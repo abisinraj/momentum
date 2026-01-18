@@ -49,7 +49,217 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     _initializeClock();
   }
   
-  // ... (Keep existing methods until _buildChecklistPage) ...
+  void _initializeClock() {
+    switch (widget.session.clockType) {
+      case ClockType.none:
+      case ClockType.stopwatch:
+      case ClockType.alarm:
+        _startElapsedTimer();
+        break;
+      case ClockType.timer:
+        _remaining = widget.session.timerDuration ?? const Duration(minutes: 30);
+        _startCountdownTimer();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _pageController.jumpToPage(1);
+        });
+        break;
+    }
+  }
+  
+  void _startElapsedTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_isRunning && mounted) {
+        setState(() {
+          _elapsed = DateTime.now().difference(widget.session.startedAt);
+        });
+      }
+    });
+  }
+  
+  void _startCountdownTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_isRunning && mounted) {
+        setState(() {
+          _elapsed = DateTime.now().difference(widget.session.startedAt);
+          final targetDuration = widget.session.timerDuration ?? const Duration(minutes: 30);
+          _remaining = targetDuration - _elapsed;
+          
+          if (_remaining.isNegative) {
+            _remaining = Duration.zero;
+            if (!_timerCompleted) {
+              _timerCompleted = true;
+              _onTimerComplete();
+            }
+          }
+        });
+      }
+    });
+  }
+  
+  void _onTimerComplete() {
+    HapticFeedback.heavyImpact();
+  }
+  
+  void _togglePause() {
+    setState(() {
+      _isRunning = !_isRunning;
+    });
+    HapticFeedback.lightImpact();
+  }
+  
+  Future<void> _completeWorkout() async {
+    _timer?.cancel();
+    await ref.read(activeWorkoutSessionProvider.notifier).completeWorkout();
+    if (mounted) {
+      Navigator.pop(context);
+    }
+  }
+  
+  void _cancelWorkout() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Workout?'),
+        content: const Text('Progress will be lost.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Resume'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context); // Dialog
+              _timer?.cancel();
+              ref.read(activeWorkoutSessionProvider.notifier).cancelWorkout();
+              Navigator.pop(this.context); // Screen
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('End Session'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final exercisesAsync = ref.watch(exercisesForWorkoutProvider(widget.session.workoutId));
+    
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildAppBar(theme),
+            
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildTabIndicator(0, 'Checklist', theme),
+                const SizedBox(width: 16),
+                _buildTabIndicator(1, 'Timer', theme),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                children: [
+                  _buildChecklistPage(exercisesAsync, theme),
+                  _buildTimerPage(theme),
+                ],
+              ),
+            ),
+            
+            _buildControls(theme),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildTabIndicator(int index, String label, ThemeData theme) {
+    final isActive = _currentPage == index;
+    return GestureDetector(
+      onTap: () => _pageController.animateToPage(
+        index, 
+        duration: const Duration(milliseconds: 300), 
+        curve: Curves.easeInOut,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? theme.colorScheme.primaryContainer : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? Colors.transparent : theme.colorScheme.outlineVariant,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildAppBar(ThemeData theme) {
+    final displayDuration = widget.session.clockType == ClockType.timer 
+        ? _remaining 
+        : _elapsed;
+    final hours = displayDuration.inHours;
+    final minutes = (displayDuration.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (displayDuration.inSeconds % 60).toString().padLeft(2, '0');
+    final timeString = hours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: _cancelWorkout,
+          ),
+          Column(
+            children: [
+              Text(
+                widget.session.workoutName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                timeString,
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  color: widget.session.clockType == ClockType.timer && _remaining.inSeconds < 60
+                      ? theme.colorScheme.error 
+                      : theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 48), // Balance for icon
+        ],
+      ),
+    );
+  }
 
   Widget _buildChecklistPage(AsyncValue<List<Exercise>> exercisesAsync, ThemeData theme) {
     return exercisesAsync.when(

@@ -64,6 +64,9 @@ class ThumbnailService {
       'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?auto=format&fit=crop&w=1000&q=80', // Home core
     ],
   };
+  
+  // Flattened list of all available images for general display
+  List<String> get _thumbnails => _keywordMap.values.expand((element) => element).toSet().toList();
 
   /// Search for images using Pexels API, falling back to local smart-search
   Future<List<String>> searchImages(String query) async {
