@@ -5,7 +5,9 @@ import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/services/ai_insights_service.dart';
 import '../../workout/presentation/active_workout_screen.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Home screen - shows next workout in cycle with Momentum design
 class HomeScreen extends ConsumerWidget {
@@ -176,7 +178,12 @@ class HomeScreen extends ConsumerWidget {
           textAlign: TextAlign.center,
         ),
         
-        const SizedBox(height: 40),
+        const SizedBox(height: 20),
+        
+        // Progress Insight Card
+        _buildProgressInsight(ref, workout),
+        
+        const SizedBox(height: 24),
         
         // Start/Resume/Stop Controls
         if (activeSession != null && activeSession.workoutId == workout.id) ...[
@@ -338,6 +345,139 @@ class HomeScreen extends ConsumerWidget {
       ClockType.alarm => 'Alarm when complete',
     };
     return clockDesc;
+  }
+  
+  Widget _buildProgressInsight(WidgetRef ref, Workout workout) {
+    final db = ref.watch(appDatabaseProvider);
+    final aiService = ref.watch(aiInsightsServiceProvider);
+    
+    // First check connectivity
+    return FutureBuilder<List<ConnectivityResult>>(
+      future: Connectivity().checkConnectivity(),
+      builder: (context, connectivitySnapshot) {
+        // If no connectivity data yet or offline, hide the card
+        if (!connectivitySnapshot.hasData) {
+          return const SizedBox.shrink();
+        }
+        
+        final results = connectivitySnapshot.data!;
+        final isOnline = results.isNotEmpty && 
+            !results.contains(ConnectivityResult.none);
+        
+        // If offline, don't show the insight card at all
+        if (!isOnline) {
+          return const SizedBox.shrink();
+        }
+        
+        // Online - fetch and display progress
+        return FutureBuilder<Map<String, dynamic>>(
+          future: db.getWorkoutProgressSummary(workout.id, days: 30),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const SizedBox.shrink();
+            }
+            
+            final data = snapshot.data!;
+            final sessionCount = data['sessionCount'] as int;
+            final lastDuration = data['lastDuration'] as int?;
+            final avgDuration = data['averageDuration'] as double;
+            
+            // If no history, show a "first time" message
+            if (sessionCount == 0) {
+              return _buildInsightCard(
+                icon: Icons.rocket_launch,
+                title: 'First Session',
+                subtitle: "Let's set your baseline!",
+              );
+            }
+            
+            // Calculate comparison
+            final lastMinutes = lastDuration != null ? (lastDuration / 60).round() : 0;
+            final avgMinutes = (avgDuration / 60).round();
+            
+            // Get AI insight asynchronously
+            return FutureBuilder<String?>(
+              future: aiService.generateWorkoutInsight(
+                workoutName: workout.name,
+                progressData: data,
+              ),
+              builder: (context, aiSnapshot) {
+                final insight = aiSnapshot.data ?? 
+                    '$sessionCount sessions • avg $avgMinutes min';
+                
+                return _buildInsightCard(
+                  icon: lastMinutes < avgMinutes ? Icons.trending_up : Icons.trending_flat,
+                  title: 'Last: $lastMinutes min',
+                  subtitle: insight,
+                  trend: lastMinutes < avgMinutes,
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+  
+  Widget _buildInsightCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    bool? trend,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: trend == true 
+                  ? AppTheme.tealPrimary.withOpacity(0.15)
+                  : AppTheme.textMuted.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: trend == true ? AppTheme.tealPrimary : AppTheme.textMuted,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
   
   Widget _buildStatsRow(BuildContext context, WidgetRef ref) {

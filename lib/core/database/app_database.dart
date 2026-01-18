@@ -57,13 +57,23 @@ class Sessions extends Table {
   IntColumn get durationSeconds => integer().nullable()();
 }
 
+/// SessionExercises table - stores completed exercise data per session
+class SessionExercises extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get sessionId => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
+  IntColumn get exerciseId => integer().references(Exercises, #id, onDelete: KeyAction.cascade)();
+  IntColumn get completedSets => integer().withDefault(const Constant(0))();
+  IntColumn get completedReps => integer().withDefault(const Constant(0))(); // Total reps done
+  TextColumn get notes => text().nullable()(); // User notes like "felt easy", "used 20kg"
+}
+
 /// The main application database
-@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises])
+@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
   
   @override
   MigrationStrategy get migration {
@@ -88,6 +98,11 @@ class AppDatabase extends _$AppDatabase {
           // Schema v3 changes:
           // Add currentSplitIndex to users (for manual split progression)
           await m.addColumn(users, users.currentSplitIndex);
+        }
+        if (from < 4) {
+          // Schema v4 changes:
+          // Create SessionExercises table for tracking completed sets/reps per session
+          await m.createTable(sessionExercises);
         }
       },
     );
@@ -201,6 +216,92 @@ class AppDatabase extends _$AppDatabase {
             completedAt: Value(DateTime.now()),
             durationSeconds: Value(durationSeconds),
           ));
+  
+  // ===== Session Exercises Operations =====
+  
+  /// Save exercise completion data for a session
+  Future<int> saveSessionExercise(SessionExercisesCompanion data) =>
+      into(sessionExercises).insert(data);
+  
+  /// Get all exercise data for a specific session
+  Future<List<SessionExercise>> getSessionExercises(int sessionId) =>
+      (select(sessionExercises)..where((se) => se.sessionId.equals(sessionId))).get();
+  
+  /// Update exercise completion data
+  Future<bool> updateSessionExercise(SessionExercisesCompanion data) =>
+      update(sessionExercises).replace(data);
+  
+  // ===== Progress Queries (Last 30 Days) =====
+  
+  /// Get the last completed session for a specific workout
+  Future<Session?> getLastSessionForWorkout(int workoutId) async {
+    return (select(sessions)
+          ..where((s) => s.workoutId.equals(workoutId) & s.completedAt.isNotNull())
+          ..orderBy([(s) => OrderingTerm.desc(s.completedAt)])
+          ..limit(1))
+        .getSingleOrNull();
+  }
+  
+  /// Get all sessions for a workout in the last N days
+  Future<List<Session>> getSessionsForWorkoutInDays(int workoutId, int days) async {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day).subtract(Duration(days: days));
+    
+    return (select(sessions)
+          ..where((s) => s.workoutId.equals(workoutId) & 
+                        s.completedAt.isNotNull() &
+                        s.startedAt.isBiggerOrEqualValue(start))
+          ..orderBy([(s) => OrderingTerm.desc(s.startedAt)]))
+        .get();
+  }
+  
+  /// Get average duration for a workout (from last N sessions)
+  Future<double> getAverageDurationForWorkout(int workoutId, {int limit = 5}) async {
+    final recentSessions = await (select(sessions)
+          ..where((s) => s.workoutId.equals(workoutId) & 
+                        s.completedAt.isNotNull() &
+                        s.durationSeconds.isNotNull())
+          ..orderBy([(s) => OrderingTerm.desc(s.completedAt)])
+          ..limit(limit))
+        .get();
+    
+    if (recentSessions.isEmpty) return 0;
+    
+    final totalSeconds = recentSessions.fold<int>(0, (sum, s) => sum + (s.durationSeconds ?? 0));
+    return totalSeconds / recentSessions.length;
+  }
+  
+  /// Get progress summary for a workout (for AI analysis)
+  Future<Map<String, dynamic>> getWorkoutProgressSummary(int workoutId, {int days = 30}) async {
+    final recentSessions = await getSessionsForWorkoutInDays(workoutId, days);
+    
+    if (recentSessions.isEmpty) {
+      return {
+        'sessionCount': 0,
+        'averageDuration': 0.0,
+        'lastSessionDate': null,
+        'lastDuration': null,
+        'durations': <int>[],
+      };
+    }
+    
+    final durations = recentSessions
+        .where((s) => s.durationSeconds != null)
+        .map((s) => s.durationSeconds!)
+        .toList();
+    
+    final avgDuration = durations.isNotEmpty 
+        ? durations.reduce((a, b) => a + b) / durations.length 
+        : 0.0;
+    
+    return {
+      'sessionCount': recentSessions.length,
+      'averageDuration': avgDuration,
+      'lastSessionDate': recentSessions.first.completedAt?.toIso8601String(),
+      'lastDuration': recentSessions.first.durationSeconds,
+      'durations': durations,
+    };
+  }
   
   // ===== Progress/History Operations =====
   

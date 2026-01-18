@@ -546,8 +546,8 @@ class _WorkoutCard extends StatelessWidget {
               width: isActive ? 2 : 1,
             ),
           ),
-        child: Row(
-          children: [
+          child: Row(
+            children: [
             // Gradient thumbnail / icon
             Container(
               width: 56,
@@ -654,6 +654,7 @@ class _WorkoutCard extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

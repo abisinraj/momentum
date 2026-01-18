@@ -23,6 +23,6 @@ Execution failed for task ':app:compileFlutterBuildDebug'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 1m 46s
-Running Gradle task 'assembleDebug'...                            111.6s
+BUILD FAILED in 25s
+Running Gradle task 'assembleDebug'...                             27.4s
 Error: Gradle task assembleDebug failed with exit code 1
