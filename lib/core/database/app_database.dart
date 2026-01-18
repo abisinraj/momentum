@@ -20,6 +20,7 @@ class Users extends Table {
   RealColumn get heightCm => real().nullable()();
   RealColumn get weightKg => real().nullable()();
   TextColumn get goal => text().nullable()();
+  IntColumn get splitDays => integer().nullable()(); // Number of days in split (e.g. 3, 4, 5)
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -28,10 +29,22 @@ class Workouts extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 100)();
   TextColumn get shortCode => text().withLength(min: 1, max: 1)(); // Single letter
+  TextColumn get description => text().nullable()();
+  TextColumn get thumbnailUrl => text().nullable()(); // URL or asset path
   IntColumn get orderIndex => integer()(); // Position in cycle
   IntColumn get clockType => intEnum<ClockType>().withDefault(const Constant(0))();
   IntColumn get timerDurationSeconds => integer().nullable()(); // For timer type
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Exercises table - stores exercises for each workout
+class Exercises extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get workoutId => integer().references(Workouts, #id, onDelete: KeyAction.cascade)();
+  TextColumn get name => text()();
+  IntColumn get sets => integer().withDefault(const Constant(3))();
+  IntColumn get reps => integer().withDefault(const Constant(10))();
+  IntColumn get orderIndex => integer()();
 }
 
 /// Sessions table - stores completed workout sessions
@@ -44,12 +57,35 @@ class Sessions extends Table {
 }
 
 /// The main application database
-@DriftDatabase(tables: [Users, Workouts, Sessions])
+@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+  
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          // Schema v2 changes:
+          // 1. Add splitDays to users
+          await m.addColumn(users, users.splitDays);
+          
+          // 2. Add description and thumbnailUrl to workouts
+          await m.addColumn(workouts, workouts.description);
+          await m.addColumn(workouts, workouts.thumbnailUrl);
+          
+          // 3. Create exercises table
+          await m.createTable(exercises);
+        }
+      },
+    );
+  }
   
   // ===== User Operations =====
   
@@ -65,6 +101,32 @@ class AppDatabase extends _$AppDatabase {
     final user = await getUser();
     return user != null;
   }
+  
+  // ===== Exercises Operations =====
+  
+  /// Get exercises for a specific workout
+  Future<List<Exercise>> getExercisesForWorkout(int workoutId) =>
+      (select(exercises)..where((e) => e.workoutId.equals(workoutId))
+                        ..orderBy([(e) => OrderingTerm.asc(e.orderIndex)]))
+          .get();
+          
+  /// Watch exercises for a workout
+  Stream<List<Exercise>> watchExercisesForWorkout(int workoutId) =>
+      (select(exercises)..where((e) => e.workoutId.equals(workoutId))
+                        ..orderBy([(e) => OrderingTerm.asc(e.orderIndex)]))
+          .watch();
+          
+  /// Add an exercise
+  Future<int> addExercise(ExercisesCompanion exercise) =>
+      into(exercises).insert(exercise);
+      
+  /// Update an exercise
+  Future<bool> updateExercise(ExercisesCompanion exercise) =>
+      update(exercises).replace(exercise);
+              
+  /// Delete an exercise
+  Future<int> deleteExercise(int id) =>
+      (delete(exercises)..where((e) => e.id.equals(id))).go();
   
   // ===== Workout Operations =====
   
@@ -84,6 +146,10 @@ class AppDatabase extends _$AppDatabase {
   Future<void> updateWorkoutOrder(int id, int newIndex) =>
       (update(workouts)..where((w) => w.id.equals(id)))
           .write(WorkoutsCompanion(orderIndex: Value(newIndex)));
+          
+  /// Update workout details
+  Future<bool> updateWorkout(WorkoutsCompanion workout) =>
+      update(workouts).replace(workout);
   
   /// Delete a workout
   Future<int> deleteWorkout(int id) =>
