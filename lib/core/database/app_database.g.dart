@@ -85,6 +85,18 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _currentSplitIndexMeta = const VerificationMeta(
+    'currentSplitIndex',
+  );
+  @override
+  late final GeneratedColumn<int> currentSplitIndex = GeneratedColumn<int>(
+    'current_split_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -106,6 +118,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     weightKg,
     goal,
     splitDays,
+    currentSplitIndex,
     createdAt,
   ];
   @override
@@ -161,6 +174,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         splitDays.isAcceptableOrUnknown(data['split_days']!, _splitDaysMeta),
       );
     }
+    if (data.containsKey('current_split_index')) {
+      context.handle(
+        _currentSplitIndexMeta,
+        currentSplitIndex.isAcceptableOrUnknown(
+          data['current_split_index']!,
+          _currentSplitIndexMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -204,6 +226,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.int,
         data['${effectivePrefix}split_days'],
       ),
+      currentSplitIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_split_index'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -225,6 +251,7 @@ class User extends DataClass implements Insertable<User> {
   final double? weightKg;
   final String? goal;
   final int? splitDays;
+  final int currentSplitIndex;
   final DateTime createdAt;
   const User({
     required this.id,
@@ -234,6 +261,7 @@ class User extends DataClass implements Insertable<User> {
     this.weightKg,
     this.goal,
     this.splitDays,
+    required this.currentSplitIndex,
     required this.createdAt,
   });
   @override
@@ -256,6 +284,7 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || splitDays != null) {
       map['split_days'] = Variable<int>(splitDays);
     }
+    map['current_split_index'] = Variable<int>(currentSplitIndex);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -275,6 +304,7 @@ class User extends DataClass implements Insertable<User> {
       splitDays: splitDays == null && nullToAbsent
           ? const Value.absent()
           : Value(splitDays),
+      currentSplitIndex: Value(currentSplitIndex),
       createdAt: Value(createdAt),
     );
   }
@@ -292,6 +322,7 @@ class User extends DataClass implements Insertable<User> {
       weightKg: serializer.fromJson<double?>(json['weightKg']),
       goal: serializer.fromJson<String?>(json['goal']),
       splitDays: serializer.fromJson<int?>(json['splitDays']),
+      currentSplitIndex: serializer.fromJson<int>(json['currentSplitIndex']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -306,6 +337,7 @@ class User extends DataClass implements Insertable<User> {
       'weightKg': serializer.toJson<double?>(weightKg),
       'goal': serializer.toJson<String?>(goal),
       'splitDays': serializer.toJson<int?>(splitDays),
+      'currentSplitIndex': serializer.toJson<int>(currentSplitIndex),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -318,6 +350,7 @@ class User extends DataClass implements Insertable<User> {
     Value<double?> weightKg = const Value.absent(),
     Value<String?> goal = const Value.absent(),
     Value<int?> splitDays = const Value.absent(),
+    int? currentSplitIndex,
     DateTime? createdAt,
   }) => User(
     id: id ?? this.id,
@@ -327,6 +360,7 @@ class User extends DataClass implements Insertable<User> {
     weightKg: weightKg.present ? weightKg.value : this.weightKg,
     goal: goal.present ? goal.value : this.goal,
     splitDays: splitDays.present ? splitDays.value : this.splitDays,
+    currentSplitIndex: currentSplitIndex ?? this.currentSplitIndex,
     createdAt: createdAt ?? this.createdAt,
   );
   User copyWithCompanion(UsersCompanion data) {
@@ -338,6 +372,9 @@ class User extends DataClass implements Insertable<User> {
       weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
       goal: data.goal.present ? data.goal.value : this.goal,
       splitDays: data.splitDays.present ? data.splitDays.value : this.splitDays,
+      currentSplitIndex: data.currentSplitIndex.present
+          ? data.currentSplitIndex.value
+          : this.currentSplitIndex,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -352,6 +389,7 @@ class User extends DataClass implements Insertable<User> {
           ..write('weightKg: $weightKg, ')
           ..write('goal: $goal, ')
           ..write('splitDays: $splitDays, ')
+          ..write('currentSplitIndex: $currentSplitIndex, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -366,6 +404,7 @@ class User extends DataClass implements Insertable<User> {
     weightKg,
     goal,
     splitDays,
+    currentSplitIndex,
     createdAt,
   );
   @override
@@ -379,6 +418,7 @@ class User extends DataClass implements Insertable<User> {
           other.weightKg == this.weightKg &&
           other.goal == this.goal &&
           other.splitDays == this.splitDays &&
+          other.currentSplitIndex == this.currentSplitIndex &&
           other.createdAt == this.createdAt);
 }
 
@@ -390,6 +430,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<double?> weightKg;
   final Value<String?> goal;
   final Value<int?> splitDays;
+  final Value<int> currentSplitIndex;
   final Value<DateTime> createdAt;
   const UsersCompanion({
     this.id = const Value.absent(),
@@ -399,6 +440,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.weightKg = const Value.absent(),
     this.goal = const Value.absent(),
     this.splitDays = const Value.absent(),
+    this.currentSplitIndex = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   UsersCompanion.insert({
@@ -409,6 +451,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.weightKg = const Value.absent(),
     this.goal = const Value.absent(),
     this.splitDays = const Value.absent(),
+    this.currentSplitIndex = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name);
   static Insertable<User> custom({
@@ -419,6 +462,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<double>? weightKg,
     Expression<String>? goal,
     Expression<int>? splitDays,
+    Expression<int>? currentSplitIndex,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -429,6 +473,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (weightKg != null) 'weight_kg': weightKg,
       if (goal != null) 'goal': goal,
       if (splitDays != null) 'split_days': splitDays,
+      if (currentSplitIndex != null) 'current_split_index': currentSplitIndex,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -441,6 +486,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<double?>? weightKg,
     Value<String?>? goal,
     Value<int?>? splitDays,
+    Value<int>? currentSplitIndex,
     Value<DateTime>? createdAt,
   }) {
     return UsersCompanion(
@@ -451,6 +497,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       weightKg: weightKg ?? this.weightKg,
       goal: goal ?? this.goal,
       splitDays: splitDays ?? this.splitDays,
+      currentSplitIndex: currentSplitIndex ?? this.currentSplitIndex,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -479,6 +526,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (splitDays.present) {
       map['split_days'] = Variable<int>(splitDays.value);
     }
+    if (currentSplitIndex.present) {
+      map['current_split_index'] = Variable<int>(currentSplitIndex.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -495,6 +545,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('weightKg: $weightKg, ')
           ..write('goal: $goal, ')
           ..write('splitDays: $splitDays, ')
+          ..write('currentSplitIndex: $currentSplitIndex, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1884,6 +1935,7 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<double?> weightKg,
       Value<String?> goal,
       Value<int?> splitDays,
+      Value<int> currentSplitIndex,
       Value<DateTime> createdAt,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
@@ -1895,6 +1947,7 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<double?> weightKg,
       Value<String?> goal,
       Value<int?> splitDays,
+      Value<int> currentSplitIndex,
       Value<DateTime> createdAt,
     });
 
@@ -1938,6 +1991,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<int> get splitDays => $composableBuilder(
     column: $table.splitDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentSplitIndex => $composableBuilder(
+    column: $table.currentSplitIndex,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1991,6 +2049,11 @@ class $$UsersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get currentSplitIndex => $composableBuilder(
+    column: $table.currentSplitIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2026,6 +2089,11 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<int> get splitDays =>
       $composableBuilder(column: $table.splitDays, builder: (column) => column);
+
+  GeneratedColumn<int> get currentSplitIndex => $composableBuilder(
+    column: $table.currentSplitIndex,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2066,6 +2134,7 @@ class $$UsersTableTableManager
                 Value<double?> weightKg = const Value.absent(),
                 Value<String?> goal = const Value.absent(),
                 Value<int?> splitDays = const Value.absent(),
+                Value<int> currentSplitIndex = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
@@ -2075,6 +2144,7 @@ class $$UsersTableTableManager
                 weightKg: weightKg,
                 goal: goal,
                 splitDays: splitDays,
+                currentSplitIndex: currentSplitIndex,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -2086,6 +2156,7 @@ class $$UsersTableTableManager
                 Value<double?> weightKg = const Value.absent(),
                 Value<String?> goal = const Value.absent(),
                 Value<int?> splitDays = const Value.absent(),
+                Value<int> currentSplitIndex = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
@@ -2095,6 +2166,7 @@ class $$UsersTableTableManager
                 weightKg: weightKg,
                 goal: goal,
                 splitDays: splitDays,
+                currentSplitIndex: currentSplitIndex,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

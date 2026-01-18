@@ -21,6 +21,7 @@ class Users extends Table {
   RealColumn get weightKg => real().nullable()();
   TextColumn get goal => text().nullable()();
   IntColumn get splitDays => integer().nullable()(); // Number of days in split (e.g. 3, 4, 5)
+  IntColumn get currentSplitIndex => integer().withDefault(const Constant(0))(); // Current position in split (0 to splitDays-1)
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -62,7 +63,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
   
   @override
   MigrationStrategy get migration {
@@ -82,6 +83,11 @@ class AppDatabase extends _$AppDatabase {
           
           // 3. Create exercises table
           await m.createTable(exercises);
+        }
+        if (from < 3) {
+          // Schema v3 changes:
+          // Add currentSplitIndex to users (for manual split progression)
+          await m.addColumn(users, users.currentSplitIndex);
         }
       },
     );
@@ -226,23 +232,84 @@ class AppDatabase extends _$AppDatabase {
   
   // ===== Cycle Logic =====
   
-  /// Get the next workout in the cycle
+  /// Get the current user's split index
+  Future<int> getCurrentSplitIndex() async {
+    final user = await getUser();
+    return user?.currentSplitIndex ?? 0;
+  }
+  
+  /// Get the workout for the current split day
   Future<Workout?> getNextWorkout() async {
     final allWorkouts = await getAllWorkouts();
     if (allWorkouts.isEmpty) return null;
     
-    final todayCompleted = await getTodayCompletedWorkoutIds();
+    final currentIndex = await getCurrentSplitIndex();
     
-    // Find the first workout not completed today
+    // Find workout matching current split index
     for (final workout in allWorkouts) {
-      if (!todayCompleted.contains(workout.id)) {
+      if (workout.orderIndex == currentIndex) {
         return workout;
       }
     }
     
-    // All done today - return first for tomorrow
+    // Fallback to first workout if index is out of range
     return allWorkouts.first;
   }
+  
+  /// Count completed sessions for a specific workout orderIndex (current split day)
+  Future<int> getCompletedCountForSplitDay(int splitIndex) async {
+    final allWorkouts = await getAllWorkouts();
+    
+    // Find workout IDs that match this split index
+    final matchingWorkoutIds = allWorkouts
+        .where((w) => w.orderIndex == splitIndex)
+        .map((w) => w.id)
+        .toList();
+    
+    if (matchingWorkoutIds.isEmpty) return 0;
+    
+    // Count all completed sessions for these workouts
+    final result = await (select(sessions)
+          ..where((s) => s.workoutId.isIn(matchingWorkoutIds) & 
+                        s.completedAt.isNotNull()))
+        .get();
+    
+    return result.length;
+  }
+  
+  /// Advance to next split day if 2+ workouts completed for current day
+  /// Returns true if advanced, false otherwise
+  Future<bool> advanceSplit() async {
+    final user = await getUser();
+    if (user == null) return false;
+    
+    final currentIndex = user.currentSplitIndex;
+    final splitDays = user.splitDays ?? 7;
+    
+    final completedCount = await getCompletedCountForSplitDay(currentIndex);
+    
+    if (completedCount >= 2) {
+      // Advance to next day (with wrap-around)
+      final nextIndex = (currentIndex + 1) % splitDays;
+      
+      await (update(users)..where((u) => u.id.equals(user.id)))
+          .write(UsersCompanion(currentSplitIndex: Value(nextIndex)));
+      
+      return true;
+    }
+    
+    return false;
+  }
+  
+  /// Update the user's current split index manually
+  Future<void> setSplitIndex(int index) async {
+    final user = await getUser();
+    if (user == null) return;
+    
+    await (update(users)..where((u) => u.id.equals(user.id)))
+        .write(UsersCompanion(currentSplitIndex: Value(index)));
+  }
+  
   // ===== Stats & Insights =====
   
   /// Get stats for the last 7 days (including today)

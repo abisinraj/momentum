@@ -10,11 +10,18 @@ import 'active_workout_screen.dart';
 
 /// Workout screen - shows list of workouts with completion states
 /// Design: Date header, focus subtitle, workout cards with status badges
-class WorkoutScreen extends ConsumerWidget {
+class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorkoutScreen> createState() => _WorkoutScreenState();
+}
+
+class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
+  bool _showAllWorkouts = false;
+  
+  @override
+  Widget build(BuildContext context) {
     final workoutsAsync = ref.watch(workoutsStreamProvider);
     final todayCompletedAsync = ref.watch(todayCompletedWorkoutIdsProvider);
     final userAsync = ref.watch(currentUserProvider);
@@ -22,6 +29,12 @@ class WorkoutScreen extends ConsumerWidget {
     final userGoal = switch (userAsync) {
       AsyncData(:final value) => value?.goal ?? 'Fitness & Wellness',
       _ => 'Fitness & Wellness',
+    };
+    
+    // Get user's current split index (manual progression, not tied to weekday)
+    final currentSplitIndex = switch (userAsync) {
+      AsyncData(:final value) => value?.currentSplitIndex ?? 0,
+      _ => 0,
     };
     
     return Scaffold(
@@ -36,7 +49,7 @@ class WorkoutScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date and search
+                  // Date and toggle
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -49,13 +62,53 @@ class WorkoutScreen extends ConsumerWidget {
                           letterSpacing: 1.0,
                         ),
                       ),
-                      Icon(Icons.search, color: AppTheme.textMuted),
+                      // Toggle: Today / All
+                      GestureDetector(
+                        onTap: () => setState(() => _showAllWorkouts = !_showAllWorkouts),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _showAllWorkouts 
+                                ? AppTheme.tealPrimary.withOpacity(0.15) 
+                                : AppTheme.darkSurfaceContainer,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _showAllWorkouts 
+                                  ? AppTheme.tealPrimary 
+                                  : AppTheme.darkBorder,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _showAllWorkouts ? Icons.calendar_view_week : Icons.today,
+                                size: 16,
+                                color: _showAllWorkouts 
+                                    ? AppTheme.tealPrimary 
+                                    : AppTheme.textMuted,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _showAllWorkouts ? 'All' : 'Current',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: _showAllWorkouts 
+                                      ? AppTheme.tealPrimary 
+                                      : AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   // Title
                   Text(
-                    'Workouts',
+                    _showAllWorkouts ? 'All Workouts' : 'Current Split Day',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -78,9 +131,19 @@ class WorkoutScreen extends ConsumerWidget {
             // Workout list
             Expanded(
               child: switch (workoutsAsync) {
-                AsyncData(:final value) => value.isEmpty
-                    ? _buildEmptyState()
-                    : _buildWorkoutList(context, ref, value, todayCompletedAsync),
+                AsyncData(:final value) => () {
+                  // Filter to current split day's workout if not showing all
+                  final filtered = _showAllWorkouts 
+                      ? value 
+                      : value.where((w) => w.orderIndex == currentSplitIndex).toList();
+                  
+                  if (filtered.isEmpty) {
+                    return _buildEmptyState(_showAllWorkouts 
+                        ? 'No workouts yet' 
+                        : 'No workout for current split day');
+                  }
+                  return _buildWorkoutList(context, ref, filtered, todayCompletedAsync, value.length);
+                }(),
                 AsyncError(:final error) => Center(
                     child: Text(
                       'Error: $error',
@@ -103,7 +166,7 @@ class WorkoutScreen extends ConsumerWidget {
     );
   }
   
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -115,7 +178,7 @@ class WorkoutScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No workouts yet',
+            message,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -124,7 +187,7 @@ class WorkoutScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Tap + to add your first workout',
+            'Tap + to add a workout',
             style: TextStyle(
               fontSize: 14,
               color: AppTheme.textSecondary,
@@ -140,6 +203,7 @@ class WorkoutScreen extends ConsumerWidget {
     WidgetRef ref,
     List<Workout> workouts,
     AsyncValue<List<int>> todayCompletedAsync,
+    int totalCount,
   ) {
     final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
     final activeSession = ref.watch(activeWorkoutSessionProvider);
@@ -164,8 +228,8 @@ class WorkoutScreen extends ConsumerWidget {
           workout: workout,
           isCompleted: isCompleted,
           isActive: isActive,
-          index: index,
-          total: workouts.length,
+          index: workout.orderIndex, // Use actual order index for display
+          total: totalCount,
           onTap: () => _startWorkout(context, ref, workout),
           onDelete: () => _confirmDelete(context, ref, workout),
         );
