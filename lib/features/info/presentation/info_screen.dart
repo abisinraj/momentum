@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
@@ -367,11 +368,8 @@ class InfoScreen extends ConsumerWidget {
         
         const SizedBox(height: 24),
       ],
-            ),
-          ),
-        ),
-      );
-    }
+    );
+  }
   
   // Note: Updated method signature and implementation below
   Widget _buildSettingTile({
@@ -467,5 +465,50 @@ class InfoScreen extends ConsumerWidget {
     if (workouts >= 20) return 'MOMENTUM PRO';
     if (workouts >= 5) return 'MOMENTUM STARTER';
     return 'MOMENTUM MEMBER';
+  }
+
+  Widget _buildSectionLabel(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: AppTheme.textMuted,
+        letterSpacing: 1.0,
+      ),
+    );
+  }
+
+  Widget _buildStatColumn(String value, String label) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.textMuted,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      width: 1,
+      height: 40,
+      color: AppTheme.darkBorder,
+    );
   }
 }
