@@ -21,14 +21,25 @@ class UserSetup extends _$UserSetup {
     String? goal,
   }) async {
     final db = ref.read(appDatabaseProvider);
+    final user = await db.getUser();
     
-    await db.saveUser(UsersCompanion.insert(
-      name: name,
-      age: age != null ? Value(age) : const Value.absent(),
-      heightCm: heightCm != null ? Value(heightCm) : const Value.absent(),
-      weightKg: weightKg != null ? Value(weightKg) : const Value.absent(),
-      goal: goal != null ? Value(goal) : const Value.absent(),
-    ));
+    if (user != null) {
+      await db.saveUser(user.toCompanion(true).copyWith(
+        name: Value(name),
+        age: age != null ? Value(age) : const Value.absent(),
+        heightCm: heightCm != null ? Value(heightCm) : const Value.absent(),
+        weightKg: weightKg != null ? Value(weightKg) : const Value.absent(),
+        goal: goal != null ? Value(goal) : const Value.absent(),
+      ));
+    } else {
+      await db.saveUser(UsersCompanion.insert(
+        name: name,
+        age: age != null ? Value(age) : const Value.absent(),
+        heightCm: heightCm != null ? Value(heightCm) : const Value.absent(),
+        weightKg: weightKg != null ? Value(weightKg) : const Value.absent(),
+        goal: goal != null ? Value(goal) : const Value.absent(),
+      ));
+    }
     
     // Invalidate setup check
     ref.invalidate(isSetupCompleteProvider);

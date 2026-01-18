@@ -90,7 +90,7 @@ class AppDatabase extends _$AppDatabase {
   // ===== User Operations =====
   
   /// Get the current user (there's only one)
-  Future<User?> getUser() => select(users).getSingleOrNull();
+  Future<User?> getUser() => (select(users)..limit(1)).getSingleOrNull();
   
   /// Create or update user
   Future<int> saveUser(UsersCompanion user) =>
