@@ -75,6 +75,23 @@ class NavigationShell extends StatelessWidget {
   }
 }
 
+/// Helper function to handle redirect when setup data is loaded
+String? _handleDataRedirect(String path, bool isComplete) {
+  // If on splash, redirect based on setup status
+  if (path == AppRoute.splash.path) {
+    return isComplete ? AppRoute.home.path : AppRoute.setup.path;
+  }
+  // If on setup and already complete, go to home
+  if (path == AppRoute.setup.path && isComplete) {
+    return AppRoute.home.path;
+  }
+  // If trying to access app routes but not setup, go to setup
+  if (path != AppRoute.setup.path && path != AppRoute.splash.path && !isComplete) {
+    return AppRoute.setup.path;
+  }
+  return null; // No redirect needed
+}
+
 /// Router provider using go_router
 @riverpod
 GoRouter router(ref) {
@@ -86,36 +103,13 @@ GoRouter router(ref) {
     redirect: (context, state) {
       final path = state.uri.path;
       
-      // Check if still loading
-      if (isSetupCompleteAsync.isLoading) {
-        // Stay on splash while loading
-        if (path != AppRoute.splash.path) {
-          return AppRoute.splash.path;
-        }
-        return null;
-      }
-      
-      // Check for error
-      if (isSetupCompleteAsync.hasError) {
-        return AppRoute.setup.path;
-      }
-      
-      // We have data
-      final isComplete = isSetupCompleteAsync.valueOrNull ?? false;
-      
-      // If on splash, redirect based on setup status
-      if (path == AppRoute.splash.path) {
-        return isComplete ? AppRoute.home.path : AppRoute.setup.path;
-      }
-      // If on setup and already complete, go to home
-      if (path == AppRoute.setup.path && isComplete) {
-        return AppRoute.home.path;
-      }
-      // If trying to access app routes but not setup, go to setup
-      if (path != AppRoute.setup.path && path != AppRoute.splash.path && !isComplete) {
-        return AppRoute.setup.path;
-      }
-      return null; // No redirect needed
+      // Use pattern matching for the async value
+      return switch (isSetupCompleteAsync) {
+        AsyncLoading() => path != AppRoute.splash.path ? AppRoute.splash.path : null,
+        AsyncError() => AppRoute.setup.path,
+        AsyncData(:final value) => _handleDataRedirect(path, value),
+        _ => path != AppRoute.splash.path ? AppRoute.splash.path : null, // Default: stay on splash
+      };
     },
     routes: [
       // Splash route
