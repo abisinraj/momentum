@@ -53,3 +53,10 @@ Future<Map<DateTime, String>> activityGrid(ref, {int days = 30}) async {
   final db = ref.watch(appDatabaseProvider);
   return db.getActivityGrid(days);
 }
+
+/// Provider for exercises in a workout
+@riverpod
+Future<List<Exercise>> exercisesForWorkout(ref, int workoutId) async {
+  final db = ref.watch(appDatabaseProvider);
+  return db.getExercisesForWorkout(workoutId);
+}

@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/services/widget_service.dart';
 import '../../../app/theme/app_theme.dart';
 
 /// Splash screen shown while app initializes
 /// Design: Teal M logo centered with "Momentum" text below
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Sync widget data in background
+    ref.read(widgetSyncProvider);
+
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
       body: Stack(
