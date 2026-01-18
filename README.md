@@ -1,0 +1,1 @@
+# Momentum\n\nOffline-first fitness tracker with cycle-based workout progression.\n\n## Features\n- Cycle-based workouts (not calendar)\n- SQLite database with Drift\n- Material 3 theming\n- Android home screen widget\n\n## Run\n```bash\nflutter run -d chrome  # Web\nflutter run -d android # Android\n```
