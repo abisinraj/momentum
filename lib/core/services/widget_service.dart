@@ -1,15 +1,8 @@
 import 'package:flutter/services.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../database/app_database.dart';
-import '../providers/database_providers.dart';
-
-
-
-/// Service for syncing data to Android Home Screen Widget
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../database/app_database.dart';
 import '../providers/database_providers.dart';
 
