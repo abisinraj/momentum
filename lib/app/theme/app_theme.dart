@@ -22,6 +22,7 @@ class AppTheme {
   static const Color darkSurface = Color(0xFF1A1F25);
   static const Color darkSurfaceContainer = Color(0xFF242A32);
   static const Color darkSurfaceContainerHigh = Color(0xFF2E353F);
+  static const Color darkSurfaceContainerHighest = Color(0xFF38404B);
   static const Color darkBorder = Color(0xFF3A424D);
   
   // Text colors
