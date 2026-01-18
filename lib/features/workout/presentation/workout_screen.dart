@@ -157,7 +157,7 @@ class WorkoutScreen extends ConsumerWidget {
       itemBuilder: (context, index) {
         final workout = workouts[index];
         final isCompleted = todayCompleted.contains(workout.id);
-        final isActive = activeSession?.workout.id == workout.id;
+        final isActive = activeSession?.workoutId == workout.id;
         
         return _WorkoutCard(
           key: ValueKey(workout.id),
