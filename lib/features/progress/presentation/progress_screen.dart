@@ -18,93 +18,85 @@ class ProgressScreen extends ConsumerWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Last 30 Days',
-              style: theme.textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            // Contribution grid
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: activityAsync.when(
-                  data: (activityMap) => _ContributionGrid(activityMap: activityMap),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, s) => Text('Error: $e'),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Summary',
-              style: theme.textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            activityAsync.when(
-              data: (activityMap) {
-                final activeDays = activityMap.length;
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        _StatItem(
-                          label: 'Active Days',
-                          value: activeDays.toString(),
-                          icon: Icons.calendar_today,
-                        ),
-                        const SizedBox(width: 24),
-                        _StatItem(
-                          label: 'This Month',
-                          value: _getThisMonthCount(activityMap).toString(),
-                          icon: Icons.trending_up,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (e, s) => const SizedBox.shrink(),
-            ),
-            const Spacer(),
-            // Motivational message
-            activityAsync.when(
-              data: (activityMap) {
-                final message = _getMotivationalMessage(activityMap.length);
-                return Card(
-                  color: theme.colorScheme.primaryContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.lightbulb_outline,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            message,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (e, s) => const SizedBox.shrink(),
-            ),
-          ],
-        ),
+        child: switch (activityAsync) {
+          AsyncData(:final value) => _buildContent(context, value),
+          AsyncError(:final error) => Center(child: Text('Error: $error')),
+          _ => const Center(child: CircularProgressIndicator()),
+        },
       ),
+    );
+  }
+  
+  Widget _buildContent(BuildContext context, Map<DateTime, String> activityMap) {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Last 30 Days',
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: 16),
+        // Contribution grid
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: _ContributionGrid(activityMap: activityMap),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Summary',
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                _StatItem(
+                  label: 'Active Days',
+                  value: activityMap.length.toString(),
+                  icon: Icons.calendar_today,
+                ),
+                const SizedBox(width: 24),
+                _StatItem(
+                  label: 'This Month',
+                  value: _getThisMonthCount(activityMap).toString(),
+                  icon: Icons.trending_up,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Spacer(),
+        // Motivational message
+        Card(
+          color: theme.colorScheme.primaryContainer,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _getMotivationalMessage(activityMap.length),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
   

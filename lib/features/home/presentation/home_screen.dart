@@ -35,11 +35,11 @@ class HomeScreen extends ConsumerWidget {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: nextWorkoutAsync.when(
-            data: (workout) => _buildContent(context, ref, workout),
-            loading: () => const CircularProgressIndicator(),
-            error: (error, stack) => Text('Error: $error'),
-          ),
+          child: switch (nextWorkoutAsync) {
+            AsyncData(:final value) => _buildContent(context, ref, value),
+            AsyncError(:final error) => Text('Error: $error'),
+            _ => const CircularProgressIndicator(),
+          },
         ),
       ),
     );

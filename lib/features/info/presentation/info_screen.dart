@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/database_providers.dart';
+import '../../../core/database/app_database.dart';
 
 /// Info screen - settings and about
 class InfoScreen extends ConsumerWidget {
@@ -20,104 +21,26 @@ class InfoScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // Profile section
-          userAsync.when(
-            data: (user) => Card(
+          switch (userAsync) {
+            AsyncData(:final value) => _buildProfileCard(context, value),
+            AsyncError(:final error) => Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      child: Text(
-                        user?.name.isNotEmpty == true 
-                            ? user!.name[0].toUpperCase() 
-                            : '?',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user?.name ?? 'User',
-                            style: theme.textTheme.titleLarge,
-                          ),
-                          if (user?.goal != null && user!.goal!.isNotEmpty)
-                            Text(
-                              user.goal!,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                child: Text('Error loading profile: $error'),
               ),
             ),
-            loading: () => const Card(
+            _ => const Card(
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Center(child: CircularProgressIndicator()),
               ),
             ),
-            error: (e, s) => Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text('Error loading profile: $e'),
-              ),
-            ),
-          ),
+          },
           const SizedBox(height: 16),
           
           // Stats section
-          userAsync.when(
-            data: (user) {
-              if (user == null) return const SizedBox.shrink();
-              
-              final stats = <(String, String)>[];
-              if (user.age != null) stats.add(('Age', '${user.age} years'));
-              if (user.heightCm != null) stats.add(('Height', '${user.heightCm!.round()} cm'));
-              if (user.weightKg != null) stats.add(('Weight', '${user.weightKg!.round()} kg'));
-              
-              if (stats.isEmpty) return const SizedBox.shrink();
-              
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Profile',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Card(
-                    child: Column(
-                      children: stats.map((stat) => ListTile(
-                        title: Text(stat.$1),
-                        trailing: Text(
-                          stat.$2,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              );
-            },
-            loading: () => const SizedBox.shrink(),
-            error: (e, s) => const SizedBox.shrink(),
-          ),
+          if (userAsync case AsyncData(:final value) when value != null)
+            _buildStatsSection(context, value),
           
           // App info section
           Text(
@@ -188,6 +111,89 @@ class InfoScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+  
+  Widget _buildProfileCard(BuildContext context, User? user) {
+    final theme = Theme.of(context);
+    
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Text(
+                user?.name.isNotEmpty == true 
+                    ? user!.name[0].toUpperCase() 
+                    : '?',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user?.name ?? 'User',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  if (user?.goal != null && user!.goal!.isNotEmpty)
+                    Text(
+                      user.goal!,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildStatsSection(BuildContext context, User user) {
+    final theme = Theme.of(context);
+    
+    final stats = <(String, String)>[];
+    if (user.age != null) stats.add(('Age', '${user.age} years'));
+    if (user.heightCm != null) stats.add(('Height', '${user.heightCm!.round()} cm'));
+    if (user.weightKg != null) stats.add(('Weight', '${user.weightKg!.round()} kg'));
+    
+    if (stats.isEmpty) return const SizedBox.shrink();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Profile',
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: Column(
+            children: stats.map((stat) => ListTile(
+              title: Text(stat.$1),
+              trailing: Text(
+                stat.$2,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )).toList(),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

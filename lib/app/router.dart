@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -77,7 +78,7 @@ class NavigationShell extends StatelessWidget {
 /// Router provider using go_router
 @riverpod
 GoRouter router(ref) {
-  // Watch the async setup provider - it returns AsyncValue<bool>
+  // Watch the async setup provider
   final isSetupCompleteAsync = ref.watch(isSetupCompleteProvider);
   
   return GoRouter(
@@ -85,32 +86,36 @@ GoRouter router(ref) {
     redirect: (context, state) {
       final path = state.uri.path;
       
-      // Handle async setup check
-      return isSetupCompleteAsync.when(
-        data: (isComplete) {
-          // If on splash, redirect based on setup status
-          if (path == AppRoute.splash.path) {
-            return isComplete ? AppRoute.home.path : AppRoute.setup.path;
-          }
-          // If on setup and already complete, go to home
-          if (path == AppRoute.setup.path && isComplete) {
-            return AppRoute.home.path;
-          }
-          // If trying to access app routes but not setup, go to setup
-          if (path != AppRoute.setup.path && path != AppRoute.splash.path && !isComplete) {
-            return AppRoute.setup.path;
-          }
-          return null; // No redirect needed
-        },
-        loading: () {
-          // Stay on splash while loading
-          if (path != AppRoute.splash.path) {
-            return AppRoute.splash.path;
-          }
-          return null;
-        },
-        error: (_, __) => AppRoute.setup.path, // On error, go to setup
-      );
+      // Check if still loading
+      if (isSetupCompleteAsync.isLoading) {
+        // Stay on splash while loading
+        if (path != AppRoute.splash.path) {
+          return AppRoute.splash.path;
+        }
+        return null;
+      }
+      
+      // Check for error
+      if (isSetupCompleteAsync.hasError) {
+        return AppRoute.setup.path;
+      }
+      
+      // We have data
+      final isComplete = isSetupCompleteAsync.valueOrNull ?? false;
+      
+      // If on splash, redirect based on setup status
+      if (path == AppRoute.splash.path) {
+        return isComplete ? AppRoute.home.path : AppRoute.setup.path;
+      }
+      // If on setup and already complete, go to home
+      if (path == AppRoute.setup.path && isComplete) {
+        return AppRoute.home.path;
+      }
+      // If trying to access app routes but not setup, go to setup
+      if (path != AppRoute.setup.path && path != AppRoute.splash.path && !isComplete) {
+        return AppRoute.setup.path;
+      }
+      return null; // No redirect needed
     },
     routes: [
       // Splash route

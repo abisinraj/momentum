@@ -25,65 +25,65 @@ class WorkoutScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: workoutsAsync.when(
-        data: (workouts) {
-          if (workouts.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.fitness_center_outlined,
-                    size: 64,
-                    color: theme.colorScheme.outline,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No workouts yet',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+      body: switch (workoutsAsync) {
+        AsyncData(:final value) => value.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.fitness_center_outlined,
+                      size: 64,
+                      color: theme.colorScheme.outline,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tap + to add your first workout',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(height: 16),
+                    Text(
+                      'No workouts yet',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }
-          
-          final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
-          
-          return ReorderableListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: workouts.length,
-            onReorder: (oldIndex, newIndex) {
-              if (newIndex > oldIndex) newIndex--;
-              final reordered = List<Workout>.from(workouts);
-              final item = reordered.removeAt(oldIndex);
-              reordered.insert(newIndex, item);
-              ref.read(workoutManagerProvider.notifier).reorderWorkouts(reordered);
-            },
-            itemBuilder: (context, index) {
-              final workout = workouts[index];
-              final isCompleted = todayCompleted.contains(workout.id);
-              
-              return _WorkoutCard(
-                key: ValueKey(workout.id),
-                workout: workout,
-                isCompleted: isCompleted,
-                onDelete: () => _confirmDelete(context, ref, workout),
-              );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
-      ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Tap + to add your first workout',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : _buildWorkoutList(context, ref, value, todayCompletedAsync),
+        AsyncError(:final error) => Center(child: Text('Error: $error')),
+        _ => const Center(child: CircularProgressIndicator()),
+      },
+    );
+  }
+  
+  Widget _buildWorkoutList(BuildContext context, WidgetRef ref, List<Workout> workouts, AsyncValue<List<int>> todayCompletedAsync) {
+    final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
+    
+    return ReorderableListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: workouts.length,
+      onReorder: (oldIndex, newIndex) {
+        if (newIndex > oldIndex) newIndex--;
+        final reordered = List<Workout>.from(workouts);
+        final item = reordered.removeAt(oldIndex);
+        reordered.insert(newIndex, item);
+        ref.read(workoutManagerProvider.notifier).reorderWorkouts(reordered);
+      },
+      itemBuilder: (context, index) {
+        final workout = workouts[index];
+        final isCompleted = todayCompleted.contains(workout.id);
+        
+        return _WorkoutCard(
+          key: ValueKey(workout.id),
+          workout: workout,
+          isCompleted: isCompleted,
+          onDelete: () => _confirmDelete(context, ref, workout),
+        );
+      },
     );
   }
   
