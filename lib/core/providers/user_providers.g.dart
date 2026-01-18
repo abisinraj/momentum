@@ -6,7 +6,7 @@ part of 'user_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$userSetupHash() => r'056c8b0981756370bced23e97fd408e9e02a7e72';
+String _$userSetupHash() => r'3a3f67308fb3448f154f2266434fd27872323d1d';
 
 /// Notifier for managing user setup
 ///

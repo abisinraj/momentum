@@ -66,14 +66,26 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         goal: _selectedGoal,
       );
       
-      // Proceed to split setup instead of home
       if (mounted) {
-        context.go('/split-setup');
+        // Use pushReplacement to ensure we can move forward
+        // context.go should also work but pushReplacement is sometimes safer locally
+        context.pushReplacement('/split-setup');
       }
-    } catch (e) {
+    } catch (e, st) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+        // Show clear error dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Setup Error'),
+            content: Text('Could not save profile: $e\n\n$st'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
         );
       }
     } finally {
@@ -95,21 +107,32 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
             children: [
               // Header with wrench icon
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    Icons.build_outlined,
-                    color: AppTheme.tealPrimary,
-                    size: 18,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.build_outlined,
+                        color: AppTheme.tealPrimary,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'SETUP',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.tealPrimary,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'SETUP',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.tealPrimary,
-                      letterSpacing: 1.5,
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    color: AppTheme.tealPrimary,
+                    onPressed: () => context.push('/settings'),
+                    tooltip: 'API Settings',
                   ),
                 ],
               ),

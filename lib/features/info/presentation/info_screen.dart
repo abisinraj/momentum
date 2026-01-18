@@ -303,10 +303,17 @@ class InfoScreen extends ConsumerWidget {
         
         // Settings list
         _buildSettingTile(
+          icon: Icons.api,
+          iconColor: AppTheme.tealPrimary,
+          title: 'API Integrations',
+          onTap: () => context.push('/settings'),
+          trailing: _buildActiveChip(),
+        ),
+        const SizedBox(height: 8),
+        _buildSettingTile(
           icon: Icons.favorite_outline,
           iconColor: const Color(0xFFE91E63),
           title: 'HealthKit Access',
-          trailing: _buildActiveChip(),
         ),
         const SizedBox(height: 8),
         _buildSettingTile(
@@ -331,6 +338,7 @@ class InfoScreen extends ConsumerWidget {
         
         const SizedBox(height: 32),
         
+        // Footer
         // Footer
         Center(
           child: Column(
@@ -359,92 +367,55 @@ class InfoScreen extends ConsumerWidget {
         
         const SizedBox(height: 24),
       ],
-    );
-  }
-  
-  Widget _buildSectionLabel(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.textMuted,
-        letterSpacing: 1.0,
-      ),
-    );
-  }
-  
-  Widget _buildStatColumn(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: AppTheme.textMuted,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
+      );
+    }
   
-  Widget _buildDivider() {
-    return Container(
-      width: 1,
-      height: 40,
-      color: AppTheme.darkBorder,
-    );
-  }
-  
+  // Note: Updated method signature and implementation below
   Widget _buildSettingTile({
     required IconData icon,
     required Color iconColor,
     required String title,
     Widget? trailing,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.darkSurfaceContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textPrimary,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.textPrimary,
+                ),
               ),
             ),
-          ),
-          if (trailing != null) trailing,
-          const SizedBox(width: 4),
-          Icon(Icons.chevron_right, color: AppTheme.textMuted, size: 20),
-        ],
+            if (trailing != null) trailing,
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right, color: AppTheme.textMuted, size: 20),
+          ],
+        ),
       ),
     );
   }

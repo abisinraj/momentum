@@ -11,6 +11,7 @@ import '../features/info/presentation/info_screen.dart';
 import '../features/setup/presentation/setup_screen.dart';
 import '../features/setup/presentation/split_setup_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import '../core/providers/database_providers.dart';
 
 part 'router.g.dart';
@@ -24,7 +25,8 @@ enum AppRoute {
   home('/home'),
   workout('/workout'),
   progress('/progress'),
-  info('/info');
+  info('/info'),
+  settings('/settings');
 
   const AppRoute(this.path);
   final String path;
@@ -149,6 +151,12 @@ GoRouter router(ref) {
             totalDays: total,
           );
         },
+      ),
+      
+      GoRoute(
+        path: AppRoute.settings.path,
+        name: AppRoute.settings.name,
+        builder: (context, state) => const SettingsScreen(),
       ),
       
       // Main app shell with bottom navigation
