@@ -6,26 +6,27 @@ part of 'core_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isSetupCompleteHash() => r'39bc1a2eaa6ebcc002eb5c5097ee422d7675a43c';
+String _$isSetupCompleteSyncHash() =>
+    r'3d1a01f533f859d74e2f60a775d0e80fd360b765';
 
 /// Provider for checking if setup is complete (synchronous check for router)
 /// This watches the async provider and returns false until loaded
 ///
-/// Copied from [isSetupComplete].
-@ProviderFor(isSetupComplete)
-final isSetupCompleteProvider = AutoDisposeProvider<bool>.internal(
-  isSetupComplete,
-  name: r'isSetupCompleteProvider',
+/// Copied from [isSetupCompleteSync].
+@ProviderFor(isSetupCompleteSync)
+final isSetupCompleteSyncProvider = AutoDisposeProvider<bool>.internal(
+  isSetupCompleteSync,
+  name: r'isSetupCompleteSyncProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$isSetupCompleteHash,
+      : _$isSetupCompleteSyncHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef IsSetupCompleteRef = AutoDisposeProviderRef<bool>;
+typedef IsSetupCompleteSyncRef = AutoDisposeProviderRef<bool>;
 String _$currentCyclePositionHash() =>
     r'a1ac4bfe02b71010c68ec07871c75497aea29df0';
 
