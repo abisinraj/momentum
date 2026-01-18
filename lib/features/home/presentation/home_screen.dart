@@ -260,24 +260,8 @@ class HomeScreen extends ConsumerWidget {
         ] else ...[
           SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: () async {
-                await ref.read(activeWorkoutSessionProvider.notifier)
-                    .startWorkout(workout);
-                
-                // ActiveWorkoutScreen will handle navigation via post-frame or we do it here
-                // Note: We removed the auto-nav in build, so we must nav here.
-                if (context.mounted) {
-                  final session = ref.read(activeWorkoutSessionProvider);
-                  if (session != null) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ActiveWorkoutScreen(session: session),
-                      ),
-                    );
-                  }
-                }
-              },
+              child: FilledButton(
+              onPressed: () => _onStartPressed(context, ref, workout),
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.tealPrimary,
                 foregroundColor: AppTheme.darkBackground,
@@ -489,5 +473,214 @@ class HomeScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+  
+  void _onStartPressed(BuildContext context, WidgetRef ref, Workout? defaultWorkout) async {
+    final workoutsAsync = ref.read(workoutsStreamProvider);
+    
+    // Safety check
+    if (defaultWorkout == null) return;
+    
+    // If we have access to the full list, check count
+    if (workoutsAsync is AsyncData<List<Workout>>) {
+      final workouts = workoutsAsync.value;
+      if (workouts.length > 1) {
+        // Multiple workouts - show selection dialog
+        final selected = await _showWorkoutSelectionDialog(context, workouts);
+        if (selected != null) {
+          _startSession(context, ref, selected);
+        }
+        return;
+      }
+    }
+    
+    // Default single workout behavior
+    _startSession(context, ref, defaultWorkout);
+  }
+  
+  void _startSession(BuildContext context, WidgetRef ref, Workout workout) async {
+    await ref.read(activeWorkoutSessionProvider.notifier).startWorkout(workout);
+    
+    if (context.mounted) {
+      final session = ref.read(activeWorkoutSessionProvider);
+      if (session != null) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ActiveWorkoutScreen(session: session),
+          ),
+        );
+      }
+    }
+  }
+  
+  Future<Workout?> _showWorkoutSelectionDialog(BuildContext context, List<Workout> workouts) {
+    return showGeneralDialog<Workout>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.black.withOpacity(0.8),
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, anim1, anim2) => const SizedBox(), // not used
+      transitionBuilder: (context, anim1, anim2, child) {
+        final curvedValue = Curves.easeInOutBack.transform(anim1.value) - 1.0;
+        
+        return Transform(
+          transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
+          child: Opacity(
+            opacity: anim1.value,
+            child: Dialog(
+              backgroundColor: AppTheme.darkSurface,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              elevation: 16,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'CHOOSE SESSION',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.tealPrimary,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.5,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: workouts.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final w = entry.value;
+                            return _SelectionCard(
+                              workout: w,
+                              index: index,
+                              onTap: () => Navigator.of(context).pop(w),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SelectionCard extends StatelessWidget {
+  final Workout workout;
+  final int index;
+  final VoidCallback onTap;
+  
+  const _SelectionCard({
+    required this.workout,
+    required this.index,
+    required this.onTap,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppTheme.darkSurfaceContainer,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.darkBorder.withOpacity(0.5)),
+        ),
+        child: Row(
+          children: [
+            // Mini gradient icon
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: _getGradientColors(index),
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                _getWorkoutIcon(workout.clockType),
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    workout.name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    _getSubtitle(workout),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: AppTheme.textMuted),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  String _getSubtitle(Workout workout) {
+    return switch (workout.clockType) {
+      ClockType.none => 'Freestyle',
+      ClockType.stopwatch => 'Stopwatch',
+      ClockType.timer => workout.timerDurationSeconds != null
+          ? '${workout.timerDurationSeconds! ~/ 60} min'
+          : 'Timer',
+      ClockType.alarm => 'Alarm',
+    };
+  }
+  
+  IconData _getWorkoutIcon(ClockType type) {
+    return switch (type) {
+      ClockType.none => Icons.fitness_center,
+      ClockType.stopwatch => Icons.timer_outlined,
+      ClockType.timer => Icons.hourglass_bottom,
+      ClockType.alarm => Icons.alarm,
+    };
+  }
+  
+  List<Color> _getGradientColors(int index) {
+    final gradients = [
+      [const Color(0xFF4A00E0), const Color(0xFF8E2DE2)], // Purple
+      [const Color(0xFF00B4DB), const Color(0xFF0083B0)], // Blue
+      [const Color(0xFFE91E63), const Color(0xFF9C27B0)], // Pink
+      [const Color(0xFF00D9B8), const Color(0xFF00A88A)], // Teal
+    ];
+    return gradients[index % gradients.length];
   }
 }

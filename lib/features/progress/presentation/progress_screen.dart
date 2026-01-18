@@ -388,8 +388,9 @@ class ProgressScreen extends ConsumerWidget {
   }
   
   // Weekly insight helper removed, replaced by provider
-  
-  class _TabButton extends StatelessWidget {
+}
+
+class _TabButton extends StatelessWidget {
 
   final String label;
   final bool isSelected;
