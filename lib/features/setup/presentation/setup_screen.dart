@@ -66,32 +66,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         goal: _selectedGoal,
       );
       
-      // Add default workouts
-      final workoutManager = ref.read(workoutManagerProvider.notifier);
-      await workoutManager.addWorkout(
-        name: 'Push',
-        shortCode: 'P',
-        clockType: ClockType.stopwatch,
-      );
-      await workoutManager.addWorkout(
-        name: 'Pull',
-        shortCode: 'L',
-        clockType: ClockType.stopwatch,
-      );
-      await workoutManager.addWorkout(
-        name: 'Legs',
-        shortCode: 'G',
-        clockType: ClockType.stopwatch,
-      );
-      await workoutManager.addWorkout(
-        name: 'Cardio',
-        shortCode: 'C',
-        clockType: ClockType.timer,
-        timerDuration: const Duration(minutes: 30),
-      );
-      
+      // Proceed to split setup instead of home
       if (mounted) {
-        context.go(AppRoute.home.path);
+        context.go('/split-setup');
       }
     } catch (e) {
       if (mounted) {

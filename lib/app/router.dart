@@ -5,11 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../features/home/presentation/home_screen.dart';
 import '../features/workout/presentation/workout_screen.dart';
+import '../features/workout/presentation/create_workout_screen.dart';
 import '../features/progress/presentation/progress_screen.dart';
 import '../features/info/presentation/info_screen.dart';
 import '../features/setup/presentation/setup_screen.dart';
+import '../features/setup/presentation/split_setup_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
-import '../core/providers/core_providers.dart';
 import '../core/providers/database_providers.dart';
 
 part 'router.g.dart';
@@ -18,6 +19,8 @@ part 'router.g.dart';
 enum AppRoute {
   splash('/'),
   setup('/setup'),
+  splitSetup('/split-setup'),
+  createWorkout('/create-workout/:index/:total'),
   home('/home'),
   workout('/workout'),
   progress('/progress'),
@@ -76,20 +79,27 @@ class NavigationShell extends StatelessWidget {
 }
 
 /// Helper function to handle redirect when setup data is loaded
-String? _handleDataRedirect(String path, bool isComplete) {
-  // If on splash, redirect based on setup status
-  if (path == AppRoute.splash.path) {
-    return isComplete ? AppRoute.home.path : AppRoute.setup.path;
-  }
-  // If on setup and already complete, go to home
-  if (path == AppRoute.setup.path && isComplete) {
-    return AppRoute.home.path;
-  }
-  // If trying to access app routes but not setup, go to setup
-  if (path != AppRoute.setup.path && path != AppRoute.splash.path && !isComplete) {
+String? _handleDataRedirect(BuildContext context, GoRouterState state, bool isComplete) {
+  final path = state.uri.path;
+  final isSetupFlow = path == AppRoute.setup.path || 
+                      path == AppRoute.splitSetup.path ||
+                      path.startsWith('/create-workout');
+
+  // If setup is NOT complete
+  if (!isComplete) {
+    // Allow splash and any setup flow screen
+    if (path == AppRoute.splash.path || isSetupFlow) return null;
+    // Otherwise redirect to setup start
     return AppRoute.setup.path;
   }
-  return null; // No redirect needed
+
+  // If setup IS complete
+  if (isSetupFlow || path == AppRoute.splash.path) {
+    // Redirect to home if trying to access setup or splash
+    return AppRoute.home.path;
+  }
+
+  return null; // Allow other routes
 }
 
 /// Router provider using go_router
@@ -101,14 +111,12 @@ GoRouter router(ref) {
   return GoRouter(
     initialLocation: AppRoute.splash.path,
     redirect: (context, state) {
-      final path = state.uri.path;
-      
       // Use pattern matching for the async value
       return switch (isSetupCompleteAsync) {
-        AsyncLoading() => path != AppRoute.splash.path ? AppRoute.splash.path : null,
+        AsyncLoading() => state.uri.path != AppRoute.splash.path ? AppRoute.splash.path : null,
         AsyncError() => AppRoute.setup.path,
-        AsyncData(:final value) => _handleDataRedirect(path, value),
-        _ => path != AppRoute.splash.path ? AppRoute.splash.path : null, // Default: stay on splash
+        AsyncData(:final value) => _handleDataRedirect(context, state, value),
+        _ => state.uri.path != AppRoute.splash.path ? AppRoute.splash.path : null,
       };
     },
     routes: [
@@ -119,11 +127,28 @@ GoRouter router(ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       
-      // Setup route (shown only on first launch)
+      // Setup routes
       GoRoute(
         path: AppRoute.setup.path,
         name: AppRoute.setup.name,
         builder: (context, state) => const SetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.splitSetup.path,
+        name: AppRoute.splitSetup.name,
+        builder: (context, state) => const SplitSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.createWorkout.path,
+        name: 'createWorkout', // manual name as enum path has params
+        builder: (context, state) {
+          final index = int.parse(state.pathParameters['index']!);
+          final total = int.parse(state.pathParameters['total']!);
+          return CreateWorkoutScreen(
+            index: index,
+            totalDays: total,
+          );
+        },
       ),
       
       // Main app shell with bottom navigation
@@ -179,4 +204,3 @@ GoRouter router(ref) {
     ],
   );
 }
-

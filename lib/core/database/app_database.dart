@@ -99,7 +99,7 @@ class AppDatabase extends _$AppDatabase {
   /// Check if setup is complete
   Future<bool> isSetupComplete() async {
     final user = await getUser();
-    return user != null;
+    return user != null && user.splitDays != null;
   }
   
   // ===== Exercises Operations =====
