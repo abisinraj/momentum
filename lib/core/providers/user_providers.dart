@@ -70,4 +70,20 @@ class UserSetup extends _$UserSetup {
     
     ref.invalidate(currentUserProvider);
   }
+  
+  /// Update split days
+  Future<void> setSplitDays(int days) async {
+    final db = ref.read(appDatabaseProvider);
+    final currentUser = await db.getUser();
+    
+    if (currentUser == null) return;
+    
+    await db.saveUser(currentUser.toCompanion(true).copyWith(
+      splitDays: Value(days),
+    ));
+    
+    ref.invalidate(currentUserProvider);
+    // Note: We don't invalidate isSetupComplete yet as we want to keep them in the wizard
+    // until they finish creating workouts
+  }
 }

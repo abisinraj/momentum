@@ -107,32 +107,21 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
             children: [
               // Header with wrench icon
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.build_outlined,
-                        color: AppTheme.tealPrimary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'SETUP',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.tealPrimary,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined),
+                  Icon(
+                    Icons.build_outlined,
                     color: AppTheme.tealPrimary,
-                    onPressed: () => context.push('/settings'),
-                    tooltip: 'API Settings',
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'SETUP',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.tealPrimary,
+                      letterSpacing: 1.5,
+                    ),
                   ),
                 ],
               ),

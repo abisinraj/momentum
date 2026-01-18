@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
+import '../../../core/providers/user_providers.dart';
 
 /// Screen to select number of days in the split
 class SplitSetupScreen extends ConsumerStatefulWidget {
@@ -102,10 +103,14 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    // Save the selected split configuration
+                    await ref.read(userSetupProvider.notifier).setSplitDays(_selectedDays);
+                    
                     // Start the creation wizard
-                    // We'll pass the total days to the wizard
-                    context.push('/create-workout/1/$_selectedDays');
+                    if (context.mounted) {
+                      context.push('/create-workout/1/$_selectedDays');
+                    }
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.tealPrimary,

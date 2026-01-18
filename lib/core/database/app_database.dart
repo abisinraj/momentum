@@ -99,7 +99,11 @@ class AppDatabase extends _$AppDatabase {
   /// Check if setup is complete
   Future<bool> isSetupComplete() async {
     final user = await getUser();
-    return user != null && user.splitDays != null;
+    if (user == null || user.splitDays == null) return false;
+    
+    // Also check if they have created at least one workout
+    final workouts = await getAllWorkouts();
+    return workouts.isNotEmpty;
   }
   
   // ===== Exercises Operations =====
