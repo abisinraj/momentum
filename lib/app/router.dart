@@ -87,8 +87,8 @@ String? _handleDataRedirect(BuildContext context, GoRouterState state, bool isCo
 
   // If setup is NOT complete
   if (!isComplete) {
-    // Allow splash and any setup flow screen
-    if (path == AppRoute.splash.path || isSetupFlow) return null;
+    // Allow any setup flow screen (but redirect splash to setup)
+    if (isSetupFlow) return null;
     // Otherwise redirect to setup start
     return AppRoute.setup.path;
   }
