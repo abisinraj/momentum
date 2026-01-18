@@ -107,6 +107,37 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
     HapticFeedback.lightImpact();
   }
   
+  Future<void> _confirmAndCompleteWorkout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text(
+          'Finish Workout?',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
+        content: Text(
+          'Are you sure you want to mark this workout as complete?',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Finish'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed == true) {
+      await _completeWorkout();
+    }
+  }
+  
   Future<void> _completeWorkout() async {
     _timer?.cancel();
     await ref.read(activeWorkoutSessionProvider.notifier).completeWorkout();
@@ -510,7 +541,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             width: 160,
             height: 56,
             child: FilledButton.icon(
-              onPressed: _completeWorkout,
+              onPressed: _confirmAndCompleteWorkout,
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,

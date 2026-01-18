@@ -142,7 +142,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                         ? 'No workouts yet' 
                         : 'No workout for current split day');
                   }
-                  return _buildWorkoutList(context, ref, filtered, todayCompletedAsync, value.length);
+                  return _buildWorkoutList(context, ref, filtered, todayCompletedAsync, value.length, currentSplitIndex);
                 }(),
                 AsyncError(:final error) => Center(
                     child: Text(
@@ -204,6 +204,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     List<Workout> workouts,
     AsyncValue<List<int>> todayCompletedAsync,
     int totalCount,
+    int currentSplitIndex,
   ) {
     final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
     final activeSession = ref.watch(activeWorkoutSessionProvider);
@@ -222,15 +223,18 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         final workout = workouts[index];
         final isCompleted = todayCompleted.contains(workout.id);
         final isActive = activeSession?.workoutId == workout.id;
+        // Lock workouts that don't match current split index (when viewing all)
+        final isLocked = _showAllWorkouts && workout.orderIndex != currentSplitIndex;
         
         return _WorkoutCard(
           key: ValueKey(workout.id),
           workout: workout,
           isCompleted: isCompleted,
           isActive: isActive,
+          isLocked: isLocked,
           index: workout.orderIndex, // Use actual order index for display
           total: totalCount,
-          onTap: () => _startWorkout(context, ref, workout),
+          onTap: isLocked ? null : () => _startWorkout(context, ref, workout),
           onDelete: () => _confirmDelete(context, ref, workout),
         );
       },
@@ -501,9 +505,10 @@ class _WorkoutCard extends StatelessWidget {
   final Workout workout;
   final bool isCompleted;
   final bool isActive;
+  final bool isLocked;
   final int index;
   final int total;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final VoidCallback onDelete;
   
   const _WorkoutCard({
@@ -511,31 +516,36 @@ class _WorkoutCard extends StatelessWidget {
     required this.workout,
     required this.isCompleted,
     required this.isActive,
+    this.isLocked = false,
     required this.index,
     required this.total,
-    required this.onTap,
+    this.onTap,
     required this.onDelete,
   });
   
   @override
   Widget build(BuildContext context) {
+    final isDisabled = isCompleted || isLocked;
+    
     return GestureDetector(
-      onTap: isCompleted ? null : onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppTheme.tealPrimary.withOpacity(0.1)
-              : AppTheme.darkSurfaceContainer,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
+      onTap: isDisabled ? null : onTap,
+      child: Opacity(
+        opacity: isLocked ? 0.5 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
             color: isActive
-                ? AppTheme.tealPrimary
-                : AppTheme.darkBorder.withOpacity(0.3),
-            width: isActive ? 2 : 1,
+                ? AppTheme.tealPrimary.withOpacity(0.1)
+                : AppTheme.darkSurfaceContainer,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isActive
+                  ? AppTheme.tealPrimary
+                  : AppTheme.darkBorder.withOpacity(0.3),
+              width: isActive ? 2 : 1,
+            ),
           ),
-        ),
         child: Row(
           children: [
             // Gradient thumbnail / icon
