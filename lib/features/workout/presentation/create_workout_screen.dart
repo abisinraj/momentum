@@ -33,6 +33,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   String? _selectedThumbnail;
   String _searchQuery = '';
   ClockType _selectedClock = ClockType.stopwatch;
+  bool _isSaving = false;
   final List<({String name, int sets, int reps})> _exercises = [];
   
   // Exercise inputs
@@ -99,18 +100,27 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                   ),
                 const Spacer(),
                 FilledButton(
-                  onPressed: _canProceed() ? _nextStep : null,
+                  onPressed: (_canProceed() && !_isSaving) ? _nextStep : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.tealPrimary,
                     foregroundColor: AppTheme.darkBackground,
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     disabledBackgroundColor: AppTheme.darkSurfaceContainer,
                   ),
-                  child: Text(
-                    _currentStep == 3 
-                        ? (widget.index < widget.totalDays ? 'Next Workout' : 'Finish Split')
-                        : 'Continue',
-                  ),
+                  child: _isSaving
+                      ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppTheme.darkBackground,
+                          ),
+                        )
+                      : Text(
+                          _currentStep == 3 
+                              ? (widget.index < widget.totalDays ? 'Next Workout' : 'Finish Split')
+                              : 'Continue',
+                        ),
                 ),
               ],
             ),
@@ -137,27 +147,50 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
         curve: Curves.easeOut,
       );
     } else {
-      // Save and proceed
-      await _saveWorkout();
+      if (_isSaving) return;
       
-      if (!mounted) return;
+      setState(() => _isSaving = true);
       
-      if (widget.index < widget.totalDays) {
-        // Go to next workout creation
-        context.push('/create-workout/${widget.index + 1}/${widget.totalDays}');
-      } else {
-        // Finish split setup
-        // Update user split days
-        final db = ref.read(appDatabaseProvider);
-        final user = await db.getUser();
-        if (user != null) {
-          await db.saveUser(user.toCompanion(true).copyWith(
-            splitDays: drift.Value(widget.totalDays),
-          ));
-        }
+      try {
+        // Save and proceed
+        await _saveWorkout();
         
+        if (!mounted) return;
+        
+        if (widget.index < widget.totalDays) {
+          // Go to next workout creation
+          context.push('/create-workout/${widget.index + 1}/${widget.totalDays}');
+        } else {
+          // Finish split setup
+          // Update user split days
+          final db = ref.read(appDatabaseProvider);
+          final user = await db.getUser();
+          if (user != null) {
+            await db.saveUser(user.toCompanion(true).copyWith(
+              splitDays: drift.Value(widget.totalDays),
+            ));
+          }
+          
+          // Invalidate setup check to allow router to redirect to Home
+          ref.invalidate(isSetupCompleteProvider);
+          
+          if (mounted) {
+            context.go('/home');
+          }
+        }
+      } catch (e, st) {
         if (mounted) {
-          context.go('/home');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error saving workout: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          print('Error saving workout: $e\n$st');
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isSaving = false);
         }
       }
     }
@@ -295,13 +328,27 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: isSelected ? Border.all(color: AppTheme.tealPrimary, width: 3) : null,
-                          image: DecorationImage(
-                            image: NetworkImage(url),
-                            fit: BoxFit.cover,
-                          ),
+                          color: AppTheme.darkSurfaceContainerHighest,
                         ),
-                        child: isSelected
-                            ? Center(
+                        clipBehavior: Clip.antiAlias,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              url,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: Icon(Icons.broken_image, color: AppTheme.textMuted),
+                                );
+                              },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.tealPrimary));
+                              },
+                            ),
+                            if (isSelected)
+                              Center(
                                 child: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
@@ -310,8 +357,9 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                                   ),
                                   child: const Icon(Icons.check, color: Colors.white, size: 20),
                                 ),
-                              )
-                            : null,
+                              ),
+                          ],
+                        ),
                       ),
                     );
                   },

@@ -113,12 +113,19 @@ GoRouter router(ref) {
   return GoRouter(
     initialLocation: AppRoute.splash.path,
     redirect: (context, state) {
+      final path = state.uri.path;
+      final isSetupFlow = path == AppRoute.setup.path || 
+                          path == AppRoute.splitSetup.path ||
+                          path.startsWith('/create-workout');
+
       // Use pattern matching for the async value
       return switch (isSetupCompleteAsync) {
-        AsyncLoading() => state.uri.path != AppRoute.splash.path ? AppRoute.splash.path : null,
+        // Only redirect to splash if we are NOT in setup flow
+        // This prevents kicking the user out of setup when the provider refreshes (e.g. after saving profile)
+        AsyncLoading() => (path != AppRoute.splash.path && !isSetupFlow) ? AppRoute.splash.path : null,
         AsyncError() => AppRoute.setup.path,
         AsyncData(:final value) => _handleDataRedirect(context, state, value),
-        _ => state.uri.path != AppRoute.splash.path ? AppRoute.splash.path : null,
+        _ => (path != AppRoute.splash.path && !isSetupFlow) ? AppRoute.splash.path : null,
       };
     },
     routes: [

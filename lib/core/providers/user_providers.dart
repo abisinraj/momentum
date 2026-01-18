@@ -41,9 +41,12 @@ class UserSetup extends _$UserSetup {
       ));
     }
     
-    // Invalidate setup check
-    ref.invalidate(isSetupCompleteProvider);
+    // Invalidate user provider to update UI name etc
     ref.invalidate(currentUserProvider);
+    
+    // NOTE: We do NOT invalidate isSetupCompleteProvider here.
+    // We want the user to stay in the setup flow until they finish creating workouts.
+    // The invalidation happens in CreateWorkoutScreen.
   }
   
   /// Update user profile
