@@ -36,239 +36,21 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   int _currentPage = 0;
   
   // Checklist state
-  final Set<int> _completedExercises = {}; // Store completed exercise IDs locally for session
+  // Key: Exercise ID, Value: Completed sets count
+  final Map<int, int> _completedSets = {};
+  
+  // Key: Exercise ID, Value: Note/Actual reps (transient)
+  final Map<int, String> _exerciseNotes = {};
   
   @override
   void initState() {
     super.initState();
-    // Default to Checklist view for None/Stopwatch, Timer view for others?
-    // User requested Checklist for None.
-    // Let's default to Checklist (Page 0) generally, Timer (Page 1).
-    // Unless logic suggests otherwise.
     _pageController = PageController(initialPage: 0);
     _initializeClock();
   }
   
-  void _initializeClock() {
-    switch (widget.session.clockType) {
-      case ClockType.none:
-      case ClockType.stopwatch:
-      case ClockType.alarm:
-        _startElapsedTimer();
-        break;
-      case ClockType.timer:
-        _remaining = widget.session.timerDuration ?? const Duration(minutes: 30);
-        _startCountdownTimer();
-        // If it's a timer, maybe default to Timer view?
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _pageController.jumpToPage(1);
-        });
-        break;
-    }
-  }
-  
-  void _startElapsedTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_isRunning && mounted) {
-        setState(() {
-          _elapsed = DateTime.now().difference(widget.session.startedAt);
-        });
-      }
-    });
-  }
-  
-  void _startCountdownTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_isRunning && mounted) {
-        setState(() {
-          _elapsed = DateTime.now().difference(widget.session.startedAt);
-          final targetDuration = widget.session.timerDuration ?? const Duration(minutes: 30);
-          _remaining = targetDuration - _elapsed;
-          
-          if (_remaining.isNegative) {
-            _remaining = Duration.zero;
-            if (!_timerCompleted) {
-              _timerCompleted = true;
-              _onTimerComplete();
-            }
-          }
-        });
-      }
-    });
-  }
-  
-  void _onTimerComplete() {
-    HapticFeedback.heavyImpact();
-    // Show simplified toast/dialog?
-  }
-  
-  void _togglePause() {
-    setState(() {
-      _isRunning = !_isRunning;
-    });
-    HapticFeedback.lightImpact();
-  }
-  
-  Future<void> _completeWorkout() async {
-    _timer?.cancel();
-    // Logic to mark all as done? Or just finish time.
-    await ref.read(activeWorkoutSessionProvider.notifier).completeWorkout();
-    if (mounted) {
-      Navigator.pop(context);
-    }
-  }
-  
-  void _cancelWorkout() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Workout?'),
-        content: const Text('Progress will be lost.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Resume'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context); // Dialog
-              _timer?.cancel();
-              ref.read(activeWorkoutSessionProvider.notifier).cancelWorkout();
-              Navigator.pop(this.context); // Screen
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('End Session'),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _pageController.dispose();
-    super.dispose();
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final exercisesAsync = ref.watch(exercisesForWorkoutProvider(widget.session.workoutId));
-    
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Custom App Bar with Timer
-            _buildAppBar(theme),
-            
-            // Tab Indicator
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildTabIndicator(0, 'Checklist', theme),
-                const SizedBox(width: 16),
-                _buildTabIndicator(1, 'Timer', theme),
-              ],
-            ),
-            const SizedBox(height: 16),
-            
-            // Page View
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) => setState(() => _currentPage = index),
-                children: [
-                  _buildChecklistPage(exercisesAsync, theme),
-                  _buildTimerPage(theme),
-                ],
-              ),
-            ),
-            
-            // Controls
-            _buildControls(theme),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildTabIndicator(int index, String label, ThemeData theme) {
-    final isActive = _currentPage == index;
-    return GestureDetector(
-      onTap: () => _pageController.animateToPage(
-        index, 
-        duration: const Duration(milliseconds: 300), 
-        curve: Curves.easeInOut,
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? theme.colorScheme.primaryContainer : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? Colors.transparent : theme.colorScheme.outlineVariant,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildAppBar(ThemeData theme) {
-    // Mini timer display
-    final displayDuration = widget.session.clockType == ClockType.timer 
-        ? _remaining 
-        : _elapsed;
-    final hours = displayDuration.inHours;
-    final minutes = (displayDuration.inMinutes % 60).toString().padLeft(2, '0');
-    final seconds = (displayDuration.inSeconds % 60).toString().padLeft(2, '0');
-    final timeString = hours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
+  // ... (Keep existing methods until _buildChecklistPage) ...
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: _cancelWorkout,
-          ),
-          Column(
-            children: [
-              Text(
-                widget.session.workoutName,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                timeString,
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  color: widget.session.clockType == ClockType.timer && _remaining.inSeconds < 60
-                      ? theme.colorScheme.error 
-                      : theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 48), // Balance for icon
-        ],
-      ),
-    );
-  }
-  
   Widget _buildChecklistPage(AsyncValue<List<Exercise>> exercisesAsync, ThemeData theme) {
     return exercisesAsync.when(
       data: (exercises) {
@@ -285,48 +67,116 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           itemCount: exercises.length,
           itemBuilder: (context, index) {
             final ex = exercises[index];
-            final isDone = _completedExercises.contains(ex.id);
+            final completed = _completedSets[ex.id] ?? 0;
+            final targetSets = ex.sets;
+            final isFullyDone = completed >= targetSets;
+            final note = _exerciseNotes[ex.id];
             
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               elevation: 0,
-              color: isDone ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.5) : theme.colorScheme.surfaceContainer,
+              color: isFullyDone 
+                  ? theme.colorScheme.secondaryContainer.withOpacity(0.3) 
+                  : theme.colorScheme.surfaceContainer,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: isDone ? BorderSide.none : BorderSide(color: theme.colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(16),
+                side: isFullyDone 
+                    ? BorderSide.none 
+                    : BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
               ),
-              child: CheckboxListTile(
-                value: isDone,
-                onChanged: (val) {
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
                   setState(() {
-                    if (val == true) {
-                      _completedExercises.add(ex.id);
-                    } else {
-                      _completedExercises.remove(ex.id);
-                    }
+                    final current = _completedSets[ex.id] ?? 0;
+                    // Cycle: 0 -> 1 -> ... -> Max -> 0
+                    final next = (current + 1) % (targetSets + 1);
+                    _completedSets[ex.id] = next;
                   });
                   HapticFeedback.lightImpact();
                 },
-                title: Text(
-                  ex.name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    decoration: isDone ? TextDecoration.lineThrough : null,
-                    color: isDone ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onSurface,
-                  ),
-                ),
-                subtitle: Text('${ex.sets} Sets × ${ex.reps} Reps'),
-                activeColor: theme.colorScheme.primary,
-                checkColor: theme.colorScheme.onPrimary,
-                secondary: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${index + 1}',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                onLongPress: () => _showRepInputDialog(ex),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      // Set Progress Circular
+                      SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: completed / targetSets,
+                              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                              color: isFullyDone ? theme.colorScheme.primary : theme.colorScheme.tertiary,
+                              strokeWidth: 4,
+                            ),
+                            if (isFullyDone)
+                              Icon(Icons.check, size: 24, color: theme.colorScheme.primary)
+                            else
+                              Text(
+                                '$completed',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ex.name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isFullyDone ? theme.colorScheme.onSurface.withOpacity(0.6) : theme.colorScheme.onSurface,
+                                decoration: isFullyDone ? TextDecoration.lineThrough : null,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$targetSets Sets × ${ex.reps} Reps',
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontSize: 13,
+                              ),
+                            ),
+                            if (note != null && note.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Log: $note',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: theme.colorScheme.primary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      // Helper text?
+                      Icon(
+                        Icons.touch_app, 
+                        size: 16, 
+                        color: theme.colorScheme.outline.withOpacity(0.5)
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -338,6 +188,42 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       loading: () => const Center(child: CircularProgressIndicator()),
     );
   }
+
+  void _showRepInputDialog(Exercise ex) {
+    final controller = TextEditingController(text: _exerciseNotes[ex.id] ?? '${ex.reps}');
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Reps for ${ex.name}'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Actual Reps performed',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              setState(() {
+                _exerciseNotes[ex.id] = '${controller.text} reps';
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Save Note'),
+          ),
+        ],
+      ),
+    );
+  }
+
   
   Widget _buildTimerPage(ThemeData theme) {
     // Re-use previous big timer layout
