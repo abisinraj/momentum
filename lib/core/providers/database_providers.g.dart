@@ -277,5 +277,178 @@ class _ActivityGridProviderElement
   int get days => (origin as ActivityGridProvider).days;
 }
 
+String _$exercisesForWorkoutHash() =>
+    r'b6929e591567145ec1226195b2c0763b2431dd40';
+
+/// Provider for exercises in a workout
+///
+/// Copied from [exercisesForWorkout].
+@ProviderFor(exercisesForWorkout)
+const exercisesForWorkoutProvider = ExercisesForWorkoutFamily();
+
+/// Provider for exercises in a workout
+///
+/// Copied from [exercisesForWorkout].
+class ExercisesForWorkoutFamily extends Family<AsyncValue<List<Exercise>>> {
+  /// Provider for exercises in a workout
+  ///
+  /// Copied from [exercisesForWorkout].
+  const ExercisesForWorkoutFamily();
+
+  /// Provider for exercises in a workout
+  ///
+  /// Copied from [exercisesForWorkout].
+  ExercisesForWorkoutProvider call(int workoutId) {
+    return ExercisesForWorkoutProvider(workoutId);
+  }
+
+  @override
+  ExercisesForWorkoutProvider getProviderOverride(
+    covariant ExercisesForWorkoutProvider provider,
+  ) {
+    return call(provider.workoutId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'exercisesForWorkoutProvider';
+}
+
+/// Provider for exercises in a workout
+///
+/// Copied from [exercisesForWorkout].
+class ExercisesForWorkoutProvider
+    extends AutoDisposeFutureProvider<List<Exercise>> {
+  /// Provider for exercises in a workout
+  ///
+  /// Copied from [exercisesForWorkout].
+  ExercisesForWorkoutProvider(int workoutId)
+    : this._internal(
+        (ref) => exercisesForWorkout(ref as ExercisesForWorkoutRef, workoutId),
+        from: exercisesForWorkoutProvider,
+        name: r'exercisesForWorkoutProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$exercisesForWorkoutHash,
+        dependencies: ExercisesForWorkoutFamily._dependencies,
+        allTransitiveDependencies:
+            ExercisesForWorkoutFamily._allTransitiveDependencies,
+        workoutId: workoutId,
+      );
+
+  ExercisesForWorkoutProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.workoutId,
+  }) : super.internal();
+
+  final int workoutId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<Exercise>> Function(ExercisesForWorkoutRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: ExercisesForWorkoutProvider._internal(
+        (ref) => create(ref as ExercisesForWorkoutRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        workoutId: workoutId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<Exercise>> createElement() {
+    return _ExercisesForWorkoutProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ExercisesForWorkoutProvider && other.workoutId == workoutId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, workoutId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ExercisesForWorkoutRef on AutoDisposeFutureProviderRef<List<Exercise>> {
+  /// The parameter `workoutId` of this provider.
+  int get workoutId;
+}
+
+class _ExercisesForWorkoutProviderElement
+    extends AutoDisposeFutureProviderElement<List<Exercise>>
+    with ExercisesForWorkoutRef {
+  _ExercisesForWorkoutProviderElement(super.provider);
+
+  @override
+  int get workoutId => (origin as ExercisesForWorkoutProvider).workoutId;
+}
+
+String _$weeklyStatsHash() => r'e72e44a89933eaec9e36add3e194acb27916806b';
+
+/// Provider for weekly stats
+///
+/// Copied from [weeklyStats].
+@ProviderFor(weeklyStats)
+final weeklyStatsProvider =
+    AutoDisposeFutureProvider<Map<String, int>>.internal(
+      weeklyStats,
+      name: r'weeklyStatsProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$weeklyStatsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef WeeklyStatsRef = AutoDisposeFutureProviderRef<Map<String, int>>;
+String _$weeklyInsightHash() => r'75146fca320485cbc5539b7db547f44fa0af43b7';
+
+/// Provider for weekly insight text
+///
+/// Copied from [weeklyInsight].
+@ProviderFor(weeklyInsight)
+final weeklyInsightProvider = AutoDisposeFutureProvider<String>.internal(
+  weeklyInsight,
+  name: r'weeklyInsightProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$weeklyInsightHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef WeeklyInsightRef = AutoDisposeFutureProviderRef<String>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

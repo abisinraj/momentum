@@ -25,6 +25,8 @@ class HomeScreen extends ConsumerWidget {
     final activeSession = ref.watch(activeWorkoutSessionProvider);
     
     // If there's an active session, navigate to it
+    // REMOVED: User prefers manual control
+    /*
     if (activeSession != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).push(
@@ -34,6 +36,7 @@ class HomeScreen extends ConsumerWidget {
         );
       });
     }
+    */
     
     final userName = switch (userAsync) {
       AsyncData(:final value) => value?.name ?? 'Athlete',
@@ -54,7 +57,7 @@ class HomeScreen extends ConsumerWidget {
               
               // Main workout content
               switch (nextWorkoutAsync) {
-                AsyncData(:final value) => _buildWorkoutContent(context, ref, value),
+                AsyncData(:final value) => _buildWorkoutContent(context, ref, value, activeSession),
                 AsyncError(:final error) => _buildErrorState(context, error.toString()),
                 _ => const Center(child: CircularProgressIndicator()),
               },
@@ -119,7 +122,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
   
-  Widget _buildWorkoutContent(BuildContext context, WidgetRef ref, Workout? workout) {
+  Widget _buildWorkoutContent(BuildContext context, WidgetRef ref, Workout? workout, ActiveSession? activeSession) {
     if (workout == null) {
       return _buildEmptyState(context);
     }
@@ -175,50 +178,132 @@ class HomeScreen extends ConsumerWidget {
         
         const SizedBox(height: 40),
         
-        // Start Workout Button
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: () async {
-              await ref.read(activeWorkoutSessionProvider.notifier)
-                  .startWorkout(workout);
-              
-              if (context.mounted) {
-                final session = ref.read(activeWorkoutSessionProvider);
-                if (session != null) {
+        // Start/Resume/Stop Controls
+        if (activeSession != null && activeSession.workoutId == workout.id) ...[
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () {
+                final currentSession = ref.read(activeWorkoutSessionProvider);
+                if (currentSession != null && context.mounted) {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ActiveWorkoutScreen(session: session),
+                      builder: (_) => ActiveWorkoutScreen(session: currentSession),
                     ),
                   );
                 }
-              }
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.tealPrimary,
-              foregroundColor: AppTheme.darkBackground,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.tealPrimary,
+                foregroundColor: AppTheme.darkBackground,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                   Text(
+                    'RESUME SESSION',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(Icons.open_in_new, size: 24),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'START WORKOUT',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                  ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () async {
+                 // Confirm stop
+                 final confirm = await showDialog<bool>(
+                   context: context,
+                   builder: (context) => AlertDialog(
+                     title: const Text('Stop Workout?'),
+                     content: const Text('This will finish the current session.'),
+                     actions: [
+                       TextButton(
+                         onPressed: () => Navigator.pop(context, false),
+                         child: const Text('Cancel'),
+                       ),
+                       FilledButton(
+                         onPressed: () => Navigator.pop(context, true),
+                         child: const Text('Stop Framework'),
+                       ),
+                     ],
+                   ),
+                 );
+                 
+                 if (confirm == true) {
+                   await ref.read(activeWorkoutSessionProvider.notifier).completeWorkout();
+                 }
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.error,
+                side: BorderSide(color: AppTheme.error),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(width: 12),
-                Icon(Icons.play_arrow, size: 24),
-              ],
+              ),
+              child: const Text('STOP WORKOUT'),
             ),
           ),
-        ),
+        ] else ...[
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () async {
+                await ref.read(activeWorkoutSessionProvider.notifier)
+                    .startWorkout(workout);
+                
+                // ActiveWorkoutScreen will handle navigation via post-frame or we do it here
+                // Note: We removed the auto-nav in build, so we must nav here.
+                if (context.mounted) {
+                  final session = ref.read(activeWorkoutSessionProvider);
+                  if (session != null) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ActiveWorkoutScreen(session: session),
+                      ),
+                    );
+                  }
+                }
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.tealPrimary,
+                foregroundColor: AppTheme.darkBackground,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'START WORKOUT',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(Icons.play_arrow, size: 24),
+                ],
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -272,12 +357,15 @@ class HomeScreen extends ConsumerWidget {
   }
   
   Widget _buildStatsRow(BuildContext context, WidgetRef ref) {
-    final activityAsync = ref.watch(activityGridProvider(days: 7));
+    final statsAsync = ref.watch(weeklyStatsProvider);
     
-    final activeDays = switch (activityAsync) {
-      AsyncData(:final value) => value.length,
-      _ => 0,
+    final stats = switch (statsAsync) {
+      AsyncData(:final value) => value,
+      _ => {'calories': 0, 'duration': 0},
     };
+    
+    final calories = stats['calories'] ?? 0;
+    final durationSec = stats['duration'] ?? 0;
     
     return Container(
       padding: const EdgeInsets.all(20),
@@ -291,7 +379,7 @@ class HomeScreen extends ConsumerWidget {
           Expanded(
             child: _buildStatItem(
               icon: Icons.local_fire_department_outlined,
-              value: '${activeDays * 60}',
+              value: '$calories',
               label: 'KCAL BURNED',
             ),
           ),
@@ -303,7 +391,7 @@ class HomeScreen extends ConsumerWidget {
           Expanded(
             child: _buildStatItem(
               icon: Icons.timer_outlined,
-              value: '${activeDays * 45}m',
+              value: '${durationSec ~/ 60}m',
               label: 'ACTIVE MIN',
             ),
           ),

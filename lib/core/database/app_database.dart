@@ -243,5 +243,88 @@ class AppDatabase extends _$AppDatabase {
     // All done today - return first for tomorrow
     return allWorkouts.first;
   }
+  // ===== Stats & Insights =====
+  
+  /// Get stats for the last 7 days (including today)
+  /// Returns { 'duration': totalSeconds, 'calories': totalKcal, 'workouts': count }
+  Future<Map<String, int>> getWeeklyStats() async {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
+    
+    // Get sessions from last 7 days that are completed
+    final recentSessions = await (select(sessions)
+          ..where((s) => s.startedAt.isBiggerOrEqualValue(start) & 
+                        s.completedAt.isNotNull()))
+        .get();
+        
+    int totalDuration = 0;
+    int workoutCount = recentSessions.length;
+    
+    // Get user weight for calorie calc
+    final user = await getUser();
+    final weight = user?.weightKg ?? 70.0; // Fallback to 70kg
+    const double met = 4.5; // Moderate effort
+    
+    for (final session in recentSessions) {
+      totalDuration += session.durationSeconds ?? 0;
+    }
+    
+    // Calorie formula: MET * Weight(kg) * Duration(hr)
+    final durationHours = totalDuration / 3600.0;
+    final totalCalories = (met * weight * durationHours).round();
+    
+    return {
+      'duration': totalDuration,
+      'calories': totalCalories,
+      'workouts': workoutCount,
+    };
+  }
+  
+  /// Get weekly insight comparing this week (last 7 days) vs previous week
+  Future<String> getWeeklyInsight() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // This week: [Today-6, Today]
+    final thisWeekStart = today.subtract(const Duration(days: 6));
+    
+    // Last week: [Today-13, Today-7]
+    final lastWeekStart = today.subtract(const Duration(days: 13));
+    final lastWeekEnd = today.subtract(const Duration(days: 7));
+    
+    // Helper to count sessions in range
+    Future<int> countSessions(DateTime start, DateTime end) async {
+       // inclusive start, inclusive end (conceptually)
+       // drift queries usually need careful bounds. 
+       // strict comparison: start <= date < end+1day
+       final effectiveEnd = end.add(const Duration(days: 1));
+       
+       final result = await (select(sessions)
+          ..where((s) => s.startedAt.isBiggerOrEqualValue(start) & 
+                        s.startedAt.isSmallerThanValue(effectiveEnd) &
+                        s.completedAt.isNotNull()))
+        .get();
+        return result.length;
+    }
+    
+    final thisWeekCount = await countSessions(thisWeekStart, today);
+    final lastWeekCount = await countSessions(lastWeekStart, lastWeekEnd);
+    
+    if (thisWeekCount == 0) {
+      if (lastWeekCount > 0) {
+        return "You've been quiet this week. Time to get back to it!";
+      }
+      return "Start your first workout to build momentum!";
+    }
+    
+    if (thisWeekCount > lastWeekCount) {
+      final diff = thisWeekCount - lastWeekCount;
+      return "You're crushing it! $diff more workouts than last week. Keep building that momentum.";
+    } else if (thisWeekCount == lastWeekCount) {
+      return "Consistent effort! You're matching your pace from last week.";
+    } else {
+      return "You're active, but a little behind last week's pace. Push for one more!";
+    }
+  }
 }
 

@@ -60,3 +60,17 @@ Future<List<Exercise>> exercisesForWorkout(ref, int workoutId) async {
   final db = ref.watch(appDatabaseProvider);
   return db.getExercisesForWorkout(workoutId);
 }
+
+/// Provider for weekly stats
+@riverpod
+Future<Map<String, int>> weeklyStats(ref) async {
+  final db = ref.watch(appDatabaseProvider);
+  return db.getWeeklyStats();
+}
+
+/// Provider for weekly insight text
+@riverpod
+Future<String> weeklyInsight(ref) async {
+  final db = ref.watch(appDatabaseProvider);
+  return db.getWeeklyInsight();
+}

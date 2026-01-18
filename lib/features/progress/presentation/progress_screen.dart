@@ -12,23 +12,28 @@ class ProgressScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activityAsync = ref.watch(activityGridProvider(days: 42)); // 6 weeks
+    final statsAsync = ref.watch(weeklyStatsProvider);
+    final insightAsync = ref.watch(weeklyInsightProvider);
     
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
       body: SafeArea(
-        child: switch (activityAsync) {
-          AsyncData(:final value) => _buildContent(context, value),
-          AsyncError(:final error) => Center(
+        child: switch ((activityAsync, statsAsync, insightAsync)) {
+          (AsyncData(value: final activity), AsyncData(value: final stats), AsyncData(value: final insight)) => 
+              _buildContent(context, activity, stats, insight),
+          (AsyncError(:final error), _, _) => Center(
               child: Text('Error: $error', style: TextStyle(color: AppTheme.error)),
             ),
-          _ => Center(child: CircularProgressIndicator(color: AppTheme.tealPrimary)),
+           _ => Center(child: CircularProgressIndicator(color: AppTheme.tealPrimary)),
         },
       ),
     );
   }
   
-  Widget _buildContent(BuildContext context, Map<DateTime, String> activityMap) {
+  Widget _buildContent(BuildContext context, Map<DateTime, String> activityMap, Map<String, int> stats, String insight) {
     final streak = _calculateStreak(activityMap);
+    final calories = stats['calories'] ?? 0;
+    final durationSec = stats['duration'] ?? 0;
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -177,7 +182,7 @@ class ProgressScreen extends ConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      'Calories Burned vs Intake',
+                      'Calories Burned',
                       style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.textMuted,
@@ -189,7 +194,7 @@ class ProgressScreen extends ConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      '${activityMap.length * 85}',
+                      '$calories',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -204,6 +209,7 @@ class ProgressScreen extends ConsumerWidget {
                         color: AppTheme.textSecondary,
                       ),
                     ),
+                    /*
                     const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -217,7 +223,7 @@ class ProgressScreen extends ConsumerWidget {
                           Icon(Icons.trending_up, color: AppTheme.success, size: 14),
                           const SizedBox(width: 4),
                           Text(
-                            '+${(activityMap.length * 3.3).toInt()}%',
+                            '+5%',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -227,10 +233,11 @@ class ProgressScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    */
                   ],
                 ),
                 const SizedBox(height: 20),
-                // Simple chart placeholder
+                // Simple chart placeholder - could use real dataPoints if we had daily breakdown
                 SizedBox(
                   height: 80,
                   child: CustomPaint(
@@ -288,7 +295,7 @@ class ProgressScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _getWeeklyInsight(activityMap.length),
+                        insight,
                         style: TextStyle(
                           fontSize: 13,
                           color: AppTheme.textSecondary,
@@ -307,9 +314,10 @@ class ProgressScreen extends ConsumerWidget {
           // Bottom stats row
           Row(
             children: [
-              Expanded(child: _buildStatCard(Icons.timer_outlined, '${activityMap.length * 45}m', 'ACTIVE TIME')),
+              Expanded(child: _buildStatCard(Icons.timer_outlined, '${durationSec ~/ 60}m', 'ACTIVE TIME')),
               const SizedBox(width: 12),
-              Expanded(child: _buildStatCard(Icons.favorite_border, '${72 + (activityMap.length * 2)}', 'AVG BPM')),
+              // Avg BPM removed or mocked as we don't have heart rate data
+              Expanded(child: _buildStatCard(Icons.favorite_border, '--', 'AVG BPM')),
             ],
           ),
         ],
@@ -379,20 +387,10 @@ class ProgressScreen extends ConsumerWidget {
     return streak;
   }
   
-  String _getWeeklyInsight(int activeDays) {
-    if (activeDays == 0) {
-      return "Start your first workout to build momentum! Every journey begins with a single step.";
-    } else if (activeDays < 5) {
-      return "You're off to a great start! Your activity is up compared to last week. Keep building that momentum.";
-    } else if (activeDays < 15) {
-      return "You're crushing it! Your cardio intensity is up ${(activeDays * 3)}% compared to last week. Keep pushing that pace.";
-    } else {
-      return "Outstanding consistency! You've been incredibly active. Your dedication is clearly paying off.";
-    }
-  }
-}
+  // Weekly insight helper removed, replaced by provider
+  
+  class _TabButton extends StatelessWidget {
 
-class _TabButton extends StatelessWidget {
   final String label;
   final bool isSelected;
   
