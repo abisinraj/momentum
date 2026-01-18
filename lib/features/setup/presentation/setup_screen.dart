@@ -58,6 +58,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     
     try {
       // Save user to database
+      print('Setup: Saving user profile...');
       await ref.read(userSetupProvider.notifier).completeSetup(
         name: _nameController.text.trim(),
         age: int.tryParse(_ageController.text),
@@ -65,11 +66,13 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         weightKg: double.tryParse(_weightController.text),
         goal: _selectedGoal,
       );
+      print('Setup: Profile saved. Navigating to split-setup...');
       
       if (mounted) {
-        // Use pushReplacement to ensure we can move forward
-        // context.go should also work but pushReplacement is sometimes safer locally
-        context.pushReplacement('/split-setup');
+        // Use go() for cleaner navigation stack reset
+        context.go('/split-setup');
+      } else {
+        print('Setup: Context not mounted!');
       }
     } catch (e, st) {
       if (mounted) {
