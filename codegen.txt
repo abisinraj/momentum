@@ -1,0 +1,912 @@
+  Generating the build script.
+  Reading the asset graph.
+  Checking for updates.
+  Updating the asset graph.
+  Building, incremental build.
+  0s riverpod_generator on 23 inputs; lib/app/app.dart
+  0s riverpod_generator on 23 inputs: 1 skipped; lib/app/router.dart
+  0s riverpod_generator on 23 inputs: 23 skipped
+  0s freezed on 23 inputs; lib/app/app.dart
+  0s freezed on 23 inputs: 23 skipped
+  0s json_serializable on 46 inputs; lib/app/app.dart
+  0s json_serializable on 46 inputs: 46 skipped
+  0s drift_dev on 184 inputs; lib/app/app.dart
+  0s drift_dev on 184 inputs: 184 skipped
+  0s source_gen:combining_builder on 92 inputs; lib/app/app.dart
+  0s source_gen:combining_builder on 92 inputs: 92 skipped
+  Running the post build.
+  Writing the asset graph.
+E riverpod_generator on lib/app/router.dart:
+  PackageNotFoundException: shared_preferences
+E riverpod_generator on lib/core/database/app_database.dart:
+  Bad state: Cannot recurse at later or equal phase 0, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E riverpod_generator on lib/core/providers/core_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 0, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E riverpod_generator on lib/core/providers/database_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 0, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E riverpod_generator on lib/core/providers/user_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 0, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E riverpod_generator on lib/core/providers/workout_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 0, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E riverpod_generator on lib/core/services/widget_service.dart:
+  Bad state: Cannot recurse at later or equal phase 0, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E freezed on lib/app/router.dart:
+  Bad state: Cannot recurse at later or equal phase 1, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E freezed on lib/core/database/app_database.dart:
+  Bad state: Cannot recurse at later or equal phase 1, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E freezed on lib/core/providers/core_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 1, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E freezed on lib/core/providers/database_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 1, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E freezed on lib/core/providers/user_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 1, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E freezed on lib/core/providers/workout_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 1, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E freezed on lib/core/services/widget_service.dart:
+  Bad state: Cannot recurse at later or equal phase 1, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/app/app.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/app/router.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/database/app_database.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/database/connection/connection.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/database/connection/connection_stub.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/database/connection/native.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/database/connection/web.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/providers/core_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/providers/database_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/providers/user_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/providers/workout_providers.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/core/services/widget_service.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/features/home/presentation/home_screen.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/features/info/presentation/info_screen.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/features/progress/presentation/progress_screen.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/features/setup/presentation/setup_screen.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/features/workout/presentation/active_workout_screen.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/features/workout/presentation/workout_screen.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on lib/main.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+E json_serializable on test/widget_test.dart:
+  Bad state: Cannot recurse at later or equal phase 2, already running at: [0]
+  #0      LibraryCycleGraphLoader.libraryCycleOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:442:7)
+  #1      LibraryCycleGraphLoader.libraryCycleGraphOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:473:11)
+  #2      LibraryCycleGraphLoader.transitiveDepsOf (package:build/src/library_cycle_graph/library_cycle_graph_loader.dart:495:25)
+  #3      AnalysisDriverModel._performResolve.<anonymous closure> (package:build_resolvers/src/analysis_driver_model.dart:125:35)
+  #4      TimedActivities._runAsync (package:build_runner_core/src/logging/timed_activities.dart:105:28)
+  #5      TimedActivity.runAsync (package:build_runner_core/src/logging/timed_activities.dart:47:27)
+  #6      AnalysisDriverModel._performResolve (package:build_resolvers/src/analysis_driver_model.dart:119:61)
+  #7      AnalysisDriverModel.performResolve (package:build_resolvers/src/analysis_driver_model.dart:97:13)
+  #8      PerActionResolver._resolveIfNecessary.<anonymous closure>.<anonymous closure> (package:build_resolvers/src/resolver.dart:164:46)
+  #9      _NoOpBuilderActionTracker.trackStage (package:build_runner_core/src/generate/performance_tracker.dart:332:17)
+  #10     BuildStepImpl.trackStage (package:build_runner_core/src/generate/build_step_impl.dart:207:23)
+  #11     PerActionResolver._resolveIfNecessary.<anonymous closure> (package:build_resolvers/src/resolver.dart:162:19)
+  #12     Pool.withResource (package:pool/pool.dart:127:28)
+  <asynchronous suspension>
+  #13     PerActionResolver.libraryFor.<anonymous closure> (package:build_resolvers/src/resolver.dart:144:5)
+  <asynchronous suspension>
+  #14     _Builder.build (package:source_gen/src/builder.dart:105:17)
+  <asynchronous suspension>
+  #15     runBuilder.buildForInput (package:build/src/generate/run_builder.dart:100:7)
+  <asynchronous suspension>
+  #16     Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+  <asynchronous suspension>
+  #17     BuildLogLogger.scopeLogAsync.<anonymous closure> (package:build_runner_core/src/logging/build_log_logger.dart:58:13)
+  <asynchronous suspension>
+  
+  Failed to build with build_runner in 35s; wrote 0 outputs.
