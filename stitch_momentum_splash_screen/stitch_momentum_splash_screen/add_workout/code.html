@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Workout - Momentum</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#22c3a8",
+                        "secondary": "#ccff00",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#1c1f22",
+                        "surface-dark": "#262a2d",
+                        "surface-darker": "#16181a",
+                    },
+                    fontFamily: {
+                        "display": ["Epilogue", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-slate-900 dark:text-white font-display overflow-x-hidden selection:bg-primary selection:text-black">
+<div class="relative flex h-full w-full flex-col pb-24">
+<!-- Header -->
+<header class="sticky top-0 z-20 flex items-center justify-between px-4 py-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<h2 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">Create Routine</h2>
+</header>
+<!-- Scrollable Content -->
+<main class="flex-1 flex flex-col px-4 pt-4 gap-8">
+<!-- Section 1: Identity -->
+<section>
+<h3 class="text-xl font-bold leading-tight mb-4 text-slate-900 dark:text-white">Identity</h3>
+<div class="flex items-start gap-4">
+<label class="flex flex-col flex-1 gap-2">
+<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Workout Name</span>
+<input class="w-full bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm placeholder:text-slate-400" placeholder="e.g. Morning Cardio" type="text" value="High Intensity Interval"/>
+</label>
+<!-- Short Code Badge (Dynamic Preview) -->
+<div class="flex flex-col gap-2 items-center">
+<span class="text-sm font-medium text-slate-500 dark:text-slate-400">Code</span>
+<div class="size-[58px] rounded-full bg-secondary text-black flex items-center justify-center shadow-lg shadow-secondary/20 border-2 border-white dark:border-surface-darker">
+<span class="text-2xl font-bold">H</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Visuals -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold leading-tight text-slate-900 dark:text-white">Visuals</h3>
+<button class="text-primary text-sm font-medium hover:text-primary/80">View All</button>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<!-- Selected Item -->
+<button class="relative aspect-square rounded-xl overflow-hidden group ring-2 ring-primary ring-offset-2 ring-offset-background-light dark:ring-offset-background-dark transition-all">
+<div class="absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-600 opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Abstract gradient purple to blue"></div>
+<span class="material-symbols-outlined absolute inset-0 m-auto flex items-center justify-center text-white text-3xl drop-shadow-md">bolt</span>
+<div class="absolute inset-0 bg-black/10"></div>
+</button>
+<!-- Option 2 -->
+<button class="relative aspect-square rounded-xl overflow-hidden group hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all">
+<div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-700 opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Abstract gradient emerald to teal"></div>
+<span class="material-symbols-outlined absolute inset-0 m-auto flex items-center justify-center text-white text-3xl drop-shadow-md">fitness_center</span>
+</button>
+<!-- Option 3 -->
+<button class="relative aspect-square rounded-xl overflow-hidden group hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all">
+<div class="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Abstract gradient orange to red"></div>
+<span class="material-symbols-outlined absolute inset-0 m-auto flex items-center justify-center text-white text-3xl drop-shadow-md">timer</span>
+</button>
+<!-- Option 4 -->
+<button class="relative aspect-square rounded-xl overflow-hidden group hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all">
+<div class="absolute inset-0 bg-gradient-to-br from-pink-500 to-rose-600 opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Abstract gradient pink to rose"></div>
+<span class="material-symbols-outlined absolute inset-0 m-auto flex items-center justify-center text-white text-3xl drop-shadow-md">favorite</span>
+</button>
+<!-- Option 5 -->
+<button class="relative aspect-square rounded-xl overflow-hidden group hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all">
+<div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-cyan-500 opacity-60 group-hover:opacity-80 transition-opacity" data-alt="Abstract gradient indigo to cyan"></div>
+<span class="material-symbols-outlined absolute inset-0 m-auto flex items-center justify-center text-white text-3xl drop-shadow-md">water_drop</span>
+</button>
+<!-- Upload Option -->
+<button class="relative aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center gap-1 hover:border-primary hover:bg-primary/5 transition-colors group">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">add_photo_alternate</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary uppercase tracking-wide">Custom</span>
+</button>
+</div>
+</section>
+<!-- Section 3: Time Control -->
+<section>
+<h3 class="text-xl font-bold leading-tight mb-4 text-slate-900 dark:text-white">Tracking Mode</h3>
+<div class="flex overflow-x-auto gap-3 pb-2 no-scrollbar -mx-4 px-4 snap-x">
+<!-- Option 1: None -->
+<label class="snap-start flex-none relative cursor-pointer">
+<input class="peer sr-only" name="clock-type" type="radio"/>
+<div class="w-28 h-32 rounded-2xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:ring-1 peer-checked:ring-primary">
+<div class="size-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 peer-checked:bg-primary peer-checked:text-black">
+<span class="material-symbols-outlined">block</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">None</span>
+</div>
+</label>
+<!-- Option 2: Stopwatch -->
+<label class="snap-start flex-none relative cursor-pointer">
+<input class="peer sr-only" name="clock-type" type="radio"/>
+<div class="w-28 h-32 rounded-2xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:ring-1 peer-checked:ring-primary">
+<div class="size-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 peer-checked:bg-primary peer-checked:text-black">
+<span class="material-symbols-outlined">timer</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">Stopwatch</span>
+</div>
+</label>
+<!-- Option 3: Timer (Selected) -->
+<label class="snap-start flex-none relative cursor-pointer">
+<input checked="" class="peer sr-only" name="clock-type" type="radio"/>
+<div class="w-28 h-32 rounded-2xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:ring-1 peer-checked:ring-primary shadow-lg shadow-primary/5">
+<div class="size-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 peer-checked:bg-primary peer-checked:text-surface-darker">
+<span class="material-symbols-outlined">hourglass_top</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">Timer</span>
+</div>
+</label>
+<!-- Option 4: Interval -->
+<label class="snap-start flex-none relative cursor-pointer">
+<input class="peer sr-only" name="clock-type" type="radio"/>
+<div class="w-28 h-32 rounded-2xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 transition-all peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:ring-1 peer-checked:ring-primary">
+<div class="size-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 peer-checked:bg-primary peer-checked:text-black">
+<span class="material-symbols-outlined">av_timer</span>
+</div>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">Interval</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Spacing for scroll -->
+<div class="h-8"></div>
+<!-- Primary Action -->
+<button class="w-full bg-primary hover:bg-teal-400 text-surface-darker font-bold h-14 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
+<span class="material-symbols-outlined">check</span>
+<span>Create Workout</span>
+</button>
+<!-- Extra space for disabled nav overlap -->
+<div class="h-4"></div>
+</main>
+<!-- Disabled Bottom Navigation (Visual Only) -->
+<nav class="fixed bottom-0 left-0 w-full bg-background-light dark:bg-surface-dark border-t border-gray-200 dark:border-gray-800 h-20 flex items-center justify-around opacity-40 pointer-events-none z-10 grayscale">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-2xl">fitness_center</span>
+<span class="text-[10px] font-medium">Workouts</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-2xl fill-1">add_circle</span>
+<span class="text-[10px] font-medium">Create</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-2xl">bar_chart</span>
+<span class="text-[10px] font-medium">Stats</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-2xl">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</div>
+</nav>
+</div>
+</body></html>

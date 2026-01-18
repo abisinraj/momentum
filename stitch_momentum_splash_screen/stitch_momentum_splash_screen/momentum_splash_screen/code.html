@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Momentum Splash Screen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#22c3a8",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#1c1f22",
+                    },
+                    fontFamily: {
+                        "display": ["Epilogue", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    backgroundImage: {
+                        'glow-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom centering utility to ensure optical alignment */
+        .optical-center {
+            position: absolute;
+            top: 45%; /* Slightly above 50% for optical centering */
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased overflow-hidden h-screen w-full relative">
+<!-- Ambient background glow for studio effect -->
+<div class="absolute inset-0 w-full h-full pointer-events-none opacity-20 dark:opacity-10">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] bg-glow-radial from-primary/30 via-transparent to-transparent"></div>
+</div>
+<!-- Main Content Container -->
+<div class="optical-center flex flex-col items-center gap-6 w-full max-w-xs z-10">
+<!-- Brand Mark Container with subtle layering -->
+<div class="relative group">
+<!-- Decorative ring (subtle pulse suggestion) -->
+<div class="absolute -inset-4 bg-primary/5 rounded-full blur-xl scale-150 animate-pulse"></div>
+<!-- Logo Icon -->
+<div class="relative flex items-center justify-center w-32 h-32 bg-background-dark rounded-3xl shadow-2xl border border-white/5">
+<!-- Abstract geometric M logo construction using SVG -->
+<svg class="text-primary drop-shadow-[0_0_15px_rgba(34,195,168,0.3)]" fill="none" height="64" viewbox="0 0 64 64" width="64" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 56V24L32 44L56 24V56" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"></path>
+<circle cx="32" cy="12" fill="currentColor" r="6"></circle>
+</svg>
+</div>
+</div>
+<!-- Logotype -->
+<div class="text-center space-y-2">
+<h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Momentum
+            </h1>
+<!-- Optional subtle tagline or version, kept very minimal or hidden for pure splash -->
+</div>
+</div>
+<!-- Footer / Legal (Optional, kept barely visible for realism) -->
+<div class="absolute bottom-8 w-full text-center opacity-30">
+<p class="text-[10px] font-medium tracking-widest uppercase text-slate-500 dark:text-slate-400">
+            Digital Athletic Journal
+        </p>
+</div>
+</body></html>

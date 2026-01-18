@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Momentum - Workout Detail</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&amp;family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#22c3a8",
+                        "primary-dark": "#1aa18a",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#1c1f22",
+                        "surface": "#252A2E",
+                        "surface-highlight": "#2a3735",
+                        "accent-lime": "#dfff4f", 
+                    },
+                    fontFamily: {
+                        "display": ["Epilogue", "sans-serif"],
+                        "body": ["Lexend", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "glow": "0 0 20px rgba(34, 195, 168, 0.25)",
+                        "glow-lime": "0 0 15px rgba(223, 255, 79, 0.2)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Lexend', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Epilogue', sans-serif; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-background-dark">
+<!-- Header: Minimal, only workout name as requested -->
+<header class="flex-none flex items-center justify-between px-6 pt-6 pb-2 bg-background-light dark:bg-background-dark z-10">
+<!-- Back button kept for navigation context, but styled minimally -->
+<button class="flex items-center justify-center w-10 h-10 -ml-2 rounded-full hover:bg-surface-highlight/50 transition-colors text-slate-400 hover:text-white">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="flex-1 text-center text-xl font-extrabold tracking-tight text-white uppercase leading-tight">Upper Body Power</h1>
+<!-- Empty div to balance the flex layout -->
+<div class="w-10"></div>
+</header>
+<!-- Main Content: Scrollable -->
+<main class="flex-1 overflow-y-auto px-4 pb-32 pt-2 scroll-smooth">
+<!-- Date/Subtitle -->
+<div class="flex justify-center mb-6">
+<span class="text-xs font-semibold tracking-wider text-primary uppercase bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                Today's Session
+            </span>
+</div>
+<!-- Stats Grid (Component Adaptation) -->
+<section class="grid grid-cols-2 gap-3 mb-8">
+<div class="bg-surface p-5 rounded-2xl flex flex-col gap-1 relative overflow-hidden group border border-white/5">
+<div class="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full blur-xl"></div>
+<div class="text-slate-400 mb-1">
+<span class="material-symbols-outlined text-2xl group-hover:text-primary transition-colors">schedule</span>
+</div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Duration</p>
+<p class="text-white text-2xl font-bold tracking-tight">45<span class="text-base text-slate-500 ml-0.5 font-normal">m</span></p>
+</div>
+<div class="bg-surface p-5 rounded-2xl flex flex-col gap-1 relative overflow-hidden group border border-white/5">
+<div class="absolute -right-4 -top-4 w-16 h-16 bg-accent-lime/10 rounded-full blur-xl"></div>
+<div class="text-slate-400 mb-1">
+<span class="material-symbols-outlined text-2xl group-hover:text-accent-lime transition-colors">repeat</span>
+</div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Sets</p>
+<p class="text-white text-2xl font-bold tracking-tight">18</p>
+</div>
+<div class="bg-surface p-5 rounded-2xl flex flex-col gap-1 relative overflow-hidden group border border-white/5">
+<div class="text-slate-400 mb-1">
+<span class="material-symbols-outlined text-2xl">accessibility_new</span>
+</div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Focus</p>
+<p class="text-white text-xl font-bold tracking-tight truncate">Chest &amp; Tri</p>
+</div>
+<div class="bg-surface p-5 rounded-2xl flex flex-col gap-1 relative overflow-hidden group border border-white/5">
+<div class="text-slate-400 mb-1">
+<span class="material-symbols-outlined text-2xl">bolt</span>
+</div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Intensity</p>
+<p class="text-accent-lime text-xl font-bold tracking-tight">High</p>
+</div>
+</section>
+<!-- Exercises List -->
+<section class="space-y-4">
+<div class="flex items-center justify-between px-1">
+<h3 class="text-white text-lg font-bold font-display">Circuit 1</h3>
+<span class="text-slate-500 text-sm">3 rounds</span>
+</div>
+<div class="space-y-2">
+<!-- ListItem 1 -->
+<div class="flex items-center gap-4 bg-surface-highlight/40 border border-white/5 p-3 pr-4 rounded-xl active:scale-[0.99] transition-transform">
+<div class="flex items-center justify-center rounded-lg bg-surface-highlight shrink-0 w-12 h-12 text-white shadow-inner">
+<span class="material-symbols-outlined">fitness_center</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0 justify-center">
+<p class="text-white text-base font-semibold leading-tight truncate">Bench Press</p>
+<p class="text-primary text-sm font-medium leading-normal mt-0.5">4 sets x 8 reps</p>
+</div>
+<span class="material-symbols-outlined text-slate-600">drag_handle</span>
+</div>
+<!-- ListItem 2 -->
+<div class="flex items-center gap-4 bg-surface-highlight/40 border border-white/5 p-3 pr-4 rounded-xl active:scale-[0.99] transition-transform">
+<div class="flex items-center justify-center rounded-lg bg-surface-highlight shrink-0 w-12 h-12 text-white shadow-inner">
+<span class="material-symbols-outlined">rotate_right</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0 justify-center">
+<p class="text-white text-base font-semibold leading-tight truncate">Incline Dumbbell Press</p>
+<p class="text-primary text-sm font-medium leading-normal mt-0.5">3 sets x 10 reps</p>
+</div>
+<span class="material-symbols-outlined text-slate-600">drag_handle</span>
+</div>
+<!-- ListItem 3 -->
+<div class="flex items-center gap-4 bg-surface-highlight/40 border border-white/5 p-3 pr-4 rounded-xl active:scale-[0.99] transition-transform">
+<div class="flex items-center justify-center rounded-lg bg-surface-highlight shrink-0 w-12 h-12 text-white shadow-inner">
+<span class="material-symbols-outlined">expand</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0 justify-center">
+<p class="text-white text-base font-semibold leading-tight truncate">Cable Fly</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="bg-accent-lime text-background-dark text-[10px] font-bold px-1.5 py-0.5 rounded">DROP SET</span>
+<p class="text-slate-400 text-sm font-medium leading-normal">3 sets x 12 reps</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-600">drag_handle</span>
+</div>
+</div>
+<div class="flex items-center justify-between px-1 mt-6">
+<h3 class="text-white text-lg font-bold font-display">Finisher</h3>
+<span class="text-slate-500 text-sm">1 round</span>
+</div>
+<div class="space-y-2">
+<!-- ListItem 4 -->
+<div class="flex items-center gap-4 bg-surface-highlight/40 border border-white/5 p-3 pr-4 rounded-xl active:scale-[0.99] transition-transform">
+<div class="flex items-center justify-center rounded-lg bg-surface-highlight shrink-0 w-12 h-12 text-white shadow-inner">
+<span class="material-symbols-outlined">cardiology</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0 justify-center">
+<p class="text-white text-base font-semibold leading-tight truncate">Push-up Burnout</p>
+<p class="text-slate-400 text-sm font-medium leading-normal mt-0.5">Until failure</p>
+</div>
+<span class="material-symbols-outlined text-slate-600">drag_handle</span>
+</div>
+</div>
+<!-- Additional Spacer -->
+<div class="h-8"></div>
+</section>
+</main>
+<!-- Floating Bottom Section -->
+<div class="fixed bottom-0 left-0 right-0 z-50">
+<!-- Gradient fade for seamless scroll -->
+<div class="h-12 bg-gradient-to-t from-background-dark via-background-dark/90 to-transparent pointer-events-none"></div>
+<div class="bg-background-dark pb-safe px-4">
+<!-- Primary Actions Container -->
+<div class="flex flex-col gap-3 mb-2">
+<!-- Start Session Button -->
+<button class="w-full h-14 bg-primary hover:bg-primary-dark active:scale-[0.98] transition-all rounded-2xl flex items-center justify-center gap-3 shadow-glow group">
+<span class="material-symbols-outlined text-background-dark group-hover:animate-pulse">play_arrow</span>
+<span class="text-background-dark text-lg font-bold tracking-tight">Start Session</span>
+</button>
+<!-- Finish Session Button (Secondary/Text Style as requested) -->
+<button class="w-full py-3 text-slate-500 text-sm font-medium hover:text-white transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+                    Finish Session Manually
+                </button>
+</div>
+<!-- Persistent Bottom Navigation -->
+<nav class="border-t border-white/5 pt-1 pb-2 flex justify-between items-end px-2">
+<a class="flex flex-col items-center gap-1.5 p-3 flex-1 text-slate-500 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:-translate-y-1 transition-transform duration-300">home</span>
+<span class="text-[10px] font-medium tracking-wide opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1.5 p-3 flex-1 text-primary relative" href="#">
+<!-- Active Indicator -->
+<div class="absolute -top-1 w-12 h-1 bg-primary rounded-b-full shadow-glow"></div>
+<span class="material-symbols-outlined text-2xl fill-current">fitness_center</span>
+<span class="text-[10px] font-bold tracking-wide">Workout</span>
+</a>
+<a class="flex flex-col items-center gap-1.5 p-3 flex-1 text-slate-500 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:-translate-y-1 transition-transform duration-300">insights</span>
+<span class="text-[10px] font-medium tracking-wide opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1">Stats</span>
+</a>
+<a class="flex flex-col items-center gap-1.5 p-3 flex-1 text-slate-500 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-2xl group-hover:-translate-y-1 transition-transform duration-300">person</span>
+<span class="text-[10px] font-medium tracking-wide opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1">Profile</span>
+</a>
+</nav>
+</div>
+</div>
+</body></html>
