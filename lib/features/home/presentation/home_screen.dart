@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../workout/presentation/active_workout_screen.dart';
 
-/// Home screen - shows next workout in cycle
+/// Home screen - shows next workout in cycle with Momentum design
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'GOOD MORNING';
+    if (hour < 17) return 'GOOD AFTERNOON';
+    return 'GOOD EVENING';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final nextWorkoutAsync = ref.watch(nextWorkoutProvider);
+    final userAsync = ref.watch(currentUserProvider);
     final activeSession = ref.watch(activeWorkoutSessionProvider);
     
-    // If there's an active session, show the active workout screen
+    // If there's an active session, navigate to it
     if (activeSession != null) {
-      // Use addPostFrameCallback to avoid build errors
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -28,147 +35,371 @@ class HomeScreen extends ConsumerWidget {
       });
     }
     
+    final userName = switch (userAsync) {
+      AsyncData(:final value) => value?.name ?? 'Athlete',
+      _ => 'Athlete',
+    };
+    
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Momentum'),
-      ),
-      body: Center(
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: switch (nextWorkoutAsync) {
-            AsyncData(:final value) => _buildContent(context, ref, value),
-            AsyncError(:final error) => Text('Error: $error'),
-            _ => const CircularProgressIndicator(),
-          },
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with greeting and notification bell
+              _buildHeader(context, userName),
+              
+              const Spacer(),
+              
+              // Main workout content
+              switch (nextWorkoutAsync) {
+                AsyncData(:final value) => _buildWorkoutContent(context, ref, value),
+                AsyncError(:final error) => _buildErrorState(context, error.toString()),
+                _ => const Center(child: CircularProgressIndicator()),
+              },
+              
+              const Spacer(),
+              
+              // Bottom stats row
+              _buildStatsRow(context, ref),
+            ],
+          ),
         ),
       ),
     );
   }
   
-  Widget _buildContent(
-    BuildContext context, 
-    WidgetRef ref, 
-    Workout? workout,
-  ) {
-    final theme = Theme.of(context);
-    
-    // If no workouts defined
-    if (workout == null) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.fitness_center,
-            size: 80,
-            color: theme.colorScheme.outline,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'No workouts yet',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Add workouts in the Workout tab',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      );
-    }
-    
-    // Show next workout
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildHeader(BuildContext context, String userName) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Workout icon with short code
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              workout.shortCode,
-              style: theme.textTheme.displayLarge?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.bold,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _getGreeting(),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.textMuted,
+                letterSpacing: 1.5,
               ),
             ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Next Workout',
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          workout.name,
-          style: theme.textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        _buildClockTypeChip(context, workout.clockType),
-        if (workout.clockType == ClockType.timer && workout.timerDurationSeconds != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            '${workout.timerDurationSeconds! ~/ 60} minutes',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            const SizedBox(height: 4),
+            Text(
+              userName,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
             ),
+          ],
+        ),
+        // Notification bell
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppTheme.darkSurfaceContainer,
+            borderRadius: BorderRadius.circular(12),
           ),
-        ],
-        const SizedBox(height: 32),
-        FilledButton.icon(
-          onPressed: () async {
-            await ref.read(activeWorkoutSessionProvider.notifier)
-                .startWorkout(workout);
-            
-            if (context.mounted) {
-              final session = ref.read(activeWorkoutSessionProvider);
-              if (session != null) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ActiveWorkoutScreen(session: session),
-                  ),
-                );
-              }
-            }
-          },
-          icon: const Icon(Icons.play_arrow),
-          label: const Text('Start'),
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          child: IconButton(
+            icon: Icon(
+              Icons.notifications_outlined,
+              color: AppTheme.tealPrimary,
+            ),
+            onPressed: () {
+              // TODO: Notifications
+            },
           ),
         ),
       ],
     );
   }
   
-  Widget _buildClockTypeChip(BuildContext context, ClockType clockType) {
-    final theme = Theme.of(context);
+  Widget _buildWorkoutContent(BuildContext context, WidgetRef ref, Workout? workout) {
+    if (workout == null) {
+      return _buildEmptyState(context);
+    }
     
-    final (icon, label) = switch (clockType) {
-      ClockType.none => (Icons.timer_off_outlined, 'No timer'),
-      ClockType.stopwatch => (Icons.timer_outlined, 'Stopwatch'),
-      ClockType.timer => (Icons.hourglass_bottom, 'Timer'),
-      ClockType.alarm => (Icons.alarm, 'Alarm'),
+    return Column(
+      children: [
+        // Today's Focus badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppTheme.darkSurfaceContainer,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.bolt,
+                size: 16,
+                color: AppTheme.tealPrimary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                "TODAY'S FOCUS",
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.tealPrimary,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 32),
+        
+        // Large workout name with accent styling
+        _buildWorkoutTitle(workout.name),
+        
+        const SizedBox(height: 16),
+        
+        // Workout description / clock type
+        Text(
+          _getWorkoutDescription(workout),
+          style: TextStyle(
+            fontSize: 14,
+            color: AppTheme.textSecondary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        
+        const SizedBox(height: 40),
+        
+        // Start Workout Button
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: () async {
+              await ref.read(activeWorkoutSessionProvider.notifier)
+                  .startWorkout(workout);
+              
+              if (context.mounted) {
+                final session = ref.read(activeWorkoutSessionProvider);
+                if (session != null) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ActiveWorkoutScreen(session: session),
+                    ),
+                  );
+                }
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.tealPrimary,
+              foregroundColor: AppTheme.darkBackground,
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'START WORKOUT',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Icon(Icons.play_arrow, size: 24),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildWorkoutTitle(String name) {
+    // Split name into words and style the middle word with yellow accent
+    final words = name.split(' ');
+    
+    if (words.length == 1) {
+      return Text(
+        name.toUpperCase(),
+        style: TextStyle(
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
+          color: AppTheme.textPrimary,
+          height: 1.2,
+        ),
+        textAlign: TextAlign.center,
+      );
+    }
+    
+    // For multi-word names, accent the middle or second word
+    final accentIndex = words.length > 2 ? 1 : 0;
+    
+    return Column(
+      children: words.asMap().entries.map((entry) {
+        final isAccent = entry.key == accentIndex;
+        return Text(
+          entry.value.toUpperCase(),
+          style: TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+            color: isAccent ? AppTheme.yellowAccent : AppTheme.textPrimary,
+            height: 1.2,
+          ),
+        );
+      }).toList(),
+    );
+  }
+  
+  String _getWorkoutDescription(Workout workout) {
+    final clockDesc = switch (workout.clockType) {
+      ClockType.none => 'Freestyle workout',
+      ClockType.stopwatch => 'Timed with stopwatch',
+      ClockType.timer => workout.timerDurationSeconds != null
+          ? 'Timer: ${workout.timerDurationSeconds! ~/ 60} minutes'
+          : 'Timer workout',
+      ClockType.alarm => 'Alarm when complete',
+    };
+    return clockDesc;
+  }
+  
+  Widget _buildStatsRow(BuildContext context, WidgetRef ref) {
+    final activityAsync = ref.watch(activityGridProvider(days: 7));
+    
+    final activeDays = switch (activityAsync) {
+      AsyncData(:final value) => value.length,
+      _ => 0,
     };
     
-    return Chip(
-      avatar: Icon(icon, size: 18),
-      label: Text(label),
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildStatItem(
+              icon: Icons.local_fire_department_outlined,
+              value: '${activeDays * 60}',
+              label: 'KCAL BURNED',
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 50,
+            color: AppTheme.darkBorder,
+          ),
+          Expanded(
+            child: _buildStatItem(
+              icon: Icons.timer_outlined,
+              value: '${activeDays * 45}m',
+              label: 'ACTIVE MIN',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildStatItem({
+    required IconData icon,
+    required String value,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, color: AppTheme.tealPrimary, size: 24),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.textMuted,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildEmptyState(BuildContext context) {
+    return Column(
+      children: [
+        Icon(
+          Icons.fitness_center_outlined,
+          size: 80,
+          color: AppTheme.textMuted,
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'No workouts yet',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Add workouts in the Workout tab\nto start building momentum',
+          style: TextStyle(
+            fontSize: 14,
+            color: AppTheme.textSecondary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildErrorState(BuildContext context, String error) {
+    return Column(
+      children: [
+        Icon(
+          Icons.error_outline,
+          size: 64,
+          color: AppTheme.error,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Something went wrong',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          error,
+          style: TextStyle(
+            fontSize: 14,
+            color: AppTheme.textSecondary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
-
