@@ -1,0 +1,20 @@
+Launching lib/main.dart on 24069PC21I in debug mode...
+Running Gradle task 'assembleDebug'...                          
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/home/abisinraj/.gradle/wrapper/dists/gradle-8.14-all/c2qonpi39x1mddn7hk5gh9iqj/gradle-8.14/lib/native-platform-0.22-milestone-28.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+D/FlutterJNI(23631): Beginning load of flutter...
+D/FlutterJNI(23631): flutter (null) was loaded normally!
+I/flutter (23631): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(62)] Using the Impeller rendering backend (Vulkan).
+I/flutter (23631): Flutter Error: Zone mismatch.
+I/flutter (23631): The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+I/flutter (23631): It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+I/flutter (23631): To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+I/flutter (23631): #0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+I/flutter (23631): #1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+I/flutter (23631): #2      _runWidget (package:flutter/src/widgets/binding.dart:1640:18)
+I/flutter (23631): #3      runApp (package:flutter/src/widgets/binding.dart:1576:3)
+I/flutter (23631): #4      main.<anonymous c
+I/flutter (23631): dynamic_color: Core palette detected.
