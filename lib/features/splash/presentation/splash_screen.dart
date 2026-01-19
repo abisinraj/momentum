@@ -74,13 +74,22 @@ class SplashScreen extends ConsumerWidget {
   /// Custom M logo matching the design
   Widget _buildMomentumLogo() {
     return Container(
+      width: 60,
+      height: 60,
       decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-        image: const DecorationImage(
-          image: AssetImage('assets/images/app_logo.jpg'),
-          fit: BoxFit.cover,
-        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Image.asset(
+        'assets/images/app_logo.jpg',
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          print('Error loading logo: $error');
+          return Icon(
+            Icons.broken_image_outlined,
+            color: AppTheme.tealPrimary,
+            size: 40,
+          );
+        },
       ),
     );
   }

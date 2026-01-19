@@ -18,3 +18,198 @@ I/flutter (23631): #2      _runWidget (package:flutter/src/widgets/binding.dart:
 I/flutter (23631): #3      runApp (package:flutter/src/widgets/binding.dart:1576:3)
 I/flutter (23631): #4      main.<anonymous c
 I/flutter (23631): dynamic_color: Core palette detected.
+Running Gradle task 'assembleDebug'...                            224.6s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           5.3s
+D/FlutterJNI(20685): Beginning load of flutter...
+D/FlutterJNI(20685): flutter (null) was loaded normally!
+I/flutter (20685): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(62)] Using the Impeller rendering backend (Vulkan).
+I/flutter (20685): Flutter Error: Zone mismatch.
+I/flutter (20685): The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+I/flutter (20685): It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+I/flutter (20685): To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+I/flutter (20685): #0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+I/flutter (20685): #1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+I/flutter (20685): #2      _runWidget (package:flutter/src/widgets/binding.dart:1640:18)
+I/flutter (20685): #3      runApp (package:flutter/src/widgets/binding.dart:1576:3)
+I/flutter (20685): #4      main.<anonymous c
+I/flutter (20685): dynamic_color: Core palette detected.
+D/ActivityThread(20685): Fail to check app heapsize due to java.lang.NoSuchMethodException: dalvik.system.VMRuntime.getBlockingGcCountForAlloc []
+D/ProfileInstaller(20685): Installing profile for com.momentum.momentum
+Syncing files to device 24069PC21I...                              733ms
+
+Flutter run key commands.
+r Hot reload. 🔥🔥🔥
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on 24069PC21I is available at: http://127.0.0.1:42207/7vuRdQvux0s=/
+The Flutter DevTools debugger and profiler on 24069PC21I is available at: http://127.0.0.1:42207/7vuRdQvux0s=/devtools/?uri=ws://127.0.0.1:42207/7vuRdQvux0s=/ws
+W/mentum.momentum(20685): userfaultfd: MOVE ioctl seems unsupported: Connection timed out
+I/Choreographer(20685): Skipped 112 frames!  The application may be doing too much work on its main thread.
+D/UserSceneDetector(20685): invoke error.
+W/Looper  (20685): PerfMonitor doFrame : time=21ms vsyncFrame=40295 latency=938ms procState=-1 historyMsgCount=1
+D/AppScoutStateMachine(20685): 20685-ScoutStateMachinecreated
+D/SecurityManager(20685): checkAccessControl flag1
+W/libc    (20685): Access denied finding property "vendor.gpp.create_frc_extension"
+I/mentum.momentum(20685): 【MiuiBoosterUtils】checkUtil disable.
+I/mentum.momentum(20685): 【MiuiBoosterUtils】package permission check disable.
+I/mentum.momentum(20685): 【MiuiBoosterUtils】get Service disable.
+W/libc    (20685): Access denied finding property "vendor.gpp.create_frc_extension"
+I/mentum.momentum(20685): 【MiuiBoosterUtils】checkUtil disable.
+I/mentum.momentum(20685): 【MiuiBoosterUtils】package permission check disable.
+I/mentum.momentum(20685): 【MiuiBoosterUtils】get Service disable.
+W/qdgralloc(20685): GetSize: Pixel format: 0x3b is not supported by gralloc
+W/qdgralloc(20685): gralloc failed to allocate buffer for size 0 format 59 AWxAH 1x1 usage 2816
+E/Gralloc4(20685): isSupported(1, 1, 59, 1, ...) failed with 7
+I/AHardwareBuffer(20685): proc name :com.momentum.momentum
+E/GraphicBufferAllocator(20685): Failed to allocate (4 x 4) layerCount 1 format 59 usage b00: 2
+E/AHardwareBuffer(20685): GraphicBuffer(w=4, h=4, lc=1) failed (Unknown error -2), handle=0x0
+W/qdgralloc(20685): GetSize: Pixel format: 0x3b is not supported by gralloc
+W/qdgralloc(20685): gralloc failed to allocate buffer for size 0 format 59 AWxAH 1x1 usage 2816
+E/Gralloc4(20685): isSupported(1, 1, 59, 1, ...) failed with 7
+I/AHardwareBuffer(20685): proc name :com.momentum.momentum
+E/GraphicBufferAllocator(20685): Failed to allocate (4 x 4) layerCount 1 format 59 usage b00: 2
+E/AHardwareBuffer(20685): GraphicBuffer(w=4, h=4, lc=1) failed (Unknown error -2), handle=0x0
+W/qdgralloc(20685): getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+W/qdgralloc(20685): getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+W/qdgralloc(20685): getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+W/qdgralloc(20685): getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+W/qdgralloc(20685): getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+W/qdgralloc(20685): getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+D/VRI[MainActivity](20685): vri.reportNextDraw android.view.ViewRootImpl.performTraversals:4972 android.view.ViewRootImpl.doTraversal:3560 android.view.ViewRootImpl$TraversalRunnable.run:11601 android.view.Choreographer$CallbackRecord.run:1747 android.view.Choreographer$CallbackRecord.run:1756 
+D/SurfaceView(20685): UPDATE Surface(name=SurfaceView[com.momentum.momentum/com.momentum.momentum.MainActivity]#286)/@0xa00c56d, mIsProjectionMode = false
+E/LB      (20685): fail to open node: No such file or directory
+E/mentum.momentum(20685): FrameInsert open fail: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3352): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+D/VRI[MainActivity](20685): vri.Setup new sync=wmsSync-VRI[MainActivity]#2
+D/UserSceneDetector(20685): invoke error.
+D/mentum.momentum(20685): MiuiProcessManagerServiceStub setSchedFifo
+I/MiuiProcessManagerImpl(20685): setSchedFifo pid:20685, mode:3
+W/RenderThread(20685): type=1400 audit(0.0:3353): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+D/VRI[MainActivity](20685): vri.reportDrawFinished
+I/HandWritingStubImpl(20685): refreshLastKeyboardType: 1
+I/HandWritingStubImpl(20685): getCurrentKeyboardType: 1
+I/HandWritingStubImpl(20685): getCurrentKeyboardType: 1
+I/HandWritingStubImpl(20685): getCurrentKeyboardType: 1
+I/MIUIInput(20685): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=1509085, downTime=1509085, phoneEventTime=08:25:57.070 } moveCount:0
+I/MIUIInput(20685): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=1509216, downTime=1509085, phoneEventTime=08:25:57.202 } moveCount:2
+I/MIUIInput(20685): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=1509800, downTime=1509800, phoneEventTime=08:25:57.785 } moveCount:0
+I/MIUIInput(20685): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=1509843, downTime=1509800, phoneEventTime=08:25:57.828 } moveCount:0
+E/LB      (20685): fail to open node: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3354): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3355): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3356): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+W/1.raster(20685): type=1400 audit(0.0:3357): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3358): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3359): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+I/MIUIInput(20685): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=1510872, downTime=1510872, phoneEventTime=08:25:58.858 } moveCount:0
+I/MIUIInput(20685): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=1510940, downTime=1510872, phoneEventTime=08:25:58.926 } moveCount:0
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3404): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3405): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+W/1.raster(20685): type=1400 audit(0.0:3406): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+W/1.raster(20685): type=1400 audit(0.0:3407): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+W/1.raster(20685): type=1400 audit(0.0:3408): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64586 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+E/LB      (20685): fail to open node: No such file or directory
+I/MIUIInput(20685): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=1511500, downTime=1511500, phoneEventTime=08:25:59.486 } moveCount:0
+I/MIUIInput(20685): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=1511699, downTime=1511500, phoneEventTime=08:25:59.684 } moveCount:19
+D/VRI[MainActivity](20685): visibilityChanged oldVisibility=true newVisibility=false
+D/ActivityThread(20685): Fail to check app heapsize due to java.lang.NoSuchMethodException: dalvik.system.VMRuntime.getBlockingGcCountForAlloc []
+Lost connection to device.
