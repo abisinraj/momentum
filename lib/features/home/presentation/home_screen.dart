@@ -351,25 +351,28 @@ class HomeScreen extends ConsumerWidget {
     final db = ref.watch(appDatabaseProvider);
     final aiService = ref.watch(aiInsightsServiceProvider);
     
-    // First check connectivity
+    // First check connectivity with timeout
     return FutureBuilder<List<ConnectivityResult>>(
-      future: Connectivity().checkConnectivity(),
+      future: Connectivity().checkConnectivity().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => [ConnectivityResult.wifi], // Assume online on timeout
+      ),
       builder: (context, connectivitySnapshot) {
-        // If no connectivity data yet or offline, hide the card
-        if (!connectivitySnapshot.hasData) {
+        // If waiting, don't hide immediately to avoid flicker, or show empty
+        // But if it takes >2s, we assume online.
+        
+        final results = connectivitySnapshot.data ?? [];
+        // If results are empty (waiting or error), we assume online to be safe
+        // UNLESS we explicitly get ConnectivityResult.none
+        
+        final isOffline = results.contains(ConnectivityResult.none);
+        
+        // Only hide if explicitly offline
+        if (isOffline) {
           return const SizedBox.shrink();
         }
         
-        final results = connectivitySnapshot.data!;
-        final isOnline = results.isNotEmpty && 
-            !results.contains(ConnectivityResult.none);
-        
-        // If offline, don't show the insight card at all
-        if (!isOnline) {
-          return const SizedBox.shrink();
-        }
-        
-        // Online - fetch and display progress
+        // Online (or assumed online) - fetch and display progress
         return FutureBuilder<Map<String, dynamic>>(
           future: db.getWorkoutProgressSummary(workout.id, days: 30),
           builder: (context, snapshot) {
