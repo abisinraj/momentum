@@ -73,58 +73,18 @@ class SplashScreen extends ConsumerWidget {
   
   /// Custom M logo matching the design
   Widget _buildMomentumLogo() {
-    return CustomPaint(
-      size: const Size(50, 40),
-      painter: _MomentumLogoPainter(),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(24),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/app_logo.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 }
 
 /// Custom painter for the Momentum "M" logo
-class _MomentumLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppTheme.tealPrimary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    
-    final path = Path();
-    
-    // Draw stylized M shape
-    // Left leg
-    path.moveTo(size.width * 0.1, size.height * 0.85);
-    path.lineTo(size.width * 0.1, size.height * 0.15);
-    
-    // Top left to center peak
-    path.lineTo(size.width * 0.5, size.height * 0.55);
-    
-    // Center peak to top right
-    path.lineTo(size.width * 0.9, size.height * 0.15);
-    
-    // Right leg
-    path.lineTo(size.width * 0.9, size.height * 0.85);
-    
-    canvas.drawPath(path, paint);
-    
-    // Draw checkmark/arrow at bottom center
-    final arrowPaint = Paint()
-      ..color = AppTheme.tealPrimary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.5
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    
-    final arrowPath = Path();
-    arrowPath.moveTo(size.width * 0.35, size.height * 0.65);
-    arrowPath.lineTo(size.width * 0.5, size.height * 0.85);
-    arrowPath.lineTo(size.width * 0.65, size.height * 0.65);
-    
-    canvas.drawPath(arrowPath, arrowPaint);
-  }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

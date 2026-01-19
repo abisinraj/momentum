@@ -619,25 +619,11 @@ class HomeScreen extends ConsumerWidget {
   }
   
   void _onStartPressed(BuildContext context, WidgetRef ref, Workout? defaultWorkout) async {
-    final workoutsAsync = ref.read(workoutsStreamProvider);
-    
     // Safety check
     if (defaultWorkout == null) return;
     
-    // If we have access to the full list, check count
-    if (workoutsAsync is AsyncData<List<Workout>>) {
-      final workouts = workoutsAsync.value;
-      if (workouts.length > 1) {
-        // Multiple workouts - show selection dialog
-        final selected = await _showWorkoutSelectionDialog(context, workouts);
-        if (selected != null) {
-          _startSession(context, ref, selected);
-        }
-        return;
-      }
-    }
-    
-    // Default single workout behavior
+    // Default behavior: Start the scheduled workout immediately
+    // User requested to skip the selection list and just show today's items
     _startSession(context, ref, defaultWorkout);
   }
   

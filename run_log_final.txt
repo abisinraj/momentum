@@ -716,3 +716,6 @@ I/MIUIInput(30586): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum
 I/MIUIInput(30586): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34310408, downTime=34310330, phoneEventTime=07:44:32.222 } moveCount:0
 I/MIUIInput(30586): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34311854, downTime=34311854, phoneEventTime=07:44:33.667 } moveCount:0
 I/MIUIInput(30586): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34311878, downTime=34311854, phoneEventTime=07:44:33.691 } moveCount:0
+I/HandWritingStubImpl(30586): refreshLastKeyboardType: 1
+I/HandWritingStubImpl(30586): getCurrentKeyboardType: 1
+Lost connection to device.

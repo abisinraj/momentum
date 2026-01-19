@@ -5,3 +5,130 @@ WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.i
 WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
 WARNING: Restricted methods will be blocked in a future release unless native access is enabled
 
+Running Gradle task 'assembleDebug'...                            515.5s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           6.2s
+D/FlutterJNI( 9931): Beginning load of flutter...
+D/FlutterJNI( 9931): flutter (null) was loaded normally!
+I/flutter ( 9931): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(62)] Using the Impeller rendering backend (Vulkan).
+I/flutter ( 9931): Flutter Error: Zone mismatch.
+I/flutter ( 9931): The Flutter bindings were initialized in a different zone than is now being used. This will likely cause confusion and bugs as any zone-specific configuration will inconsistently use the configuration of the original binding initialization zone or this zone based on hard-to-predict factors such as which zone was active when a particular callback was set.
+I/flutter ( 9931): It is important to use the same zone when calling `ensureInitialized` on the binding as when calling `runApp` later.
+I/flutter ( 9931): To make this warning fatal, set BindingBase.debugZoneErrorsAreFatal to true before the bindings are initialized (i.e. as the first statement in `void main() { }`).
+I/flutter ( 9931): #0      BindingBase.debugCheckZone.<anonymous closure> (package:flutter/src/foundation/binding.dart:519:31)
+I/flutter ( 9931): #1      BindingBase.debugCheckZone (package:flutter/src/foundation/binding.dart:525:6)
+I/flutter ( 9931): #2      _runWidget (package:flutter/src/widgets/binding.dart:1640:18)
+I/flutter ( 9931): #3      runApp (package:flutter/src/widgets/binding.dart:1576:3)
+I/flutter ( 9931): #4      main.<anonymous c
+I/flutter ( 9931): dynamic_color: Core palette detected.
+D/ProfileInstaller( 9931): Installing profile for com.momentum.momentum
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34534122, downTime=34534122, phoneEventTime=07:48:15.935 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34534568, downTime=34534122, phoneEventTime=07:48:16.381 } moveCount:82
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34534747, downTime=34534747, phoneEventTime=07:48:16.560 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34534915, downTime=34534747, phoneEventTime=07:48:16.728 } moveCount:27
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34535104, downTime=34535104, phoneEventTime=07:48:16.917 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34535191, downTime=34535104, phoneEventTime=07:48:17.004 } moveCount:13
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34535354, downTime=34535354, phoneEventTime=07:48:17.168 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34535455, downTime=34535354, phoneEventTime=07:48:17.269 } moveCount:18
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34536223, downTime=34536223, phoneEventTime=07:48:18.037 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34536304, downTime=34536223, phoneEventTime=07:48:18.117 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34536852, downTime=34536852, phoneEventTime=07:48:18.666 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34536932, downTime=34536852, phoneEventTime=07:48:18.745 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34537630, downTime=34537630, phoneEventTime=07:48:19.443 } moveCount:0
+W/mentum.momentum( 9931): userfaultfd: MOVE ioctl seems unsupported: Connection timed out
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34537736, downTime=34537630, phoneEventTime=07:48:19.550 } moveCount:0
+E/LB      ( 9931): fail to open node: No such file or directory
+E/mentum.momentum( 9931): FrameInsert open fail: No such file or directory
+W/1.raster( 9931): type=1400 audit(0.0:47038): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      ( 9931): fail to open node: No such file or directory
+W/1.raster( 9931): type=1400 audit(0.0:47039): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      ( 9931): fail to open node: No such file or directory
+W/1.raster( 9931): type=1400 audit(0.0:47040): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+W/1.raster( 9931): type=1400 audit(0.0:47041): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      ( 9931): fail to open node: No such file or directory
+W/1.raster( 9931): type=1400 audit(0.0:47042): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+Error detected in pubspec.yaml:
+No file or variants found for asset: assets/images/app_logo.jpg.
+
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_DOWN, id[0]=0, pointerCount=1, eventTime=34540169, downTime=34540169, phoneEventTime=07:48:21.983 } moveCount:0
+I/MIUIInput( 9931): [MotionEvent] ViewRootImpl windowName 'com.momentum.momentum/com.momentum.momentum.MainActivity', { action=ACTION_UP, id[0]=0, pointerCount=1, eventTime=34540261, downTime=34540169, phoneEventTime=07:48:22.075 } moveCount:0
+E/LB      ( 9931): fail to open node: No such file or directory
+W/1.raster( 9931): type=1400 audit(0.0:47083): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      ( 9931): fail to open node: No such file or directory
+W/1.raster( 9931): type=1400 audit(0.0:47084): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+W/1.raster( 9931): type=1400 audit(0.0:47085): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+W/1.raster( 9931): type=1400 audit(0.0:47086): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      ( 9931): fail to open node: No such file or directory
+W/1.raster( 9931): type=1400 audit(0.0:47087): avc:  denied  { getattr } for  path="/sys/module/metis/parameters/minor_window_app" dev="sysfs" ino=64590 scontext=u:r:untrusted_app:s0:c86,c257,c512,c768 tcontext=u:object_r:sysfs_migt:s0 tclass=file permissive=0 app=com.momentum.momentum
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
+E/LB      ( 9931): fail to open node: No such file or directory
