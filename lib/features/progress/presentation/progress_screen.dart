@@ -309,6 +309,55 @@ class ProgressScreen extends ConsumerWidget {
             ),
           ),
           
+          const SizedBox(height: 32),
+          
+          // Session History Section
+          Text(
+            'Session History',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Session History List (Consumer widget to access ref)
+          Consumer(
+            builder: (context, ref, _) {
+              final historyAsync = ref.watch(sessionHistoryProvider(limit: 10));
+              
+              return switch (historyAsync) {
+                AsyncData(value: final sessions) when sessions.isEmpty => Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppTheme.darkSurfaceContainer,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'No completed sessions yet',
+                        style: TextStyle(color: AppTheme.textMuted),
+                      ),
+                    ),
+                  ),
+                AsyncData(value: final sessions) => Column(
+                    children: sessions.map((session) => _SessionHistoryCard(
+                      workoutName: session['workoutName'] as String,
+                      completedAt: session['completedAt'] as DateTime?,
+                      durationSeconds: session['durationSeconds'] as int,
+                      exerciseCount: session['exerciseCount'] as int,
+                      completedSets: session['completedSets'] as int,
+                      sessionId: (session['session'] as dynamic).id as int,
+                    )).toList(),
+                  ),
+                AsyncError(:final error) => Text('Error: $error', style: TextStyle(color: AppTheme.error)),
+                _ => const Center(child: CircularProgressIndicator()),
+              };
+            },
+          ),
+          
           const SizedBox(height: 24),
           
           // Bottom stats row
@@ -561,4 +610,127 @@ class _ChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Session history card widget
+class _SessionHistoryCard extends StatelessWidget {
+  final String workoutName;
+  final DateTime? completedAt;
+  final int durationSeconds;
+  final int exerciseCount;
+  final int completedSets;
+  final int sessionId;
+  
+  const _SessionHistoryCard({
+    required this.workoutName,
+    required this.completedAt,
+    required this.durationSeconds,
+    required this.exerciseCount,
+    required this.completedSets,
+    required this.sessionId,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    final dateStr = completedAt != null 
+        ? _formatDate(completedAt!) 
+        : 'Unknown date';
+    final durationStr = '${durationSeconds ~/ 60}m ${durationSeconds % 60}s';
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          // Date badge
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppTheme.tealPrimary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  completedAt != null ? completedAt!.day.toString() : '--',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.tealPrimary,
+                  ),
+                ),
+                Text(
+                  completedAt != null ? _getMonthAbbr(completedAt!.month) : '',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppTheme.tealPrimary.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Session info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  workoutName,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(Icons.timer_outlined, size: 14, color: AppTheme.textMuted),
+                    const SizedBox(width: 4),
+                    Text(
+                      durationStr,
+                      style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(Icons.fitness_center, size: 14, color: AppTheme.textMuted),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$completedSets sets',
+                      style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Arrow
+          Icon(Icons.chevron_right, color: AppTheme.textMuted),
+        ],
+      ),
+    );
+  }
+  
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date).inDays;
+    
+    if (diff == 0) return 'Today';
+    if (diff == 1) return 'Yesterday';
+    if (diff < 7) return '${diff}d ago';
+    return '${date.day}/${date.month}';
+  }
+  
+  String _getMonthAbbr(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  }
 }

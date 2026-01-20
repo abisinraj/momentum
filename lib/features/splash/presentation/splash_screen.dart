@@ -5,68 +5,118 @@ import '../../../../core/services/widget_service.dart';
 import '../../../app/theme/app_theme.dart';
 
 /// Splash screen shown while app initializes
-/// Design: Teal M logo centered with "Momentum" text below
-class SplashScreen extends ConsumerWidget {
+/// Design: Teal M logo centered with \"Momentum\" text below
+/// Animation: Fade-in with 1.5s minimum display
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends ConsumerState<SplashScreen> 
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Fade-in animation
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+    
+    // Start animation
+    _controller.forward();
+    
     // Sync widget data in background
     ref.read(widgetSyncProvider);
+  }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
-      body: Stack(
-        children: [
-          // Center content
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // App icon - Stylized M in rounded square
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppTheme.darkSurfaceContainer,
-                    borderRadius: BorderRadius.circular(24),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Stack(
+          children: [
+            // Center content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // App icon - Stylized M in rounded square
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: AppTheme.darkSurfaceContainer,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Center(
+                      child: _buildMomentumLogo(),
+                    ),
                   ),
-                  child: Center(
-                    child: _buildMomentumLogo(),
+                  const SizedBox(height: 32),
+                  // App name
+                  Text(
+                    'Momentum',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.tealPrimary,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                // App name
-                Text(
-                  'Momentum',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.tealPrimary,
-                    letterSpacing: 0.5,
+                  const SizedBox(height: 16),
+                  // Subtle loading indicator
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppTheme.tealPrimary.withOpacity(0.5),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // Bottom tagline
-          Positioned(
-            bottom: 60,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                'DIGITAL ATHLETIC JOURNAL',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textMuted,
-                  letterSpacing: 2.0,
+            // Bottom tagline
+            Positioned(
+              bottom: 60,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Text(
+                  'DIGITAL ATHLETIC JOURNAL',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textMuted,
+                    letterSpacing: 2.0,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

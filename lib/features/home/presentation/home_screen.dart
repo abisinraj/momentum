@@ -7,6 +7,7 @@ import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/services/ai_insights_service.dart';
 import '../../workout/presentation/active_workout_screen.dart';
+import '../../../app/widgets/skeleton_loader.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Home screen - shows next workout in cycle with Momentum design
@@ -61,7 +62,7 @@ class HomeScreen extends ConsumerWidget {
               switch (nextWorkoutAsync) {
                 AsyncData(:final value) => _buildWorkoutContent(context, ref, value, activeSession),
                 AsyncError(:final error) => _buildErrorState(context, error.toString()),
-                _ => const Center(child: CircularProgressIndicator()),
+                _ => const WorkoutCardSkeleton(),
               },
               
               const Spacer(),
@@ -575,14 +576,27 @@ class HomeScreen extends ConsumerWidget {
             color: AppTheme.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
         Text(
-          'Add workouts in the Workout tab\nto start building momentum',
+          'Create your training split to start\nbuilding momentum',
           style: TextStyle(
             fontSize: 14,
             color: AppTheme.textSecondary,
           ),
           textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+        FilledButton.icon(
+          onPressed: () {
+            // Navigate to split setup
+            Navigator.of(context).pushNamed('/split-setup');
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('Create Your First Workout'),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppTheme.tealPrimary,
+            foregroundColor: AppTheme.darkBackground,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          ),
         ),
       ],
     );

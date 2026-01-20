@@ -15,6 +15,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _pexelsController = TextEditingController();
   final _unsplashController = TextEditingController();
   final _openaiController = TextEditingController();
+  final _restTimerController = TextEditingController();
   bool _isLoading = true;
 
   @override
@@ -28,12 +29,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final pexels = await service.getPexelsKey();
     final unsplash = await service.getUnsplashKey();
     final openai = await service.getOpenAiKey();
+    final restTimer = await service.getRestTimer();
 
     if (mounted) {
       setState(() {
         _pexelsController.text = pexels ?? '';
         _unsplashController.text = unsplash ?? '';
         _openaiController.text = openai ?? '';
+        _restTimerController.text = restTimer.toString();
         _isLoading = false;
       });
     }
@@ -54,9 +57,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await service.setUnsplashKey(_unsplashController.text.trim());
     await service.setOpenAiKey(_openaiController.text.trim());
     
+    final restTime = int.tryParse(_restTimerController.text.trim()) ?? 60;
+    await service.setRestTimer(restTime);
+    
     // Invalidate providers
     ref.invalidate(pexelsApiKeyProvider);
     ref.invalidate(unsplashApiKeyProvider);
+    ref.invalidate(restTimerProvider);
     
     if (mounted) {
       setState(() => _isLoading = false);
@@ -112,6 +119,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    ),
                    const SizedBox(height: 32),
                    
+                   _buildSectionHeader('Workout Preferences'),
+                   const SizedBox(height: 16),
+                   _buildTextField(
+                     controller: _restTimerController,
+                     label: 'Rest Timer (seconds)',
+                     hint: '60',
+                     icon: Icons.timer_outlined,
+                     keyboardType: TextInputType.number,
+                   ),
+
+                   const SizedBox(height: 32),
+                   
                    SizedBox(
                      width: double.infinity,
                      child: FilledButton.icon(
@@ -165,6 +184,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String label,
     required String hint,
     required IconData icon,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

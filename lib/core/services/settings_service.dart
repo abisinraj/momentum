@@ -7,7 +7,18 @@ part 'settings_service.g.dart';
 class SettingsService {
   static const String _keyPexels = 'api_key_pexels';
   static const String _keyUnsplash = 'api_key_unsplash';
-  static const String _keyOpenAi = 'api_key_openai';
+  static const String _keyRestTimer = 'rest_timer_seconds';
+
+  Future<void> setRestTimer(int seconds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyRestTimer, seconds);
+  }
+
+  Future<int> getRestTimer() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyRestTimer) ?? 60; // Default 60s
+  }
+}
 
   Future<void> setPexelsKey(String key) async {
     final prefs = await SharedPreferences.getInstance();
@@ -53,4 +64,9 @@ Future<String?> pexelsApiKey(Ref ref) async {
 @riverpod
 Future<String?> unsplashApiKey(Ref ref) async {
   return ref.watch(settingsServiceProvider).getUnsplashKey();
+}
+
+@riverpod
+Future<int> restTimer(Ref ref) async {
+  return ref.watch(settingsServiceProvider).getRestTimer();
 }

@@ -1,0 +1,180 @@
+import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
+
+/// Skeleton shimmer widget for loading states
+/// Provides a pulsing animation placeholder
+class SkeletonLoader extends StatefulWidget {
+  final double width;
+  final double height;
+  final double borderRadius;
+  
+  const SkeletonLoader({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = 8,
+  });
+
+  @override
+  State<SkeletonLoader> createState() => _SkeletonLoaderState();
+}
+
+class _SkeletonLoaderState extends State<SkeletonLoader>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _animation = Tween<double>(begin: 0.3, end: 0.6).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            color: AppTheme.darkSurfaceContainer.withOpacity(_animation.value),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Skeleton card for workout loading state
+class WorkoutCardSkeleton extends StatelessWidget {
+  const WorkoutCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Thumbnail skeleton
+          const SkeletonLoader(width: double.infinity, height: 140, borderRadius: 12),
+          const SizedBox(height: 16),
+          // Title skeleton
+          const SkeletonLoader(width: 150, height: 24, borderRadius: 4),
+          const SizedBox(height: 8),
+          // Subtitle skeleton
+          const SkeletonLoader(width: 200, height: 16, borderRadius: 4),
+          const SizedBox(height: 16),
+          // Button skeleton
+          const SkeletonLoader(width: double.infinity, height: 48, borderRadius: 12),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skeleton for stats row
+class StatsRowSkeleton extends StatelessWidget {
+  const StatsRowSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              children: const [
+                SkeletonLoader(width: 40, height: 40, borderRadius: 20),
+                SizedBox(height: 8),
+                SkeletonLoader(width: 60, height: 24, borderRadius: 4),
+                SizedBox(height: 4),
+                SkeletonLoader(width: 80, height: 12, borderRadius: 4),
+              ],
+            ),
+          ),
+          Container(width: 1, height: 50, color: AppTheme.darkBorder),
+          Expanded(
+            child: Column(
+              children: const [
+                SkeletonLoader(width: 40, height: 40, borderRadius: 20),
+                SizedBox(height: 8),
+                SkeletonLoader(width: 60, height: 24, borderRadius: 4),
+                SizedBox(height: 4),
+                SkeletonLoader(width: 80, height: 12, borderRadius: 4),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skeleton for progress grid
+class ProgressGridSkeleton extends StatelessWidget {
+  const ProgressGridSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          // Header skeleton
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              SkeletonLoader(width: 100, height: 20, borderRadius: 4),
+              SkeletonLoader(width: 60, height: 20, borderRadius: 4),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Grid skeleton (7 columns, 5 rows)
+          ...List.generate(5, (row) => Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(7, (col) => const SkeletonLoader(
+                width: 32,
+                height: 32,
+                borderRadius: 6,
+              )),
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+}

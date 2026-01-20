@@ -1774,3 +1774,4 @@ D/VRI[MainActivity](29403): visibilityChanged oldVisibility=true newVisibility=f
 W/WindowOnBackDispatcher(29403): sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda12@16eacf1
 D/DecorViewImmersiveImpl(29403): onDetachedFromWindow
 D/ActivityThread(29403): Fail to check app heapsize due to java.lang.NoSuchMethodException: dalvik.system.VMRuntime.getBlockingGcCountForAlloc []
+Lost connection to device.

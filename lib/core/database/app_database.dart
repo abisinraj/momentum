@@ -494,5 +494,67 @@ class AppDatabase extends _$AppDatabase {
       return "You're active, but a little behind last week's pace. Push for one more!";
     }
   }
+  
+  // ===== Session History =====
+  
+  /// Get recent completed sessions with workout details
+  /// Returns list of maps with session + workout info for history display
+  Future<List<Map<String, dynamic>>> getRecentSessionsWithDetails({int limit = 20}) async {
+    final completedSessions = await (select(sessions)
+          ..where((s) => s.completedAt.isNotNull())
+          ..orderBy([(s) => OrderingTerm.desc(s.completedAt)])
+          ..limit(limit))
+        .get();
+    
+    final results = <Map<String, dynamic>>[];
+    
+    for (final session in completedSessions) {
+      // Get workout details
+      final workout = await (select(workouts)
+            ..where((w) => w.id.equals(session.workoutId)))
+          .getSingleOrNull();
+      
+      // Get exercise count for this session
+      final sessionExercisesList = await getSessionExercises(session.id);
+      final completedSets = sessionExercisesList.fold<int>(
+        0, (sum, ex) => sum + (ex.completedSets ?? 0));
+      
+      results.add({
+        'session': session,
+        'workout': workout,
+        'workoutName': workout?.name ?? 'Unknown Workout',
+        'thumbnailUrl': workout?.thumbnailUrl,
+        'completedAt': session.completedAt,
+        'durationSeconds': session.durationSeconds ?? 0,
+        'exerciseCount': sessionExercisesList.length,
+        'completedSets': completedSets,
+      });
+    }
+    
+    return results;
+  }
+  
+  /// Get detailed exercise data for a specific session
+  Future<List<Map<String, dynamic>>> getSessionExerciseDetails(int sessionId) async {
+    final sessionExercisesList = await getSessionExercises(sessionId);
+    final results = <Map<String, dynamic>>[];
+    
+    for (final se in sessionExercisesList) {
+      // Get original exercise definition
+      final exercise = await (select(exercises)
+            ..where((e) => e.id.equals(se.exerciseId)))
+          .getSingleOrNull();
+      
+      results.add({
+        'exerciseName': exercise?.name ?? 'Unknown',
+        'targetSets': exercise?.sets ?? 0,
+        'targetReps': exercise?.reps ?? 0,
+        'completedSets': se.completedSets ?? 0,
+        'actualReps': se.actualReps,
+      });
+    }
+    
+    return results;
+  }
 }
 

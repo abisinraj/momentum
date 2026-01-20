@@ -74,3 +74,17 @@ Future<String> weeklyInsight(ref) async {
   final db = ref.watch(appDatabaseProvider);
   return db.getWeeklyInsight();
 }
+
+/// Provider for session history with workout details
+@riverpod
+Future<List<Map<String, dynamic>>> sessionHistory(ref, {int limit = 20}) async {
+  final db = ref.watch(appDatabaseProvider);
+  return db.getRecentSessionsWithDetails(limit: limit);
+}
+
+/// Provider for exercise details of a specific session
+@riverpod
+Future<List<Map<String, dynamic>>> sessionExerciseDetails(ref, int sessionId) async {
+  final db = ref.watch(appDatabaseProvider);
+  return db.getSessionExerciseDetails(sessionId);
+}
