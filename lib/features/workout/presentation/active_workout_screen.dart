@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/providers/database_providers.dart'; // Import for exercises
 import '../../../core/database/app_database.dart';
+import '../../../core/services/settings_service.dart';
 
 /// Active workout screen 
 /// Supports two views:
@@ -25,10 +26,16 @@ class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   ConsumerState<ActiveWorkoutScreen> createState() => _ActiveWorkoutScreenState();
 }
 
-class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
+class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with TickerProviderStateMixin {
   Timer? _timer;
   Duration _elapsed = Duration.zero;
   Duration _remaining = Duration.zero;
+  
+  // Rest Timer State
+  late AnimationController _restController;
+  int? _restingExerciseId;
+  String _restTimeDisplay = '';
+
   bool _isRunning = true;
   bool _timerCompleted = false;
   
@@ -46,6 +53,26 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
+    
+    _restController = AnimationController(vsync: this);
+    _restController.addListener(() {
+      if (mounted) {
+        setState(() {
+          // Update display text based on controller value
+           final totalSeconds = _restController.duration?.inSeconds ?? 60;
+           final remaining = (_restController.value * totalSeconds).ceil();
+           _restTimeDisplay = '$remaining';
+        });
+      }
+    });
+    _restController.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) {
+        // Timer complete
+        HapticFeedback.mediumImpact();
+        setState(() => _restingExerciseId = null);
+      }
+    });
+    
     _initializeClock();
   }
   
@@ -177,6 +204,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _restController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -312,6 +340,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
             final targetSets = ex.sets;
             final isFullyDone = completed >= targetSets;
             final note = _exerciseNotes[ex.id];
+            final isResting = _restingExerciseId == ex.id;
             
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
@@ -328,97 +357,139 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
+                  final current = _completedSets[ex.id] ?? 0;
+                  // Cycle: 0 -> 1 -> ... -> Max -> 0
+                  final next = (current + 1) % (targetSets + 1);
+                  
                   setState(() {
-                    final current = _completedSets[ex.id] ?? 0;
-                    // Cycle: 0 -> 1 -> ... -> Max -> 0
-                    final next = (current + 1) % (targetSets + 1);
                     _completedSets[ex.id] = next;
                   });
                   HapticFeedback.lightImpact();
+                  
+                  // Trigger rest timer if set completed (and not reset to 0)
+                  if (next > current && !isFullyDone) {
+                    _startRestTimer(ex.id);
+                  } else if (isResting) {
+                     // Cancel rest if clicked again
+                     _restController.stop();
+                     setState(() => _restingExerciseId = null);
+                  }
                 },
                 onLongPress: () => _showRepInputDialog(ex),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      // Set Progress Circular
-                      SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CircularProgressIndicator(
-                              value: completed / targetSets,
-                              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                              color: isFullyDone ? theme.colorScheme.primary : theme.colorScheme.tertiary,
-                              strokeWidth: 4,
-                            ),
-                            if (isFullyDone)
-                              Icon(Icons.check, size: 24, color: theme.colorScheme.primary)
-                            else
-                              Text(
-                                '$completed',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.onSurface,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Set Progress Circular
+                          SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: completed / targetSets,
+                                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                                  color: isFullyDone ? theme.colorScheme.primary : theme.colorScheme.tertiary,
+                                  strokeWidth: 4,
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      // Details
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              ex.name,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: isFullyDone ? theme.colorScheme.onSurface.withOpacity(0.6) : theme.colorScheme.onSurface,
-                                decoration: isFullyDone ? TextDecoration.lineThrough : null,
-                              ),
+                                if (isFullyDone)
+                                  Icon(Icons.check, size: 24, color: theme.colorScheme.primary)
+                                else
+                                  Text(
+                                    '$completed',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$targetSets Sets × ${ex.reps} Reps',
-                              style: TextStyle(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontSize: 13,
-                              ),
-                            ),
-                            if (note != null && note.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  'Log: $note',
+                          ),
+                          const SizedBox(width: 16),
+                          // Details
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  ex.name,
                                   style: TextStyle(
-                                    fontSize: 11,
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: isFullyDone ? theme.colorScheme.onSurface.withOpacity(0.6) : theme.colorScheme.onSurface,
+                                    decoration: isFullyDone ? TextDecoration.lineThrough : null,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ],
-                        ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      '$targetSets Sets × ${ex.reps} Reps',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    if (isResting)
+                                      Text(
+                                        'Rest: $_restTimeDisplay\s',
+                                        style: TextStyle(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (note != null && note.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'Log: $note',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          // Helper text?
+                          Icon(
+                            Icons.touch_app, 
+                            size: 16, 
+                            color: theme.colorScheme.outline.withOpacity(0.5)
+                          ),
+                        ],
                       ),
-                      // Helper text?
-                      Icon(
-                        Icons.touch_app, 
-                        size: 16, 
-                        color: theme.colorScheme.outline.withOpacity(0.5)
+                    ),
+                    // Rest Timer Progress Bar
+                    if (isResting)
+                      AnimatedBuilder(
+                        animation: _restController,
+                        builder: (context, child) {
+                          return LinearProgressIndicator(
+                            value: _restController.value,
+                            backgroundColor: Colors.transparent,
+                            // Green (Full/1.0) -> Red (Empty/0.0)
+                            color: Color.lerp(Colors.red, Colors.green, _restController.value),
+                            minHeight: 4,
+                          );
+                        },
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             );
