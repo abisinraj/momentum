@@ -7,6 +7,7 @@ part 'settings_service.g.dart';
 class SettingsService {
   static const String _keyPexels = 'api_key_pexels';
   static const String _keyUnsplash = 'api_key_unsplash';
+  static const String _keyOpenAi = 'api_key_openai';
   static const String _keyRestTimer = 'rest_timer_seconds';
 
   Future<void> setRestTimer(int seconds) async {
@@ -17,6 +18,36 @@ class SettingsService {
   Future<int> getRestTimer() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_keyRestTimer) ?? 60; // Default 60s
+  }
+
+  Future<void> setPexelsKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyPexels, key);
+  }
+
+  Future<String?> getPexelsKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyPexels);
+  }
+
+  Future<void> setUnsplashKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyUnsplash, key);
+  }
+
+  Future<String?> getUnsplashKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUnsplash);
+  }
+  
+  Future<void> setOpenAiKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyOpenAi, key);
+  }
+
+  Future<String?> getOpenAiKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyOpenAi);
   }
 }
 

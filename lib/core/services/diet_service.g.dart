@@ -1,29 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'router.dart';
+part of 'diet_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$routerHash() => r'0ab7d2de8bab49c14cf021b5e7d5e81c456e8a0d';
+String _$dietServiceHash() => r'ee6621e5cf44f9b16a920cee03ec8e0ee3e843d5';
 
-/// Router provider using go_router
-///
-/// Copied from [router].
-@ProviderFor(router)
-final routerProvider = AutoDisposeProvider<GoRouter>.internal(
-  router,
-  name: r'routerProvider',
+/// See also [dietService].
+@ProviderFor(dietService)
+final dietServiceProvider = AutoDisposeProvider<DietService>.internal(
+  dietService,
+  name: r'dietServiceProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$routerHash,
+      : _$dietServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef RouterRef = AutoDisposeProviderRef<GoRouter>;
+typedef DietServiceRef = AutoDisposeProviderRef<DietService>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

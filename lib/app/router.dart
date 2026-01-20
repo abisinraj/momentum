@@ -13,6 +13,8 @@ import '../features/setup/presentation/setup_screen.dart';
 import '../features/setup/presentation/split_setup_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
+import '../features/diet/presentation/diet_screen.dart';
 import '../core/providers/database_providers.dart';
 
 part 'router.g.dart';
@@ -25,6 +27,7 @@ enum AppRoute {
   createWorkout('/create-workout/:index/:total'),
   home('/home'),
   workout('/workout'),
+  diet('/diet'),
   progress('/progress'),
   info('/info'),
   settings('/settings');
@@ -70,6 +73,11 @@ class NavigationShell extends StatelessWidget {
             icon: Icon(Icons.insights_outlined),
             selectedIcon: Icon(Icons.insights),
             label: 'Progress',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.restaurant_menu_outlined),
+            selectedIcon: Icon(Icons.restaurant_menu),
+            label: 'Diet',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
@@ -203,6 +211,16 @@ GoRouter router(ref) {
                 path: AppRoute.progress.path,
                 name: AppRoute.progress.name,
                 builder: (context, state) => const ProgressScreen(),
+              ),
+            ],
+          ),
+          // Diet branch
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoute.diet.path,
+                name: AppRoute.diet.name,
+                builder: (context, state) => const DietScreen(),
               ),
             ],
           ),

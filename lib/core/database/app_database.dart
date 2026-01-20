@@ -67,13 +67,25 @@ class SessionExercises extends Table {
   TextColumn get notes => text().nullable()(); // User notes like "felt easy", "used 20kg"
 }
 
+/// FoodLogs table - stores nutrition data
+class FoodLogs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get description => text()(); // "Chicken Sandwich"
+  IntColumn get calories => integer()();
+  RealColumn get protein => real().withDefault(const Constant(0.0))();
+  RealColumn get carbs => real().withDefault(const Constant(0.0))();
+  RealColumn get fats => real().withDefault(const Constant(0.0))();
+  TextColumn get imageUrl => text().nullable()(); // Local path
+}
+
 /// The main application database
-@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises])
+@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises, FoodLogs])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
   
   @override
   MigrationStrategy get migration {
@@ -103,6 +115,11 @@ class AppDatabase extends _$AppDatabase {
           // Schema v4 changes:
           // Create SessionExercises table for tracking completed sets/reps per session
           await m.createTable(sessionExercises);
+        }
+        if (from < 5) {
+          // Schema v5 changes:
+          // Create FoodLogs table
+          await m.createTable(foodLogs);
         }
       },
     );
@@ -555,6 +572,50 @@ class AppDatabase extends _$AppDatabase {
     }
     
     return results;
+  }
+  // ===== Diet / Food Log Operations =====
+  
+  /// Add a food log entry
+  Future<int> addFoodLog(FoodLogsCompanion entry) =>
+      into(foodLogs).insert(entry);
+      
+  /// Delete a food log entry
+  Future<int> deleteFoodLog(int id) =>
+      (delete(foodLogs)..where((f) => f.id.equals(id))).go();
+      
+  /// Get food logs for a specific date
+  Future<List<FoodLog>> getFoodLogsForDate(DateTime date) {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    return (select(foodLogs)
+          ..where((f) => f.date.isBiggerOrEqualValue(start) & 
+                        f.date.isSmallerThanValue(end))
+          ..orderBy([(f) => OrderingTerm.desc(f.date)]))
+        .get();
+  }
+  
+  /// Get daily nutrition summary
+  Future<Map<String, double>> getDailyNutritionSummary(DateTime date) async {
+    final logs = await getFoodLogsForDate(date);
+    
+    double calories = 0;
+    double protein = 0;
+    double carbs = 0;
+    double fats = 0;
+    
+    for (final log in logs) {
+      calories += log.calories;
+      protein += log.protein;
+      carbs += log.carbs;
+      fats += log.fats;
+    }
+    
+    return {
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fats': fats,
+    };
   }
 }
 
