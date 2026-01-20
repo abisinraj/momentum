@@ -63,15 +63,23 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
 
     // 2. Get Next Workout
     final nextWorkout = await db.getNextWorkout();
-    final title = nextWorkout?.name ?? 'Complete Setup';
-    
-    // Description: "4 Exercises"
+    String title = nextWorkout?.name ?? 'Complete Setup';
     String desc = 'Tap to start';
+    
+    // Check if this workout is already completed today
     if (nextWorkout != null) {
-      final exercises = await db.getExercisesForWorkout(nextWorkout.id);
-      desc = '${exercises.length} Exercises';
+      final completedIds = await db.getTodayCompletedWorkoutIds();
+      if (completedIds.contains(nextWorkout.id)) {
+        // Workout done!
+        title = 'Session Complete';
+        desc = 'Great job keeping momentum!';
+      } else {
+        // Not done yet
+        final exercises = await db.getExercisesForWorkout(nextWorkout.id);
+        desc = '${exercises.length} Exercises';
+      }
     }
-
+    
     // 3. Update Widget
     await widgetService.updateWidget(
       streak: streak,
