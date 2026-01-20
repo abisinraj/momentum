@@ -130,64 +130,174 @@ class HomeScreen extends ConsumerWidget {
       return _buildEmptyState(context);
     }
     
-    return Column(
-      children: [
-        // Today's Focus badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.darkSurfaceContainer,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+    // Determine image provider
+    ImageProvider? imageProvider;
+    if (workout.thumbnailUrl != null && workout.thumbnailUrl!.isNotEmpty) {
+      if (workout.thumbnailUrl!.startsWith('http')) {
+        imageProvider = NetworkImage(workout.thumbnailUrl!);
+      } else {
+        imageProvider = AssetImage(workout.thumbnailUrl!);
+      }
+    }
+    
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(minHeight: 480),
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(32),
+        image: imageProvider != null ? DecorationImage(
+          image: imageProvider,
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.2), // Slight dark tint globally
+            BlendMode.darken,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.bolt,
-                size: 16,
-                color: AppTheme.tealPrimary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                "TODAY'S FOCUS",
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.tealPrimary,
-                  letterSpacing: 1.0,
+        ) : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Gradient Overlay for text readability
+          if (imageProvider != null)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(32),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.4),
+                      Colors.black.withOpacity(0.95),
+                    ],
+                    stops: const [0.4, 0.7, 1.0],
+                  ),
                 ),
               ),
-            ],
+            ),
+            
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Row with "Today's Focus"
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.5)),
+                        backdropFilter: null, // blur could be added effectively with ClipRRect
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.bolt,
+                            size: 16,
+                            color: AppTheme.tealPrimary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "TODAY'S FOCUS",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.tealPrimary,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Optional: Add more badges here (e.g. Duration)
+                  ],
+                ),
+                
+                const Spacer(),
+                
+                // Workout Title
+                _buildImmersiveTitle(workout.name),
+                
+                const SizedBox(height: 8),
+                
+                // Description / Type
+                Row(
+                  children: [
+                    Icon(
+                      _getWorkoutIcon(workout.clockType),
+                      color: AppTheme.textSecondary,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _getWorkoutDescription(workout),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Progress Insight (Semi-transparent to blend)
+                _buildProgressInsight(ref, workout),
+                
+                const SizedBox(height: 24),
+                
+                // Action Buttons
+                _buildActionButtons(context, ref, workout, activeSession),
+              ],
+            ),
           ),
-        ),
-        
-        const SizedBox(height: 32),
-        
-        // Large workout name with accent styling
-        _buildWorkoutTitle(workout.name),
-        
-        const SizedBox(height: 16),
-        
-        // Workout description / clock type
-        Text(
-          _getWorkoutDescription(workout),
-          style: TextStyle(
-            fontSize: 14,
-            color: AppTheme.textSecondary,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImmersiveTitle(String name) {
+    return Text(
+      name.toUpperCase(),
+      style: const TextStyle(
+        fontSize: 40,
+        fontWeight: FontWeight.w900,
+        color: Colors.white,
+        height: 1.0,
+        letterSpacing: -1.0,
+        shadows: [
+          Shadow(
+            offset: Offset(0, 2),
+            blurRadius: 4,
+            color: Colors.black54,
           ),
-          textAlign: TextAlign.center,
-        ),
-        
-        const SizedBox(height: 20),
-        
-        // Progress Insight Card
-        _buildProgressInsight(ref, workout),
-        
-        const SizedBox(height: 24),
-        
-        // Start/Resume/Stop Controls
-        if (activeSession != null && activeSession.workoutId == workout.id) ...[
+        ],
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+  
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref, Workout workout, ActiveSession? activeSession) {
+    if (activeSession != null && activeSession.workoutId == workout.id) {
+      return Column(
+        children: [
           SizedBox(
             width: double.infinity,
             child: FilledButton(
@@ -208,8 +318,9 @@ class HomeScreen extends ConsumerWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
+                elevation: 0,
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                    Text(
@@ -220,31 +331,32 @@ class HomeScreen extends ConsumerWidget {
                       letterSpacing: 1.0,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Icon(Icons.open_in_new, size: 24),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton(
+            child: TextButton(
               onPressed: () async {
-                 // Confirm stop
                  final confirm = await showDialog<bool>(
                    context: context,
                    builder: (context) => AlertDialog(
-                     title: const Text('Stop Workout?'),
-                     content: const Text('This will finish the current session.'),
+                     backgroundColor: AppTheme.darkSurface,
+                     title: const Text('Stop Workout?', style: TextStyle(color: Colors.white)),
+                     content: const Text('This will finish the current session.', style: TextStyle(color: Colors.white70)),
                      actions: [
                        TextButton(
                          onPressed: () => Navigator.pop(context, false),
                          child: const Text('Cancel'),
                        ),
                        FilledButton(
+                         style: FilledButton.styleFrom(backgroundColor: AppTheme.error),
                          onPressed: () => Navigator.pop(context, true),
-                         child: const Text('Stop Framework'),
+                         child: const Text('Stop'),
                        ),
                      ],
                    ),
@@ -254,96 +366,58 @@ class HomeScreen extends ConsumerWidget {
                    await ref.read(activeWorkoutSessionProvider.notifier).completeWorkout();
                  }
               },
-              style: OutlinedButton.styleFrom(
+              style: TextButton.styleFrom(
                 foregroundColor: AppTheme.error,
-                side: BorderSide(color: AppTheme.error),
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
               ),
               child: const Text('STOP WORKOUT'),
             ),
           ),
-        ] else ...[
-          SizedBox(
-            width: double.infinity,
-              child: FilledButton(
-              onPressed: () => _onStartPressed(context, ref, workout),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.tealPrimary,
-                foregroundColor: AppTheme.darkBackground,
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+        ],
+      );
+    } else {
+      return SizedBox(
+        width: double.infinity,
+          child: FilledButton(
+          onPressed: () => _onStartPressed(context, ref, workout),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppTheme.tealPrimary,
+            foregroundColor: AppTheme.darkBackground,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+            shadowColor: AppTheme.tealPrimary.withOpacity(0.4),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'START WORKOUT',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'START WORKOUT',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Icon(Icons.play_arrow, size: 24),
-                ],
-              ),
-            ),
+              SizedBox(width: 12),
+              Icon(Icons.play_arrow, size: 24),
+            ],
           ),
-        ],
-      ],
-    );
-  }
-  
-  Widget _buildWorkoutTitle(String name) {
-    // Split name into words and style the middle word with yellow accent
-    final words = name.split(' ');
-    
-    if (words.length == 1) {
-      return Text(
-        name.toUpperCase(),
-        style: TextStyle(
-          fontSize: 36,
-          fontWeight: FontWeight.bold,
-          color: AppTheme.textPrimary,
-          height: 1.2,
         ),
-        textAlign: TextAlign.center,
       );
     }
-    
-    // For multi-word names, accent the middle or second word
-    final accentIndex = words.length > 2 ? 1 : 0;
-    
-    return Column(
-      children: words.asMap().entries.map((entry) {
-        final isAccent = entry.key == accentIndex;
-        return Text(
-          entry.value.toUpperCase(),
-          style: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
-            color: isAccent ? AppTheme.yellowAccent : AppTheme.textPrimary,
-            height: 1.2,
-          ),
-        );
-      }).toList(),
-    );
   }
-  
+
   String _getWorkoutDescription(Workout workout) {
     final clockDesc = switch (workout.clockType) {
-      ClockType.none => 'Freestyle workout',
-      ClockType.stopwatch => 'Timed with stopwatch',
+      ClockType.none => 'Freestyle',
+      ClockType.stopwatch => 'Tracked with Stopwatch',
       ClockType.timer => workout.timerDurationSeconds != null
-          ? 'Timer: ${workout.timerDurationSeconds! ~/ 60} minutes'
-          : 'Timer workout',
-      ClockType.alarm => 'Alarm when complete',
+          ? '${workout.timerDurationSeconds! ~/ 60} min Timer'
+          : 'Timer Workout',
+      ClockType.alarm => 'Alarm Completion',
     };
     return clockDesc;
   }
