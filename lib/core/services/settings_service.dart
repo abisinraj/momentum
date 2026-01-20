@@ -20,37 +20,6 @@ class SettingsService {
   }
 }
 
-  Future<void> setPexelsKey(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyPexels, key);
-  }
-
-  Future<String?> getPexelsKey() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyPexels);
-  }
-
-  Future<void> setUnsplashKey(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyUnsplash, key);
-  }
-
-  Future<String?> getUnsplashKey() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyUnsplash);
-  }
-  
-  Future<void> setOpenAiKey(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyOpenAi, key);
-  }
-
-  Future<String?> getOpenAiKey() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyOpenAi);
-  }
-}
-
 @riverpod
 SettingsService settingsService(Ref ref) {
   return SettingsService();

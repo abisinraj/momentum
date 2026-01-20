@@ -36,6 +36,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   int? _restingExerciseId;
   String _restTimeDisplay = '';
 
+  // Cooldown Timer State
+  late AnimationController _cooldownController;
+  int? _cooldownExerciseId;
+  String _cooldownTimeDisplay = '';
+
   bool _isRunning = true;
   bool _timerCompleted = false;
   
@@ -71,6 +76,19 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
         HapticFeedback.mediumImpact();
         setState(() => _restingExerciseId = null);
       }
+    });
+
+    _cooldownController = AnimationController(vsync: this, duration: const Duration(minutes: 5));
+    _cooldownController.addListener(() {
+       if (mounted) {
+         setState(() {
+            final totalSeconds = _cooldownController.duration?.inSeconds ?? 300;
+            final remaining = (_cooldownController.value * totalSeconds).ceil();
+            final mins = remaining ~/ 60;
+            final secs = (remaining % 60).toString().padLeft(2, '0');
+            _cooldownTimeDisplay = '$mins:$secs';
+         });
+       }
     });
     
     _initializeClock();
@@ -205,6 +223,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   void dispose() {
     _timer?.cancel();
     _restController.dispose();
+    _cooldownController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -320,10 +339,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     );
   }
 
+  Future<void> _startCooldown(int exerciseId) async {
+    if (mounted) {
+      setState(() {
+        _cooldownExerciseId = exerciseId;
+        _cooldownController.value = 1.0;
+        _cooldownController.reverse();
+      });
+    }
+  }
+
   Widget _buildChecklistPage(AsyncValue<List<Exercise>> exercisesAsync, ThemeData theme) {
     return exercisesAsync.when(
-      data: (exercises) {
-        if (exercises.isEmpty) {
+      data: (exercisesList) {
+        if (exercisesList.isEmpty) {
           return Center(
             child: Text(
               'No exercises configured',
@@ -331,16 +360,27 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
             ),
           );
         }
+        
+        // Sort: Incomplete first, then Fully Completed
+        final sortedExercises = List<Exercise>.from(exercisesList);
+        sortedExercises.sort((a, b) {
+           final aDone = (_completedSets[a.id] ?? 0) >= a.sets;
+           final bDone = (_completedSets[b.id] ?? 0) >= b.sets;
+           if (aDone == bDone) return a.orderIndex.compareTo(b.orderIndex);
+           return aDone ? 1 : -1; // Done goes to bottom
+        });
+
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: exercises.length,
+          itemCount: sortedExercises.length,
           itemBuilder: (context, index) {
-            final ex = exercises[index];
+            final ex = sortedExercises[index];
             final completed = _completedSets[ex.id] ?? 0;
             final targetSets = ex.sets;
             final isFullyDone = completed >= targetSets;
             final note = _exerciseNotes[ex.id];
             final isResting = _restingExerciseId == ex.id;
+            final isCoolingDown = _cooldownExerciseId == ex.id;
             
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
@@ -366,9 +406,22 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                   });
                   HapticFeedback.lightImpact();
                   
-                  // Trigger rest timer if set completed (and not reset to 0)
-                  if (next > current && !isFullyDone) {
-                    _startRestTimer(ex.id);
+                  // Logic: 
+                  // 1. If Just Finished Exercise (all sets done): Start Cooldown
+                  // 2. If Just Finished Set (but not all): Start Rest
+                  
+                  final newIsFullyDone = next >= targetSets;
+                  
+                  if (newIsFullyDone) {
+                     // Exercise Complete -> Cooldown (Blue/Cyan typically)
+                     _startCooldown(ex.id);
+                     _restController.stop(); // Stop rest if running
+                     setState(() => _restingExerciseId = null);
+                  } else if (next > current) {
+                     // Set Complete -> Rest
+                     _startRestTimer(ex.id);
+                     _cooldownController.stop(); // Stop cooldown if running
+                     setState(() => _cooldownExerciseId = null);
                   } else if (isResting) {
                      // Cancel rest if clicked again
                      _restController.stop();
@@ -443,6 +496,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                                           fontSize: 12,
                                         ),
                                       ),
+                                    if (isCoolingDown)
+                                      Text(
+                                        'Cooldown: $_cooldownTimeDisplay',
+                                        style: TextStyle(
+                                          color: Colors.cyanAccent,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
                                   ],
                                 ),
                                 if (note != null && note.isNotEmpty) ...[
@@ -466,12 +528,6 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                               ],
                             ),
                           ),
-                          // Helper text?
-                          Icon(
-                            Icons.touch_app, 
-                            size: 16, 
-                            color: theme.colorScheme.outline.withOpacity(0.5)
-                          ),
                         ],
                       ),
                     ),
@@ -483,8 +539,22 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                           return LinearProgressIndicator(
                             value: _restController.value,
                             backgroundColor: Colors.transparent,
-                            // Green (Full/1.0) -> Red (Empty/0.0)
                             color: Color.lerp(Colors.red, Colors.green, _restController.value),
+                            minHeight: 4,
+                          );
+                        },
+                      ),
+                      
+                    // Cooldown Timer Progress Bar (Blue/Cyan)
+                    if (isCoolingDown)
+                      AnimatedBuilder(
+                        animation: _cooldownController,
+                        builder: (context, child) {
+                          return LinearProgressIndicator(
+                            value: _cooldownController.value,
+                            backgroundColor: Colors.transparent,
+                            // Cyan -> Blue
+                            color: Color.lerp(Colors.blue, Colors.cyanAccent, _cooldownController.value),
                             minHeight: 4,
                           );
                         },
