@@ -32,29 +32,29 @@ class ThumbnailService {
       'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1000&q=80', // Back
     ],
     'legs': [
-      'https://images.unsplash.com/photo-1434608519344-49d77a699ded?auto=format&fit=crop&w=1000&q=80', // Squat/Stretch
       'https://images.unsplash.com/photo-1574680096141-1cddd32e012e?auto=format&fit=crop&w=1000&q=80', // Lunges
       'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1000&q=80', // Running/Legs
+      'https://images.unsplash.com/photo-1434596922112-19c563067271?auto=format&fit=crop&w=1000&q=80', // Replacement for broken
     ],
     'squat': [
-      'https://images.unsplash.com/photo-1434608519344-49d77a699ded?auto=format&fit=crop&w=1000&q=80', // Squat
       'https://images.unsplash.com/photo-1574680096141-1cddd32e012e?auto=format&fit=crop&w=1000&q=80', // Lunges
+      'https://images.unsplash.com/photo-1434596922112-19c563067271?auto=format&fit=crop&w=1000&q=80', // Replacement for broken
     ],
     'cardio': [
-      'https://images.unsplash.com/photo-1538805060512-e2596d6aade0?auto=format&fit=crop&w=1000&q=80', // Running track
       'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1000&q=80', // Running man
+      'https://images.unsplash.com/photo-1552674605-46d5465a13f1?auto=format&fit=crop&w=1000&q=80', // Gym runner (Replacement)
       'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=1000&q=80', // Athletics
     ],
     'run': [
       'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1000&q=80', // Running man
-      'https://images.unsplash.com/photo-1538805060512-e2596d6aade0?auto=format&fit=crop&w=1000&q=80', // Track
+      'https://images.unsplash.com/photo-1552674605-46d5465a13f1?auto=format&fit=crop&w=1000&q=80', // Gym runner (Replacement)
     ],
     'yoga': [
       'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1000&q=80', // Meditating
       'https://images.unsplash.com/photo-1544367563-12123d896589?auto=format&fit=crop&w=1000&q=80', // Yoga pose
     ],
     'stretch': [
-      'https://images.unsplash.com/photo-1434608519344-49d77a699ded?auto=format&fit=crop&w=1000&q=80', // Stretch
+      'https://images.unsplash.com/photo-1544367563-12123d896589?auto=format&fit=crop&w=1000&q=80', // Yoga/Stretch (Replacement)
     ],
     'abs': [
       'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1000&q=80', // Core/Pushups

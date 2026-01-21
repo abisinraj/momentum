@@ -132,7 +132,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
 
   bool _canProceed() {
     switch (_currentStep) {
-      case 0: return _nameController.text.trim().isNotEmpty;
+      case 0: return _nameController.text.trim().isNotEmpty && _nameController.text.length <= 50;
       case 1: return _selectedThumbnail != null;
       case 2: return _exercises.isNotEmpty;
       case 3: return true;
@@ -180,9 +180,19 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
         }
       } catch (e, st) {
         if (mounted) {
+          // Check for drift InvalidDataException specifically
+          final errorMessage = e.toString();
+          String userMessage = 'Error saving workout';
+          
+          if (errorMessage.contains('InvalidDataException') && errorMessage.contains('name: Must at most be 100 characters')) {
+            userMessage = 'Name is too long (max 50 characters)';
+          } else {
+             userMessage = 'Error saving: ${e.toString().split('\n').first}';
+          }
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error saving workout: $e'),
+              content: Text(userMessage),
               backgroundColor: Colors.red,
             ),
           );
@@ -250,10 +260,12 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
             controller: _nameController,
             style: TextStyle(fontSize: 24, color: AppTheme.textPrimary),
             textAlign: TextAlign.center,
+            maxLength: 50, // Prevent database overflow (Drift limit is 100, we stay safer)
             decoration: InputDecoration(
               hintText: 'e.g., Pull Day',
               hintStyle: TextStyle(color: AppTheme.textMuted),
               border: InputBorder.none,
+              counterText: "", // Hide character counter for cleaner look
             ),
             textCapitalization: TextCapitalization.words,
             onChanged: (_) => setState(() {}),
