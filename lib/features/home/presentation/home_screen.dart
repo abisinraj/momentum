@@ -142,15 +142,25 @@ class HomeScreen extends ConsumerWidget {
       }
     }
     
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate responsive minHeight based on screen
+        final screenHeight = MediaQuery.of(context).size.height;
+        final responsiveMinHeight = (screenHeight * 0.55).clamp(350.0, 550.0);
+        
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 480),
+      constraints: BoxConstraints(minHeight: responsiveMinHeight),
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(32),
         image: imageProvider != null ? DecorationImage(
           image: imageProvider,
           fit: BoxFit.cover,
+          onError: (exception, stackTrace) {
+            // Silently handle image load errors
+            debugPrint('Image load error: $exception');
+          },
           colorFilter: ColorFilter.mode(
             Colors.black.withOpacity(0.2), // Slight dark tint globally
             BlendMode.darken,
@@ -231,7 +241,8 @@ class HomeScreen extends ConsumerWidget {
                   ],
                 ),
                 
-                const Spacer(),
+                // Flexible space instead of unbounded Spacer
+                const SizedBox(height: 100),
                 
                 // Workout Title
                 _buildImmersiveTitle(workout.name),
@@ -272,6 +283,8 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 
@@ -429,72 +442,83 @@ class HomeScreen extends ConsumerWidget {
     final db = ref.watch(appDatabaseProvider);
     final aiService = ref.watch(aiInsightsServiceProvider);
     
-    // First check connectivity with timeout
-    return FutureBuilder<List<ConnectivityResult>>(
-      future: Connectivity().checkConnectivity().timeout(
+    // Combined async operation to avoid nested FutureBuilders
+    Future<Map<String, dynamic>> fetchInsightData() async {
+      // Check connectivity (with timeout to avoid blocking)
+      final connectivity = await Connectivity().checkConnectivity().timeout(
         const Duration(seconds: 2),
-        onTimeout: () => [ConnectivityResult.wifi], // Assume online on timeout
-      ),
-      builder: (context, connectivitySnapshot) {
-        // If waiting, don't hide immediately to avoid flicker, or show empty
-        // But if it takes >2s, we assume online.
-        
-        final results = connectivitySnapshot.data ?? [];
-        // If results are empty (waiting or error), we assume online to be safe
-        // UNLESS we explicitly get ConnectivityResult.none
-        
-        final isOffline = results.contains(ConnectivityResult.none);
-        
-        // Only hide if explicitly offline
-        if (isOffline) {
+        onTimeout: () => [ConnectivityResult.wifi],
+      );
+      
+      if (connectivity.contains(ConnectivityResult.none)) {
+        return {'offline': true};
+      }
+      
+      // Fetch workout progress
+      final progressData = await db.getWorkoutProgressSummary(workout.id, days: 30);
+      final sessionCount = progressData['sessionCount'] as int;
+      
+      if (sessionCount == 0) {
+        return {'firstSession': true};
+      }
+      
+      // Fetch AI insight (non-blocking, use fallback if slow)
+      String? aiInsight;
+      try {
+        aiInsight = await aiService.generateWorkoutInsight(
+          workoutName: workout.name,
+          progressData: progressData,
+        ).timeout(const Duration(seconds: 3), onTimeout: () => null);
+      } catch (_) {
+        aiInsight = null;
+      }
+      
+      return {
+        ...progressData,
+        'aiInsight': aiInsight,
+      };
+    }
+    
+    return FutureBuilder<Map<String, dynamic>>(
+      future: fetchInsightData(),
+      builder: (context, snapshot) {
+        // Loading or error: show nothing to avoid layout shift
+        if (!snapshot.hasData) {
           return const SizedBox.shrink();
         }
         
-        // Online (or assumed online) - fetch and display progress
-        return FutureBuilder<Map<String, dynamic>>(
-          future: db.getWorkoutProgressSummary(workout.id, days: 30),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const SizedBox.shrink();
-            }
-            
-            final data = snapshot.data!;
-            final sessionCount = data['sessionCount'] as int;
-            final lastDuration = data['lastDuration'] as int?;
-            final avgDuration = data['averageDuration'] as double;
-            
-            // If no history, show a "first time" message
-            if (sessionCount == 0) {
-              return _buildInsightCard(
-                icon: Icons.rocket_launch,
-                title: 'First Session',
-                subtitle: "Let's set your baseline!",
-              );
-            }
-            
-            // Calculate comparison
-            final lastMinutes = lastDuration != null ? (lastDuration / 60).round() : 0;
-            final avgMinutes = (avgDuration / 60).round();
-            
-            // Get AI insight asynchronously
-            return FutureBuilder<String?>(
-              future: aiService.generateWorkoutInsight(
-                workoutName: workout.name,
-                progressData: data,
-              ),
-              builder: (context, aiSnapshot) {
-                final insight = aiSnapshot.data ?? 
-                    '$sessionCount sessions • avg $avgMinutes min';
-                
-                return _buildInsightCard(
-                  icon: lastMinutes < avgMinutes ? Icons.trending_up : Icons.trending_flat,
-                  title: 'Last: $lastMinutes min',
-                  subtitle: insight,
-                  trend: lastMinutes < avgMinutes,
-                );
-              },
-            );
-          },
+        final data = snapshot.data!;
+        
+        // Offline case
+        if (data['offline'] == true) {
+          return const SizedBox.shrink();
+        }
+        
+        // First session case
+        if (data['firstSession'] == true) {
+          return _buildInsightCard(
+            icon: Icons.rocket_launch,
+            title: 'First Session',
+            subtitle: "Let's set your baseline!",
+          );
+        }
+        
+        // Normal case with data
+        final sessionCount = data['sessionCount'] as int;
+        final lastDuration = data['lastDuration'] as int?;
+        final avgDuration = data['averageDuration'] as double;
+        final aiInsight = data['aiInsight'] as String?;
+        
+        final lastMinutes = lastDuration != null ? (lastDuration / 60).round() : 0;
+        final avgMinutes = (avgDuration / 60).round();
+        
+        final insight = aiInsight ?? '$sessionCount sessions • avg $avgMinutes min';
+        
+        return _buildInsightCard(
+          icon: lastMinutes < avgMinutes ? Icons.trending_up : Icons.trending_flat,
+          title: 'Last: $lastMinutes min',
+          subtitle: insight,
+          trend: lastMinutes < avgMinutes,
         );
       },
     );
@@ -733,72 +757,7 @@ class HomeScreen extends ConsumerWidget {
     }
   }
   
-  Future<Workout?> _showWorkoutSelectionDialog(BuildContext context, List<Workout> workouts) {
-    return showGeneralDialog<Workout>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Dismiss',
-      barrierColor: Colors.black.withOpacity(0.8),
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, anim1, anim2) => const SizedBox(), // not used
-      transitionBuilder: (context, anim1, anim2, child) {
-        final curvedValue = Curves.easeInOutBack.transform(anim1.value) - 1.0;
-        
-        return Transform(
-          transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
-          child: Opacity(
-            opacity: anim1.value,
-            child: Dialog(
-              backgroundColor: AppTheme.darkSurface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              elevation: 16,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'CHOOSE SESSION',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.tealPrimary,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * 0.5,
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: workouts.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final w = entry.value;
-                            return _SelectionCard(
-                              workout: w,
-                              index: index,
-                              onTap: () => Navigator.of(context).pop(w),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+  // NOTE: _showWorkoutSelectionDialog was removed (dead code)
 
   IconData _getWorkoutIcon(ClockType type) {
     return switch (type) {

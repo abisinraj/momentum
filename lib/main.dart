@@ -23,16 +23,12 @@ Future<void> main() async {
 
   final container = ProviderContainer();
 
-  runZonedGuarded(
-    () => runApp(
-      UncontrolledProviderScope(
-        container: container,
-        child: const MomentumApp(),
-      ),
+  // Run app in the same zone as Flutter bindings
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const MomentumApp(),
     ),
-    (error, stack) {
-      print('Zoned Error: $error\n$stack');
-    },
   );
 }
 
