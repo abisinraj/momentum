@@ -256,9 +256,17 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     }
   }
   
-  void _showAddWorkoutDialog(BuildContext context, WidgetRef ref) {
+  void _showAddWorkoutDialog(BuildContext context, WidgetRef ref) async {
     final nameController = TextEditingController();
     ClockType selectedClockType = ClockType.stopwatch;
+    
+    // Get user's split days count and current index
+    final db = ref.read(appDatabaseProvider);
+    final user = await db.getUser();
+    final splitDays = user?.splitDays ?? 3;
+    int selectedSplitIndex = user?.currentSplitIndex ?? 0;
+    
+    if (!context.mounted) return;
     
     showModalBottomSheet(
       context: context,
@@ -333,6 +341,55 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               
               const SizedBox(height: 24),
               
+              // Split Day Selector
+              Text(
+                'ADD TO SPLIT DAY',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textMuted,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(splitDays, (index) {
+                    final isSelected = selectedSplitIndex == index;
+                    final dayLabel = 'Day ${index + 1}';
+                    
+                    return Padding(
+                      padding: EdgeInsets.only(right: index < splitDays - 1 ? 8 : 0),
+                      child: GestureDetector(
+                        onTap: () => setState(() => selectedSplitIndex = index),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppTheme.tealPrimary.withOpacity(0.15) : AppTheme.darkSurfaceContainer,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder.withOpacity(0.3),
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: Text(
+                            dayLabel,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected ? AppTheme.tealPrimary : AppTheme.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
               // Tracking Mode
               Text(
                 'TRACKING MODE',
@@ -394,6 +451,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                       name: name,
                       shortCode: code,
                       clockType: selectedClockType,
+                      orderIndex: selectedSplitIndex, // Use selected split day
                     );
                     
                     if (context.mounted) {

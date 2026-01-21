@@ -534,7 +534,7 @@ class AppDatabase extends _$AppDatabase {
       // Get exercise count for this session
       final sessionExercisesList = await getSessionExercises(session.id);
       final completedSets = sessionExercisesList.fold<int>(
-        0, (sum, ex) => sum + (ex.completedSets ?? 0));
+        0, (sum, ex) => sum + ex.completedSets);
       
       results.add({
         'session': session,
@@ -566,8 +566,8 @@ class AppDatabase extends _$AppDatabase {
         'exerciseName': exercise?.name ?? 'Unknown',
         'targetSets': exercise?.sets ?? 0,
         'targetReps': exercise?.reps ?? 0,
-        'completedSets': se.completedSets ?? 0,
-        'actualReps': se.actualReps,
+        'completedSets': se.completedSets,
+        'actualReps': se.completedReps,
       });
     }
     

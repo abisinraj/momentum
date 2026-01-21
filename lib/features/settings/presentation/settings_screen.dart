@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/services/settings_service.dart';
+import '../../../core/services/seed_data.dart';
+import '../../../core/providers/database_providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -17,6 +19,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _openaiController = TextEditingController();
   final _restTimerController = TextEditingController();
   bool _isLoading = true;
+  bool _isSeeding = false;
 
   @override
   void initState() {
@@ -71,6 +74,61 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SnackBar(content: Text('Settings saved successfully')),
       );
       context.pop();
+    }
+  }
+
+  Future<void> _seedDemoData() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.darkSurface,
+        title: const Text('Load Demo Data?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'This will add sample workouts and session history. Existing data will not be overwritten.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Load Data'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirm != true) return;
+    
+    setState(() => _isSeeding = true);
+    
+    try {
+      final db = ref.read(appDatabaseProvider);
+      final seedService = SeedDataService(db);
+      await seedService.seedAll();
+      
+      // Invalidate providers to refresh data
+      ref.invalidate(workoutsStreamProvider);
+      ref.invalidate(nextWorkoutProvider);
+      ref.invalidate(currentUserProvider);
+      ref.invalidate(activityGridProvider);
+      ref.invalidate(isSetupCompleteProvider);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Demo data loaded successfully!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSeeding = false);
     }
   }
 

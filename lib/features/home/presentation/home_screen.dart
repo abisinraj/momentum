@@ -174,11 +174,12 @@ class HomeScreen extends ConsumerWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.4),
-                      Colors.black.withOpacity(0.95),
+                      Colors.black.withOpacity(0.5), // Darker at top for header visibility
+                      Colors.black.withOpacity(0.3), // Mid section slightly lighter
+                      Colors.black.withOpacity(0.7), // Darker toward bottom
+                      Colors.black.withOpacity(0.95), // Very dark at bottom for text
                     ],
-                    stops: const [0.4, 0.7, 1.0],
+                    stops: const [0.0, 0.3, 0.6, 1.0],
                   ),
                 ),
               ),
@@ -200,7 +201,7 @@ class HomeScreen extends ConsumerWidget {
                         color: Colors.black.withOpacity(0.6),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.5)),
-                        backdropFilter: null, // blur could be added effectively with ClipRRect
+                        // backdropFilter: null, // blur could be added effectively with ClipRRect
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -795,6 +796,15 @@ class HomeScreen extends ConsumerWidget {
         );
       },
     );
+  }
+
+  IconData _getWorkoutIcon(ClockType type) {
+    return switch (type) {
+      ClockType.none => Icons.fitness_center,
+      ClockType.stopwatch => Icons.timer_outlined,
+      ClockType.timer => Icons.hourglass_bottom,
+      ClockType.alarm => Icons.alarm,
+    };
   }
 }
 

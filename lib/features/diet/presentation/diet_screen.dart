@@ -7,6 +7,7 @@ import '../../../core/providers/database_providers.dart';
 import '../../../core/services/diet_service.dart';
 import '../../../core/services/settings_service.dart';
 import 'dart:io';
+import 'package:drift/drift.dart' as drift;
 
 class DietScreen extends ConsumerStatefulWidget {
   const DietScreen({super.key});
@@ -152,7 +153,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
   }
 
   Future<void> _logToDatabase(Map<String, dynamic> data) async {
-    final db = ref.read(databaseProvider);
+    final db = ref.watch(appDatabaseProvider);
     await db.addFoodLog(FoodLogsCompanion.insert(
       description: data['description'] ?? 'Unknown',
       calories: data['calories'] is int ? data['calories'] : int.tryParse(data['calories'].toString()) ?? 0,
@@ -219,7 +220,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     // Watch today's logs
     // We need a StreamProvider for this in database_providers.dart or just FutureBuilder here for MVP
     // Let's use a FutureBuilder that watches a stream locally or creating a quick ad-hoc stream
-    final db = ref.watch(databaseProvider);
+    final db = ref.watch(appDatabaseProvider);
     
     return FutureBuilder<List<FoodLog>>(
       future: db.getFoodLogsForDate(DateTime.now()),

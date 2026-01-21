@@ -87,15 +87,17 @@ class WorkoutManager extends _$WorkoutManager {
     required String shortCode,
     ClockType clockType = ClockType.none,
     Duration? timerDuration,
+    int? orderIndex, // If provided, use this; otherwise append at end
   }) async {
     final db = ref.read(appDatabaseProvider);
-    final workouts = await db.getAllWorkouts();
-    final nextIndex = workouts.isEmpty ? 0 : workouts.length;
+    
+    // If orderIndex not provided, append at end
+    final index = orderIndex ?? (await db.getAllWorkouts()).length;
     
     await db.addWorkout(WorkoutsCompanion.insert(
       name: name,
       shortCode: shortCode,
-      orderIndex: nextIndex,
+      orderIndex: index,
       clockType: Value(clockType),
       timerDurationSeconds: timerDuration != null 
           ? Value(timerDuration.inSeconds)

@@ -59,11 +59,19 @@ class MomentumWidgetProvider : AppWidgetProvider() {
             val streak = prefs.getInt("widget_streak", 0)
             val title = prefs.getString("widget_title", "No Workout") ?: "No Workout"
             val desc = prefs.getString("widget_desc", "Tap to view") ?: "Tap to view"
+            val nextWorkout = prefs.getString("widget_next_workout", "") ?: ""
             
             // Update views
             views.setTextViewText(R.id.widget_streak, "\uD83D\uDD25 $streak") // Fire emoji
             views.setTextViewText(R.id.widget_workout_name, title)
             views.setTextViewText(R.id.widget_workout_desc, desc)
+
+            if (nextWorkout.isNotEmpty()) {
+                views.setViewVisibility(R.id.widget_next_workout, android.view.View.VISIBLE)
+                views.setTextViewText(R.id.widget_next_workout, "Next: $nextWorkout")
+            } else {
+                views.setViewVisibility(R.id.widget_next_workout, android.view.View.GONE)
+            }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }

@@ -1,0 +1,127 @@
+Analyzing momentum...                                           
+
+   info • The import of 'package:flutter_riverpod/flutter_riverpod.dart' is unnecessary because all of the used elements are also provided by the import of 'package:riverpod_annotation/riverpod_annotation.dart' • lib/app/router.dart:3:8 • unnecessary_import
+warning • Duplicate import • lib/app/router.dart:16:8 • duplicate_import
+   info • Missing type annotation • lib/app/router.dart:119:17 • strict_top_level_inference
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:63:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:67:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:71:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:78:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:111:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:150:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:175:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:189:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:215:27 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/theme/app_theme.dart:222:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/skeleton_loader.dart:56:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/skeleton_loader.dart:75:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/app/widgets/skeleton_loader.dart:108:55 • deprecated_member_use
+warning • Dead code • lib/core/database/app_database.dart:537:49 • dead_code
+warning • The left operand can't be null, so the right operand is never executed • lib/core/database/app_database.dart:537:52 • dead_null_aware_expression
+warning • Dead code • lib/core/database/app_database.dart:569:43 • dead_code
+warning • The left operand can't be null, so the right operand is never executed • lib/core/database/app_database.dart:569:46 • dead_null_aware_expression
+warning • Unused import: '../app_database.dart' • lib/core/database/connection/connection_stub.dart:3:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/core/database/connection/web.dart:14:7 • avoid_print
+   info • Missing type annotation • lib/core/providers/core_providers.dart:10:26 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/core_providers.dart:17:26 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:9:25 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:17:30 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:24:27 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:31:38 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:38:44 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:45:30 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:52:44 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:59:44 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:66:38 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:73:30 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:80:51 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:87:59 • strict_top_level_inference
+warning • The value of 'refresh' should be used • lib/core/providers/workout_providers.dart:67:9 • unused_result
+   info • Unnecessary braces in a string interpolation • lib/core/services/ai_insights_service.dart:139:20 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/core/services/thumbnail_service.dart:87:9 • avoid_print
+warning • Unused import: 'package:flutter/services.dart' • lib/core/services/widget_service.dart:1:8 • unused_import
+warning • Unused import: 'package:shared_preferences/shared_preferences.dart' • lib/core/services/widget_service.dart:4:8 • unused_import
+warning • Unused import: '../database/app_database.dart' • lib/core/services/widget_service.dart:6:8 • unused_import
+warning • The value of the field '_groupId' isn't used • lib/core/services/widget_service.dart:11:23 • unused_field
+   info • Don't invoke 'print' in production code • lib/core/services/widget_service.dart:31:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/services/widget_service.dart:114:5 • avoid_print
+warning • The value of the local variable 'img' isn't used • lib/features/diet/presentation/diet_screen.dart:106:11 • unused_local_variable
+  error • Undefined name 'databaseProvider' • lib/features/diet/presentation/diet_screen.dart:156:25 • undefined_identifier
+  error • Undefined name 'databaseProvider' • lib/features/diet/presentation/diet_screen.dart:223:26 • undefined_identifier
+   info • Unnecessary use of string interpolation • lib/features/diet/presentation/diet_screen.dart:257:53 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/features/diet/presentation/diet_screen.dart:258:51 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/features/diet/presentation/diet_screen.dart:259:50 • unnecessary_string_interpolations
+   info • Unnecessary use of multiple underscores • lib/features/diet/presentation/diet_screen.dart:279:44 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/diet/presentation/diet_screen.dart:279:47 • unnecessary_underscores
+   info • Unnecessary use of 'toList' in a spread • lib/features/diet/presentation/diet_screen.dart:293:17 • unnecessary_to_list_in_spreads
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/diet/presentation/diet_screen.dart:304:105 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:153:26 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:159:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:178:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:179:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:200:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:202:72 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:391:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:511:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:520:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:521:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:577:55 • deprecated_member_use
+warning • The declaration '_showWorkoutSelectionDialog' isn't referenced • lib/features/home/presentation/home_screen.dart:733:20 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:738:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/home_screen.dart:831:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/info/presentation/info_screen.dart:141:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/info/presentation/info_screen.dart:212:54 • deprecated_member_use
+   info • Unnecessary use of multiple underscores • lib/features/info/presentation/info_screen.dart:219:41 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/info/presentation/info_screen.dart:219:45 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/info/presentation/info_screen.dart:287:66 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/info/presentation/info_screen.dart:396:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/info/presentation/info_screen.dart:425:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/progress/presentation/progress_screen.dart:99:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/progress/presentation/progress_screen.dart:101:66 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/progress/presentation/progress_screen.dart:278:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/progress/presentation/progress_screen.dart:598:32 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/progress/presentation/progress_screen.dart:599:32 • deprecated_member_use
+warning • The value of the local variable 'dateStr' isn't used • lib/features/progress/presentation/progress_screen.dart:635:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/progress/presentation/progress_screen.dart:646:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/progress/presentation/progress_screen.dart:655:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/progress/presentation/progress_screen.dart:673:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/settings/presentation/settings_screen.dart:165:56 • deprecated_member_use
+warning • Unused import: '../../../app/router.dart' • lib/features/setup/presentation/setup_screen.dart:5:8 • unused_import
+warning • Unused import: '../../../core/providers/workout_providers.dart' • lib/features/setup/presentation/setup_screen.dart:8:8 • unused_import
+warning • Unused import: '../../../core/database/app_database.dart' • lib/features/setup/presentation/setup_screen.dart:9:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/features/setup/presentation/setup_screen.dart:61:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/setup/presentation/setup_screen.dart:69:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/setup/presentation/setup_screen.dart:75:9 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/setup/presentation/setup_screen.dart:324:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/setup/presentation/setup_screen.dart:370:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/setup/presentation/setup_screen.dart:372:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/setup/presentation/setup_screen.dart:399:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/setup/presentation/setup_screen.dart:402:76 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/setup/presentation/setup_screen.dart:412:58 • deprecated_member_use
+warning • Unused import: '../../../core/providers/database_providers.dart' • lib/features/setup/presentation/split_setup_screen.dart:6:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/setup/presentation/split_setup_screen.dart:85:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/splash/presentation/splash_screen.dart:94:46 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/features/splash/presentation/splash_screen.dart:136:11 • avoid_print
+   info • The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/features/workout/presentation/active_workout_screen.dart:2:8 • unnecessary_import
+warning • Unused import: '../../../core/services/settings_service.dart' • lib/features/workout/presentation/active_workout_screen.dart:11:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/active_workout_screen.dart:400:58 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/active_workout_screen.dart:406:74 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/active_workout_screen.dart:486:86 • deprecated_member_use
+   info • Unnecessary escape in string literal • lib/features/workout/presentation/active_workout_screen.dart:503:65 • unnecessary_string_escapes
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/active_workout_screen.dart:671:33 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/features/workout/presentation/create_workout_screen.dart:189:11 • avoid_print
+warning • The value of the local variable 'workoutNotifier' isn't used • lib/features/workout/presentation/create_workout_screen.dart:201:11 • unused_local_variable
+   info • Unnecessary use of multiple underscores • lib/features/workout/presentation/create_workout_screen.dart:397:41 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/create_workout_screen.dart:552:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/workout_screen.dart:72:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/workout_screen.dart:441:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/workout_screen.dart:444:78 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/workout_screen.dart:539:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/workout/presentation/workout_screen.dart:545:41 • deprecated_member_use
+warning • Unused import: 'core/providers/database_providers.dart' • lib/main.dart:5:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/main.dart:16:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/main.dart:20:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/main.dart:34:7 • avoid_print
+  error • The name 'MyApp' isn't a class • test/widget_test.dart:16:35 • creation_with_non_type
+
+123 issues found. (ran in 1.4s)

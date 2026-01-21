@@ -15,11 +15,13 @@ class WidgetService {
     required int streak,
     required String title,
     required String desc,
+    String? nextWorkoutName,
   }) async {
     try {
       await HomeWidget.saveWidgetData('widget_streak', streak);
       await HomeWidget.saveWidgetData('widget_title', title);
       await HomeWidget.saveWidgetData('widget_desc', desc);
+      await HomeWidget.saveWidgetData('widget_next_workout', nextWorkoutName ?? '');
       
       await HomeWidget.updateWidget(
         name: _androidName,
@@ -81,10 +83,32 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     }
     
     // 3. Update Widget
+    String? nextWorkoutName;
+    
+    if (title == 'Session Complete' && nextWorkout != null) {
+      // Find the *next* workout in the cycle
+      // If current is index N, next is (N+1) % splitDays
+      // We can query all workouts and find the one with index + 1
+      final allWorkouts = await db.getAllWorkouts();
+      final user = await db.getUser();
+      if (user != null && allWorkouts.isNotEmpty) {
+        final currentSplitIndex = nextWorkout.orderIndex; // The one we just finished/checked
+        final splitDays = user.splitDays ?? allWorkouts.length;
+        final nextIndex = (currentSplitIndex + 1) % splitDays;
+        
+        final nextDayWorkout = allWorkouts.firstWhere(
+          (w) => w.orderIndex == nextIndex, 
+          orElse: () => allWorkouts.first
+        );
+        nextWorkoutName = nextDayWorkout.name;
+      }
+    }
+
     await widgetService.updateWidget(
       streak: streak,
       title: title,
       desc: desc,
+      nextWorkoutName: nextWorkoutName,
     );
   } catch (e) {
     print('Widget Sync Error: $e');

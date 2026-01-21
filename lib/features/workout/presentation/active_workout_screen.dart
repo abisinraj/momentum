@@ -339,6 +339,17 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     );
   }
 
+  Future<void> _startRestTimer(int exerciseId) async {
+    if (mounted) {
+      setState(() {
+        _restingExerciseId = exerciseId;
+        _restController.duration = const Duration(seconds: 90);
+        _restController.value = 1.0;
+        _restController.reverse();
+      });
+    }
+  }
+
   Future<void> _startCooldown(int exerciseId) async {
     if (mounted) {
       setState(() {

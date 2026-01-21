@@ -70,4 +70,16 @@
             
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/widget_next_workout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:text="Next: Leg Day"
+        android:textSize="10sp"
+        android:textColor="#B0BEC5"
+        android:visibility="gone"
+        android:layout_marginBottom="2dp" />
+
 </RelativeLayout>
