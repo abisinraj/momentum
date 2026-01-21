@@ -77,7 +77,7 @@ class HealthNotifier extends _$HealthNotifier {
   }
 
   Future<void> _checkAvailability() async {
-    final status = await _service.checkAvailability();
+    final status = await HealthConnectService.checkAvailability();
     final isAvailable = status == HealthConnectSdkStatus.sdkAvailable;
     
     if (isAvailable) {

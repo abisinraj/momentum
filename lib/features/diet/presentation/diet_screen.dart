@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/services/diet_service.dart';
-import '../../../core/services/settings_service.dart';
 import 'dart:io';
 import 'package:drift/drift.dart' as drift;
 
@@ -103,7 +102,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     final p = result['protein'] ?? 0;
     final c = result['carbs'] ?? 0;
     final f = result['fats'] ?? 0;
-    final img = result['imageUrl']; // transient
+    // imageUrl is stored in result for logging but not displayed here
 
     final responseText = "I found: **$desc**\n"
         "Calories: $cal kcal\n"

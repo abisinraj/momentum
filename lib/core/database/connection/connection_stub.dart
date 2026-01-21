@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 
-import '../app_database.dart';
 import 'connection.dart' as impl;
 
 /// Open database connection - delegates to platform-specific implementation

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_theme.dart';
-import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/user_providers.dart';
 
 /// Screen to select number of days in the split

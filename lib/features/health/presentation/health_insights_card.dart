@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:health/health.dart';
 import '../../../core/providers/health_connect_provider.dart';
-import '../../../app/theme/app_theme.dart';
 
 /// Card widget displaying health insights on the home screen.
 class HealthInsightsCard extends ConsumerWidget {

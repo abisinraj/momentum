@@ -632,9 +632,6 @@ class _SessionHistoryCard extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    final dateStr = completedAt != null 
-        ? _formatDate(completedAt!) 
-        : 'Unknown date';
     final durationStr = '${durationSeconds ~/ 60}m ${durationSeconds % 60}s';
     
     return Container(
@@ -716,16 +713,6 @@ class _SessionHistoryCard extends StatelessWidget {
         ],
       ),
     );
-  }
-  
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date).inDays;
-    
-    if (diff == 0) return 'Today';
-    if (diff == 1) return 'Yesterday';
-    if (diff < 7) return '${diff}d ago';
-    return '${date.day}/${date.month}';
   }
   
   String _getMonthAbbr(int month) {

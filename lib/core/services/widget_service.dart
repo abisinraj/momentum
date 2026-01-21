@@ -1,14 +1,10 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../database/app_database.dart';
 import '../providers/database_providers.dart';
 
 /// Service to sync data to Android Home Screen Widget
 class WidgetService {
-  static const String _groupId = 'group.momentum'; // For iOS App Groups if needed later
   static const String _androidName = 'MomentumWidgetProvider';
 
   Future<void> updateWidget({

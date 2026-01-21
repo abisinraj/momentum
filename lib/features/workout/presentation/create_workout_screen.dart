@@ -292,7 +292,8 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
 
   Future<void> _saveWorkout() async {
     final db = ref.read(appDatabaseProvider);
-    final workoutNotifier = ref.read(workoutManagerProvider.notifier);
+    // Note: WorkoutManager provides a convenient wrapper but we use db directly for now
+    final _ = ref.read(workoutManagerProvider.notifier);
     
     // Create workout
     final workoutId = await db.addWorkout(

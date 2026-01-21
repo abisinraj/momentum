@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/user_providers.dart';
-import '../../../core/providers/workout_providers.dart';
-import '../../../core/database/app_database.dart';
 
 /// One-time setup screen for first launch
 /// Design: Single page with goal presets

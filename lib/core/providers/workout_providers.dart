@@ -64,7 +64,7 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
     ref.invalidate(activityGridProvider);
     
     // Sync widget data
-    ref.refresh(widgetSyncProvider);
+    final _ = ref.refresh(widgetSyncProvider);
     
     state = null;
   }
