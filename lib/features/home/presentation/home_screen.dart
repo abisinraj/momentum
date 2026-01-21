@@ -48,7 +48,7 @@ class HomeScreen extends ConsumerWidget {
     
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +56,7 @@ class HomeScreen extends ConsumerWidget {
               // Header with greeting and notification bell
               _buildHeader(context, userName),
               
-              const Spacer(),
+              const SizedBox(height: 24),
               
               // Main workout content
               switch (nextWorkoutAsync) {
@@ -65,10 +65,12 @@ class HomeScreen extends ConsumerWidget {
                 _ => const WorkoutCardSkeleton(),
               },
               
-              const Spacer(),
+              const SizedBox(height: 24),
               
               // Bottom stats row
               _buildStatsRow(context, ref),
+              
+              const SizedBox(height: 20),
             ],
           ),
         ),
