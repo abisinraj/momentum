@@ -44,7 +44,14 @@ Future<List<int>> todayCompletedWorkoutIds(ref) async {
 @riverpod
 Future<Workout?> nextWorkout(ref) async {
   final db = ref.watch(appDatabaseProvider);
-  return db.getNextWorkout();
+  try {
+    final workout = await db.getNextWorkout();
+    print('[DEBUG] nextWorkoutProvider: got workout = ${workout?.name}');
+    return workout;
+  } catch (e, st) {
+    print('[DEBUG] nextWorkoutProvider ERROR: $e\n$st');
+    rethrow;
+  }
 }
 
 /// Provider for activity grid data (last N days)
