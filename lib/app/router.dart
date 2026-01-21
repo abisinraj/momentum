@@ -15,6 +15,8 @@ import '../features/splash/presentation/splash_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/diet/presentation/diet_screen.dart';
+import '../features/health/presentation/health_detail_screen.dart';
+import '../features/health/presentation/privacy_policy_screen.dart';
 import '../core/providers/database_providers.dart';
 
 part 'router.g.dart';
@@ -30,7 +32,9 @@ enum AppRoute {
   diet('/diet'),
   progress('/progress'),
   info('/info'),
-  settings('/settings');
+  settings('/settings'),
+  healthDetail('/health'),
+  privacyPolicy('/privacy');
 
   const AppRoute(this.path);
   final String path;
@@ -174,6 +178,18 @@ GoRouter router(ref) {
         path: AppRoute.settings.path,
         name: AppRoute.settings.name,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      
+      // Health Connect routes
+      GoRoute(
+        path: AppRoute.healthDetail.path,
+        name: AppRoute.healthDetail.name,
+        builder: (context, state) => const HealthDetailScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.privacyPolicy.path,
+        name: AppRoute.privacyPolicy.name,
+        builder: (context, state) => const PrivacyPolicyScreen(),
       ),
       
       // Main app shell with bottom navigation

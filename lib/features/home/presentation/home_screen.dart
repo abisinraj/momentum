@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +10,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/services/ai_insights_service.dart';
 import '../../workout/presentation/active_workout_screen.dart';
 import '../../../app/widgets/skeleton_loader.dart';
+import '../../health/presentation/health_insights_card.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Home screen - shows next workout in cycle with Momentum design
@@ -65,7 +68,12 @@ class HomeScreen extends ConsumerWidget {
                 _ => const WorkoutCardSkeleton(),
               },
               
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              
+              // Health Insights Card (from Health Connect)
+              const HealthInsightsCard(),
+              
+              const SizedBox(height: 16),
               
               // Bottom stats row
               _buildStatsRow(context, ref),
@@ -770,4 +778,4 @@ class HomeScreen extends ConsumerWidget {
       ClockType.alarm => Icons.alarm,
     };
   }
-
+}

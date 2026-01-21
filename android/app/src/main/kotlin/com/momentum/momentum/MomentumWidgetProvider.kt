@@ -26,7 +26,11 @@ class MomentumWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onEnabled(context: Context) {
-        // Widget first added to home screen
+        // Widget first added to home screen - force immediate update
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val componentName = android.content.ComponentName(context, MomentumWidgetProvider::class.java)
+        val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
+        onUpdate(context, appWidgetManager, appWidgetIds)
     }
 
     override fun onDisabled(context: Context) {

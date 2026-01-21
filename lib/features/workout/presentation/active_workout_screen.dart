@@ -340,10 +340,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   }
 
   Future<void> _startRestTimer(int exerciseId) async {
+    final service = ref.read(settingsServiceProvider);
+    final restSeconds = await service.getRestTimer();
     if (mounted) {
       setState(() {
         _restingExerciseId = exerciseId;
-        _restController.duration = const Duration(seconds: 90);
+        _restController.duration = Duration(seconds: restSeconds);
         _restController.value = 1.0;
         _restController.reverse();
       });

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/services/settings_service.dart';
-import '../../../core/services/seed_data.dart';
 import '../../../core/providers/database_providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -18,8 +17,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _unsplashController = TextEditingController();
   final _openaiController = TextEditingController();
   final _restTimerController = TextEditingController();
+  String _weightUnit = 'kg'; // 'kg' or 'lbs'
   bool _isLoading = true;
-  bool _isSeeding = false;
 
   @override
   void initState() {
@@ -33,6 +32,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final unsplash = await service.getUnsplashKey();
     final openai = await service.getOpenAiKey();
     final restTimer = await service.getRestTimer();
+    final weightUnit = await service.getWeightUnit();
 
     if (mounted) {
       setState(() {
@@ -40,6 +40,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _unsplashController.text = unsplash ?? '';
         _openaiController.text = openai ?? '';
         _restTimerController.text = restTimer.toString();
+        _weightUnit = weightUnit;
         _isLoading = false;
       });
     }
@@ -50,6 +51,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _pexelsController.dispose();
     _unsplashController.dispose();
     _openaiController.dispose();
+    _restTimerController.dispose();
     super.dispose();
   }
 
@@ -62,11 +64,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     
     final restTime = int.tryParse(_restTimerController.text.trim()) ?? 60;
     await service.setRestTimer(restTime);
+    await service.setWeightUnit(_weightUnit);
     
     // Invalidate providers
     ref.invalidate(pexelsApiKeyProvider);
     ref.invalidate(unsplashApiKeyProvider);
     ref.invalidate(restTimerProvider);
+    ref.invalidate(weightUnitProvider);
     
     if (mounted) {
       setState(() => _isLoading = false);
@@ -74,61 +78,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SnackBar(content: Text('Settings saved successfully')),
       );
       context.pop();
-    }
-  }
-
-  Future<void> _seedDemoData() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.darkSurface,
-        title: const Text('Load Demo Data?', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'This will add sample workouts and session history. Existing data will not be overwritten.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Load Data'),
-          ),
-        ],
-      ),
-    );
-    
-    if (confirm != true) return;
-    
-    setState(() => _isSeeding = true);
-    
-    try {
-      final db = ref.read(appDatabaseProvider);
-      final seedService = SeedDataService(db);
-      await seedService.seedAll();
-      
-      // Invalidate providers to refresh data
-      ref.invalidate(workoutsStreamProvider);
-      ref.invalidate(nextWorkoutProvider);
-      ref.invalidate(currentUserProvider);
-      ref.invalidate(activityGridProvider);
-      ref.invalidate(isSetupCompleteProvider);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Demo data loaded successfully!')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSeeding = false);
     }
   }
 
@@ -186,6 +135,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      icon: Icons.timer_outlined,
                      keyboardType: TextInputType.number,
                    ),
+                   const SizedBox(height: 16),
+                   _buildWeightUnitSelector(),
 
                    const SizedBox(height: 32),
                    
@@ -263,6 +214,84 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, color: AppTheme.textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWeightUnitSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Weight Unit',
+          style: TextStyle(
+            color: AppTheme.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: AppTheme.darkSurfaceContainer,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.3)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _weightUnit = 'kg'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: _weightUnit == 'kg'
+                          ? AppTheme.tealPrimary.withOpacity(0.2)
+                          : Colors.transparent,
+                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Kilograms (kg)',
+                        style: TextStyle(
+                          color: _weightUnit == 'kg'
+                              ? AppTheme.tealPrimary
+                              : AppTheme.textSecondary,
+                          fontWeight: _weightUnit == 'kg' ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _weightUnit = 'lbs'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: _weightUnit == 'lbs'
+                          ? AppTheme.tealPrimary.withOpacity(0.2)
+                          : Colors.transparent,
+                      borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Pounds (lbs)',
+                        style: TextStyle(
+                          color: _weightUnit == 'lbs'
+                              ? AppTheme.tealPrimary
+                              : AppTheme.textSecondary,
+                          fontWeight: _weightUnit == 'lbs' ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
