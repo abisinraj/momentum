@@ -16,8 +16,10 @@ class HealthConnectService {
   ];
   
   /// Check if Health Connect is available on this device.
-  Future<HealthConnectSdkStatus> checkAvailability() async {
-    return await Health().getHealthConnectSdkStatus();
+  static Future<HealthConnectSdkStatus> checkAvailability() async {
+    // Check if Health Connect is available
+    final status = await Health().getHealthConnectSdkStatus();
+    return status ?? HealthConnectSdkStatus.sdkUnavailable;
   }
   
   /// Request permissions for activity recognition (required for steps).

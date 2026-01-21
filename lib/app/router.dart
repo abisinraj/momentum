@@ -13,7 +13,6 @@ import '../features/setup/presentation/setup_screen.dart';
 import '../features/setup/presentation/split_setup_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
-import '../features/settings/presentation/settings_screen.dart';
 import '../features/diet/presentation/diet_screen.dart';
 import '../features/health/presentation/health_detail_screen.dart';
 import '../features/health/presentation/privacy_policy_screen.dart';
