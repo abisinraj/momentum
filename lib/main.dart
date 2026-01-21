@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
-import 'core/providers/database_providers.dart';
-
-import 'dart:async';
-import 'package:flutter/foundation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,11 +9,11 @@ Future<void> main() async {
   // Global error handling
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    print('Flutter Error: ${details.exception}\n${details.stack}');
+    debugPrint('Flutter Error: ${details.exception}\n${details.stack}');
   };
   
   PlatformDispatcher.instance.onError = (error, stack) {
-    print('Platform Error: $error\n$stack');
+    debugPrint('Platform Error: $error\n$stack');
     return true;
   };
 

@@ -7,6 +7,7 @@ import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import 'active_workout_screen.dart';
+import 'create_workout_screen.dart';
 
 /// Workout screen - shows list of workouts with completion states
 /// Design: Date header, focus subtitle, workout cards with status badges
@@ -631,7 +632,7 @@ class _WorkoutCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title row with play button
+                  // Title row with menu
                   Row(
                     children: [
                       Expanded(
@@ -645,18 +646,53 @@ class _WorkoutCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (!isCompleted)
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: AppTheme.tealPrimary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.play_arrow,
-                            color: AppTheme.darkBackground,
-                            size: 20,
+                      // Edit/Delete Menu (Only if not locked)
+                      if (!isLocked)
+                        SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: PopupMenuButton<String>(
+                            icon: Icon(Icons.more_vert, color: AppTheme.textSecondary, size: 20),
+                            color: AppTheme.darkSurfaceContainerHigh,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                // Navigate to edit
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => CreateWorkoutScreen(
+                                      index: index + 1,
+                                      totalDays: total,
+                                      existingWorkout: workout,
+                                    ),
+                                  ),
+                                );
+                              } else if (value == 'delete') {
+                                onDelete();
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit_outlined, size: 20, color: Colors.white),
+                                    SizedBox(width: 12),
+                                    Text('Edit', style: TextStyle(color: Colors.white)),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                                    SizedBox(width: 12),
+                                    Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                     ],
@@ -698,14 +734,22 @@ class _WorkoutCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      Text(
-                        '${index + 1}/$total',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: AppTheme.textMuted,
+                      
+                      // Play button (miniature) if not completed/active
+                      if (!isCompleted && !isActive)
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: AppTheme.tealPrimary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.play_arrow,
+                            color: AppTheme.darkBackground,
+                            size: 16,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ],

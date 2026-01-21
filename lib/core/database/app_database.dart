@@ -169,6 +169,10 @@ class AppDatabase extends _$AppDatabase {
   /// Delete an exercise
   Future<int> deleteExercise(int id) =>
       (delete(exercises)..where((e) => e.id.equals(id))).go();
+
+  /// Delete all exercises for a workout (used when updating)
+  Future<int> deleteExercisesForWorkout(int workoutId) =>
+      (delete(exercises)..where((e) => e.workoutId.equals(workoutId))).go();
   
   // ===== Workout Operations =====
   

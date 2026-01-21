@@ -46,10 +46,9 @@ Future<Workout?> nextWorkout(ref) async {
   final db = ref.watch(appDatabaseProvider);
   try {
     final workout = await db.getNextWorkout();
-    print('[DEBUG] nextWorkoutProvider: got workout = ${workout?.name}');
     return workout;
   } catch (e, st) {
-    print('[DEBUG] nextWorkoutProvider ERROR: $e\n$st');
+    debugPrint('[DEBUG] nextWorkoutProvider ERROR: $e\n$st');
     rethrow;
   }
 }

@@ -14,11 +14,13 @@ import '../../../core/services/thumbnail_service.dart';
 class CreateWorkoutScreen extends ConsumerStatefulWidget {
   final int index; // 1-based index
   final int totalDays;
+  final Workout? existingWorkout; // NEW: Optional workout to edit
 
   const CreateWorkoutScreen({
     super.key,
     required this.index,
     required this.totalDays,
+    this.existingWorkout,
   });
 
   @override
@@ -34,6 +36,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   String _searchQuery = '';
   ClockType _selectedClock = ClockType.stopwatch;
   bool _isSaving = false;
+  bool _isLoading = false; // To show loading spinner during exercise fetch
   final List<({String name, int sets, int reps})> _exercises = [];
   
   // Exercise inputs
@@ -42,12 +45,54 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   final _repsController = TextEditingController(text: '10');
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.existingWorkout != null) {
+      _loadExistingData();
+    }
+  }
+
+  Future<void> _loadExistingData() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      final w = widget.existingWorkout!;
+      _nameController.text = w.name;
+      _selectedThumbnail = w.thumbnailUrl;
+      _selectedClock = w.clockType;
+      
+      // Fetch exercises
+      final db = ref.read(appDatabaseProvider);
+      final exercises = await db.getExercisesForWorkout(w.id);
+      
+      if (mounted) {
+        setState(() {
+          for (var e in exercises) {
+            _exercises.add((name: e.name, sets: e.sets, reps: e.reps));
+          }
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading workout data: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: AppTheme.darkBackground,
+        body: Center(child: CircularProgressIndicator(color: AppTheme.tealPrimary)),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text('Workout ${widget.index} of ${widget.totalDays}'),
+        title: Text(widget.existingWorkout != null ? 'Edit Workout' : 'Workout ${widget.index} of ${widget.totalDays}'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -118,7 +163,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                         )
                       : Text(
                           _currentStep == 3 
-                              ? (widget.index < widget.totalDays ? 'Next Workout' : 'Finish Split')
+                              ? (widget.existingWorkout != null ? 'Save Changes' : (widget.index < widget.totalDays ? 'Next Workout' : 'Finish Split'))
                               : 'Continue',
                         ),
                 ),
@@ -153,11 +198,18 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
       
       try {
         // Save and proceed
-        await _saveWorkout();
+        if (widget.existingWorkout != null) {
+          await _updateWorkout();
+        } else {
+          await _saveWorkout();
+        }
         
         if (!mounted) return;
         
-        if (widget.index < widget.totalDays) {
+        if (widget.existingWorkout != null) {
+          // Just pop if editing
+          Navigator.of(context).pop();
+        } else if (widget.index < widget.totalDays) {
           // Go to next workout creation
           context.push('/create-workout/${widget.index + 1}/${widget.totalDays}');
         } else {
@@ -206,6 +258,38 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
     }
   }
 
+  Future<void> _updateWorkout() async {
+    final db = ref.read(appDatabaseProvider);
+    final w = widget.existingWorkout!;
+    
+    // Update workout details
+    await db.updateWorkout(w.toCompanion(true).copyWith(
+      name: drift.Value(_nameController.text.trim()),
+      shortCode: drift.Value(_nameController.text.trim()[0].toUpperCase()),
+      thumbnailUrl: drift.Value(_selectedThumbnail),
+      clockType: drift.Value(_selectedClock),
+    ));
+    
+    // Replace exercises (Delete all + Re-insert)
+    await db.deleteExercisesForWorkout(w.id);
+    
+    for (int i = 0; i < _exercises.length; i++) {
+        final ex = _exercises[i];
+        await db.addExercise(
+          ExercisesCompanion(
+            workoutId: drift.Value(w.id),
+            name: drift.Value(ex.name),
+            sets: drift.Value(ex.sets),
+            reps: drift.Value(ex.reps),
+            orderIndex: drift.Value(i),
+          ),
+        );
+      }
+      
+    // Refresh workout list
+    ref.invalidate(workoutsStreamProvider);
+  }
+
   Future<void> _saveWorkout() async {
     final db = ref.read(appDatabaseProvider);
     final workoutNotifier = ref.read(workoutManagerProvider.notifier);
@@ -216,7 +300,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
         name: drift.Value(_nameController.text.trim()),
         shortCode: drift.Value(_nameController.text.trim()[0].toUpperCase()),
         thumbnailUrl: drift.Value(_selectedThumbnail),
-        orderIndex: drift.Value(widget.index - 1),
+        orderIndex: drift.Value(widget.index - 1), // 0-based index
         clockType: drift.Value(_selectedClock),
       ),
     );
@@ -241,37 +325,44 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
 
   // STEP 1: Name
   Widget _buildNameStep() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'What\'s this workout called?',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'What\'s this workout called?',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                TextField(
+                  controller: _nameController,
+                  style: TextStyle(fontSize: 24, color: AppTheme.textPrimary),
+                  textAlign: TextAlign.center,
+                  maxLength: 50, // Prevent database overflow (Drift limit is 100, we stay safer)
+                  decoration: InputDecoration(
+                    hintText: 'e.g., Pull Day',
+                    hintStyle: TextStyle(color: AppTheme.textMuted),
+                    border: InputBorder.none,
+                    counterText: "", // Hide character counter for cleaner look
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                  onChanged: (_) => setState(() {}),
+                ),
+              ],
             ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
-          TextField(
-            controller: _nameController,
-            style: TextStyle(fontSize: 24, color: AppTheme.textPrimary),
-            textAlign: TextAlign.center,
-            maxLength: 50, // Prevent database overflow (Drift limit is 100, we stay safer)
-            decoration: InputDecoration(
-              hintText: 'e.g., Pull Day',
-              hintStyle: TextStyle(color: AppTheme.textMuted),
-              border: InputBorder.none,
-              counterText: "", // Hide character counter for cleaner look
-            ),
-            textCapitalization: TextCapitalization.words,
-            onChanged: (_) => setState(() {}),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -385,117 +476,105 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   }
 
   // STEP 3: Exercises
+  // STEP 3: Exercises
   Widget _buildExercisesStep() {
-    return Column(
-      children: [
-        Expanded(
-          child: _exercises.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.fitness_center, size: 64, color: AppTheme.textMuted),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Empty Workout',
-                        style: TextStyle(color: AppTheme.textSecondary),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(24),
-                  itemCount: _exercises.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final ex = _exercises[index];
-                    return ListTile(
-                      tileColor: AppTheme.darkSurfaceContainer,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      title: Text(ex.name, style: TextStyle(color: AppTheme.textPrimary)),
-                      subtitle: Text('${ex.sets} sets x ${ex.reps} reps',
-                          style: TextStyle(color: AppTheme.textSecondary)),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                        onPressed: () => setState(() => _exercises.removeAt(index)),
-                      ),
-                    );
-                  },
+    return ListView.separated(
+      padding: const EdgeInsets.all(24),
+      // +1 for the "Add Exercise" form at the end
+      itemCount: _exercises.length + 1,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        // If it's the last item, render the Add Form
+        if (index == _exercises.length) {
+          return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppTheme.darkSurfaceContainer,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Add Exercise',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                 ),
-        ),
-        // Add form
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: AppTheme.darkSurfaceContainer,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: TextField(
+                        controller: _exNameController,
+                        style: TextStyle(color: AppTheme.textPrimary),
+                        decoration: InputDecoration(
+                          labelText: 'Exercise Name',
+                          filled: true,
+                          fillColor: AppTheme.darkBackground,
+                        ),
+                        textCapitalization: TextCapitalization.sentences,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _setsController,
+                        style: TextStyle(color: AppTheme.textPrimary),
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Sets',
+                          filled: true,
+                          fillColor: AppTheme.darkBackground,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _repsController,
+                        style: TextStyle(color: AppTheme.textPrimary),
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Reps',
+                          filled: true,
+                          fillColor: AppTheme.darkBackground,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton.filled(
+                      onPressed: _addExercise,
+                      icon: const Icon(Icons.add),
+                      style: IconButton.styleFrom(backgroundColor: AppTheme.tealPrimary),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }
+        
+        // Otherwise render the exercise tile
+        final ex = _exercises[index];
+        return ListTile(
+          tileColor: AppTheme.darkSurfaceContainer,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: Text(ex.name, style: TextStyle(color: AppTheme.textPrimary)),
+          subtitle: Text('${ex.sets} sets x ${ex.reps} reps',
+              style: TextStyle(color: AppTheme.textSecondary)),
+          trailing: IconButton(
+            icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+            onPressed: () => setState(() => _exercises.removeAt(index)),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Add Exercise',
-                style: TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: _exNameController,
-                      style: TextStyle(color: AppTheme.textPrimary),
-                      decoration: InputDecoration(
-                        labelText: 'Exercise Name',
-                        filled: true,
-                        fillColor: AppTheme.darkBackground,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _setsController,
-                      style: TextStyle(color: AppTheme.textPrimary),
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Sets',
-                        filled: true,
-                        fillColor: AppTheme.darkBackground,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _repsController,
-                      style: TextStyle(color: AppTheme.textPrimary),
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Reps',
-                        filled: true,
-                        fillColor: AppTheme.darkBackground,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  IconButton.filled(
-                    onPressed: _addExercise,
-                    icon: const Icon(Icons.add),
-                    style: IconButton.styleFrom(backgroundColor: AppTheme.tealPrimary),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
   
@@ -514,7 +593,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
 
   // STEP 4: Clock
   Widget _buildClockStep() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

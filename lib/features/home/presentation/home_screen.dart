@@ -143,7 +143,7 @@ class HomeScreen extends ConsumerWidget {
     }
     
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (context, _) {
         // Calculate responsive minHeight based on screen
         final screenHeight = MediaQuery.of(context).size.height;
         final responsiveMinHeight = (screenHeight * 0.55).clamp(350.0, 550.0);
@@ -469,7 +469,10 @@ class HomeScreen extends ConsumerWidget {
           workoutName: workout.name,
           progressData: progressData,
         ).timeout(const Duration(seconds: 3), onTimeout: () => null);
-      } catch (_) {
+      } on TimeoutException catch (_) {
+        aiInsight = null;
+      } on Exception catch (e) {
+        debugPrint('AI Insight Error: $e');
         aiInsight = null;
       }
       
@@ -767,108 +770,4 @@ class HomeScreen extends ConsumerWidget {
       ClockType.alarm => Icons.alarm,
     };
   }
-}
 
-class _SelectionCard extends StatelessWidget {
-  final Workout workout;
-  final int index;
-  final VoidCallback onTap;
-  
-  const _SelectionCard({
-    required this.workout,
-    required this.index,
-    required this.onTap,
-  });
-  
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppTheme.darkSurfaceContainer,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.darkBorder.withOpacity(0.5)),
-        ),
-        child: Row(
-          children: [
-            // Mini gradient icon
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: _getGradientColors(index),
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                _getWorkoutIcon(workout.clockType),
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    workout.name,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    _getSubtitle(workout),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, color: AppTheme.textMuted),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  String _getSubtitle(Workout workout) {
-    return switch (workout.clockType) {
-      ClockType.none => 'Freestyle',
-      ClockType.stopwatch => 'Stopwatch',
-      ClockType.timer => workout.timerDurationSeconds != null
-          ? '${workout.timerDurationSeconds! ~/ 60} min'
-          : 'Timer',
-      ClockType.alarm => 'Alarm',
-    };
-  }
-  
-  IconData _getWorkoutIcon(ClockType type) {
-    return switch (type) {
-      ClockType.none => Icons.fitness_center,
-      ClockType.stopwatch => Icons.timer_outlined,
-      ClockType.timer => Icons.hourglass_bottom,
-      ClockType.alarm => Icons.alarm,
-    };
-  }
-  
-  List<Color> _getGradientColors(int index) {
-    final gradients = [
-      [const Color(0xFF4A00E0), const Color(0xFF8E2DE2)], // Purple
-      [const Color(0xFF00B4DB), const Color(0xFF0083B0)], // Blue
-      [const Color(0xFFE91E63), const Color(0xFF9C27B0)], // Pink
-      [const Color(0xFF00D9B8), const Color(0xFF00A88A)], // Teal
-    ];
-    return gradients[index % gradients.length];
-  }
-}
