@@ -104,7 +104,7 @@ final todayCompletedWorkoutIdsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef TodayCompletedWorkoutIdsRef = AutoDisposeFutureProviderRef<List<int>>;
-String _$nextWorkoutHash() => r'e44cb96d7ea50c5186ff8bc274589edf44eb4633';
+String _$nextWorkoutHash() => r'd3aa3afa40c9f6e22cea028e934f6b5c1c431f90';
 
 /// Provider for the next workout in the cycle
 ///

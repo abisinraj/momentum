@@ -25,7 +25,7 @@ final activeWorkoutSessionProvider =
     );
 
 typedef _$ActiveWorkoutSession = AutoDisposeNotifier<ActiveSession?>;
-String _$workoutManagerHash() => r'4853088a5e66e800a3998a81392000663871d0af';
+String _$workoutManagerHash() => r'0ddad0209420097d9bc7a6731daddbc2d88ec630';
 
 /// Provider for adding a new workout
 ///

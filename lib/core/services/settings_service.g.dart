@@ -74,5 +74,22 @@ final restTimerProvider = AutoDisposeFutureProvider<int>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef RestTimerRef = AutoDisposeFutureProviderRef<int>;
+String _$weightUnitHash() => r'8a4bf16514276e46f84fc01e5250b45d27afa067';
+
+/// See also [weightUnit].
+@ProviderFor(weightUnit)
+final weightUnitProvider = AutoDisposeFutureProvider<String>.internal(
+  weightUnit,
+  name: r'weightUnitProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$weightUnitHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef WeightUnitRef = AutoDisposeFutureProviderRef<String>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

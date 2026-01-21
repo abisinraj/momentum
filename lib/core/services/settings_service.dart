@@ -9,6 +9,7 @@ class SettingsService {
   static const String _keyUnsplash = 'api_key_unsplash';
   static const String _keyOpenAi = 'api_key_openai';
   static const String _keyRestTimer = 'rest_timer_seconds';
+  static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
 
   Future<void> setRestTimer(int seconds) async {
     final prefs = await SharedPreferences.getInstance();
@@ -49,6 +50,16 @@ class SettingsService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyOpenAi);
   }
+
+  Future<void> setWeightUnit(String unit) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyWeightUnit, unit);
+  }
+
+  Future<String> getWeightUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyWeightUnit) ?? 'kg'; // Default kg
+  }
 }
 
 @riverpod
@@ -69,4 +80,9 @@ Future<String?> unsplashApiKey(Ref ref) async {
 @riverpod
 Future<int> restTimer(Ref ref) async {
   return ref.watch(settingsServiceProvider).getRestTimer();
+}
+
+@riverpod
+Future<String> weightUnit(Ref ref) async {
+  return ref.watch(settingsServiceProvider).getWeightUnit();
 }
