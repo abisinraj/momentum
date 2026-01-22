@@ -13,7 +13,7 @@ import '../../../app/widgets/skeleton_loader.dart';
 import '../../health/presentation/health_insights_card.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../home/presentation/widgets/ai_insights_card.dart';
-import '../../home/presentation/widgets/muscle_heatmap_widget.dart';
+import '../../home/presentation/widgets/ai_insights_card.dart';
 import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/recovery_score_card.dart';
 import '../../home/presentation/widgets/volume_load_widget.dart';
@@ -110,9 +110,11 @@ class HomeScreen extends ConsumerWidget {
               _buildVolumeCard(ref),
               const SizedBox(height: 16),
               
-              // 3. Muscle Heatmap
-              _buildHeatmap(ref),
+              // 2. Volume Load
+              _buildVolumeCard(ref),
               const SizedBox(height: 16),
+              
+              // Heatmap moved to Profile
               
               // 4. Consistency Grid
               _buildConsistencyGrid(ref),
@@ -886,15 +888,6 @@ class HomeScreen extends ConsumerWidget {
         currentWeekVolume: data[0],
         lastWeekVolume: data[1],
       ),
-      loading: () => const SizedBox.shrink(),
-      error: (_,__) => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildHeatmap(WidgetRef ref) {
-    final heatmapAsync = ref.watch(muscleWorkloadProvider);
-    return heatmapAsync.when(
-      data: (data) => MuscleHeatmapWidget(muscleWorkload: data),
       loading: () => const SizedBox.shrink(),
       error: (_,__) => const SizedBox.shrink(),
     );

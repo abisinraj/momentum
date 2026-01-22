@@ -6,6 +6,8 @@ import '../../../app/router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/providers/dashboard_providers.dart';
+import '../../home/presentation/widgets/particle_man_widget.dart';
 
 /// Info screen - profile, settings, and data management
 /// Design: Profile avatar, stats row, Google Drive backup, preferences
@@ -192,6 +194,21 @@ class InfoScreen extends ConsumerWidget {
         ),
         
         const SizedBox(height: 24),
+        
+        // 3D Muscle Status (Particle Man)
+        Consumer(
+          builder: (context, ref, child) {
+            final workloadAsync = ref.watch(muscleWorkloadProvider);
+            return workloadAsync.when(
+              data: (data) => Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: ParticleManWidget(muscleWorkload: data),
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_,__) => const SizedBox.shrink(),
+            );
+          },
+        ),
         
         // Data Management section
         _buildSectionLabel('DATA MANAGEMENT'),

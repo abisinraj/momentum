@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/services/settings_service.dart';
+import '../../../core/services/thumbnail_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -63,6 +64,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Invalidate providers
     ref.invalidate(pexelsApiKeyProvider);
     ref.invalidate(unsplashApiKeyProvider);
+    ref.invalidate(thumbnailServiceProvider); // Force recreate to pick up new keys
     
     if (mounted) {
       setState(() => _isLoading = false);
@@ -103,6 +105,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    ),
                    const SizedBox(height: 12),
                    _buildSettingsTile(
+                     icon: Icons.widgets_outlined,
+                     iconColor: Colors.blueAccent,
+                     title: 'Home Screen Widget',
+                     subtitle: 'Customize appearance',
+                     onTap: () {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text('Widget settings coming soon')),
+                       );
+                     },
+                   ),
+                   const SizedBox(height: 12),
+                   _buildSettingsTile(
                      icon: Icons.notifications_outlined,
                      iconColor: AppTheme.yellowAccent,
                      title: 'Notifications',
@@ -110,6 +124,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      onTap: () {
                        ScaffoldMessenger.of(context).showSnackBar(
                          const SnackBar(content: Text('Notification settings coming soon')),
+                       );
+                     },
+                   ),
+                   const SizedBox(height: 12),
+                   _buildSettingsTile(
+                     icon: Icons.widgets_outlined,
+                     iconColor: Colors.blueAccent,
+                     title: 'Home Screen Widget',
+                     subtitle: 'Customize appearance',
+                     onTap: () {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text('Widget settings coming soon')),
                        );
                      },
                    ),

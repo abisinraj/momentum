@@ -28,13 +28,13 @@ final isSetupCompleteSyncProvider = AutoDisposeProvider<bool>.internal(
 // ignore: unused_element
 typedef IsSetupCompleteSyncRef = AutoDisposeProviderRef<bool>;
 String _$currentCyclePositionHash() =>
-    r'a1ac4bfe02b71010c68ec07871c75497aea29df0';
+    r'6f943248f2b2d405e5f36b188650d4c0491c074c';
 
 /// Provider for current cycle position
 ///
 /// Copied from [currentCyclePosition].
 @ProviderFor(currentCyclePosition)
-final currentCyclePositionProvider = AutoDisposeProvider<int>.internal(
+final currentCyclePositionProvider = AutoDisposeFutureProvider<int>.internal(
   currentCyclePosition,
   name: r'currentCyclePositionProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -46,6 +46,6 @@ final currentCyclePositionProvider = AutoDisposeProvider<int>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef CurrentCyclePositionRef = AutoDisposeProviderRef<int>;
+typedef CurrentCyclePositionRef = AutoDisposeFutureProviderRef<int>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
