@@ -45,6 +45,7 @@ class Exercises extends Table {
   TextColumn get name => text()();
   IntColumn get sets => integer().withDefault(const Constant(3))();
   IntColumn get reps => integer().withDefault(const Constant(10))();
+  TextColumn get primaryMuscleGroup => text().nullable()(); // e.g., "Chest", "Back", "Legs"
   IntColumn get orderIndex => integer()();
 }
 
@@ -64,7 +65,8 @@ class SessionExercises extends Table {
   IntColumn get exerciseId => integer().references(Exercises, #id, onDelete: KeyAction.cascade)();
   IntColumn get completedSets => integer().withDefault(const Constant(0))();
   IntColumn get completedReps => integer().withDefault(const Constant(0))(); // Total reps done
-  TextColumn get notes => text().nullable()(); // User notes like "felt easy", "used 20kg"
+  RealColumn get weightKg => real().nullable()(); // Weight used (kg)
+  TextColumn get notes => text().nullable()(); // User notes like "felt easy"
 }
 
 /// FoodLogs table - stores nutrition data
@@ -85,7 +87,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 7;
   
   @override
   MigrationStrategy get migration {
@@ -120,6 +122,15 @@ class AppDatabase extends _$AppDatabase {
           // Schema v5 changes:
           // Create FoodLogs table
           await m.createTable(foodLogs);
+        }
+          // Schema v6 changes:
+          // Add primaryMuscleGroup to exercises
+          await m.addColumn(exercises, exercises.primaryMuscleGroup);
+        }
+        if (from < 7) {
+          // Schema v7 changes:
+          // Add weightKg to session_exercises
+          await m.addColumn(sessionExercises, sessionExercises.weightKg);
         }
       },
     );
@@ -352,6 +363,84 @@ class AppDatabase extends _$AppDatabase {
     return grid;
   }
   
+  /// Get muscle workload for heatmap (last N days)
+  /// Returns Map<MuscleName, IntensityScore> where score is approx sets/volume
+  Future<Map<String, int>> getMuscleWorkload(int days) async {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day).subtract(Duration(days: days));
+    
+    // Join Sessions -> SessionExercises -> Exercises
+    final query = select(sessionExercises)
+        .join([
+          innerJoin(sessions, sessions.id.equalsExp(sessionExercises.sessionId)),
+          innerJoin(exercises, exercises.id.equalsExp(sessionExercises.exerciseId)),
+        ])
+        ..where(sessions.startedAt.isBiggerOrEqualValue(start));
+        
+    final result = await query.get();
+    
+    final Map<String, int> workload = {};
+    
+    for (final row in result) {
+      final exercise = row.readTable(exercises);
+      final sessionExercise = row.readTable(sessionExercises);
+      final muscle = exercise.primaryMuscleGroup;
+      
+      if (muscle != null && muscle.isNotEmpty) {
+        // Simple scoring: 1 point per set
+        final sets = sessionExercise.completedSets;
+        workload[muscle] = (workload[muscle] ?? 0) + sets;
+      }
+    }
+    
+    return workload;
+  }
+  
+  /// Get volume load for a specific period
+  /// Returns total volume (kg * reps * sets)
+  Future<double> getVolumeLoad(int days, {int offsetDays = 0}) async {
+    final now = DateTime.now();
+    // End date is today minus offset
+    final end = DateTime(now.year, now.month, now.day).subtract(Duration(days: offsetDays));
+    final effectiveEnd = end.add(const Duration(days: 1)); // inclusive end day
+    
+    // Start date is end minus duration
+    final start = end.subtract(Duration(days: days));
+    
+    // Join Sessions -> SessionExercises
+    final query = select(sessionExercises)
+        .join([
+          innerJoin(sessions, sessions.id.equalsExp(sessionExercises.sessionId)),
+        ])
+        ..where(sessions.startedAt.isBiggerOrEqualValue(start) & 
+                sessions.startedAt.isSmallerThanValue(effectiveEnd));
+                
+    final result = await query.get();
+    
+    // Need user weight for bodyweight calc
+    final user = await getUser();
+    final userWeight = user?.weightKg ?? 70.0;
+    
+    double totalVolume = 0;
+    
+    for (final row in result) {
+      final se = row.readTable(sessionExercises);
+      
+      final weight = se.weightKg ?? (userWeight * 0.8); // Default to bodyweight*0.8 if no weight specified? 
+      // Or should we strict check? 
+      // For now, if weightKg is null, we assume bodyweight exercise.
+      
+      totalVolume += weight * se.completedReps; 
+      // Note: completedReps usually is Total reps (Sets * Reps per set) if tracked that way
+      // But looking at SessionExercises logic: `completedSets` and `completedReps`.
+      // If `completedReps` is TOTAL reps, then `weight * reps` is correct.
+      // If `completedReps` is average reps per set (unlikely), need to multiply by sets.
+      // Based on schema comments: "Total reps done". So just weight * reps.
+    }
+    
+    return totalVolume;
+  }
+
   // ===== Cycle Logic =====
   
   /// Get the current user's split index

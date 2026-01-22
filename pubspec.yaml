@@ -45,6 +45,9 @@ dependencies:
   permission_handler: ^11.3.0
   google_generative_ai: ^0.4.7
   shimmer: ^3.0.0
+  heart_bpm: ^2.0.0+0
+  camera: ^0.10.6
+  percent_indicator: ^4.2.5
 
 dev_dependencies:
   flutter_test:

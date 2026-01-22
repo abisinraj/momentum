@@ -13,6 +13,12 @@ import '../../../app/widgets/skeleton_loader.dart';
 import '../../health/presentation/health_insights_card.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../home/presentation/widgets/ai_insights_card.dart';
+import '../../home/presentation/widgets/muscle_heatmap_widget.dart';
+import '../../home/presentation/widgets/consistency_grid_widget.dart';
+import '../../home/presentation/widgets/recovery_score_card.dart';
+import '../../home/presentation/widgets/volume_load_widget.dart';
+import '../../../core/providers/dashboard_providers.dart';
+import '../../../core/providers/health_connect_provider.dart';
 
 /// Home screen - shows next workout in cycle with Momentum design
 class HomeScreen extends ConsumerWidget {
@@ -85,12 +91,37 @@ class HomeScreen extends ConsumerWidget {
               
               const SizedBox(height: 16),
               
+              const SizedBox(height: 16),
+              
               // Health Insights Card (from Health Connect)
               const HealthInsightsCard(),
+
+              const SizedBox(height: 32),
+              
+              // === DASHBOARD 2.0 ===
+              _buildSectionHeader("ANALYTICS"),
+              const SizedBox(height: 16),
+              
+              // 1. Recovery Score
+              _buildRecoveryCard(ref),
+              const SizedBox(height: 16),
+              
+              // 2. Volume Load
+              _buildVolumeCard(ref),
+              const SizedBox(height: 16),
+              
+              // 3. Muscle Heatmap
+              _buildHeatmap(ref),
+              const SizedBox(height: 16),
+              
+              // 4. Consistency Grid
+              _buildConsistencyGrid(ref),
               
               const SizedBox(height: 16),
               
-              // Bottom stats row
+              // Bottom stats row (Existing - maybe redundant now? Let's keep for day-specific stats)
+              _buildSectionHeader("THIS WEEK"),
+              const SizedBox(height: 16),
               _buildStatsRow(context, ref),
               
               const SizedBox(height: 20),
@@ -816,5 +847,65 @@ class HomeScreen extends ConsumerWidget {
       ClockType.timer => Icons.hourglass_bottom,
       ClockType.alarm => Icons.alarm,
     };
+  }
+  
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 2.0,
+          color: AppTheme.tealPrimary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecoveryCard(WidgetRef ref) {
+    final healthState = ref.watch(healthNotifierProvider);
+    // ignore: unused_local_variable
+    final volumeAsync = ref.watch(volumeLoadProvider);
+    
+    final sleepDuration = healthState.lastNightSleep ?? const Duration(hours: 0);
+    
+    return RecoveryScoreCard(
+      sleepHours: sleepDuration.inHours,
+      workoutsLast3Days: 1, // TODO: Connect to real query
+      isRestDay: false, 
+    );
+  }
+
+  Widget _buildVolumeCard(WidgetRef ref) {
+    final volumeAsync = ref.watch(volumeLoadProvider);
+    
+    return volumeAsync.when(
+      data: (data) => VolumeLoadWidget(
+        currentWeekVolume: data[0],
+        lastWeekVolume: data[1],
+      ),
+      loading: () => const SizedBox.shrink(),
+      error: (_,__) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildHeatmap(WidgetRef ref) {
+    final heatmapAsync = ref.watch(muscleWorkloadProvider);
+    return heatmapAsync.when(
+      data: (data) => MuscleHeatmapWidget(muscleWorkload: data),
+      loading: () => const SizedBox.shrink(),
+      error: (_,__) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildConsistencyGrid(WidgetRef ref) {
+    final gridAsync = ref.watch(activityGridProvider);
+    return gridAsync.when(
+      data: (data) => ConsistencyGridWidget(activityData: data),
+      loading: () => const SizedBox.shrink(),
+      error: (_,__) => const SizedBox.shrink(),
+    );
   }
 }

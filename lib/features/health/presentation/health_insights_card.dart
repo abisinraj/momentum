@@ -134,12 +134,19 @@ class HealthInsightsCard extends ConsumerWidget {
           label: 'Steps',
           color: colorScheme.primary,
         ),
-        _buildMetric(
-          context,
-          icon: Icons.favorite_rounded,
-          value: state.latestHeartRate != null ? '${state.latestHeartRate}' : '--',
-          label: 'BPM',
-          color: Colors.red,
+        InkWell(
+          onTap: () => GoRouter.of(context).push(AppRoute.heartRate.path),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _buildMetric(
+              context,
+              icon: Icons.favorite_rounded,
+              value: state.latestHeartRate != null ? '${state.latestHeartRate}' : '--',
+              label: 'BPM (Tap to Measure)',
+              color: Colors.red,
+            ),
+          ),
         ),
         _buildMetric(
           context,
