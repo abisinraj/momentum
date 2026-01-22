@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#121212</color>
+
+    <!-- Widget Colors (Base / Fallback) -->
+    <color name="widget_background">#1E1E1E</color>
+    <color name="widget_text_primary">#FFFFFF</color>
+    <color name="widget_text_secondary">#B0BEC5</color>
+    <color name="widget_accent">#009688</color> <!-- Teal -->
+    <color name="widget_border">#009688</color>
 </resources>
