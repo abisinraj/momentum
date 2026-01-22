@@ -19,9 +19,9 @@ class MomentumApp extends ConsumerWidget {
           title: 'Momentum',
           debugShowCheckedModeBanner: false,
           
-          // Theme configuration - Momentum uses dark theme only
-          theme: AppTheme.dark(dynamicScheme: null),
-          darkTheme: AppTheme.dark(dynamicScheme: null),
+          // Theme configuration - Momentum uses dark theme with dynamic colors if available
+          theme: AppTheme.dark(dynamicScheme: lightDynamic),
+          darkTheme: AppTheme.dark(dynamicScheme: darkDynamic),
           themeMode: ThemeMode.dark,
           
           // Router configuration

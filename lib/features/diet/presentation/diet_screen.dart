@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/services/diet_service.dart';
@@ -52,9 +53,11 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
       final dietService = ref.read(dietServiceProvider);
       final result = await dietService.analyzeFoodText(text);
       
+      if (!mounted) return;
       _handleAnalysisResult(result);
       
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _messages.add({'role': 'ai', 'content': 'Error: $e. Please check your API key in Settings.'});
         _isAnalyzing = false;
@@ -78,6 +81,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
         final dietService = ref.read(dietServiceProvider);
         final result = await dietService.analyzeFoodImage(pickedFile.path);
         
+        if (!mounted) return;
         // Also save image path? 
         // For now just passing the result. 
         // We could attach the image path to the log if we wanted.
@@ -86,6 +90,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
         
         _handleAnalysisResult(extendedResult);
       } catch (e) {
+        if (!mounted) return;
         setState(() {
           _messages.add({'role': 'ai', 'content': 'Error analyzing image: $e'});
           _isAnalyzing = false;
@@ -108,6 +113,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
         "Calories: $cal kcal\n"
         "P: ${p}g | C: ${c}g | F: ${f}g";
 
+    if (!mounted) return;
     setState(() {
       _messages.add({'role': 'ai', 'content': responseText});
       _messages.add({'role': 'action_log', 'data': responseText, 'json': result.toString()}); 
@@ -120,8 +126,10 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     });
     
     // Auto-prompt to log
-    _showLogConfirmationDialog(result);
-    _scrollToBottom();
+    if (mounted) {
+      _showLogConfirmationDialog(result);
+      _scrollToBottom();
+    }
   }
   
   void _showLogConfirmationDialog(Map<String, dynamic> data) {
@@ -199,8 +207,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
            IconButton(
              icon: const Icon(Icons.settings),
              onPressed: () {
-               // Quick link to settings for API key
-               // GoRouter.of(context).push('/settings'); // Assumption
+               context.push('/settings');
              },
            ),
         ],

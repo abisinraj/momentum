@@ -14,7 +14,7 @@ bool isSetupCompleteSync(ref) {
 
 /// Provider for current cycle position
 @riverpod
-int currentCyclePosition(ref) {
-  // TODO: Implement actual cycle logic
-  return 0;
+Future<int> currentCyclePosition(ref) async {
+  final db = ref.watch(appDatabaseProvider);
+  return db.getCurrentSplitIndex();
 }
