@@ -1,0 +1,44 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches:
+      - copilot/fix-code-quality-issues
+
+jobs:
+  build-and-test:
+    name: Build and Test Flutter App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Flutter Analyze
+        run: flutter analyze
+
+      - name: Flutter Test
+        run: flutter test
+
+      - name: Flutter Build APK (Debug)
+        run: flutter build apk --debug
