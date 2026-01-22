@@ -164,8 +164,8 @@ GoRouter router(ref) {
         path: AppRoute.createWorkout.path,
         name: 'createWorkout', // manual name as enum path has params
         builder: (context, state) {
-          final index = int.parse(state.pathParameters['index']!);
-          final total = int.parse(state.pathParameters['total']!);
+          final index = int.tryParse(state.pathParameters['index'] ?? '') ?? 0;
+          final total = int.tryParse(state.pathParameters['total'] ?? '') ?? 1;
           return CreateWorkoutScreen(
             index: index,
             totalDays: total,
