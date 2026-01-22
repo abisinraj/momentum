@@ -248,7 +248,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
               backgroundColor: Colors.red,
             ),
           );
-          print('Error saving workout: $e\n$st');
+          debugPrint('Error saving workout: $e\n$st');
         }
       } finally {
         if (mounted) {
@@ -492,7 +492,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
             decoration: BoxDecoration(
               color: AppTheme.darkSurfaceContainer,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.3)),
+              border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -641,7 +641,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.tealPrimary.withOpacity(0.1) : AppTheme.darkSurfaceContainer,
+          color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.1) : AppTheme.darkSurfaceContainer,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppTheme.tealPrimary : Colors.transparent,

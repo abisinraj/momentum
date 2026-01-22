@@ -24,7 +24,7 @@ class WidgetService {
         androidName: _androidName,
       );
     } catch (e) {
-      print('Error updating widget: $e');
+      debugPrint('Error updating widget: $e');
     }
   }
 }
@@ -107,6 +107,6 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
       nextWorkoutName: nextWorkoutName,
     );
   } catch (e) {
-    print('Widget Sync Error: $e');
+    debugPrint('Widget Sync Error: $e');
   }
 });

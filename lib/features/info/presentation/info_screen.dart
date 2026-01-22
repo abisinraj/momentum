@@ -138,7 +138,7 @@ class InfoScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.tealPrimary.withOpacity(0.1),
+                      color: AppTheme.tealPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -209,7 +209,7 @@ class InfoScreen extends ConsumerWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4285F4).withOpacity(0.1),
+                      color: const Color(0xFF4285F4).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Image.network(
@@ -284,7 +284,7 @@ class InfoScreen extends ConsumerWidget {
                   label: const Text('Manual Backup'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.tealPrimary,
-                    side: BorderSide(color: AppTheme.tealPrimary.withOpacity(0.5)),
+                    side: BorderSide(color: AppTheme.tealPrimary.withValues(alpha: 0.5)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -393,7 +393,7 @@ class InfoScreen extends ConsumerWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: iconColor, size: 18),
@@ -422,7 +422,7 @@ class InfoScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppTheme.tealPrimary.withOpacity(0.1),
+        color: AppTheme.tealPrimary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

@@ -87,7 +87,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                             activeTrackColor: AppTheme.tealPrimary,
                             inactiveTrackColor: AppTheme.darkSurfaceContainerHighest,
                             thumbColor: AppTheme.darkBackground,
-                            overlayColor: AppTheme.tealPrimary.withOpacity(0.2),
+                            overlayColor: AppTheme.tealPrimary.withValues(alpha: 0.2),
                             thumbShape: _CustomThumbShape(),
                             trackHeight: 8,
                           ),

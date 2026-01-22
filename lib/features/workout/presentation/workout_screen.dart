@@ -70,7 +70,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: _showAllWorkouts 
-                                ? AppTheme.tealPrimary.withOpacity(0.15) 
+                                ? AppTheme.tealPrimary.withValues(alpha: 0.15) 
                                 : AppTheme.darkSurfaceContainer,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
@@ -367,10 +367,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: isSelected ? AppTheme.tealPrimary.withOpacity(0.15) : AppTheme.darkSurfaceContainer,
+                            color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.15) : AppTheme.darkSurfaceContainer,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder.withOpacity(0.3),
+                              color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder.withValues(alpha: 0.3),
                               width: isSelected ? 2 : 1,
                             ),
                           ),
@@ -497,10 +497,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.tealPrimary.withOpacity(0.1) : AppTheme.darkSurfaceContainer,
+            color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.1) : AppTheme.darkSurfaceContainer,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder.withOpacity(0.3),
+              color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -595,13 +595,13 @@ class _WorkoutCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isActive
-                ? AppTheme.tealPrimary.withOpacity(0.1)
+                ? AppTheme.tealPrimary.withValues(alpha: 0.1)
                 : AppTheme.darkSurfaceContainer,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isActive
                   ? AppTheme.tealPrimary
-                  : AppTheme.darkBorder.withOpacity(0.3),
+                  : AppTheme.darkBorder.withValues(alpha: 0.3),
               width: isActive ? 2 : 1,
             ),
           ),

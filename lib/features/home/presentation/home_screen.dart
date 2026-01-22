@@ -170,13 +170,13 @@ class HomeScreen extends ConsumerWidget {
             debugPrint('Image load error: $exception');
           },
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.2), // Slight dark tint globally
+            Colors.black.withValues(alpha: 0.2), // Slight dark tint globally
             BlendMode.darken,
           ),
         ) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -194,10 +194,10 @@ class HomeScreen extends ConsumerWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withOpacity(0.5), // Darker at top for header visibility
-                      Colors.black.withOpacity(0.3), // Mid section slightly lighter
-                      Colors.black.withOpacity(0.7), // Darker toward bottom
-                      Colors.black.withOpacity(0.95), // Very dark at bottom for text
+                      Colors.black.withValues(alpha: 0.5), // Darker at top for header visibility
+                      Colors.black.withValues(alpha: 0.3), // Mid section slightly lighter
+                      Colors.black.withValues(alpha: 0.7), // Darker toward bottom
+                      Colors.black.withValues(alpha: 0.95), // Very dark at bottom for text
                     ],
                     stops: const [0.0, 0.3, 0.6, 1.0],
                   ),
@@ -218,9 +218,9 @@ class HomeScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
+                        color: Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.5)),
+                        border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.5)),
                         // backdropFilter: null, // blur could be added effectively with ClipRRect
                       ),
                       child: Row(
@@ -412,7 +412,7 @@ class HomeScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             elevation: 4,
-            shadowColor: AppTheme.tealPrimary.withOpacity(0.4),
+            shadowColor: AppTheme.tealPrimary.withValues(alpha: 0.4),
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -546,7 +546,7 @@ class HomeScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -555,8 +555,8 @@ class HomeScreen extends ConsumerWidget {
             height: 48,
             decoration: BoxDecoration(
               color: trend == true 
-                  ? AppTheme.tealPrimary.withOpacity(0.15)
-                  : AppTheme.textMuted.withOpacity(0.1),
+                  ? AppTheme.tealPrimary.withValues(alpha: 0.15)
+                  : AppTheme.textMuted.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -612,7 +612,7 @@ class HomeScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

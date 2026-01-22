@@ -55,7 +55,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     
     try {
       // Save user to database
-      print('Setup: Saving user profile...');
+      debugPrint('Setup: Saving user profile...');
       await ref.read(userSetupProvider.notifier).completeSetup(
         name: _nameController.text.trim(),
         age: int.tryParse(_ageController.text),
@@ -63,13 +63,13 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         weightKg: double.tryParse(_weightController.text),
         goal: _selectedGoal,
       );
-      print('Setup: Profile saved. Navigating to split-setup...');
+      debugPrint('Setup: Profile saved. Navigating to split-setup...');
       
       if (mounted) {
         // Use go() for cleaner navigation stack reset
         context.go('/split-setup');
       } else {
-        print('Setup: Context not mounted!');
+        debugPrint('Setup: Context not mounted!');
       }
     } catch (e, st) {
       if (mounted) {
@@ -318,7 +318,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
       ),
       child: TextField(
         controller: controller,
@@ -364,9 +364,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppTheme.tealPrimary.withOpacity(0.1),
+        color: AppTheme.tealPrimary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -393,10 +393,10 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.tealPrimary.withOpacity(0.1) : AppTheme.darkSurfaceContainer,
+          color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.1) : AppTheme.darkSurfaceContainer,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder.withOpacity(0.3),
+            color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -406,7 +406,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.tealPrimary.withOpacity(0.2) : AppTheme.darkSurfaceContainerHigh,
+                color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.2) : AppTheme.darkSurfaceContainerHigh,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(

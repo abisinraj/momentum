@@ -84,7 +84,7 @@ class ThumbnailService {
         final results = await _searchPexels(query, pexelsKey);
         if (results.isNotEmpty) return results;
       } catch (e) {
-        print('Pexels search failed: $e. Falling back to local.');
+        debugPrint('Pexels search failed: $e. Falling back to local.');
       }
     }
     

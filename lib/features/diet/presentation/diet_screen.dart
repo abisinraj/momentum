@@ -300,7 +300,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     return Column(
       children: [
         Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimaryContainer)),
-        Text('$unit $label', style: TextStyle(fontSize: 12, color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8))),
+        Text('$unit $label', style: TextStyle(fontSize: 12, color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8))),
       ],
     );
   }

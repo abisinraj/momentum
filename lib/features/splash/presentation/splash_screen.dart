@@ -91,7 +91,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.tealPrimary.withOpacity(0.5),
+                        AppTheme.tealPrimary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -133,7 +133,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         'assets/images/app_logo.jpg',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
-          print('Error loading logo: $error');
+          debugPrint('Error loading logo: $error');
           return Icon(
             Icons.broken_image_outlined,
             color: AppTheme.tealPrimary,

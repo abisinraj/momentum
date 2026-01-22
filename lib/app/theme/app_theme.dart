@@ -60,22 +60,22 @@ class AppTheme {
       onPrimaryContainer: Colors.white,
       secondary: yellowAccent,
       onSecondary: darkBackground,
-      secondaryContainer: yellowDark.withOpacity(0.2),
+      secondaryContainer: yellowDark.withValues(alpha: 0.2),
       onSecondaryContainer: yellowAccent,
       tertiary: tealLight,
       onTertiary: darkBackground,
-      tertiaryContainer: tealDark.withOpacity(0.3),
+      tertiaryContainer: tealDark.withValues(alpha: 0.3),
       onTertiaryContainer: tealLight,
       error: error,
       onError: Colors.white,
-      errorContainer: error.withOpacity(0.2),
+      errorContainer: error.withValues(alpha: 0.2),
       onErrorContainer: error,
       surface: darkSurface,
       onSurface: textPrimary,
       surfaceContainerHighest: darkSurfaceContainerHigh,
       onSurfaceVariant: textSecondary,
       outline: darkBorder,
-      outlineVariant: darkBorder.withOpacity(0.5),
+      outlineVariant: darkBorder.withValues(alpha: 0.5),
       shadow: Colors.black,
       scrim: Colors.black,
       inverseSurface: Colors.white,
@@ -108,7 +108,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: darkBorder.withOpacity(0.3)),
+          side: BorderSide(color: darkBorder.withValues(alpha: 0.3)),
         ),
         color: darkSurfaceContainer,
         margin: EdgeInsets.zero,
@@ -147,7 +147,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: tealPrimary,
-          side: BorderSide(color: tealPrimary.withOpacity(0.5)),
+          side: BorderSide(color: tealPrimary.withValues(alpha: 0.5)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -172,7 +172,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: darkBorder.withOpacity(0.3)),
+          borderSide: BorderSide(color: darkBorder.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -186,7 +186,7 @@ class AppTheme {
       // Navigation bar (bottom)
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: darkSurface,
-        indicatorColor: tealPrimary.withOpacity(0.2),
+        indicatorColor: tealPrimary.withValues(alpha: 0.2),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -212,14 +212,14 @@ class AppTheme {
       
       // Divider
       dividerTheme: DividerThemeData(
-        color: darkBorder.withOpacity(0.3),
+        color: darkBorder.withValues(alpha: 0.3),
         thickness: 1,
       ),
       
       // Chip
       chipTheme: ChipThemeData(
         backgroundColor: darkSurfaceContainer,
-        selectedColor: tealPrimary.withOpacity(0.2),
+        selectedColor: tealPrimary.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.outfit(color: textPrimary),
         side: BorderSide.none,
         shape: RoundedRectangleBorder(

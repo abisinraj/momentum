@@ -53,7 +53,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
           height: widget.height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.borderRadius),
-            color: AppTheme.darkSurfaceContainer.withOpacity(_animation.value),
+            color: AppTheme.darkSurfaceContainer.withValues(alpha: _animation.value),
           ),
         );
       },
@@ -72,7 +72,7 @@ class WorkoutCardSkeleton extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +105,7 @@ class StatsRowSkeleton extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

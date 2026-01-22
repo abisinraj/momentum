@@ -399,13 +399,13 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
               margin: const EdgeInsets.only(bottom: 12),
               elevation: 0,
               color: isFullyDone 
-                  ? theme.colorScheme.secondaryContainer.withOpacity(0.3) 
+                  ? theme.colorScheme.secondaryContainer.withValues(alpha: 0.3) 
                   : theme.colorScheme.surfaceContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: isFullyDone 
                     ? BorderSide.none 
-                    : BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
+                    : BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
               ),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
@@ -485,7 +485,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: isFullyDone ? theme.colorScheme.onSurface.withOpacity(0.6) : theme.colorScheme.onSurface,
+                                    color: isFullyDone ? theme.colorScheme.onSurface.withValues(alpha: 0.6) : theme.colorScheme.onSurface,
                                     decoration: isFullyDone ? TextDecoration.lineThrough : null,
                                   ),
                                 ),
@@ -670,7 +670,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),

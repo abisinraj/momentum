@@ -170,7 +170,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -236,7 +236,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           decoration: BoxDecoration(
             color: AppTheme.darkSurfaceContainer,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.3)),
+            border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -247,7 +247,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: _weightUnit == 'kg'
-                          ? AppTheme.tealPrimary.withOpacity(0.2)
+                          ? AppTheme.tealPrimary.withValues(alpha: 0.2)
                           : Colors.transparent,
                       borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
                     ),
@@ -272,7 +272,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: _weightUnit == 'lbs'
-                          ? AppTheme.tealPrimary.withOpacity(0.2)
+                          ? AppTheme.tealPrimary.withValues(alpha: 0.2)
                           : Colors.transparent,
                       borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
                     ),

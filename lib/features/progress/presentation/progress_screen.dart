@@ -96,9 +96,9 @@ class ProgressScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.tealPrimary.withOpacity(0.1),
+                  color: AppTheme.tealPrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.3)),
+                  border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -214,7 +214,7 @@ class ProgressScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppTheme.success.withOpacity(0.1),
+                        color: AppTheme.success.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -275,7 +275,7 @@ class ProgressScreen extends ConsumerWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppTheme.tealPrimary.withOpacity(0.1),
+                    color: AppTheme.tealPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.auto_awesome, color: AppTheme.tealPrimary),
@@ -595,8 +595,8 @@ class _ChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          AppTheme.tealPrimary.withOpacity(0.3),
-          AppTheme.tealPrimary.withOpacity(0.0),
+          AppTheme.tealPrimary.withValues(alpha: 0.3),
+          AppTheme.tealPrimary.withValues(alpha: 0.0),
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     
@@ -640,7 +640,7 @@ class _SessionHistoryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.darkBorder.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -649,7 +649,7 @@ class _SessionHistoryCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppTheme.tealPrimary.withOpacity(0.1),
+              color: AppTheme.tealPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -667,7 +667,7 @@ class _SessionHistoryCard extends StatelessWidget {
                   completedAt != null ? _getMonthAbbr(completedAt!.month) : '',
                   style: TextStyle(
                     fontSize: 10,
-                    color: AppTheme.tealPrimary.withOpacity(0.7),
+                    color: AppTheme.tealPrimary.withValues(alpha: 0.7),
                   ),
                 ),
               ],
