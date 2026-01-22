@@ -16,6 +16,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _pexelsController = TextEditingController();
   final _unsplashController = TextEditingController();
   final _openaiController = TextEditingController();
+  final _geminiController = TextEditingController();
   bool _isLoading = true;
 
   @override
@@ -29,12 +30,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final pexels = await service.getPexelsKey();
     final unsplash = await service.getUnsplashKey();
     final openai = await service.getOpenAiKey();
+    final gemini = await service.getGeminiKey();
 
     if (mounted) {
       setState(() {
         _pexelsController.text = pexels ?? '';
         _unsplashController.text = unsplash ?? '';
         _openaiController.text = openai ?? '';
+        _geminiController.text = gemini ?? '';
         _isLoading = false;
       });
     }
@@ -45,6 +48,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _pexelsController.dispose();
     _unsplashController.dispose();
     _openaiController.dispose();
+    _geminiController.dispose();
     super.dispose();
   }
 
@@ -54,6 +58,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await service.setPexelsKey(_pexelsController.text.trim());
     await service.setUnsplashKey(_unsplashController.text.trim());
     await service.setOpenAiKey(_openaiController.text.trim());
+    await service.setGeminiKey(_geminiController.text.trim());
     
     // Invalidate providers
     ref.invalidate(pexelsApiKeyProvider);
@@ -127,6 +132,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    const SizedBox(height: 16),
                    _buildInfo('Add your API keys to enable dynamic features.'),
                    const SizedBox(height: 24),
+
+                   _buildTextField(
+                     controller: _geminiController,
+                     label: 'Google Gemini API Key',
+                     hint: 'AI Insights will be enabled',
+                     icon: Icons.auto_awesome,
+                   ),
+                   const SizedBox(height: 16),
                    
                    _buildTextField(
                      controller: _pexelsController,

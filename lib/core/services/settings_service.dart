@@ -8,6 +8,7 @@ class SettingsService {
   static const String _keyPexels = 'api_key_pexels';
   static const String _keyUnsplash = 'api_key_unsplash';
   static const String _keyOpenAi = 'api_key_openai';
+  static const String _keyGemini = 'gemini_api_key';
   static const String _keyRestTimer = 'rest_timer_seconds';
   static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
 
@@ -49,6 +50,16 @@ class SettingsService {
   Future<String?> getOpenAiKey() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyOpenAi);
+  }
+
+  Future<void> setGeminiKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyGemini, key);
+  }
+
+  Future<String?> getGeminiKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyGemini);
   }
 
   Future<void> setWeightUnit(String unit) async {

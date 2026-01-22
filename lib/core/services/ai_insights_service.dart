@@ -1,149 +1,68 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:momentum/core/database/app_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'settings_service.dart';
+class AIInsightsService {
+  // TODO: Ideally, move this to a secure backend or use --dart-define
+  // For this prototype, we will use a placeholder or ask the user to input it.
+  // We'll store it in SharedPreferences for now if provided by user.
+  static const String _defaultApiKey = 'YOUR_API_KEY_HERE'; 
 
-part 'ai_insights_service.g.dart';
-
-/// Service for generating AI-powered workout insights using OpenAI
-class AiInsightsService {
-  final SettingsService _settings;
-  
-  AiInsightsService(this._settings);
-  
-  /// Generate a progress insight for a specific workout
-  /// Returns a short, motivational message based on workout history
-  Future<String?> generateWorkoutInsight({
-    required String workoutName,
-    required Map<String, dynamic> progressData,
-  }) async {
-    final apiKey = await _settings.getOpenAiKey();
-    if (apiKey == null || apiKey.isEmpty) {
-      return _generateFallbackInsight(progressData);
-    }
-    
+  Future<String> getDailyInsight(User user, List<Map<String, dynamic>> recentSessions) async {
     try {
-      final sessionCount = progressData['sessionCount'] as int;
-      final avgDuration = progressData['averageDuration'] as double;
-      final lastDuration = progressData['lastDuration'] as int?;
-      final durations = progressData['durations'] as List<int>;
-      
-      // Build context for AI
-      final prompt = _buildPrompt(
-        workoutName: workoutName,
-        sessionCount: sessionCount,
-        avgDuration: avgDuration,
-        lastDuration: lastDuration,
-        durations: durations,
-      );
-      
-      final response = await http.post(
-        Uri.parse('https://api.openai.com/v1/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          'model': 'gpt-3.5-turbo',
-          'messages': [
-            {
-              'role': 'system',
-              'content': '''You are a friendly fitness coach. Generate a SHORT (1-2 sentences max) 
-motivational insight about the user's workout progress. Be encouraging but honest. 
-Include specific numbers when helpful. Use emojis sparingly.'''
-            },
-            {
-              'role': 'user',
-              'content': prompt,
-            }
-          ],
-          'max_tokens': 100,
-          'temperature': 0.7,
-        }),
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final content = data['choices'][0]['message']['content'] as String;
-        return content.trim();
-      } else {
-        return _generateFallbackInsight(progressData);
-      }
-    } catch (e) {
-      return _generateFallbackInsight(progressData);
-    }
-  }
-  
-  String _buildPrompt({
-    required String workoutName,
-    required int sessionCount,
-    required double avgDuration,
-    required int? lastDuration,
-    required List<int> durations,
-  }) {
-    final avgMinutes = (avgDuration / 60).round();
-    final lastMinutes = lastDuration != null ? (lastDuration / 60).round() : null;
-    
-    final buffer = StringBuffer();
-    buffer.writeln('Workout: $workoutName');
-    buffer.writeln('Sessions in last 30 days: $sessionCount');
-    
-    if (sessionCount == 0) {
-      buffer.writeln('The user has not done this workout recently.');
-    } else {
-      buffer.writeln('Average duration: $avgMinutes minutes');
-      if (lastMinutes != null) {
-        buffer.writeln('Last session duration: $lastMinutes minutes');
-        
-        // Calculate trend
-        if (durations.length >= 2) {
-          final recent = durations.take(2).toList();
-          if (recent[0] < recent[1]) {
-            buffer.writeln('Trend: Getting faster');
-          } else if (recent[0] > recent[1]) {
-            buffer.writeln('Trend: Taking more time (could mean more intensity)');
-          } else {
-            buffer.writeln('Trend: Consistent timing');
-          }
-        }
-      }
-    }
-    
-    return buffer.toString();
-  }
-  
-  /// Generate a simple insight without AI when API key is missing
-  String? _generateFallbackInsight(Map<String, dynamic> progressData) {
-    final sessionCount = progressData['sessionCount'] as int;
-    final avgDuration = progressData['averageDuration'] as double;
-    final lastDuration = progressData['lastDuration'] as int?;
-    
-    if (sessionCount == 0) {
-      return "First time doing this workout! Let's set a baseline 💪";
-    }
-    
-    final avgMinutes = (avgDuration / 60).round();
-    
-    if (lastDuration == null) {
-      return "$sessionCount sessions this month, avg $avgMinutes min";
-    }
-    
-    final lastMinutes = (lastDuration / 60).round();
-    final diff = lastMinutes - avgMinutes;
-    
-    if (diff < -2) {
-      return "Last session was ${-diff} min faster than average! 🔥";
-    } else if (diff > 2) {
-      return "Took ${diff} min longer last time - more volume or rest?";
-    } else {
-      return "Consistent at ~$avgMinutes min. $sessionCount sessions this month.";
-    }
-  }
-}
+      final prefs = await SharedPreferences.getInstance();
+      String apiKey = prefs.getString('gemini_api_key') ?? _defaultApiKey;
 
-@riverpod
-AiInsightsService aiInsightsService(Ref ref) {
-  return AiInsightsService(ref.watch(settingsServiceProvider));
+      if (apiKey == 'YOUR_API_KEY_HERE' || apiKey.isEmpty) {
+        return "Configure your API Key in Settings to unlock AI insights.";
+      }
+
+      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+
+      final prompt = _constructPrompt(user, recentSessions);
+      final content = [Content.text(prompt)];
+      final response = await model.generateContent(content);
+
+      return response.text?.trim() ?? "Stay consistent and keep pushing!";
+    } catch (e) {
+      print('AI Insight Error: $e');
+      if (e.toString().contains('API_KEY_INVALID')) {
+         return "Invalid API Key. Please check your settings.";
+      }
+      return "Focus on your form and breathing today. You got this!";
+    }
+  }
+
+  String _constructPrompt(User user, List<Map<String, dynamic>> sessions) {
+    final goal = user.goal ?? 'General Fitness';
+    final weight = user.weightKg != null ? '${user.weightKg}kg' : 'Unknown';
+    
+    StringBuffer recentActivity = StringBuffer();
+    if (sessions.isEmpty) {
+      recentActivity.writeln("No recent workouts.");
+    } else {
+      for (var s in sessions.take(5)) { // Last 5 sessions
+        final workoutName = s['workoutName'] as String? ?? 'Workout';
+        final date = s['completedAt'] as DateTime?;
+        final dateStr = date != null ? "${date.day}/${date.month}" : "Unknown date";
+        recentActivity.writeln("- $workoutName on $dateStr");
+      }
+    }
+
+    return '''
+    You are an expert fitness coach for a user named ${user.name}.
+    User Stats:
+    - Goal: $goal
+    - Weight: $weight
+    
+    Recent Activity:
+    $recentActivity
+    
+    Based on this, generate a ONE sentence daily insight or motivation for their workout today.
+    - Be brief and punchy.
+    - If they have been consistent, praise them.
+    - If they missed a few days, gently encourage them.
+    - Do not use hashtags.
+    ''';
+  }
 }

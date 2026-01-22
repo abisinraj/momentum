@@ -12,6 +12,7 @@ import '../../workout/presentation/active_workout_screen.dart';
 import '../../../app/widgets/skeleton_loader.dart';
 import '../../health/presentation/health_insights_card.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../../home/presentation/widgets/ai_insights_card.dart';
 
 /// Home screen - shows next workout in cycle with Momentum design
 class HomeScreen extends ConsumerWidget {
@@ -74,6 +75,13 @@ class HomeScreen extends ConsumerWidget {
                 AsyncError(:final error) => _buildErrorState(context, error.toString()),
                 _ => const WorkoutCardSkeleton(),
               },
+              
+              const SizedBox(height: 16),
+              
+              const SizedBox(height: 16),
+
+              // AI Insights Card (New)
+              const AIInsightsCard(),
               
               const SizedBox(height: 16),
               
