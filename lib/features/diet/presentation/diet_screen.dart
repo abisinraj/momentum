@@ -101,6 +101,8 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
   }
 
   void _handleAnalysisResult(Map<String, dynamic> result) {
+    if (!mounted) return;
+    
     // Format the result nicely
     final desc = result['description'] ?? 'Food';
     final cal = result['calories'] ?? 0;
