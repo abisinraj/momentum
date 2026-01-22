@@ -101,8 +101,6 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
   }
 
   void _handleAnalysisResult(Map<String, dynamic> result) {
-    if (!mounted) return;
-    
     // Format the result nicely
     final desc = result['description'] ?? 'Food';
     final cal = result['calories'] ?? 0;
@@ -115,6 +113,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
         "Calories: $cal kcal\n"
         "P: ${p}g | C: ${c}g | F: ${f}g";
 
+    if (!mounted) return;
     setState(() {
       _messages.add({'role': 'ai', 'content': responseText});
       _messages.add({'role': 'action_log', 'data': responseText, 'json': result.toString()}); 
@@ -127,8 +126,10 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     });
     
     // Auto-prompt to log
-    _showLogConfirmationDialog(result);
-    _scrollToBottom();
+    if (mounted) {
+      _showLogConfirmationDialog(result);
+      _scrollToBottom();
+    }
   }
   
   void _showLogConfirmationDialog(Map<String, dynamic> data) {
