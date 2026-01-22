@@ -29,6 +29,7 @@ class HomeScreen extends ConsumerWidget {
     final nextWorkoutAsync = ref.watch(nextWorkoutProvider);
     final userAsync = ref.watch(currentUserProvider);
     final activeSession = ref.watch(activeWorkoutSessionProvider);
+    final todayCompletedAsync = ref.watch(todayCompletedWorkoutIdsProvider);
     
     // If there's an active session, navigate to it
     // REMOVED: User prefers manual control
@@ -49,6 +50,12 @@ class HomeScreen extends ConsumerWidget {
       _ => 'Athlete',
     };
     
+    // Get today's completed workout IDs
+    final todayCompleted = switch (todayCompletedAsync) {
+      AsyncData(:final value) => value,
+      _ => <int>[],
+    };
+    
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -63,7 +70,7 @@ class HomeScreen extends ConsumerWidget {
               
               // Main workout content
               switch (nextWorkoutAsync) {
-                AsyncData(:final value) => _buildWorkoutContent(context, ref, value, activeSession),
+                AsyncData(:final value) => _buildWorkoutContent(context, ref, value, activeSession, todayCompleted),
                 AsyncError(:final error) => _buildErrorState(context, error.toString()),
                 _ => const WorkoutCardSkeleton(),
               },
@@ -113,32 +120,17 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
-        // Notification bell
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppTheme.darkSurfaceContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            icon: Icon(
-              Icons.notifications_outlined,
-              color: AppTheme.tealPrimary,
-            ),
-            onPressed: () {
-              // TODO: Notifications
-            },
-          ),
-        ),
       ],
     );
   }
   
-  Widget _buildWorkoutContent(BuildContext context, WidgetRef ref, Workout? workout, ActiveSession? activeSession) {
+  Widget _buildWorkoutContent(BuildContext context, WidgetRef ref, Workout? workout, ActiveSession? activeSession, List<int> todayCompleted) {
     if (workout == null) {
       return _buildEmptyState(context);
     }
+    
+    // Check if this workout was completed today
+    final isCompletedToday = todayCompleted.contains(workout.id);
     
     // Determine image provider
     ImageProvider? imageProvider;
@@ -211,33 +203,38 @@ class HomeScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Row with "Today's Focus"
+                // Header Row with completion status or "Today's Focus"
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
+                        color: isCompletedToday 
+                            ? Colors.green.withValues(alpha: 0.8)
+                            : Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.5)),
-                        // backdropFilter: null, // blur could be added effectively with ClipRRect
+                        border: Border.all(
+                          color: isCompletedToday 
+                              ? Colors.green.withValues(alpha: 0.9)
+                              : AppTheme.tealPrimary.withValues(alpha: 0.5),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.bolt,
+                            isCompletedToday ? Icons.check_circle : Icons.bolt,
                             size: 16,
-                            color: AppTheme.tealPrimary,
+                            color: isCompletedToday ? Colors.white : AppTheme.tealPrimary,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            "TODAY'S FOCUS",
+                            isCompletedToday ? "COMPLETED TODAY" : "TODAY'S FOCUS",
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: AppTheme.tealPrimary,
+                              color: isCompletedToday ? Colors.white : AppTheme.tealPrimary,
                               letterSpacing: 1.0,
                             ),
                           ),
@@ -285,7 +282,7 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 
                 // Action Buttons
-                _buildActionButtons(context, ref, workout, activeSession),
+                _buildActionButtons(context, ref, workout, activeSession, isCompletedToday),
               ],
             ),
           ),
@@ -318,7 +315,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
   
-  Widget _buildActionButtons(BuildContext context, WidgetRef ref, Workout workout, ActiveSession? activeSession) {
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref, Workout workout, ActiveSession? activeSession, bool isCompletedToday) {
     if (activeSession != null && activeSession.workoutId == workout.id) {
       return Column(
         children: [
@@ -399,7 +396,41 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       );
+    } else if (isCompletedToday) {
+      // Completed State
+      return Container(
+        padding: const EdgeInsets.all(24),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.green.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 48),
+            const SizedBox(height: 16),
+            const Text(
+              "Done for today",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "See you tomorrow!",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+      );
     } else {
+      // Start State
       return SizedBox(
         width: double.infinity,
           child: FilledButton(

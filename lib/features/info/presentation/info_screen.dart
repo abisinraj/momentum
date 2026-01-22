@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../app/router.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
@@ -36,14 +37,17 @@ class InfoScreen extends ConsumerWidget {
                       color: AppTheme.textPrimary,
                     ),
                   ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppTheme.darkSurfaceContainer,
-                      borderRadius: BorderRadius.circular(8),
+                  GestureDetector(
+                    onTap: () => context.push(AppRoute.settings.path),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppTheme.darkSurfaceContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.settings_outlined, color: AppTheme.tealPrimary, size: 20),
                     ),
-                    child: Icon(Icons.notifications_outlined, color: AppTheme.tealPrimary, size: 20),
                   ),
                 ],
               ),
@@ -244,102 +248,60 @@ class InfoScreen extends ConsumerWidget {
                                 color: AppTheme.success,
                                 shape: BoxShape.circle,
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Data secure',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppTheme.success,
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Last backup: Today, 08:00 AM',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppTheme.textMuted,
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Google Drive backup coming soon!'),
-                        backgroundColor: AppTheme.darkSurfaceContainerHigh,
+                              const SizedBox(width: 4),
+                              Text(
+                                'Data secure',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.success,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                  icon: Icon(Icons.cloud_upload_outlined, size: 18),
-                  label: const Text('Manual Backup'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.tealPrimary,
-                    side: BorderSide(color: AppTheme.tealPrimary.withValues(alpha: 0.5)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Last backup: Today, 08:00 AM',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Google Drive backup coming soon!'),
+                          backgroundColor: AppTheme.darkSurfaceContainerHigh,
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.cloud_upload_outlined, size: 18),
+                    label: const Text('Manual Backup'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.tealPrimary,
+                      side: BorderSide(color: AppTheme.tealPrimary.withValues(alpha: 0.5)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 24),
-        
-        // Preferences section
-        _buildSectionLabel('PREFERENCES'),
-        const SizedBox(height: 12),
-        
-        // Settings list
-        _buildSettingTile(
-          icon: Icons.api,
-          iconColor: AppTheme.tealPrimary,
-          title: 'API Integrations',
-          onTap: () => context.push('/settings'),
-          trailing: _buildActiveChip(),
-        ),
-        const SizedBox(height: 8),
-        _buildSettingTile(
-          icon: Icons.favorite_outline,
-          iconColor: const Color(0xFFE91E63),
-          title: 'HealthKit Access',
-        ),
-        const SizedBox(height: 8),
-        _buildSettingTile(
-          icon: Icons.palette_outlined,
-          iconColor: AppTheme.tealPrimary,
-          title: 'Appearance',
-          trailing: Text(
-            'System Default',
-            style: TextStyle(fontSize: 14, color: AppTheme.textMuted),
-          ),
-        ),
-        const SizedBox(height: 8),
-        _buildSettingTile(
-          icon: Icons.notifications_outlined,
-          iconColor: AppTheme.yellowAccent,
-          title: 'Notifications',
-          trailing: Text(
-            'On',
-            style: TextStyle(fontSize: 14, color: AppTheme.textMuted),
-          ),
+              ],
+            ),
         ),
         
         const SizedBox(height: 32),
         
-        // Footer
         // Footer
         Center(
           child: Column(
@@ -371,70 +333,7 @@ class InfoScreen extends ConsumerWidget {
     );
   }
   
-  // Note: Updated method signature and implementation below
-  Widget _buildSettingTile({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    Widget? trailing,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.darkSurfaceContainer,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: iconColor, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-            ),
-            if (trailing != null) trailing,
-            const SizedBox(width: 4),
-            Icon(Icons.chevron_right, color: AppTheme.textMuted, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildActiveChip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppTheme.tealPrimary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        'Active',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppTheme.tealPrimary,
-        ),
-      ),
-    );
-  }
+
   
   Widget _buildFooterLink(String text) {
     return GestureDetector(

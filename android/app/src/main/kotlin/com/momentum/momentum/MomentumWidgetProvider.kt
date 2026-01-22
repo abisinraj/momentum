@@ -64,16 +64,22 @@ class MomentumWidgetProvider : AppWidgetProvider() {
             val title = prefs.getString("widget_title", "No Workout") ?: "No Workout"
             val desc = prefs.getString("widget_desc", "Tap to view") ?: "Tap to view"
             val nextWorkout = prefs.getString("widget_next_workout", "") ?: ""
+            val weeklyProgress = prefs.getString("widget_cycle_progress", "1/3") ?: "1/3"
             
             // Update views
             views.setTextViewText(R.id.widget_streak, "\uD83D\uDD25 $streak") // Fire emoji
             views.setTextViewText(R.id.widget_workout_name, title)
             views.setTextViewText(R.id.widget_workout_desc, desc)
+            
+            // Cycle Progress
+            views.setTextViewText(R.id.widget_weekly_progress, "Day $weeklyProgress")
+            views.setViewVisibility(R.id.widget_weekly_progress, android.view.View.VISIBLE)
 
             if (nextWorkout.isNotEmpty()) {
                 views.setViewVisibility(R.id.widget_next_workout, android.view.View.VISIBLE)
                 views.setTextViewText(R.id.widget_next_workout, "Next: $nextWorkout")
             } else {
+                // If no next workout, we can hide it or show something else
                 views.setViewVisibility(R.id.widget_next_workout, android.view.View.GONE)
             }
 

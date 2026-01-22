@@ -12,12 +12,14 @@ class WidgetService {
     required int streak,
     required String title,
     required String desc,
+    required String cycleProgress,
     String? nextWorkoutName,
   }) async {
     try {
       await HomeWidget.saveWidgetData('widget_streak', streak);
       await HomeWidget.saveWidgetData('widget_title', title);
       await HomeWidget.saveWidgetData('widget_desc', desc);
+      await HomeWidget.saveWidgetData('widget_cycle_progress', cycleProgress);
       await HomeWidget.saveWidgetData('widget_next_workout', nextWorkoutName ?? '');
       
       await HomeWidget.updateWidget(
@@ -79,7 +81,28 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
       }
     }
     
-    // 3. Update Widget
+    // 3. Calculate Cycle Progress
+    final user = await db.getUser();
+    final allWorkouts = await db.getAllWorkouts();
+    
+    String cycleProgress = '1/3'; // Default
+    
+    if (user != null && allWorkouts.isNotEmpty) {
+      final splitDays = user.splitDays ?? allWorkouts.length;
+      final currentIndex = user.currentSplitIndex;
+      // Display as "Day X/Y"
+      cycleProgress = '${currentIndex + 1}/$splitDays';
+    }
+    
+    // For "Session Complete" state, we might want to show that we finished the cycle?
+    // But currentSplitIndex usually updates AFTER session completion.
+    // If we just finished session, currentSplitIndex is already pointing to tomorrow.
+    // So if title is "Session Complete", maybe show the progress of the JUST finished one?
+    // Let's keep it simple: Show current index pointer.
+    
+    // Pass cycleProgress instead of weeklyProgress
+
+    // 4. Update Widget
     String? nextWorkoutName;
     
     if (title == 'Session Complete' && nextWorkout != null) {
@@ -106,6 +129,7 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
       title: title,
       desc: desc,
       nextWorkoutName: nextWorkoutName,
+      cycleProgress: cycleProgress,
     );
   } catch (e) {
     debugPrint('Widget Sync Error: $e');

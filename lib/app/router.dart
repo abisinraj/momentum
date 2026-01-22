@@ -13,6 +13,7 @@ import '../features/setup/presentation/setup_screen.dart';
 import '../features/setup/presentation/split_setup_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/settings/presentation/workout_preferences_screen.dart';
 import '../features/diet/presentation/diet_screen.dart';
 import '../features/health/presentation/health_detail_screen.dart';
 import '../features/health/presentation/privacy_policy_screen.dart';
@@ -32,6 +33,7 @@ enum AppRoute {
   progress('/progress'),
   info('/info'),
   settings('/settings'),
+  workoutPreferences('/workout-preferences'),
   healthDetail('/health'),
   privacyPolicy('/privacy');
 
@@ -177,6 +179,11 @@ GoRouter router(ref) {
         path: AppRoute.settings.path,
         name: AppRoute.settings.name,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.workoutPreferences.path,
+        name: AppRoute.workoutPreferences.name,
+        builder: (context, state) => const WorkoutPreferencesScreen(),
       ),
       
       // Health Connect routes

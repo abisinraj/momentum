@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../app/router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/services/settings_service.dart';
 
@@ -15,8 +16,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _pexelsController = TextEditingController();
   final _unsplashController = TextEditingController();
   final _openaiController = TextEditingController();
-  final _restTimerController = TextEditingController();
-  String _weightUnit = 'kg'; // 'kg' or 'lbs'
   bool _isLoading = true;
 
   @override
@@ -30,16 +29,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final pexels = await service.getPexelsKey();
     final unsplash = await service.getUnsplashKey();
     final openai = await service.getOpenAiKey();
-    final restTimer = await service.getRestTimer();
-    final weightUnit = await service.getWeightUnit();
 
     if (mounted) {
       setState(() {
         _pexelsController.text = pexels ?? '';
         _unsplashController.text = unsplash ?? '';
         _openaiController.text = openai ?? '';
-        _restTimerController.text = restTimer.toString();
-        _weightUnit = weightUnit;
         _isLoading = false;
       });
     }
@@ -50,7 +45,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _pexelsController.dispose();
     _unsplashController.dispose();
     _openaiController.dispose();
-    _restTimerController.dispose();
     super.dispose();
   }
 
@@ -61,15 +55,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await service.setUnsplashKey(_unsplashController.text.trim());
     await service.setOpenAiKey(_openaiController.text.trim());
     
-    final restTime = int.tryParse(_restTimerController.text.trim()) ?? 60;
-    await service.setRestTimer(restTime);
-    await service.setWeightUnit(_weightUnit);
-    
     // Invalidate providers
     ref.invalidate(pexelsApiKeyProvider);
     ref.invalidate(unsplashApiKeyProvider);
-    ref.invalidate(restTimerProvider);
-    ref.invalidate(weightUnitProvider);
     
     if (mounted) {
       setState(() => _isLoading = false);
@@ -98,6 +86,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                   _buildSectionHeader('General'),
+                   const SizedBox(height: 16),
+                   
+                   _buildSettingsTile(
+                     icon: Icons.tune,
+                     iconColor: AppTheme.tealPrimary,
+                     title: 'Workout Settings',
+                     subtitle: 'Timer, units, and preferences',
+                     onTap: () => context.push(AppRoute.workoutPreferences.path),
+                   ),
+                   const SizedBox(height: 12),
+                   _buildSettingsTile(
+                     icon: Icons.notifications_outlined,
+                     iconColor: AppTheme.yellowAccent,
+                     title: 'Notifications',
+                     subtitle: 'On',
+                     onTap: () {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text('Notification settings coming soon')),
+                       );
+                     },
+                   ),
+                   const SizedBox(height: 12),
+                   _buildSettingsTile(
+                     icon: Icons.palette_outlined,
+                     iconColor: Colors.purpleAccent,
+                     title: 'Appearance',
+                     subtitle: 'System Default',
+                     onTap: () {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text('Appearance settings coming soon')),
+                       );
+                     },
+                   ),
+
+                   const SizedBox(height: 32),
+
                    _buildSectionHeader('API Integrations'),
                    const SizedBox(height: 16),
                    _buildInfo('Add your API keys to enable dynamic features.'),
@@ -123,20 +148,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      hint: 'Ex: sk-...',
                      icon: Icons.smart_toy,
                    ),
-                   const SizedBox(height: 32),
                    
-                   _buildSectionHeader('Workout Preferences'),
-                   const SizedBox(height: 16),
-                   _buildTextField(
-                     controller: _restTimerController,
-                     label: 'Rest Timer (seconds)',
-                     hint: '60',
-                     icon: Icons.timer_outlined,
-                     keyboardType: TextInputType.number,
-                   ),
-                   const SizedBox(height: 16),
-                   _buildWeightUnitSelector(),
-
                    const SizedBox(height: 32),
                    
                    SizedBox(
@@ -144,12 +156,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      child: FilledButton.icon(
                        onPressed: _saveKeys,
                        icon: const Icon(Icons.save),
-                       label: const Text('Save Settings'),
+                       label: const Text('Save API Keys'),
                      ),
                    ),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildSettingsTile({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    String? subtitle,
+    VoidCallback? onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.darkSurfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: subtitle != null ? Text(
+          subtitle,
+          style: const TextStyle(
+            color: AppTheme.textSecondary,
+            fontSize: 12,
+          ),
+        ) : null,
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textSecondary),
+        onTap: onTap,
+      ),
     );
   }
 
@@ -213,84 +267,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, color: AppTheme.textSecondary),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWeightUnitSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Weight Unit',
-          style: TextStyle(
-            color: AppTheme.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: AppTheme.darkSurfaceContainer,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _weightUnit = 'kg'),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: _weightUnit == 'kg'
-                          ? AppTheme.tealPrimary.withValues(alpha: 0.2)
-                          : Colors.transparent,
-                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Kilograms (kg)',
-                        style: TextStyle(
-                          color: _weightUnit == 'kg'
-                              ? AppTheme.tealPrimary
-                              : AppTheme.textSecondary,
-                          fontWeight: _weightUnit == 'kg' ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _weightUnit = 'lbs'),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: _weightUnit == 'lbs'
-                          ? AppTheme.tealPrimary.withValues(alpha: 0.2)
-                          : Colors.transparent,
-                      borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Pounds (lbs)',
-                        style: TextStyle(
-                          color: _weightUnit == 'lbs'
-                              ? AppTheme.tealPrimary
-                              : AppTheme.textSecondary,
-                          fontWeight: _weightUnit == 'lbs' ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
       ],
