@@ -9,6 +9,9 @@ jobs:
   build-and-test:
     name: Build and Test Flutter App
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
