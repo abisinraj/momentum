@@ -1,0 +1,332 @@
+Analyzing momentum...                                           
+
+   info • The import of 'package:flutter_riverpod/flutter_riverpod.dart' is unnecessary because all of the used elements are also provided by the import of 'package:riverpod_annotation/riverpod_annotation.dart' • lib/app/router.dart:3:8 • unnecessary_import
+   info • Missing type annotation • lib/app/router.dart:124:17 • strict_top_level_inference
+  error • Target of URI hasn't been generated: 'package:momentum/core/database/app_database.g.dart' • lib/core/database/app_database.dart:5:6 • uri_has_not_been_generated
+warning • The getter doesn't override an inherited getter • lib/core/database/app_database.dart:90:11 • override_on_non_overriding_member
+warning • The getter doesn't override an inherited getter • lib/core/database/app_database.dart:93:25 • override_on_non_overriding_member
+  error • Undefined name 'users' • lib/core/database/app_database.dart:102:29 • undefined_identifier
+  error • Undefined name 'users' • lib/core/database/app_database.dart:102:36 • undefined_identifier
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:105:29 • undefined_identifier
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:105:39 • undefined_identifier
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:106:29 • undefined_identifier
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:106:39 • undefined_identifier
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:109:31 • undefined_identifier
+  error • Undefined name 'users' • lib/core/database/app_database.dart:114:29 • undefined_identifier
+  error • Undefined name 'users' • lib/core/database/app_database.dart:114:36 • undefined_identifier
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:119:31 • undefined_identifier
+  error • Undefined name 'foodLogs' • lib/core/database/app_database.dart:124:31 • undefined_identifier
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:128:29 • undefined_identifier
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:128:40 • undefined_identifier
+  error • Expected to find ';' • lib/core/database/app_database.dart:129:9 • expected_token
+warning • Dead code • lib/core/database/app_database.dart:130:9 • dead_code
+  error • Expected to find ')' • lib/core/database/app_database.dart:130:9 • expected_token
+  error • Undefined name 'from' • lib/core/database/app_database.dart:130:13 • undefined_identifier
+  error • The await expression can only be used in an async function • lib/core/database/app_database.dart:133:11 • await_in_wrong_context
+  error • Undefined name 'm' • lib/core/database/app_database.dart:133:17 • undefined_identifier
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:133:29 • undefined_identifier
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:133:47 • undefined_identifier
+  error • Expected a class member • lib/core/database/app_database.dart:135:8 • expected_class_member
+  error • Expected a class member • lib/core/database/app_database.dart:136:5 • expected_class_member
+  error • Expected a class member • lib/core/database/app_database.dart:136:6 • expected_class_member
+  error • The name 'User' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:142:10 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:142:31 • undefined_function
+  error • Undefined name 'users' • lib/core/database/app_database.dart:142:38 • undefined_identifier
+  error • Undefined class 'UsersCompanion' • lib/core/database/app_database.dart:145:24 • undefined_class
+  error • The function 'into' isn't defined • lib/core/database/app_database.dart:146:7 • undefined_function
+  error • Undefined name 'users' • lib/core/database/app_database.dart:146:12 • undefined_identifier
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:161:15 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:162:8 • undefined_function
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:162:15 • undefined_identifier
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:167:15 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:168:8 • undefined_function
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:168:15 • undefined_identifier
+  error • Undefined class 'ExercisesCompanion' • lib/core/database/app_database.dart:173:27 • undefined_class
+  error • The function 'into' isn't defined • lib/core/database/app_database.dart:174:7 • undefined_function
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:174:12 • undefined_identifier
+  error • Undefined class 'ExercisesCompanion' • lib/core/database/app_database.dart:177:31 • undefined_class
+  error • The function 'update' isn't defined • lib/core/database/app_database.dart:178:7 • undefined_function
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:178:14 • undefined_identifier
+  error • The function 'delete' isn't defined • lib/core/database/app_database.dart:182:8 • undefined_function
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:182:15 • undefined_identifier
+  error • The function 'delete' isn't defined • lib/core/database/app_database.dart:186:8 • undefined_function
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:186:15 • undefined_identifier
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:191:15 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:192:8 • undefined_function
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:192:15 • undefined_identifier
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:195:15 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:196:8 • undefined_function
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:196:15 • undefined_identifier
+  error • Undefined class 'WorkoutsCompanion' • lib/core/database/app_database.dart:199:26 • undefined_class
+  error • The function 'into' isn't defined • lib/core/database/app_database.dart:200:7 • undefined_function
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:200:12 • undefined_identifier
+  error • The function 'update' isn't defined • lib/core/database/app_database.dart:204:8 • undefined_function
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:204:15 • undefined_identifier
+  error • The function 'WorkoutsCompanion' isn't defined • lib/core/database/app_database.dart:205:18 • undefined_function
+  error • Undefined class 'WorkoutsCompanion' • lib/core/database/app_database.dart:208:30 • undefined_class
+  error • The function 'update' isn't defined • lib/core/database/app_database.dart:209:7 • undefined_function
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:209:14 • undefined_identifier
+  error • The function 'delete' isn't defined • lib/core/database/app_database.dart:213:8 • undefined_function
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:213:15 • undefined_identifier
+  error • The name 'Session' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:218:15 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:221:13 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:221:20 • undefined_identifier
+  error • The property 'completedAt' can't be unconditionally accessed because the receiver can be 'null' • lib/core/database/app_database.dart:232:25 • unchecked_use_of_nullable_value
+  error • The property 'workoutId' can't be unconditionally accessed because the receiver can be 'null' • lib/core/database/app_database.dart:233:23 • unchecked_use_of_nullable_value
+  error • The function 'into' isn't defined • lib/core/database/app_database.dart:239:7 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:239:12 • undefined_identifier
+  error • The function 'SessionsCompanion' isn't defined • lib/core/database/app_database.dart:239:29 • undefined_function
+  error • The function 'update' isn't defined • lib/core/database/app_database.dart:246:8 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:246:15 • undefined_identifier
+  error • The function 'SessionsCompanion' isn't defined • lib/core/database/app_database.dart:247:18 • undefined_function
+  error • Undefined class 'SessionExercisesCompanion' • lib/core/database/app_database.dart:255:35 • undefined_class
+  error • The function 'into' isn't defined • lib/core/database/app_database.dart:256:7 • undefined_function
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:256:12 • undefined_identifier
+  error • The name 'SessionExercise' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:259:15 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:260:8 • undefined_function
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:260:15 • undefined_identifier
+  error • Undefined class 'SessionExercisesCompanion' • lib/core/database/app_database.dart:263:38 • undefined_class
+  error • The function 'update' isn't defined • lib/core/database/app_database.dart:264:7 • undefined_function
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:264:14 • undefined_identifier
+  error • The name 'Session' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:269:10 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:270:13 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:270:20 • undefined_identifier
+  error • The name 'Session' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:278:15 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:282:13 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:282:20 • undefined_identifier
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:292:35 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:292:42 • undefined_identifier
+  error • The property 'durationSeconds' can't be unconditionally accessed because the receiver can be 'null' • lib/core/database/app_database.dart:321:25 • unchecked_use_of_nullable_value
+  error • The property 'durationSeconds' can't be unconditionally accessed because the receiver can be 'null' • lib/core/database/app_database.dart:322:23 • unchecked_use_of_nullable_value
+  error • The operator '+' can't be unconditionally invoked because the receiver can be 'null' • lib/core/database/app_database.dart:326:40 • unchecked_use_of_nullable_value
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:345:27 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:345:34 • undefined_identifier
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:348:26 • undefined_identifier
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:348:36 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:348:58 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:353:37 • undefined_identifier
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:354:37 • undefined_identifier
+   info • Angle brackets will be interpreted as HTML • lib/core/database/app_database.dart:367:18 • unintended_html_in_doc_comment
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:373:19 • undefined_function
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:373:26 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:375:21 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:375:31 • undefined_identifier
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:375:53 • undefined_identifier
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:376:21 • undefined_identifier
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:376:32 • undefined_identifier
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:376:55 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:378:17 • undefined_identifier
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:385:38 • undefined_identifier
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:386:45 • undefined_identifier
+  error • A value of type 'double' can't be assigned to a variable of type 'int' • lib/core/database/app_database.dart:392:28 • invalid_assignment
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:411:19 • undefined_function
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:411:26 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:413:21 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:413:31 • undefined_identifier
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:413:53 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:415:17 • undefined_identifier
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:416:17 • undefined_identifier
+  error • Undefined name 'sessionExercises' • lib/core/database/app_database.dart:427:32 • undefined_identifier
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:453:10 • non_type_as_type_argument
+  error • The property 'orderIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/core/database/app_database.dart:476:25 • unchecked_use_of_nullable_value
+  error • The property 'id' can't be unconditionally accessed because the receiver can be 'null' • lib/core/database/app_database.dart:477:23 • unchecked_use_of_nullable_value
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:483:27 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:483:34 • undefined_identifier
+  error • The function 'update' isn't defined • lib/core/database/app_database.dart:506:14 • undefined_function
+  error • Undefined name 'users' • lib/core/database/app_database.dart:506:21 • undefined_identifier
+  error • The function 'UsersCompanion' isn't defined • lib/core/database/app_database.dart:507:18 • undefined_function
+  error • The function 'update' isn't defined • lib/core/database/app_database.dart:520:12 • undefined_function
+  error • Undefined name 'users' • lib/core/database/app_database.dart:520:19 • undefined_identifier
+  error • The function 'UsersCompanion' isn't defined • lib/core/database/app_database.dart:521:16 • undefined_function
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:533:35 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:533:42 • undefined_identifier
+  error • A value of type 'double' can't be assigned to a variable of type 'int' • lib/core/database/app_database.dart:547:24 • invalid_assignment
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:580:30 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:580:37 • undefined_identifier
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:613:38 • undefined_function
+  error • Undefined name 'sessions' • lib/core/database/app_database.dart:613:45 • undefined_identifier
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:623:30 • undefined_function
+  error • Undefined name 'workouts' • lib/core/database/app_database.dart:623:37 • undefined_identifier
+  error • The returned type 'double' isn't returnable from a 'int' function, as required by the closure's context • lib/core/database/app_database.dart:630:25 • return_of_invalid_type_from_closure
+  error • The property 'completedSets' can't be unconditionally accessed because the receiver can be 'null' • lib/core/database/app_database.dart:630:34 • unchecked_use_of_nullable_value
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:654:31 • undefined_function
+  error • Undefined name 'exercises' • lib/core/database/app_database.dart:654:38 • undefined_identifier
+  error • Undefined class 'FoodLogsCompanion' • lib/core/database/app_database.dart:672:26 • undefined_class
+  error • The function 'into' isn't defined • lib/core/database/app_database.dart:673:7 • undefined_function
+  error • Undefined name 'foodLogs' • lib/core/database/app_database.dart:673:12 • undefined_identifier
+  error • The function 'delete' isn't defined • lib/core/database/app_database.dart:677:8 • undefined_function
+  error • Undefined name 'foodLogs' • lib/core/database/app_database.dart:677:15 • undefined_identifier
+  error • The name 'FoodLog' isn't a type, so it can't be used as a type argument • lib/core/database/app_database.dart:680:15 • non_type_as_type_argument
+  error • The function 'select' isn't defined • lib/core/database/app_database.dart:683:13 • undefined_function
+  error • Undefined name 'foodLogs' • lib/core/database/app_database.dart:683:20 • undefined_identifier
+  error • Expected a method, getter, setter or operator declaration • lib/core/database/app_database.dart:713:1 • expected_executable
+warning • Unused import: 'package:momentum/core/database/app_database.dart' • lib/core/providers/ai_providers.dart:2:8 • unused_import
+warning • Unused import: 'package:momentum/core/providers/user_providers.dart' • lib/core/providers/ai_providers.dart:4:8 • unused_import
+  error • The method 'getRecentSessionsWithDetails' isn't defined for the type 'AppDatabase' • lib/core/providers/ai_providers.dart:22:28 • undefined_method
+   info • Missing type annotation • lib/core/providers/core_providers.dart:10:26 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/core_providers.dart:17:34 • strict_top_level_inference
+warning • Unused import: 'package:momentum/core/database/app_database.dart' • lib/core/providers/dashboard_providers.dart:2:8 • unused_import
+  error • The method 'getActivityGrid' isn't defined for the type 'AppDatabase' • lib/core/providers/dashboard_providers.dart:8:13 • undefined_method
+  error • The method 'getMuscleWorkload' isn't defined for the type 'AppDatabase' • lib/core/providers/dashboard_providers.dart:14:13 • undefined_method
+  error • The method 'getVolumeLoad' isn't defined for the type 'AppDatabase' • lib/core/providers/dashboard_providers.dart:23:28 • undefined_method
+  error • The method 'getVolumeLoad' isn't defined for the type 'AppDatabase' • lib/core/providers/dashboard_providers.dart:26:25 • undefined_method
+   info • Missing type annotation • lib/core/providers/database_providers.dart:10:25 • strict_top_level_inference
+  error • The method 'close' isn't defined for the type 'AppDatabase' • lib/core/providers/database_providers.dart:12:26 • undefined_method
+   info • Missing type annotation • lib/core/providers/database_providers.dart:18:30 • strict_top_level_inference
+  error • The name 'User' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.dart:25:8 • non_type_as_type_argument
+   info • Missing type annotation • lib/core/providers/database_providers.dart:25:27 • strict_top_level_inference
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.dart:32:13 • non_type_as_type_argument
+   info • Missing type annotation • lib/core/providers/database_providers.dart:32:38 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:39:44 • strict_top_level_inference
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.dart:46:8 • non_type_as_type_argument
+   info • Missing type annotation • lib/core/providers/database_providers.dart:46:30 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:59:44 • strict_top_level_inference
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.dart:66:13 • non_type_as_type_argument
+   info • Missing type annotation • lib/core/providers/database_providers.dart:66:44 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:73:38 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:80:30 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:87:51 • strict_top_level_inference
+   info • Missing type annotation • lib/core/providers/database_providers.dart:94:59 • strict_top_level_inference
+  error • The name 'User' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:53:55 • non_type_as_type_argument
+  error • The name 'User' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:65:55 • non_type_as_type_argument
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:73:36 • non_type_as_type_argument
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:85:63 • non_type_as_type_argument
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:113:55 • non_type_as_type_argument
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:125:55 • non_type_as_type_argument
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:292:64 • non_type_as_type_argument
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:331:44 • non_type_as_type_argument
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:363:19 • non_type_as_type_argument
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:380:41 • non_type_as_type_argument
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:400:67 • non_type_as_type_argument
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/core/providers/database_providers.g.dart:406:51 • non_type_as_type_argument
+  error • The method 'getUser' isn't defined for the type 'AppDatabase' • lib/core/providers/user_providers.dart:24:27 • undefined_method
+  error • The method 'saveUser' isn't defined for the type 'AppDatabase' • lib/core/providers/user_providers.dart:27:16 • undefined_method
+  error • The method 'saveUser' isn't defined for the type 'AppDatabase' • lib/core/providers/user_providers.dart:35:16 • undefined_method
+  error • Undefined name 'UsersCompanion' • lib/core/providers/user_providers.dart:35:25 • undefined_identifier
+  error • The method 'getUser' isn't defined for the type 'AppDatabase' • lib/core/providers/user_providers.dart:61:34 • undefined_method
+  error • The method 'saveUser' isn't defined for the type 'AppDatabase' • lib/core/providers/user_providers.dart:65:14 • undefined_method
+  error • The method 'UsersCompanion' isn't defined for the type 'UserSetup' • lib/core/providers/user_providers.dart:65:23 • undefined_method
+  error • The method 'getUser' isn't defined for the type 'AppDatabase' • lib/core/providers/user_providers.dart:80:34 • undefined_method
+  error • The method 'saveUser' isn't defined for the type 'AppDatabase' • lib/core/providers/user_providers.dart:84:14 • undefined_method
+  error • Undefined class 'Workout' • lib/core/providers/workout_providers.dart:36:29 • undefined_class
+  error • The method 'startSession' isn't defined for the type 'AppDatabase' • lib/core/providers/workout_providers.dart:38:32 • undefined_method
+  error • The method 'completeSession' isn't defined for the type 'AppDatabase' • lib/core/providers/workout_providers.dart:59:14 • undefined_method
+  error • The method 'getAllWorkouts' isn't defined for the type 'AppDatabase' • lib/core/providers/workout_providers.dart:95:43 • undefined_method
+  error • The method 'addWorkout' isn't defined for the type 'AppDatabase' • lib/core/providers/workout_providers.dart:97:14 • undefined_method
+  error • Undefined name 'WorkoutsCompanion' • lib/core/providers/workout_providers.dart:97:25 • undefined_identifier
+warning • The value of 'refresh' should be used • lib/core/providers/workout_providers.dart:110:9 • unused_result
+  error • The method 'deleteWorkout' isn't defined for the type 'AppDatabase' • lib/core/providers/workout_providers.dart:116:14 • undefined_method
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/core/providers/workout_providers.dart:123:37 • non_type_as_type_argument
+  error • The method 'updateWorkoutOrder' isn't defined for the type 'AppDatabase' • lib/core/providers/workout_providers.dart:126:16 • undefined_method
+  error • Undefined class 'User' • lib/core/services/ai_insights_service.dart:11:34 • undefined_class
+   info • Don't invoke 'print' in production code • lib/core/services/ai_insights_service.dart:28:7 • avoid_print
+  error • Undefined class 'User' • lib/core/services/ai_insights_service.dart:36:27 • undefined_class
+  error • The method 'getUser' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:20:35 • undefined_method
+  error • The method 'saveUser' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:23:14 • undefined_method
+  error • Undefined name 'UsersCompanion' • lib/core/services/seed_data.dart:23:23 • undefined_identifier
+  error • The method 'getAllWorkouts' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:36:31 • undefined_method
+  error • The method 'addWorkout' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:40:29 • undefined_method
+  error • Undefined name 'WorkoutsCompanion' • lib/core/services/seed_data.dart:40:40 • undefined_identifier
+  error • The method 'addWorkout' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:59:29 • undefined_method
+  error • Undefined name 'WorkoutsCompanion' • lib/core/services/seed_data.dart:59:40 • undefined_identifier
+  error • The method 'addWorkout' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:78:28 • undefined_method
+  error • Undefined name 'WorkoutsCompanion' • lib/core/services/seed_data.dart:78:39 • undefined_identifier
+  error • The method 'addExercise' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:100:16 • undefined_method
+  error • Undefined name 'ExercisesCompanion' • lib/core/services/seed_data.dart:100:28 • undefined_identifier
+  error • The method 'getAllWorkouts' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:112:31 • undefined_method
+  error • The method 'getActivityGrid' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:116:39 • undefined_method
+  error • The method 'into' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:131:34 • undefined_method
+  error • The getter 'sessions' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:131:42 • undefined_getter
+  error • Undefined name 'SessionsCompanion' • lib/core/services/seed_data.dart:131:59 • undefined_identifier
+  error • The method 'getExercisesForWorkout' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:139:34 • undefined_method
+  error • The method 'saveSessionExercise' isn't defined for the type 'AppDatabase' • lib/core/services/seed_data.dart:141:18 • undefined_method
+  error • Undefined name 'SessionExercisesCompanion' • lib/core/services/seed_data.dart:141:38 • undefined_identifier
+  error • The method 'getActivityGrid' isn't defined for the type 'AppDatabase' • lib/core/services/widget_service.dart:47:35 • undefined_method
+  error • The method 'getNextWorkout' isn't defined for the type 'AppDatabase' • lib/core/services/widget_service.dart:66:34 • undefined_method
+  error • The method 'getTodayCompletedWorkoutIds' isn't defined for the type 'AppDatabase' • lib/core/services/widget_service.dart:72:37 • undefined_method
+  error • The method 'getExercisesForWorkout' isn't defined for the type 'AppDatabase' • lib/core/services/widget_service.dart:79:36 • undefined_method
+  error • The method 'getUser' isn't defined for the type 'AppDatabase' • lib/core/services/widget_service.dart:85:27 • undefined_method
+  error • The method 'getAllWorkouts' isn't defined for the type 'AppDatabase' • lib/core/services/widget_service.dart:86:34 • undefined_method
+  error • The method 'getAllWorkouts' isn't defined for the type 'AppDatabase' • lib/core/services/widget_service.dart:112:36 • undefined_method
+  error • The method 'getUser' isn't defined for the type 'AppDatabase' • lib/core/services/widget_service.dart:113:29 • undefined_method
+  error • The method 'addFoodLog' isn't defined for the type 'AppDatabase' • lib/features/diet/presentation/diet_screen.dart:164:14 • undefined_method
+  error • Undefined name 'FoodLogsCompanion' • lib/features/diet/presentation/diet_screen.dart:164:25 • undefined_identifier
+  error • The name 'FoodLog' isn't a type, so it can't be used as a type argument • lib/features/diet/presentation/diet_screen.dart:231:31 • non_type_as_type_argument
+  error • The method 'getFoodLogsForDate' isn't defined for the type 'AppDatabase' • lib/features/diet/presentation/diet_screen.dart:232:18 • undefined_method
+  error • The returned type 'double' isn't returnable from a 'int' function, as required by the closure's context • lib/features/diet/presentation/diet_screen.dart:246:60 • return_of_invalid_type_from_closure
+  error • The property 'calories' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:246:71 • unchecked_use_of_nullable_value
+  error • The property 'protein' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:247:72 • unchecked_use_of_nullable_value
+  error • The property 'carbs' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:248:72 • unchecked_use_of_nullable_value
+  error • The property 'fats' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:249:72 • unchecked_use_of_nullable_value
+   info • Unnecessary use of string interpolation • lib/features/diet/presentation/diet_screen.dart:263:53 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/features/diet/presentation/diet_screen.dart:264:51 • unnecessary_string_interpolations
+   info • Unnecessary use of string interpolation • lib/features/diet/presentation/diet_screen.dart:265:50 • unnecessary_string_interpolations
+  error • The property 'imageUrl' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:281:31 • unchecked_use_of_nullable_value
+  error • The property 'imageUrl' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:284:52 • unchecked_use_of_nullable_value
+   info • Unnecessary use of multiple underscores • lib/features/diet/presentation/diet_screen.dart:285:44 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/diet/presentation/diet_screen.dart:285:47 • unnecessary_underscores
+  error • The property 'description' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:289:34 • unchecked_use_of_nullable_value
+  error • The property 'calories' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:290:40 • unchecked_use_of_nullable_value
+  error • The property 'protein' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:290:65 • unchecked_use_of_nullable_value
+  error • The property 'carbs' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:290:82 • unchecked_use_of_nullable_value
+  error • The property 'fats' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:290:97 • unchecked_use_of_nullable_value
+  error • The method 'deleteFoodLog' isn't defined for the type 'AppDatabase' • lib/features/diet/presentation/diet_screen.dart:294:32 • undefined_method
+  error • The property 'id' can't be unconditionally accessed because the receiver can be 'null' • lib/features/diet/presentation/diet_screen.dart:294:50 • unchecked_use_of_nullable_value
+   info • Unnecessary use of 'toList' in a spread • lib/features/diet/presentation/diet_screen.dart:299:17 • unnecessary_to_list_in_spreads
+  error • Undefined name 'GoRouter' • lib/features/health/presentation/health_insights_card.dart:138:24 • undefined_identifier
+  error • Undefined name 'AppRoute' • lib/features/health/presentation/health_insights_card.dart:138:50 • undefined_identifier
+   info • Unnecessary use of string interpolation • lib/features/health/presentation/health_insights_card.dart:161:47 • unnecessary_string_interpolations
+  error • The method 'HeartBPM' isn't defined for the type '_HeartRateMeasureScreenState' • lib/features/health/presentation/heart_rate_measure_screen.dart:143:20 • undefined_method
+  error • Undefined name '_measurements' • lib/features/health/presentation/heart_rate_measure_screen.dart:264:7 • undefined_identifier
+  error • Undefined class 'Workout' • lib/features/home/presentation/home_screen.dart:168:68 • undefined_class
+  error • Undefined class 'Workout' • lib/features/home/presentation/home_screen.dart:359:67 • undefined_class
+  error • Undefined class 'Workout' • lib/features/home/presentation/home_screen.dart:509:33 • undefined_class
+  error • Undefined class 'Workout' • lib/features/home/presentation/home_screen.dart:521:47 • undefined_class
+  error • Undefined name 'aiInsightsServiceProvider' • lib/features/home/presentation/home_screen.dart:523:33 • undefined_identifier
+  error • The method 'getWorkoutProgressSummary' isn't defined for the type 'AppDatabase' • lib/features/home/presentation/home_screen.dart:538:37 • undefined_method
+  error • Undefined class 'Workout' • lib/features/home/presentation/home_screen.dart:819:61 • undefined_class
+  error • Undefined class 'Workout' • lib/features/home/presentation/home_screen.dart:828:59 • undefined_class
+   info • Unnecessary use of multiple underscores • lib/features/home/presentation/home_screen.dart:892:17 • unnecessary_underscores
+  error • The name 'activityGridProvider' is defined in the libraries 'package:momentum/core/providers/dashboard_providers.dart' and 'package:momentum/core/providers/database_providers.dart' • lib/features/home/presentation/home_screen.dart:897:33 • ambiguous_import
+   info • Unnecessary use of multiple underscores • lib/features/home/presentation/home_screen.dart:901:17 • unnecessary_underscores
+warning • Unused import: 'dart:math' • lib/features/home/presentation/widgets/ai_insights_card.dart:3:8 • unused_import
+warning • The value of 'refresh' should be used • lib/features/home/presentation/widgets/ai_insights_card.dart:88:30 • unused_result
+   info • The imported package 'flutter_svg' isn't a dependency of the importing package • lib/features/home/presentation/widgets/muscle_heatmap_widget.dart:3:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:flutter_svg/flutter_svg.dart' • lib/features/home/presentation/widgets/muscle_heatmap_widget.dart:3:8 • uri_does_not_exist
+  error • The name 'activityGridProvider' is defined in the libraries 'package:momentum/core/providers/dashboard_providers.dart' and 'package:momentum/core/providers/database_providers.dart' • lib/features/info/presentation/info_screen.dart:20:37 • ambiguous_import
+  error • Undefined class 'User' • lib/features/info/presentation/info_screen.dart:72:53 • undefined_class
+   info • Unnecessary use of multiple underscores • lib/features/info/presentation/info_screen.dart:208:25 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/info/presentation/info_screen.dart:240:41 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/info/presentation/info_screen.dart:240:45 • unnecessary_underscores
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/features/workout/presentation/active_workout_screen.dart:365:46 • non_type_as_type_argument
+  error • The name 'Exercise' isn't a type, so it can't be used as a type argument • lib/features/workout/presentation/active_workout_screen.dart:378:38 • non_type_as_type_argument
+  error • The property 'id' can't be unconditionally accessed because the receiver can be 'null' • lib/features/workout/presentation/active_workout_screen.dart:380:44 • unchecked_use_of_nullable_value
+  error • The property 'sets' can't be unconditionally accessed because the receiver can be 'null' • lib/features/workout/presentation/active_workout_screen.dart:380:59 • unchecked_use_of_nullable_value
+  error • The property 'id' can't be unconditionally accessed because the receiver can be 'null' • lib/features/workout/presentation/active_workout_screen.dart:381:44 • unchecked_use_of_nullable_value
+  error • The property 'sets' can't be unconditionally accessed because the receiver can be 'null' • lib/features/workout/presentation/active_workout_screen.dart:381:59 • unchecked_use_of_nullable_value
+  error • The property 'orderIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/features/workout/presentation/active_workout_screen.dart:382:41 • unchecked_use_of_nullable_value
+  error • The property 'orderIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/features/workout/presentation/active_workout_screen.dart:382:64 • unchecked_use_of_nullable_value
+  error • A value of type 'double' can't be assigned to a variable of type 'int' • lib/features/workout/presentation/active_workout_screen.dart:418:45 • invalid_assignment
+   info • Unnecessary escape in string literal • lib/features/workout/presentation/active_workout_screen.dart:505:65 • unnecessary_string_escapes
+  error • Undefined class 'Exercise' • lib/features/workout/presentation/active_workout_screen.dart:587:28 • undefined_class
+  error • Undefined class 'Workout' • lib/features/workout/presentation/create_workout_screen.dart:17:9 • undefined_class
+  error • The method 'getExercisesForWorkout' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/create_workout_screen.dart:66:34 • undefined_method
+  error • The method 'getUser' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/create_workout_screen.dart:219:33 • undefined_method
+  error • The method 'saveUser' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/create_workout_screen.dart:221:22 • undefined_method
+  error • The method 'updateWorkout' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/create_workout_screen.dart:266:14 • undefined_method
+  error • The method 'deleteExercisesForWorkout' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/create_workout_screen.dart:274:14 • undefined_method
+  error • The method 'addExercise' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/create_workout_screen.dart:278:18 • undefined_method
+  error • The method 'ExercisesCompanion' isn't defined for the type '_CreateWorkoutScreenState' • lib/features/workout/presentation/create_workout_screen.dart:279:11 • undefined_method
+  error • The method 'addWorkout' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/create_workout_screen.dart:299:32 • undefined_method
+  error • The method 'WorkoutsCompanion' isn't defined for the type '_CreateWorkoutScreenState' • lib/features/workout/presentation/create_workout_screen.dart:300:7 • undefined_method
+  error • The method 'addExercise' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/create_workout_screen.dart:312:16 • undefined_method
+  error • The method 'ExercisesCompanion' isn't defined for the type '_CreateWorkoutScreenState' • lib/features/workout/presentation/create_workout_screen.dart:313:9 • undefined_method
+   info • Unnecessary use of multiple underscores • lib/features/workout/presentation/create_workout_screen.dart:486:29 • unnecessary_underscores
+  error • The property 'orderIndex' can't be unconditionally accessed because the receiver can be 'null' • lib/features/workout/presentation/workout_screen.dart:139:46 • unchecked_use_of_nullable_value
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/features/workout/presentation/workout_screen.dart:205:10 • non_type_as_type_argument
+  error • The name 'Workout' isn't a type, so it can't be used as a type argument • lib/features/workout/presentation/workout_screen.dart:218:32 • non_type_as_type_argument
+  error • Undefined class 'Workout' • lib/features/workout/presentation/workout_screen.dart:245:67 • undefined_class
+  error • The method 'getUser' isn't defined for the type 'AppDatabase' • lib/features/workout/presentation/workout_screen.dart:266:27 • undefined_method
+  error • Undefined class 'Workout' • lib/features/workout/presentation/workout_screen.dart:529:60 • undefined_class
+  error • Undefined class 'Workout' • lib/features/workout/presentation/workout_screen.dart:564:9 • undefined_class
+

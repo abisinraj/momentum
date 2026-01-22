@@ -123,6 +123,7 @@ class AppDatabase extends _$AppDatabase {
           // Create FoodLogs table
           await m.createTable(foodLogs);
         }
+        if (from < 6) {
           // Schema v6 changes:
           // Add primaryMuscleGroup to exercises
           await m.addColumn(exercises, exercises.primaryMuscleGroup);

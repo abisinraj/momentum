@@ -140,7 +140,7 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
             ],
           ),
           child: ClipOval(
-            child: HeartBPM(
+            child: HeartBPMDialog(
               context: context,
               cameraWidgetWidth: 200,
               cameraWidgetHeight: 200,
@@ -261,7 +261,6 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
 
   void _retry() {
     setState(() {
-      _measurements = []; // Cleard
       _recentReadings = [];
       _finalBpm = null;
       _isMeasuring = true;

@@ -1,12 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:momentum/core/database/app_database.dart';
 import 'package:momentum/core/providers/database_providers.dart';
 
-// Activity Grid (Last 90 days)
-final activityGridProvider = FutureProvider<Map<DateTime, String>>((ref) async {
-  final db = ref.watch(appDatabaseProvider);
-  return db.getActivityGrid(90);
-});
+// Note: activityGridProvider is in database_providers.dart
 
 // Muscle Workload (Last 5 days to define "soreness")
 final muscleWorkloadProvider = FutureProvider<Map<String, int>>((ref) async {

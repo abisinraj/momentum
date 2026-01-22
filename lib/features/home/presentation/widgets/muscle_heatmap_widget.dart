@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:momentum/app/theme/app_theme.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // We can use SVG or CustomPainter. For MVP, CustomPainter is easier without assets.
 
 /// Muscle Heatmap Widget
 /// Visualizes which body parts have been trained recently.

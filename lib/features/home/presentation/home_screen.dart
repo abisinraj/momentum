@@ -7,12 +7,10 @@ import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
-import '../../../core/services/ai_insights_service.dart';
 import '../../workout/presentation/active_workout_screen.dart';
 import '../../../app/widgets/skeleton_loader.dart';
 import '../../health/presentation/health_insights_card.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import '../../home/presentation/widgets/ai_insights_card.dart';
 import '../../home/presentation/widgets/ai_insights_card.dart';
 import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/recovery_score_card.dart';
@@ -520,7 +518,6 @@ class HomeScreen extends ConsumerWidget {
   
   Widget _buildProgressInsight(WidgetRef ref, Workout workout) {
     final db = ref.watch(appDatabaseProvider);
-    final aiService = ref.watch(aiInsightsServiceProvider);
     
     // Combined async operation to avoid nested FutureBuilders
     Future<Map<String, dynamic>> fetchInsightData() async {
@@ -542,23 +539,8 @@ class HomeScreen extends ConsumerWidget {
         return {'firstSession': true};
       }
       
-      // Fetch AI insight (non-blocking, use fallback if slow)
-      String? aiInsight;
-      try {
-        aiInsight = await aiService.generateWorkoutInsight(
-          workoutName: workout.name,
-          progressData: progressData,
-        ).timeout(const Duration(seconds: 3), onTimeout: () => null);
-      } on TimeoutException catch (_) {
-        aiInsight = null;
-      } on Exception catch (e) {
-        debugPrint('AI Insight Error: $e');
-        aiInsight = null;
-      }
-      
       return {
         ...progressData,
-        'aiInsight': aiInsight,
       };
     }
     
@@ -894,7 +876,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildConsistencyGrid(WidgetRef ref) {
-    final gridAsync = ref.watch(activityGridProvider);
+    final gridAsync = ref.watch(activityGridProvider(days: 30));
     return gridAsync.when(
       data: (data) => ConsistencyGridWidget(activityData: data),
       loading: () => const SizedBox.shrink(),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/providers/health_connect_provider.dart';
+import '../../health/presentation/heart_rate_measure_screen.dart';
 
 /// Card widget displaying health insights on the home screen.
 class HealthInsightsCard extends ConsumerWidget {
@@ -135,7 +137,9 @@ class HealthInsightsCard extends ConsumerWidget {
           color: colorScheme.primary,
         ),
         InkWell(
-          onTap: () => GoRouter.of(context).push(AppRoute.heartRate.path),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const HeartRateMeasureScreen()),
+          ),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.all(8.0),

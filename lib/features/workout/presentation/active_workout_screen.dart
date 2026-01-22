@@ -544,33 +544,44 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                         ],
                       ),
                     ),
-                    // Rest Timer Progress Bar
+                    // Rest Timer Progress Bar (Clipped to rounded corners)
                     if (isResting)
-                      AnimatedBuilder(
-                        animation: _restController,
-                        builder: (context, child) {
-                          return LinearProgressIndicator(
-                            value: _restController.value,
-                            backgroundColor: Colors.transparent,
-                            color: Color.lerp(Colors.red, Colors.green, _restController.value),
-                            minHeight: 4,
-                          );
-                        },
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
+                        ),
+                        child: AnimatedBuilder(
+                          animation: _restController,
+                          builder: (context, child) {
+                            return LinearProgressIndicator(
+                              value: _restController.value,
+                              backgroundColor: Colors.transparent,
+                              color: Color.lerp(Colors.red, Colors.green, _restController.value),
+                              minHeight: 6,
+                            );
+                          },
+                        ),
                       ),
                       
-                    // Cooldown Timer Progress Bar (Blue/Cyan)
+                    // Cooldown Timer Progress Bar (Clipped to rounded corners)
                     if (isCoolingDown)
-                      AnimatedBuilder(
-                        animation: _cooldownController,
-                        builder: (context, child) {
-                          return LinearProgressIndicator(
-                            value: _cooldownController.value,
-                            backgroundColor: Colors.transparent,
-                            // Cyan -> Blue
-                            color: Color.lerp(Colors.blue, Colors.cyanAccent, _cooldownController.value),
-                            minHeight: 4,
-                          );
-                        },
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
+                        ),
+                        child: AnimatedBuilder(
+                          animation: _cooldownController,
+                          builder: (context, child) {
+                            return LinearProgressIndicator(
+                              value: _cooldownController.value,
+                              backgroundColor: Colors.transparent,
+                              color: Color.lerp(Colors.blue, Colors.cyanAccent, _cooldownController.value),
+                              minHeight: 6,
+                            );
+                          },
+                        ),
                       ),
                   ],
                 ),

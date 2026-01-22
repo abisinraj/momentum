@@ -7,7 +7,7 @@ import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/dashboard_providers.dart';
-import '../../home/presentation/widgets/particle_man_widget.dart';
+import '../../home/presentation/widgets/three_d_man_widget.dart';
 
 /// Info screen - profile, settings, and data management
 /// Design: Profile avatar, stats row, Google Drive backup, preferences
@@ -199,10 +199,12 @@ class InfoScreen extends ConsumerWidget {
         Consumer(
           builder: (context, ref, child) {
             final workloadAsync = ref.watch(muscleWorkloadProvider);
+            // We load the workload to ensure data is fetched, 
+            // but the 3D model is currently a standalone viewer.
             return workloadAsync.when(
-              data: (data) => Padding(
-                padding: const EdgeInsets.only(bottom: 24.0),
-                child: ParticleManWidget(muscleWorkload: data),
+              data: (_) => const Padding(
+                padding: EdgeInsets.only(bottom: 24.0),
+                child: ThreeDManWidget(height: 500),
               ),
               loading: () => const SizedBox.shrink(),
               error: (_,__) => const SizedBox.shrink(),
