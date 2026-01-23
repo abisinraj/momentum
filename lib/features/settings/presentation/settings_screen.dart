@@ -14,65 +14,19 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  final _pexelsController = TextEditingController();
-  final _unsplashController = TextEditingController();
-  final _openaiController = TextEditingController();
-  final _geminiController = TextEditingController();
-  bool _isLoading = true;
+
+  // Controllers removed
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadKeys();
-  }
-
-  Future<void> _loadKeys() async {
-    final service = ref.read(settingsServiceProvider);
-    final pexels = await service.getPexelsKey();
-    final unsplash = await service.getUnsplashKey();
-    final openai = await service.getOpenAiKey();
-    final gemini = await service.getGeminiKey();
-
-    if (mounted) {
-      setState(() {
-        _pexelsController.text = pexels ?? '';
-        _unsplashController.text = unsplash ?? '';
-        _openaiController.text = openai ?? '';
-        _geminiController.text = gemini ?? '';
-        _isLoading = false;
-      });
-    }
+    // No keys to load here anymore
   }
 
   @override
   void dispose() {
-    _pexelsController.dispose();
-    _unsplashController.dispose();
-    _openaiController.dispose();
-    _geminiController.dispose();
     super.dispose();
-  }
-
-  Future<void> _saveKeys() async {
-    setState(() => _isLoading = true);
-    final service = ref.read(settingsServiceProvider);
-    await service.setPexelsKey(_pexelsController.text.trim());
-    await service.setUnsplashKey(_unsplashController.text.trim());
-    await service.setOpenAiKey(_openaiController.text.trim());
-    await service.setGeminiKey(_geminiController.text.trim());
-    
-    // Invalidate providers
-    ref.invalidate(pexelsApiKeyProvider);
-    ref.invalidate(unsplashApiKeyProvider);
-    ref.invalidate(thumbnailServiceProvider); // Force recreate to pick up new keys
-    
-    if (mounted) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Settings saved successfully')),
-      );
-      context.pop();
-    }
   }
 
   void _showWidgetThemeSelector(BuildContext context) {
@@ -223,51 +177,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                    const SizedBox(height: 32),
 
-                   _buildSectionHeader('API Integrations'),
-                   const SizedBox(height: 16),
-                   _buildInfo('Add your API keys to enable dynamic features.'),
-                   const SizedBox(height: 24),
-
-                   _buildTextField(
-                     controller: _geminiController,
-                     label: 'Google Gemini API Key',
-                     hint: 'AI Insights will be enabled',
-                     icon: Icons.auto_awesome,
-                   ),
-                   const SizedBox(height: 16),
-                   
-                   _buildTextField(
-                     controller: _pexelsController,
-                     label: 'Pexels API Key',
-                     hint: 'Ex: 563492ad6f91...',
-                     icon: Icons.photo_library,
-                   ),
-                   const SizedBox(height: 16),
-                   _buildTextField(
-                     controller: _unsplashController,
-                     label: 'Unsplash Access Key',
-                     hint: 'Ex: vK9...',
-                     icon: Icons.camera_alt,
-                   ),
-                   const SizedBox(height: 16),
-                   _buildTextField(
-                     controller: _openaiController,
-                     label: 'OpenAI API Key',
-                     hint: 'Ex: sk-...',
-                     icon: Icons.smart_toy,
-                   ),
-                   
-                   const SizedBox(height: 32),
-                   
-                   SizedBox(
-                     width: double.infinity,
-                     child: FilledButton.icon(
-                       onPressed: _saveKeys,
-                       icon: const Icon(Icons.save),
-                       label: const Text('Save API Keys'),
-                     ),
+                   const SizedBox(height: 12),
+                   _buildSettingsTile(
+                     icon: Icons.api_rounded,
+                     iconColor: Colors.orangeAccent,
+                     title: 'API Settings',
+                     subtitle: 'Gemini, Pexels, OpenAI',
+                     onTap: () => context.push(AppRoute.apiSettings.path),
                    ),
                 ],
+              ),
+            ),
+    );
+  }
               ),
             ),
     );
@@ -352,32 +274,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
-    required String hint,
+    // ... helper kept if needed, or remove? 
+    // It's not used in this file anymore. I should remove it.
+    required String hint, 
     required IconData icon,
     TextInputType? keyboardType,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: AppTheme.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(icon, color: AppTheme.textSecondary),
-          ),
-        ),
-      ],
-    );
+      return const SizedBox.shrink(); // Stub or remove completely 
   }
 }
