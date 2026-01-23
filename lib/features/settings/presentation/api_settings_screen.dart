@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../app/theme/app_theme.dart';
-import '../../../core/services/settings_service.dart';
-import '../../../core/services/thumbnail_service.dart';
+import 'package:momentum/app/theme/app_theme.dart';
+import 'package:momentum/core/services/settings_service.dart';
+import 'package:momentum/core/services/thumbnail_service.dart';
 
 class APISettingsScreen extends ConsumerStatefulWidget {
   const APISettingsScreen({super.key});
