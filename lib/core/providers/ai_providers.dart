@@ -2,7 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/services/ai_insights_service.dart';
 import 'package:momentum/core/providers/database_providers.dart';
-import 'package:momentum/core/providers/user_providers.dart';
+
 
 /// Provider for the AI Insights Service
 final aiInsightsServiceProvider = Provider<AIInsightsService>((ref) {

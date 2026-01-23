@@ -25,7 +25,7 @@ class AIInsightsService {
 
       return response.text?.trim() ?? "Stay consistent and keep pushing!";
     } catch (e) {
-      print('AI Insight Error: $e');
+      // print('AI Insight Error: $e');
       if (e.toString().contains('API_KEY_INVALID')) {
          return "Invalid API Key. Please check your settings.";
       }

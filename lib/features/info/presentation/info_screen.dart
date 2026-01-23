@@ -239,7 +239,7 @@ class InfoScreen extends ConsumerWidget {
                       'https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png',
                       width: 24,
                       height: 24,
-                      errorBuilder: (_, __, ___) => Icon(
+                      errorBuilder: (_, _, _) => Icon(
                         Icons.cloud_outlined,
                         color: const Color(0xFF4285F4),
                       ),
