@@ -1,0 +1,5 @@
+Analyzing momentum...                                           
+
+   info • Unnecessary use of multiple underscores • lib/features/settings/presentation/settings_screen.dart:106:31 • unnecessary_underscores
+
+1 issue found. (ran in 2.0s)

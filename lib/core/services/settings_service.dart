@@ -1,5 +1,6 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -13,6 +14,10 @@ class SettingsService {
   static const String _keyRestTimer = 'rest_timer_seconds';
   static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
   static const String _keyWidgetTheme = 'widget_theme'; // 'classic', 'liquid_glass'
+
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   Future<void> setWidgetTheme(String theme) async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,43 +40,78 @@ class SettingsService {
   }
 
   Future<void> setPexelsKey(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyPexels, key);
+    await _storage.write(key: _keyPexels, value: key);
   }
 
   Future<String?> getPexelsKey() async {
+    // 1. Try secure storage
+    String? value = await _storage.read(key: _keyPexels);
+    if (value != null) return value;
+    
+    // 2. Migration: Check legacy prefs
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyPexels);
+    value = prefs.getString(_keyPexels);
+    
+    // 3. If found, migrate to secure storage
+    if (value != null) {
+      await _storage.write(key: _keyPexels, value: value);
+      await prefs.remove(_keyPexels);
+    }
+    return value;
   }
 
   Future<void> setUnsplashKey(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyUnsplash, key);
+    await _storage.write(key: _keyUnsplash, value: key);
   }
 
   Future<String?> getUnsplashKey() async {
+    String? value = await _storage.read(key: _keyUnsplash);
+    if (value != null) return value;
+    
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyUnsplash);
+    value = prefs.getString(_keyUnsplash);
+    
+    if (value != null) {
+      await _storage.write(key: _keyUnsplash, value: value);
+      await prefs.remove(_keyUnsplash);
+    }
+    return value;
   }
   
   Future<void> setOpenAiKey(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyOpenAi, key);
+    await _storage.write(key: _keyOpenAi, value: key);
   }
 
   Future<String?> getOpenAiKey() async {
+    String? value = await _storage.read(key: _keyOpenAi);
+    if (value != null) return value;
+    
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyOpenAi);
+    value = prefs.getString(_keyOpenAi);
+    
+    if (value != null) {
+      await _storage.write(key: _keyOpenAi, value: value);
+      await prefs.remove(_keyOpenAi);
+    }
+    return value;
   }
 
   Future<void> setGeminiKey(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyGemini, key);
+    await _storage.write(key: _keyGemini, value: key);
   }
 
   Future<String?> getGeminiKey() async {
+    String? value = await _storage.read(key: _keyGemini);
+    if (value != null) return value;
+    
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyGemini);
+    value = prefs.getString(_keyGemini);
+    
+    if (value != null) {
+      await _storage.write(key: _keyGemini, value: value);
+      await prefs.remove(_keyGemini);
+    }
+    return value;
   }
 
   Future<void> setWeightUnit(String unit) async {
