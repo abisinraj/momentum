@@ -74,26 +74,26 @@ class SettingsService {
 }
 
 @riverpod
-SettingsService settingsService(Ref ref) {
+SettingsService settingsService(SettingsServiceRef ref) {
   return SettingsService();
 }
 
 @riverpod
-Future<String?> pexelsApiKey(Ref ref) async {
+Future<String?> pexelsApiKey(PexelsApiKeyRef ref) async {
   return ref.watch(settingsServiceProvider).getPexelsKey();
 }
 
 @riverpod
-Future<String?> unsplashApiKey(Ref ref) async {
+Future<String?> unsplashApiKey(UnsplashApiKeyRef ref) async {
   return ref.watch(settingsServiceProvider).getUnsplashKey();
 }
 
 @riverpod
-Future<int> restTimer(Ref ref) async {
+Future<int> restTimer(RestTimerRef ref) async {
   return ref.watch(settingsServiceProvider).getRestTimer();
 }
 
 @riverpod
-Future<String> weightUnit(Ref ref) async {
+Future<String> weightUnit(WeightUnitRef ref) async {
   return ref.watch(settingsServiceProvider).getWeightUnit();
 }

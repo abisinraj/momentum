@@ -114,6 +114,6 @@ class DietService {
 }
 
 @riverpod
-DietService dietService(Ref ref) {
+DietService dietService(DietServiceRef ref) {
   return DietService(ref);
 }

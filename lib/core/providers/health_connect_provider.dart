@@ -7,7 +7,7 @@ part 'health_connect_provider.g.dart';
 
 /// Provider for the Health Connect service instance.
 @riverpod
-HealthConnectService healthConnectService(Ref ref) {
+HealthConnectService healthConnectService(HealthConnectServiceRef ref) {
   return HealthConnectService();
 }
 

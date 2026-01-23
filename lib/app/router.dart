@@ -121,7 +121,7 @@ String? _handleDataRedirect(BuildContext context, GoRouterState state, bool isCo
 
 /// Router provider using go_router
 @riverpod
-GoRouter router(Ref ref) {
+GoRouter router(RouterRef ref) {
   // Watch the async setup provider
   final isSetupCompleteAsync = ref.watch(isSetupCompleteProvider);
   
