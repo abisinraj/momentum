@@ -11,7 +11,7 @@ class ProgressScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activityAsync = ref.watch(activityGridProvider(days: 42)); // 6 weeks
+    final activityAsync = ref.watch(activityGridProvider(42)); // 6 weeks
     final statsAsync = ref.watch(weeklyStatsProvider);
     final insightAsync = ref.watch(weeklyInsightProvider);
     
@@ -326,7 +326,7 @@ class ProgressScreen extends ConsumerWidget {
           // Session History List (Consumer widget to access ref)
           Consumer(
             builder: (context, ref, _) {
-              final historyAsync = ref.watch(sessionHistoryProvider(limit: 10));
+              final historyAsync = ref.watch(sessionHistoryProvider(10));
               
               return switch (historyAsync) {
                 AsyncData(value: final sessions) when sessions.isEmpty => Container(

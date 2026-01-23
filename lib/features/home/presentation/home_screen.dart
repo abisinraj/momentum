@@ -876,7 +876,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildConsistencyGrid(WidgetRef ref) {
-    final gridAsync = ref.watch(activityGridProvider(days: 30));
+    final gridAsync = ref.watch(activityGridProvider(30));
     return gridAsync.when(
       data: (data) => ConsistencyGridWidget(activityData: data),
       loading: () => const SizedBox.shrink(),

@@ -17,7 +17,7 @@ class InfoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
-    final activityAsync = ref.watch(activityGridProvider(days: 365));
+    final activityAsync = ref.watch(activityGridProvider(365));
     
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
