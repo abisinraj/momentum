@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:momentum/app/theme/app_theme.dart';
+import 'themed_card.dart';
 
 class ConsistencyGridWidget extends StatelessWidget {
   final Map<DateTime, String> activityData; // Date -> Workout Type (or just presence)
@@ -22,13 +23,8 @@ class ConsistencyGridWidget extends StatelessWidget {
     final weekday = startDate.weekday; // 1=Mon, 7=Sun
     final alignedStartDate = startDate.subtract(Duration(days: weekday - 1));
 
-    return Container(
+    return ThemedCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

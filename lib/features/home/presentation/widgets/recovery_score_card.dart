@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'themed_card.dart';
 import 'package:momentum/app/theme/app_theme.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
@@ -39,20 +40,8 @@ class RecoveryScoreCard extends StatelessWidget {
     score = score.clamp(0, 100);
     final isGood = score > 70;
     
-    return Container(
+    return ThemedCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.darkSurfaceContainer,
-            AppTheme.darkSurfaceContainer.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
-      ),
       child: Row(
         children: [
           CircularPercentIndicator(

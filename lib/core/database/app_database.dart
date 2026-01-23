@@ -365,7 +365,7 @@ class AppDatabase extends _$AppDatabase {
   }
   
   /// Get muscle workload for heatmap (last N days)
-  /// Returns Map<MuscleName, IntensityScore> where score is approx sets/volume
+  /// Returns `Map<MuscleName, IntensityScore>` where score is approx sets/volume
   Future<Map<String, int>> getMuscleWorkload(int days) async {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day).subtract(Duration(days: days));

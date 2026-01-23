@@ -107,6 +107,7 @@ class WorkoutManager extends _$WorkoutManager {
     // Invalidate workouts stream
     ref.invalidate(workoutsStreamProvider);
     ref.invalidate(nextWorkoutProvider);
+    // ignore: unused_result
     ref.refresh(widgetSyncProvider); // Force widget update
   }
   

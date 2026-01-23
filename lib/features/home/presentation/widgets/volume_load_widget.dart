@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:momentum/app/theme/app_theme.dart';
+import 'themed_card.dart';
 
 class VolumeLoadWidget extends StatelessWidget {
   final double currentWeekVolume;
@@ -16,13 +17,8 @@ class VolumeLoadWidget extends StatelessWidget {
     final diff = currentWeekVolume - lastWeekVolume;
     final isPositive = diff >= 0;
     
-    return Container(
+    return ThemedCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -75,6 +75,89 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  void _showWidgetThemeSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.darkSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+           final currentThemeAsync = ref.watch(widgetThemeProvider);
+           
+           return Container(
+             padding: const EdgeInsets.all(24),
+             child: Column(
+               mainAxisSize: MainAxisSize.min,
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text('Widget Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+                 const SizedBox(height: 16),
+                 currentThemeAsync.when(
+                   data: (current) => Column(
+                     children: [
+                       _buildThemeOption(context, ref, 'Classic', 'classic', current),
+                       const SizedBox(height: 12),
+                       _buildThemeOption(context, ref, 'Liquid Glass', 'liquid_glass', current),
+                     ],
+                   ),
+                   loading: () => const Center(child: CircularProgressIndicator()),
+                   error: (_, __) => const Text('Error loading settings', style: TextStyle(color: Colors.red)),
+                 ),
+                 const SizedBox(height: 16),
+               ],
+             ),
+           );
+        },
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(BuildContext context, WidgetRef ref, String label, String value, String current) {
+    final isSelected = value == current;
+    return InkWell(
+      onTap: () async {
+        Navigator.pop(context);
+        final service = ref.read(settingsServiceProvider);
+        await service.setWidgetTheme(value);
+        ref.invalidate(widgetThemeProvider); // Refresh UI
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.1) : AppTheme.darkSurfaceContainer,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppTheme.tealPrimary : Colors.transparent, 
+            width: 2
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              value == 'liquid_glass' ? Icons.water_drop_outlined : Icons.dashboard_outlined,
+              color: isSelected ? AppTheme.tealPrimary : AppTheme.textSecondary,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? AppTheme.tealPrimary : AppTheme.textPrimary,
+              ),
+            ),
+            const Spacer(),
+            if (isSelected) 
+              Icon(Icons.check_circle, color: AppTheme.tealPrimary),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,13 +190,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    _buildSettingsTile(
                      icon: Icons.widgets_outlined,
                      iconColor: Colors.blueAccent,
-                     title: 'Home Screen Widget',
-                     subtitle: 'Customize appearance',
-                     onTap: () {
-                       ScaffoldMessenger.of(context).showSnackBar(
-                         const SnackBar(content: Text('Widget settings coming soon')),
-                       );
-                     },
+                     title: 'Widget Theme',
+                     subtitle: 'Liquid Glass & More',
+                     onTap: () => _showWidgetThemeSelector(context),
                    ),
                    const SizedBox(height: 12),
                    _buildSettingsTile(
@@ -128,17 +207,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      },
                    ),
                    const SizedBox(height: 12),
-                   _buildSettingsTile(
-                     icon: Icons.widgets_outlined,
-                     iconColor: Colors.blueAccent,
-                     title: 'Home Screen Widget',
-                     subtitle: 'Customize appearance',
-                     onTap: () {
-                       ScaffoldMessenger.of(context).showSnackBar(
-                         const SnackBar(content: Text('Widget settings coming soon')),
-                       );
-                     },
-                   ),
+                   // Duplicate "Home Screen Widget" removed from here
                    const SizedBox(height: 12),
                    _buildSettingsTile(
                      icon: Icons.palette_outlined,

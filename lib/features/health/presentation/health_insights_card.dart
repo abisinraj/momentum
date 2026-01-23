@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/health_connect_provider.dart';
 import '../../health/presentation/heart_rate_measure_screen.dart';
+import '../../home/presentation/widgets/themed_card.dart';
 
 /// Card widget displaying health insights on the home screen.
 class HealthInsightsCard extends ConsumerWidget {
@@ -18,11 +19,10 @@ class HealthInsightsCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return Card(
+    return ThemedCard(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      padding: const EdgeInsets.all(16),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
@@ -100,7 +100,6 @@ class HealthInsightsCard extends ConsumerWidget {
                 ),
               ),
           ],
-        ),
       ),
     );
   }

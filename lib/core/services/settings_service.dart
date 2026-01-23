@@ -12,6 +12,17 @@ class SettingsService {
   static const String _keyGemini = 'gemini_api_key';
   static const String _keyRestTimer = 'rest_timer_seconds';
   static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
+  static const String _keyWidgetTheme = 'widget_theme'; // 'classic', 'liquid_glass'
+
+  Future<void> setWidgetTheme(String theme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyWidgetTheme, theme);
+  }
+
+  Future<String> getWidgetTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyWidgetTheme) ?? 'classic';
+  }
 
   Future<void> setRestTimer(int seconds) async {
     final prefs = await SharedPreferences.getInstance();
@@ -97,4 +108,11 @@ Future<int> restTimer(Ref ref) async {
 @riverpod
 Future<String> weightUnit(Ref ref) async {
   return ref.watch(settingsServiceProvider).getWeightUnit();
+}
+
+@riverpod
+Future<String> widgetTheme(Ref ref) async {
+  // Watch settings service changes? No, settingsService isn't a notifier. 
+  // We should invalidate this provider when setting updates.
+  return ref.watch(settingsServiceProvider).getWidgetTheme();
 }

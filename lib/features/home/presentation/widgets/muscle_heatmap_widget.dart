@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:momentum/app/theme/app_theme.dart';
+import 'themed_card.dart';
 
 /// Muscle Heatmap Widget
 /// Visualizes which body parts have been trained recently.
@@ -13,13 +14,8 @@ class MuscleHeatmapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ThemedCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
