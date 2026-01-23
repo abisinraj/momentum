@@ -260,9 +260,9 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                    children: [
                       _buildMacroSummary('Calories', '$totalCal', 'kcal', theme),
-                      _buildMacroSummary('Protein', '${totalP.toStringAsFixed(1)}', 'g', theme),
-                      _buildMacroSummary('Carbs', '${totalC.toStringAsFixed(1)}', 'g', theme),
-                      _buildMacroSummary('Fats', '${totalF.toStringAsFixed(1)}', 'g', theme),
+                      _buildMacroSummary('Protein', totalP.toStringAsFixed(1), 'g', theme),
+                      _buildMacroSummary('Carbs', totalC.toStringAsFixed(1), 'g', theme),
+                      _buildMacroSummary('Fats', totalF.toStringAsFixed(1), 'g', theme),
                    ],
                  ),
                ),
@@ -282,7 +282,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.file(File(log.imageUrl!), width: 50, height: 50, fit: BoxFit.cover,
-                          errorBuilder: (_,__,___) => const Icon(Icons.fastfood),
+                          errorBuilder: (_, _, _) => const Icon(Icons.fastfood),
                         ),
                       ) 
                     : const Icon(Icons.fastfood),
@@ -296,7 +296,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                     },
                  ),
                ),
-             )).toList(),
+             )),
            ],
          );
       },

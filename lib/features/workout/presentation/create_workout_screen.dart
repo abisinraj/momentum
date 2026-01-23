@@ -483,7 +483,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
       padding: const EdgeInsets.all(24),
       // +1 for the "Add Exercise" form at the end
       itemCount: _exercises.length + 1,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         // If it's the last item, render the Add Form
         if (index == _exercises.length) {

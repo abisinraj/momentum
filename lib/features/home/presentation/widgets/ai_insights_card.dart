@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Add riverpod import
-import 'dart:math' as math; // Add math import for pi
 import 'package:momentum/app/theme/app_theme.dart';
 import 'package:momentum/core/providers/ai_providers.dart';
 import 'package:shimmer/shimmer.dart';
@@ -85,6 +84,7 @@ class AIInsightsCard extends ConsumerWidget {
                     IconButton(
                       icon: Icon(Icons.refresh, color: AppTheme.textMuted, size: 20),
                       onPressed: () {
+                         // ignore: unused_result
                          ref.refresh(dailyInsightProvider);
                       },
                       splashRadius: 20,

@@ -6,50 +6,24 @@ part of 'router.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-// GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint, type=warning
-/// Router provider using go_router
-
-@ProviderFor(router)
-final routerProvider = RouterProvider._();
-
-/// Router provider using go_router
-
-final class RouterProvider
-    extends $FunctionalProvider<GoRouter, GoRouter, GoRouter>
-    with $Provider<GoRouter> {
-  /// Router provider using go_router
-  RouterProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'routerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$routerHash();
-
-  @$internal
-  @override
-  $ProviderElement<GoRouter> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  GoRouter create(Ref ref) {
-    return router(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(GoRouter value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<GoRouter>(value),
-    );
-  }
-}
-
 String _$routerHash() => r'd9c44d3661be594f876aaff4b1fe8a5db782096b';
+
+/// Router provider using go_router
+///
+/// Copied from [router].
+@ProviderFor(router)
+final routerProvider = AutoDisposeProvider<GoRouter>.internal(
+  router,
+  name: r'routerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$routerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef RouterRef = AutoDisposeProviderRef<GoRouter>;
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -871,7 +871,7 @@ class HomeScreen extends ConsumerWidget {
         lastWeekVolume: data[1],
       ),
       loading: () => const SizedBox.shrink(),
-      error: (_,__) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 
@@ -880,7 +880,7 @@ class HomeScreen extends ConsumerWidget {
     return gridAsync.when(
       data: (data) => ConsistencyGridWidget(activityData: data),
       loading: () => const SizedBox.shrink(),
-      error: (_,__) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

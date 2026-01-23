@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/providers/health_connect_provider.dart';
 import '../../health/presentation/heart_rate_measure_screen.dart';
 
@@ -162,7 +161,7 @@ class HealthInsightsCard extends ConsumerWidget {
         _buildMetric(
           context,
           icon: Icons.monitor_weight_rounded,
-          value: state.latestWeight != null ? '${state.latestWeight!.toStringAsFixed(1)}' : '--',
+          value: state.latestWeight != null ? state.latestWeight!.toStringAsFixed(1) : '--',
           label: 'kg',
           color: colorScheme.tertiary,
         ),

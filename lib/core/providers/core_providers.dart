@@ -7,14 +7,14 @@ part 'core_providers.g.dart';
 /// Provider for checking if setup is complete (synchronous check for router)
 /// This watches the async provider and returns false until loaded
 @riverpod
-bool isSetupCompleteSync(ref) {
+bool isSetupCompleteSync(Ref ref) {
   final asyncValue = ref.watch(isSetupCompleteProvider);
   return asyncValue.valueOrNull ?? false;
 }
 
 /// Provider for current cycle position
 @riverpod
-Future<int> currentCyclePosition(ref) async {
+Future<int> currentCyclePosition(Ref ref) async {
   final db = ref.watch(appDatabaseProvider);
   return db.getCurrentSplitIndex();
 }

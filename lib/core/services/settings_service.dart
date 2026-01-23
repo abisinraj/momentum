@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -74,26 +74,26 @@ class SettingsService {
 }
 
 @riverpod
-SettingsService settingsService(SettingsServiceRef ref) {
+SettingsService settingsService(Ref ref) {
   return SettingsService();
 }
 
 @riverpod
-Future<String?> pexelsApiKey(PexelsApiKeyRef ref) async {
+Future<String?> pexelsApiKey(Ref ref) async {
   return ref.watch(settingsServiceProvider).getPexelsKey();
 }
 
 @riverpod
-Future<String?> unsplashApiKey(UnsplashApiKeyRef ref) async {
+Future<String?> unsplashApiKey(Ref ref) async {
   return ref.watch(settingsServiceProvider).getUnsplashKey();
 }
 
 @riverpod
-Future<int> restTimer(RestTimerRef ref) async {
+Future<int> restTimer(Ref ref) async {
   return ref.watch(settingsServiceProvider).getRestTimer();
 }
 
 @riverpod
-Future<String> weightUnit(WeightUnitRef ref) async {
+Future<String> weightUnit(Ref ref) async {
   return ref.watch(settingsServiceProvider).getWeightUnit();
 }

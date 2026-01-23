@@ -1,5 +1,4 @@
-import 'dart:async';
-import 'dart:ui'; // For FontFeature
+import 'dart:async'; // For FontFeature
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -502,7 +501,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                                     ),
                                     if (isResting)
                                       Text(
-                                        'Rest: $_restTimeDisplay\s',
+                                        'Rest: $_restTimeDisplay s',
                                         style: TextStyle(
                                           color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.bold,

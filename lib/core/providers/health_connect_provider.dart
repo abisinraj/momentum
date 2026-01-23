@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:health/health.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../services/health_connect_service.dart';
@@ -7,7 +7,7 @@ part 'health_connect_provider.g.dart';
 
 /// Provider for the Health Connect service instance.
 @riverpod
-HealthConnectService healthConnectService(HealthConnectServiceRef ref) {
+HealthConnectService healthConnectService(Ref ref) {
   return HealthConnectService();
 }
 
