@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/settings_service.dart';
-import '../../../app/theme/app_theme.dart';
+import 'package:momentum/core/services/settings_service.dart';
+import 'package:momentum/app/theme/app_theme.dart';
 
 class ThemedCard extends ConsumerWidget {
   final Widget child;
