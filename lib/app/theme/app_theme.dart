@@ -49,6 +49,10 @@ class AppTheme {
     // Force dark theme for Momentum's design language
     return dark(dynamicScheme: null);
   }
+
+  static ThemeData dark({ColorScheme? dynamicScheme}) {
+    return _buildTheme(tealPrimary, tealDark);
+  }
   
   // Theme Modes
   static const String themeTeal = 'teal';

@@ -64,7 +64,7 @@ class ConsistencyGridWidget extends StatelessWidget {
                        final date = weekStart.add(Duration(days: dayIndex));
                        // Check if date is in future
                        if (date.isAfter(endDate)) {
-                         return _buildCell(null); // Future
+                         return _buildCell(context, null); // Future
                        }
                        
                        // Check activity
@@ -72,7 +72,7 @@ class ConsistencyGridWidget extends StatelessWidget {
                        final dateKey = DateTime(date.year, date.month, date.day);
                        final hasActivity = activityData.containsKey(dateKey);
                        
-                       return _buildCell(hasActivity);
+                       return _buildCell(context, hasActivity);
                      }),
                    ),
                  );
@@ -84,7 +84,7 @@ class ConsistencyGridWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCell(bool? active) {
+  Widget _buildCell(BuildContext context, bool? active) {
     Color color;
     if (active == null) {
       color = Colors.transparent; // Future

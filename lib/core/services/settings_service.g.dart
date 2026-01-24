@@ -107,5 +107,21 @@ final widgetThemeProvider =
     );
 
 typedef _$WidgetTheme = AutoDisposeAsyncNotifier<String>;
+String _$appThemeModeHash() => r'059fa2dcf55063b94c315a540cc149e4c98fe4ed';
+
+/// See also [AppThemeMode].
+@ProviderFor(AppThemeMode)
+final appThemeModeProvider =
+    AutoDisposeAsyncNotifierProvider<AppThemeMode, String>.internal(
+      AppThemeMode.new,
+      name: r'appThemeModeProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$appThemeModeHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$AppThemeMode = AutoDisposeAsyncNotifier<String>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
