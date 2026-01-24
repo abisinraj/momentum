@@ -60,61 +60,102 @@ class AppTheme {
   static const String themeRed = 'red';
   static const String themeBlack = 'black';
 
-  // Get theme based on key
+  // Get theme based on key with distinct palettes
   static ThemeData getTheme(String themeKey) {
     switch (themeKey) {
-      case themeYellow:
-        return _buildTheme(const Color(0xFFFFEB3B), const Color(0xFFFBC02D));
-      case themeRed:
-        return _buildTheme(const Color(0xFFE53935), const Color(0xFFC62828));
-      case themeBlack:
-        return _buildTheme(const Color(0xFFFFFFFF), const Color(0xFFB0B8C1), isMonochrome: true);
+      case themeYellow: // Cyber / High Voltage
+        return _buildTheme(
+          primary: const Color(0xFFD4E157), // Acid Yellow
+          primaryContainer: const Color(0xFFC0CA33),
+          background: const Color(0xFF050505), // Near Black
+          surface: const Color(0xFF141414),
+          surfaceContainer: const Color(0xFF1E1E1E),
+          border: const Color(0xFF333333),
+        );
+      case themeRed: // Adrenaline
+        return _buildTheme(
+          primary: const Color(0xFFE53935), // Crimson
+          primaryContainer: const Color(0xFFA50000), // Darker Red for container
+          // Background tinted with very deep red
+          background: const Color(0xFF120505), 
+          surface: const Color(0xFF1F0A0A), // Dark Red-Brown surface
+          surfaceContainer: const Color(0xFF2D0E0E),
+          border: const Color(0xFF4A1A1A),
+        );
+      case themeBlack: // OLED Midnight
+        return _buildTheme(
+          primary: const Color(0xFFFFFFFF), // White
+          primaryContainer: const Color(0xFFCCCCCC),
+          background: const Color(0xFF000000), // True Black
+          surface: const Color(0xFF000000), // True Black surfaces
+          surfaceContainer: const Color(0xFF000000), // True Black containers
+          border: const Color(0xFF333333), // Visible grey borders
+          isMonochrome: true,
+        );
       case themeTeal:
-      default:
-        return _buildTheme(tealPrimary, tealDark);
+      default: // Ocean / Default
+        return _buildTheme(
+          primary: tealPrimary,
+          primaryContainer: tealDark,
+          background: darkBackground,
+          surface: darkSurface,
+          surfaceContainer: darkSurfaceContainer,
+          border: darkBorder,
+        );
     }
   }
 
-  // Create the Momentum dark theme with dynamic primary
-  static ThemeData _buildTheme(Color primary, Color primaryContainer, {bool isMonochrome = false}) {
+  // Create the Momentum dark theme with dynamic palette
+  static ThemeData _buildTheme({
+    required Color primary, 
+    required Color primaryContainer,
+    required Color background,
+    required Color surface,
+    required Color surfaceContainer,
+    required Color border,
+    bool isMonochrome = false,
+  }) {
+    // For monochrome (OLED), we need distinctive borders, so outlines are brighter
+    final effectiveBorder = isMonochrome ? Colors.white24 : border;
+
     final colorScheme = ColorScheme(
       brightness: Brightness.dark,
       primary: primary,
-      onPrimary: isMonochrome ? Colors.black : darkBackground,
+      onPrimary: isMonochrome ? Colors.black : background,
       primaryContainer: primaryContainer,
       onPrimaryContainer: isMonochrome ? Colors.black : Colors.white,
       secondary: isMonochrome ? Colors.white : yellowAccent,
-      onSecondary: darkBackground,
+      onSecondary: background,
       secondaryContainer: isMonochrome ? const Color(0xFF333333) : yellowDark.withValues(alpha: 0.2),
       onSecondaryContainer: isMonochrome ? Colors.white : yellowAccent,
       tertiary: isMonochrome ? Colors.grey : tealLight,
-      onTertiary: darkBackground,
+      onTertiary: background,
       tertiaryContainer: isMonochrome ? Colors.grey.withValues(alpha: 0.3) : tealDark.withValues(alpha: 0.3),
       onTertiaryContainer: isMonochrome ? Colors.white : tealLight,
       error: error,
       onError: Colors.white,
       errorContainer: error.withValues(alpha: 0.2),
       onErrorContainer: error,
-      surface: darkSurface,
+      surface: surface,
       onSurface: textPrimary,
-      surfaceContainerHighest: darkSurfaceContainerHigh,
+      surfaceContainerHighest: surfaceContainer, // Using container color for highest variant too
       onSurfaceVariant: textSecondary,
-      outline: darkBorder,
-      outlineVariant: darkBorder.withValues(alpha: 0.5),
+      outline: effectiveBorder,
+      outlineVariant: effectiveBorder.withValues(alpha: 0.5),
       shadow: Colors.black,
       scrim: Colors.black,
       inverseSurface: Colors.white,
-      onInverseSurface: darkBackground,
+      onInverseSurface: background,
       inversePrimary: primaryContainer,
     );
     
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: darkBackground,
+      scaffoldBackgroundColor: background,
       textTheme: _buildTextTheme(ThemeData.dark().textTheme),
       
-      // App Bar - transparent, no elevation
+      // App Bar
       appBarTheme: AppBarTheme(
         centerTitle: false,
         backgroundColor: Colors.transparent,
@@ -128,22 +169,22 @@ class AppTheme {
         ),
       ),
       
-      // Cards - dark with subtle border
+      // Cards
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: darkBorder.withValues(alpha: 0.3)),
+          side: BorderSide(color: effectiveBorder.withValues(alpha: 0.3)),
         ),
-        color: darkSurfaceContainer,
+        color: surfaceContainer,
         margin: EdgeInsets.zero,
       ),
       
-      // Primary button (teal)
+      // Primary button
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
-          foregroundColor: isMonochrome ? Colors.black : darkBackground,
+          foregroundColor: isMonochrome ? Colors.black : background,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -156,10 +197,10 @@ class AppTheme {
         ),
       ),
       
-      // Elevated button (for secondary actions)
+      // Elevated button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: darkSurfaceContainer,
+          backgroundColor: surfaceContainer,
           foregroundColor: textPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
@@ -187,17 +228,18 @@ class AppTheme {
         ),
       ),
       
-      // Input decoration (text fields)
+      // Input decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: darkSurfaceContainer,
+        fillColor: surfaceContainer,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: darkBorder.withValues(alpha: 0.3)),
+          // Stronger border for monochrome mode
+          borderSide: BorderSide(color: effectiveBorder.withValues(alpha: isMonochrome ? 0.5 : 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -208,9 +250,9 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       
-      // Navigation bar (bottom)
+      // Navigation bar
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: darkSurface,
+        backgroundColor: surface,
         indicatorColor: primary.withValues(alpha: 0.2),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith((states) {
@@ -237,13 +279,13 @@ class AppTheme {
       
       // Divider
       dividerTheme: DividerThemeData(
-        color: darkBorder.withValues(alpha: 0.3),
+        color: effectiveBorder.withValues(alpha: 0.3),
         thickness: 1,
       ),
       
       // Chip
       chipTheme: ChipThemeData(
-        backgroundColor: darkSurfaceContainer,
+        backgroundColor: surfaceContainer,
         selectedColor: primary.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.outfit(color: textPrimary),
         side: BorderSide.none,
@@ -257,8 +299,8 @@ class AppTheme {
       
       // FAB
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: tealPrimary,
-        foregroundColor: darkBackground,
+        backgroundColor: primary,
+        foregroundColor: isMonochrome ? Colors.black : background,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -267,26 +309,29 @@ class AppTheme {
       
       // Bottom sheet
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: darkSurface,
+        backgroundColor: surface,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
+        modalBackgroundColor: surface,
       ),
       
       // Dialog
       dialogTheme: DialogThemeData(
-        backgroundColor: darkSurface,
+        backgroundColor: surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
+          side: isMonochrome ? const BorderSide(color: Colors.white24) : BorderSide.none,
         ),
       ),
       
       // Snackbar
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: darkSurfaceContainerHigh,
+        backgroundColor: surfaceContainer,
         contentTextStyle: GoogleFonts.outfit(color: textPrimary),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+          side: isMonochrome ? const BorderSide(color: Colors.white24) : BorderSide.none,
         ),
         behavior: SnackBarBehavior.floating,
       ),
@@ -294,7 +339,7 @@ class AppTheme {
       // Progress indicator
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primary,
-        circularTrackColor: darkBorder,
+        circularTrackColor: border,
       ),
     );
   }
