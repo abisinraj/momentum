@@ -149,24 +149,35 @@
             }
 
             // --- SKELETON & MUSCLES (Mapped to Real Groups) ---
-            const head = new THREE.Vector3(0, 165, 0);
-            const neck = new THREE.Vector3(0, 150, 0);
-            const shoulderL = new THREE.Vector3(-45, 145, 0);
-            const shoulderR = new THREE.Vector3(45, 145, 0);
-            const elbowL = new THREE.Vector3(-65, 105, 10);
-            const elbowR = new THREE.Vector3(65, 105, 10);
-            const handL = new THREE.Vector3(-75, 70, 20);
-            const handR = new THREE.Vector3(75, 70, 20);
-            const spineTop = new THREE.Vector3(0, 145, -5);
-            const spineBase = new THREE.Vector3(0, 100, -5);
-            const hipL = new THREE.Vector3(-25, 95, 0);
-            const hipR = new THREE.Vector3(25, 95, 0);
-            const kneeL = new THREE.Vector3(-30, 50, 10);
-            const kneeR = new THREE.Vector3(30, 50, 10);
-            const ankleL = new THREE.Vector3(-30, 5, 0);
-            const ankleR = new THREE.Vector3(30, 5, 0);
-            const footL = new THREE.Vector3(-30, 0, 15);
-            const footR = new THREE.Vector3(30, 0, 15);
+            // More realistic ratios (Head height ~22-24 units)
+            // Total height approx 170-180 units
+            const head = new THREE.Vector3(0, 168, 0);
+            const neck = new THREE.Vector3(0, 152, 0);
+
+            // Shoulders: Reduced width from 90 (±45) to 76 (±38) for realistic athletic build
+            const shoulderL = new THREE.Vector3(-38, 148, 0);
+            const shoulderR = new THREE.Vector3(38, 148, 0);
+
+            // Arms: Length ratios adjusted
+            const elbowL = new THREE.Vector3(-58, 108, 10);
+            const elbowR = new THREE.Vector3(58, 108, 10);
+            const handL = new THREE.Vector3(-68, 70, 20);
+            const handR = new THREE.Vector3(68, 70, 20);
+
+            const spineTop = new THREE.Vector3(0, 148, -5);
+            const spineBase = new THREE.Vector3(0, 102, -5);
+
+            // Hips: Slightly narrower to match new shoulders
+            const hipL = new THREE.Vector3(-22, 98, 0);
+            const hipR = new THREE.Vector3(22, 98, 0);
+
+            // Legs: Longer relative to torso for better proportions
+            const kneeL = new THREE.Vector3(-26, 52, 12);
+            const kneeR = new THREE.Vector3(26, 52, 12);
+            const ankleL = new THREE.Vector3(-26, 6, 0);
+            const ankleR = new THREE.Vector3(26, 6, 0);
+            const footL = new THREE.Vector3(-26, 0, 18);
+            const footR = new THREE.Vector3(26, 0, 18);
 
             // Head/Neck
             createMuscle(head, new THREE.Vector3(0, 185, 0), 120, 22, 0.2, 'Head');
