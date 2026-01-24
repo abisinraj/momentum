@@ -18,9 +18,27 @@ import '../../home/presentation/widgets/volume_load_widget.dart';
 import '../../../core/providers/dashboard_providers.dart';
 import '../../../core/providers/health_connect_provider.dart';
 
+import 'package:momentum/core/utils/screen_utils.dart';
+
 /// Home screen - shows next workout in cycle with Momentum design
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Log screen resolution on startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ScreenUtils.printScreenInfo(context);
+      }
+    });
+  }
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -30,7 +48,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final nextWorkoutAsync = ref.watch(nextWorkoutProvider);
     final userAsync = ref.watch(currentUserProvider);
     final activeSession = ref.watch(activeWorkoutSessionProvider);

@@ -14,55 +14,82 @@ class AIInsightsService {
       String apiKey = prefs.getString('gemini_api_key') ?? _defaultApiKey;
 
       if (apiKey == 'YOUR_API_KEY_HERE' || apiKey.isEmpty) {
-        return "Configure your API Key in Settings to unlock AI insights.";
+        return "Configure your Gemini API Key in Settings to unlock AI insights.";
       }
 
-      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+      // Use the stable 'gemini-pro' model
+      final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
 
-      final prompt = _constructPrompt(user, recentSessions);
+      final prompt = _constructDetailedPrompt(user, recentSessions);
       final content = [Content.text(prompt)];
+      
       final response = await model.generateContent(content);
 
-      return response.text?.trim() ?? "Stay consistent and keep pushing!";
+      return response.text?.trim() ?? "Consistency is key. Keep pushing forward!";
     } catch (e) {
-      // print('AI Insight Error: $e');
-      if (e.toString().contains('API_KEY_INVALID')) {
+      final errorStr = e.toString();
+      if (errorStr.contains('API_KEY_INVALID')) {
          return "Invalid API Key. Please check your settings.";
+      } else if (errorStr.contains('not found') || errorStr.contains('404')) {
+         // Fallback if model is somehow still wrong
+         return "AI Model unavailable. Focus on your ${user.goal ?? 'goals'} today!";
+      } else if (errorStr.contains('User location is not supported')) {
+         return "AI features are not supported in your region yet.";
       }
       return "Focus on your form and breathing today. You got this!";
     }
   }
 
-  String _constructPrompt(User user, List<Map<String, dynamic>> sessions) {
+  String _constructDetailedPrompt(User user, List<Map<String, dynamic>> sessions) {
     final goal = user.goal ?? 'General Fitness';
     final weight = user.weightKg != null ? '${user.weightKg}kg' : 'Unknown';
     
-    StringBuffer recentActivity = StringBuffer();
+    StringBuffer analysis = StringBuffer();
+    
     if (sessions.isEmpty) {
-      recentActivity.writeln("No recent workouts.");
+      analysis.writeln("User has no recorded workouts yet.");
+      analysis.writeln("Context: This is their very first step.");
     } else {
-      for (var s in sessions.take(5)) { // Last 5 sessions
-        final workoutName = s['workoutName'] as String? ?? 'Workout';
-        final date = s['completedAt'] as DateTime?;
-        final dateStr = date != null ? "${date.day}/${date.month}" : "Unknown date";
-        recentActivity.writeln("- $workoutName on $dateStr");
+      // Analyze consistency
+      final lastWorkout = sessions.first;
+      final lastDate = lastWorkout['completedAt'] as DateTime?;
+      final daysSince = lastDate != null ? DateTime.now().difference(lastDate).inDays : 99;
+      
+      analysis.writeln("Last workout was ${daysSince == 0 ? 'today' : '$daysSince days ago'}.");
+      
+      if (daysSince > 7) {
+        analysis.writeln("Status: User has been inactive. Needs gentle re-engagement.");
+      } else if (daysSince <= 2) {
+        analysis.writeln("Status: User is consistent and active. Needs positive reinforcement or challenge.");
+      }
+      
+      // List recent history for context
+      analysis.writeln("Recent History:");
+      for (var s in sessions.take(3)) {
+         final name = s['workoutName'] ?? 'Workout';
+         final date = s['completedAt'] as DateTime?;
+         analysis.writeln("- $name (${date?.day}/${date?.month})");
       }
     }
 
     return '''
-    You are an expert fitness coach for a user named ${user.name}.
-    User Stats:
+    You are an elite fitness coach for ${user.name}.
+    
+    User Profile:
     - Goal: $goal
     - Weight: $weight
     
-    Recent Activity:
-    $recentActivity
+    Training Status:
+    ${analysis.toString()}
     
-    Based on this, generate a ONE sentence daily insight or motivation for their workout today.
-    - Be brief and punchy.
-    - If they have been consistent, praise them.
-    - If they missed a few days, gently encourage them.
-    - Do not use hashtags.
+    Task:
+    Generate a SINGLE, punchy, high-impact sentence to motivate them for today's training.
+    
+    Guidelines:
+    - If inactive (>7 days): Be encouraging, emphasize that "starting back is the hardest part".
+    - If consistent: Challenge them to focus on form, intensity, or a specific mental cue.
+    - Style: Professional, stoic, inspiring. No emojis. No hashtags.
+    - Max length: 20 words.
     ''';
   }
 }
