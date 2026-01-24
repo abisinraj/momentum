@@ -55,8 +55,7 @@ class _ThreeDManWidgetState extends ConsumerState<ThreeDManWidget> {
   }
 
   Future<void> _loadHtmlFromAssets() async {
-    String fileHtmlContents = await rootBundle.loadString('assets/www/index.html');
-    _controller.loadHtmlString(fileHtmlContents);
+    await _controller.loadFlutterAsset('assets/www/index.html');
   }
   
   void _updateHeatmap() {
