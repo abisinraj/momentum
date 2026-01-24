@@ -50,9 +50,8 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     final today = DateTime(now.year, now.month, now.day);
     
     // Check from today backwards
-    // If today is active, streak includes it.
-    // If today is NOT active, check yesterday.
     DateTime checkDate = today;
+    // optimization: if today has activity, include it. If not, check yesterday.
     if (!activityGrid.containsKey(checkDate)) {
       checkDate = today.subtract(const Duration(days: 1));
     }
@@ -64,72 +63,43 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
 
     // 2. Get Next Workout
     final nextWorkout = await db.getNextWorkout();
-    String title = nextWorkout?.name ?? 'Complete Setup';
-    String desc = 'Tap to start';
+    String title = 'No Active Plan';
+    String desc = 'Create a workout to start';
     
-    // Check if this workout is already completed today
     if (nextWorkout != null) {
+      title = nextWorkout.name;
+      
+      // Check if done today
       final completedIds = await db.getTodayCompletedWorkoutIds();
       if (completedIds.contains(nextWorkout.id)) {
-        // Workout done!
-        title = 'Session Complete';
-        desc = 'Great job keeping momentum!';
+        title = 'Done: ${nextWorkout.name}';
+        desc = 'All done for today!';
+        // Optional: Show tomorrow's workout?
+        // Since we don't easily know "tomorrow" without user cycle logic, just status is fine.
       } else {
-        // Not done yet
+        // Not done
         final exercises = await db.getExercisesForWorkout(nextWorkout.id);
-        desc = '${exercises.length} Exercises';
+        desc = '${exercises.length} Exercises • Tap to Start';
       }
     }
     
-    // 3. Calculate Cycle Progress
+    // 3. Calculate Cycle Progress (Day X of Y)
     final user = await db.getUser();
-    final allWorkouts = await db.getAllWorkouts();
+    String cycleProgress = 'Day 1';
     
-    String cycleProgress = '1/3'; // Default
-    
-    if (user != null && allWorkouts.isNotEmpty) {
-      final splitDays = user.splitDays ?? allWorkouts.length;
-      final currentIndex = user.currentSplitIndex;
-      // Display as "Day X/Y"
-      cycleProgress = '${currentIndex + 1}/$splitDays';
+    if (user != null && user.splitDays != null && user.splitDays! > 0) {
+      final current = user.currentSplitIndex + 1;
+      final total = user.splitDays!;
+      cycleProgress = 'Day $current/$total';
     }
-    
-    // For "Session Complete" state, we might want to show that we finished the cycle?
-    // But currentSplitIndex usually updates AFTER session completion.
-    // If we just finished session, currentSplitIndex is already pointing to tomorrow.
-    // So if title is "Session Complete", maybe show the progress of the JUST finished one?
-    // Let's keep it simple: Show current index pointer.
-    
-    // Pass cycleProgress instead of weeklyProgress
 
     // 4. Update Widget
-    String? nextWorkoutName;
-    
-    if (title == 'Session Complete' && nextWorkout != null) {
-      // Find the *next* workout in the cycle
-      // If current is index N, next is (N+1) % splitDays
-      // We can query all workouts and find the one with index + 1
-      final allWorkouts = await db.getAllWorkouts();
-      final user = await db.getUser();
-      if (user != null && allWorkouts.isNotEmpty) {
-        final currentSplitIndex = nextWorkout.orderIndex; // The one we just finished/checked
-        final splitDays = user.splitDays ?? allWorkouts.length;
-        final nextIndex = (currentSplitIndex + 1) % splitDays;
-        
-        final nextDayWorkout = allWorkouts.firstWhere(
-          (w) => w.orderIndex == nextIndex, 
-          orElse: () => allWorkouts.first
-        );
-        nextWorkoutName = nextDayWorkout.name;
-      }
-    }
-
     await widgetService.updateWidget(
       streak: streak,
       title: title,
       desc: desc,
-      nextWorkoutName: nextWorkoutName,
       cycleProgress: cycleProgress,
+      nextWorkoutName: nextWorkout?.name ?? 'Split Setup', 
     );
   } catch (e) {
     debugPrint('Widget Sync Error: $e');

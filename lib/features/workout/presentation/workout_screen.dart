@@ -164,11 +164,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           Navigator.of(context).push(
             MaterialPageRoute(
                builder: (context) => CreateWorkoutScreen(
-                 index: (userAsync.value?.splitDays ?? 0) + 1, // Logic: this index is just for display if not in setup. Actually "orderIndex" handles position. 
-                 // Wait, CreateWorkoutScreen expects totalDays. 
-                 // If just adding one, we can fetch current count.
-                 // Actually, simpler: Pass dummy values if just adding extra?
-                 // Or better: Let's read total days from user.
+                 // Default to Day 1 (index 1) for standalone creation so it highlights the first option
+                 index: 1,
                  totalDays: userAsync.value?.splitDays ?? 3,
                  isStandalone: true,
                ),

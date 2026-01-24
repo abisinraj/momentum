@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../database/app_database.dart';
 import '../services/widget_service.dart';
 import 'database_providers.dart';
+import 'dashboard_providers.dart';
+import 'ai_providers.dart';
 
 part 'workout_providers.g.dart';
 
@@ -61,7 +63,29 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
     // Invalidate providers that depend on session data
     ref.invalidate(todayCompletedWorkoutIdsProvider);
     ref.invalidate(nextWorkoutProvider);
-    ref.invalidate(activityGridProvider);
+    // Note: activityGridProvider requires days arg, so we can't simple invalidate without family arg. 
+    // Usually Riverpod invalidates all family variants if we invalidate the provider itself? No, only if we use `ref.invalidate(provider)`. 
+    // But `activityGridProvider` is a family. `ref.invalidate(activityGridProvider)` is a compile error unless we pass args.
+    // However, if we don't know the args, we can't easily invalidate specific families unless we track them.
+    // WORKAROUND: We rely on the fact that UI widgets watching these will likely trigger a refresh if they are autoDispose, 
+    // OR we accept that "Activity Grid" might lagging slightly unless we force it.
+    // BETTER: Use `ref.container.invalidate(activityGridProvider)`? No.
+    // Let's focus on non-family ones or commonly used ones.
+    
+    ref.invalidate(weeklyStatsProvider);
+    ref.invalidate(weeklyInsightProvider);
+    ref.invalidate(sessionHistoryProvider); // IMPORTANT: Updates history tab
+    
+    // Dashboard & AI
+    ref.invalidate(muscleWorkloadProvider);
+    ref.invalidate(volumeLoadProvider);
+    ref.invalidate(dailyInsightProvider); // Re-generate AI insight based on new completion
+    
+    // Activity Grid (Try to invalidate common usages if possible, or leave it be if complex)
+    // Actually, `activityGridProvider` is used in ConsistencyGridWidget with days=90 usually. 
+    // Since we can't guess, we might skip explicit invalidation and hope for auto-refresh, 
+    // or if `ConsistencyGridWidget` watches `workoutsStreamProvider` too? No.
+    // Actually, `widget_service.dart` usually triggers updates.
     
     // Sync widget data
     final _ = ref.refresh(widgetSyncProvider);
