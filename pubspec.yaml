@@ -50,6 +50,7 @@ dependencies:
   percent_indicator: ^4.2.5
   model_viewer_plus: ^1.10.0
   flutter_secure_storage: ^10.0.0
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +70,7 @@ flutter:
   assets:
     - assets/images/
     - assets/3d/
+    - assets/www/
 
 flutter_launcher_icons:
   android: "launcher_icon"

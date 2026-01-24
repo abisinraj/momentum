@@ -215,7 +215,6 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
           // Go to next workout creation
           context.push('/create-workout/${widget.index + 1}/${widget.totalDays}');
         } else {
-        } else {
           // Finish split setup OR Standalone creation
           if (widget.isStandalone) {
              Navigator.of(context).pop();
