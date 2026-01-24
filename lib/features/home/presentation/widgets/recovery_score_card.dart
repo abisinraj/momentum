@@ -52,7 +52,7 @@ class RecoveryScoreCard extends StatelessWidget {
               "${score.toInt()}",
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0, color: Colors.white),
             ),
-            progressColor: isGood ? AppTheme.tealPrimary : Colors.orange,
+            progressColor: isGood ? Theme.of(context).colorScheme.primary : Colors.orange,
             backgroundColor: Colors.white10,
             circularStrokeCap: CircularStrokeCap.round,
           ),

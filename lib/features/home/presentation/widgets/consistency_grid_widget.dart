@@ -89,7 +89,7 @@ class ConsistencyGridWidget extends StatelessWidget {
     if (active == null) {
       color = Colors.transparent; // Future
     } else if (active) {
-      color = AppTheme.tealPrimary;
+      color = Theme.of(context).colorScheme.primary;
     } else {
       color = Colors.white.withValues(alpha: 0.05);
     }

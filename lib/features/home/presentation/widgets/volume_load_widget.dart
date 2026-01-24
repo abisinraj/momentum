@@ -24,7 +24,7 @@ class VolumeLoadWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.monitor_weight_outlined, color: AppTheme.tealPrimary, size: 20),
+              Icon(Icons.monitor_weight_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
               const SizedBox(width: 12),
               const Text(
                 'VOLUME LOAD',
