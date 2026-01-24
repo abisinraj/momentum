@@ -9,15 +9,12 @@ part 'settings_service.g.dart';
 class SettingsService {
   static const String _keyPexels = 'api_key_pexels';
   static const String _keyUnsplash = 'api_key_unsplash';
-  static const String _keyOpenAi = 'api_key_openai';
   static const String _keyGemini = 'gemini_api_key';
   static const String _keyRestTimer = 'rest_timer_seconds';
   static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
   static const String _keyWidgetTheme = 'widget_theme'; // 'classic', 'liquid_glass'
 
-  final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  final _storage = const FlutterSecureStorage();
 
   Future<void> setWidgetTheme(String theme) async {
     final prefs = await SharedPreferences.getInstance();
@@ -78,23 +75,7 @@ class SettingsService {
     return value;
   }
   
-  Future<void> setOpenAiKey(String key) async {
-    await _storage.write(key: _keyOpenAi, value: key);
-  }
 
-  Future<String?> getOpenAiKey() async {
-    String? value = await _storage.read(key: _keyOpenAi);
-    if (value != null) return value;
-    
-    final prefs = await SharedPreferences.getInstance();
-    value = prefs.getString(_keyOpenAi);
-    
-    if (value != null) {
-      await _storage.write(key: _keyOpenAi, value: value);
-      await prefs.remove(_keyOpenAi);
-    }
-    return value;
-  }
 
   Future<void> setGeminiKey(String key) async {
     await _storage.write(key: _keyGemini, value: key);
@@ -151,8 +132,17 @@ Future<String> weightUnit(Ref ref) async {
 }
 
 @riverpod
-Future<String> widgetTheme(Ref ref) async {
-  // Watch settings service changes? No, settingsService isn't a notifier. 
-  // We should invalidate this provider when setting updates.
-  return ref.watch(settingsServiceProvider).getWidgetTheme();
+class WidgetTheme extends _$WidgetTheme {
+  @override
+  Future<String> build() async {
+    return ref.read(settingsServiceProvider).getWidgetTheme();
+  }
+
+  Future<void> setTheme(String theme) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(settingsServiceProvider).setWidgetTheme(theme);
+      return theme;
+    });
+  }
 }

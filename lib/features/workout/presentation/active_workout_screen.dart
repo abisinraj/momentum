@@ -406,6 +406,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                     ? BorderSide.none 
                     : BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
               ),
+              clipBehavior: Clip.antiAlias,
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
@@ -545,42 +546,30 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                     ),
                     // Rest Timer Progress Bar (Clipped to rounded corners)
                     if (isResting)
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(16),
-                          bottomRight: Radius.circular(16),
-                        ),
-                        child: AnimatedBuilder(
-                          animation: _restController,
-                          builder: (context, child) {
-                            return LinearProgressIndicator(
-                              value: _restController.value,
-                              backgroundColor: Colors.transparent,
-                              color: Color.lerp(Colors.red, Colors.green, _restController.value),
-                              minHeight: 6,
-                            );
-                          },
-                        ),
+                      AnimatedBuilder(
+                        animation: _restController,
+                        builder: (context, child) {
+                          return LinearProgressIndicator(
+                            value: _restController.value,
+                            backgroundColor: Colors.transparent,
+                            color: Color.lerp(Colors.red, Colors.green, _restController.value),
+                            minHeight: 6,
+                          );
+                        },
                       ),
                       
                     // Cooldown Timer Progress Bar (Clipped to rounded corners)
                     if (isCoolingDown)
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(16),
-                          bottomRight: Radius.circular(16),
-                        ),
-                        child: AnimatedBuilder(
-                          animation: _cooldownController,
-                          builder: (context, child) {
-                            return LinearProgressIndicator(
-                              value: _cooldownController.value,
-                              backgroundColor: Colors.transparent,
-                              color: Color.lerp(Colors.blue, Colors.cyanAccent, _cooldownController.value),
-                              minHeight: 6,
-                            );
-                          },
-                        ),
+                      AnimatedBuilder(
+                        animation: _cooldownController,
+                        builder: (context, child) {
+                          return LinearProgressIndicator(
+                            value: _cooldownController.value,
+                            backgroundColor: Colors.transparent,
+                            color: Color.lerp(Colors.blue, Colors.cyanAccent, _cooldownController.value),
+                            minHeight: 6,
+                          );
+                        },
                       ),
                   ],
                 ),

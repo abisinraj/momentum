@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/services/settings_service.dart';
-import '../../../core/services/thumbnail_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -14,9 +13,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-
-  // Controllers removed
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -57,7 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      ],
                    ),
                    loading: () => const Center(child: CircularProgressIndicator()),
-                   error: (_, __) => const Text('Error loading settings', style: TextStyle(color: Colors.red)),
+                   error: (_, _) => const Text('Error loading settings', style: TextStyle(color: Colors.red)),
                  ),
                  const SizedBox(height: 16),
                ],
@@ -73,9 +69,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return InkWell(
       onTap: () async {
         Navigator.pop(context);
-        final service = ref.read(settingsServiceProvider);
-        await service.setWidgetTheme(value);
-        ref.invalidate(widgetThemeProvider); // Refresh UI
+        await ref.read(widgetThemeProvider.notifier).setTheme(value);
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
@@ -123,9 +117,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,10 +182,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
     );
   }
-              ),
-            ),
-    );
-  }
+
 
   Widget _buildSettingsTile({
     required IconData icon,
@@ -248,38 +237,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
   
-  Widget _buildInfo(String text) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.info_outline, color: AppTheme.tealPrimary, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    // ... helper kept if needed, or remove? 
-    // It's not used in this file anymore. I should remove it.
-    required String hint, 
-    required IconData icon,
-    TextInputType? keyboardType,
-  }) {
-      return const SizedBox.shrink(); // Stub or remove completely 
-  }
 }
+

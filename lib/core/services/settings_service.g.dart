@@ -91,22 +91,21 @@ final weightUnitProvider = AutoDisposeFutureProvider<String>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef WeightUnitRef = AutoDisposeFutureProviderRef<String>;
-String _$widgetThemeHash() => r'63ab9462f57e6cc2e3096a4bf72f9afdcd7fe31d';
+String _$widgetThemeHash() => r'2e318dcc2a631bd969b62dec7779b5ab22c5318c';
 
-/// See also [widgetTheme].
-@ProviderFor(widgetTheme)
-final widgetThemeProvider = AutoDisposeFutureProvider<String>.internal(
-  widgetTheme,
-  name: r'widgetThemeProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$widgetThemeHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+/// See also [WidgetTheme].
+@ProviderFor(WidgetTheme)
+final widgetThemeProvider =
+    AutoDisposeAsyncNotifierProvider<WidgetTheme, String>.internal(
+      WidgetTheme.new,
+      name: r'widgetThemeProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$widgetThemeHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef WidgetThemeRef = AutoDisposeFutureProviderRef<String>;
+typedef _$WidgetTheme = AutoDisposeAsyncNotifier<String>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

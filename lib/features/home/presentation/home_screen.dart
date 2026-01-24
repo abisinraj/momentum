@@ -81,16 +81,11 @@ class HomeScreen extends ConsumerWidget {
               },
               
               const SizedBox(height: 16),
-              
-              const SizedBox(height: 16),
 
               // AI Insights Card (New)
               const AIInsightsCard(),
-              
+
               const SizedBox(height: 16),
-              
-              const SizedBox(height: 16),
-              
               // Health Insights Card (from Health Connect)
               const HealthInsightsCard(),
 
@@ -108,11 +103,8 @@ class HomeScreen extends ConsumerWidget {
               _buildVolumeCard(ref),
               const SizedBox(height: 16),
               
-              // 2. Volume Load
-              _buildVolumeCard(ref),
-              const SizedBox(height: 16),
-              
-              // Heatmap moved to Profile
+              // 3. Consistency Grid
+
               
               // 4. Consistency Grid
               _buildConsistencyGrid(ref),

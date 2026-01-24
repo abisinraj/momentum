@@ -15,12 +15,14 @@ class CreateWorkoutScreen extends ConsumerStatefulWidget {
   final int index; // 1-based index
   final int totalDays;
   final Workout? existingWorkout; // NEW: Optional workout to edit
+  final bool isStandalone;
 
   const CreateWorkoutScreen({
     super.key,
     required this.index,
     required this.totalDays,
     this.existingWorkout,
+    this.isStandalone = false,
   });
 
   @override
@@ -163,7 +165,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                         )
                       : Text(
                           _currentStep == 3 
-                              ? (widget.existingWorkout != null ? 'Save Changes' : (widget.index < widget.totalDays ? 'Next Workout' : 'Finish Split'))
+                              ? (widget.existingWorkout != null ? 'Save Changes' : (widget.isStandalone ? 'Create Workout' : (widget.index < widget.totalDays ? 'Next Workout' : 'Finish Split')))
                               : 'Continue',
                         ),
                 ),
@@ -209,11 +211,17 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
         if (widget.existingWorkout != null) {
           // Just pop if editing
           Navigator.of(context).pop();
-        } else if (widget.index < widget.totalDays) {
+        } else if (!widget.isStandalone && widget.index < widget.totalDays) {
           // Go to next workout creation
           context.push('/create-workout/${widget.index + 1}/${widget.totalDays}');
         } else {
-          // Finish split setup
+        } else {
+          // Finish split setup OR Standalone creation
+          if (widget.isStandalone) {
+             Navigator.of(context).pop();
+             return;
+          }
+
           // Update user split days
           final db = ref.read(appDatabaseProvider);
           final user = await db.getUser();
@@ -517,6 +525,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                           fillColor: AppTheme.darkBackground,
                         ),
                         textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.next,
                       ),
                     ),
                   ],
@@ -529,6 +538,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                         controller: _setsController,
                         style: TextStyle(color: AppTheme.textPrimary),
                         keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
                           labelText: 'Sets',
                           filled: true,
@@ -542,6 +552,8 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                         controller: _repsController,
                         style: TextStyle(color: AppTheme.textPrimary),
                         keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _addExercise(),
                         decoration: InputDecoration(
                           labelText: 'Reps',
                           filled: true,
@@ -581,15 +593,29 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   
   void _addExercise() {
     final name = _exNameController.text.trim();
-    final sets = int.tryParse(_setsController.text) ?? 3;
-    final reps = int.tryParse(_repsController.text) ?? 10;
+    // Parse as double first to handle "12.0" or "12." gracefully, then round to int
+    final setsDouble = double.tryParse(_setsController.text) ?? 3;
+    final repsDouble = double.tryParse(_repsController.text) ?? 10;
     
-    if (name.isNotEmpty) {
-      setState(() {
-        _exercises.add((name: name, sets: sets, reps: reps));
-        _exNameController.clear();
-      });
+    final sets = setsDouble.round();
+    final reps = repsDouble.round();
+    
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter an exercise name', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
     }
+
+    setState(() {
+      _exercises.add((name: name, sets: sets, reps: reps));
+      _exNameController.clear();
+      // Keep sets/reps as is for quick entry of similar exercises
+    });
   }
 
   // STEP 4: Clock

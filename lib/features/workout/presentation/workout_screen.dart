@@ -160,7 +160,21 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddWorkoutDialog(context, ref),
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+               builder: (context) => CreateWorkoutScreen(
+                 index: (userAsync.value?.splitDays ?? 0) + 1, // Logic: this index is just for display if not in setup. Actually "orderIndex" handles position. 
+                 // Wait, CreateWorkoutScreen expects totalDays. 
+                 // If just adding one, we can fetch current count.
+                 // Actually, simpler: Pass dummy values if just adding extra?
+                 // Or better: Let's read total days from user.
+                 totalDays: userAsync.value?.splitDays ?? 3,
+                 isStandalone: true,
+               ),
+            ),
+          );
+        },
         backgroundColor: AppTheme.tealPrimary,
         child: Icon(Icons.add, color: AppTheme.darkBackground),
       ),

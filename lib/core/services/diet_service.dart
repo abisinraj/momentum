@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -16,7 +16,7 @@ class DietService {
   DietService(this.ref);
 
   Future<String?> _getApiKey() async {
-    return ref.read(settingsServiceProvider).getOpenAiKey();
+    return ref.read(settingsServiceProvider).getGeminiKey();
   }
 
   /// Analyze food text info and return structured data
@@ -24,91 +24,74 @@ class DietService {
   Future<Map<String, dynamic>> analyzeFoodText(String input) async {
     final apiKey = await _getApiKey();
     if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('OpenAI API Key not found');
+      throw Exception('Gemini API Key not found. Please add it in Settings.');
     }
 
-    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
-    
+    final model = GenerativeModel(
+      model: 'gemini-1.5-flash',
+      apiKey: apiKey,
+      generationConfig: GenerationConfig(responseMimeType: 'application/json'),
+    );
+
     final prompt = '''
     Analyze the following food description and estimate the nutrition facts.
     Return ONLY a JSON object with keys: "description" (short summarized name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double).
-    If the input is not food, return "error": "not food".
+    If the input is not food, return {"error": "not food"}.
     
     Input: "$input"
     ''';
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': 'gpt-4o', // or gpt-3.5-turbo
-        'messages': [
-          {'role': 'system', 'content': 'You are a nutritionist assistant. Output strict JSON.'},
-          {'role': 'user', 'content': prompt},
-        ],
-        'temperature': 0.3,
-        'response_format': { "type": "json_object" }
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final content = data['choices'][0]['message']['content'];
-      return jsonDecode(content);
+    final response = await model.generateContent([Content.text(prompt)]);
+    
+    if (response.text != null) {
+      try {
+        final Map<String, dynamic> data = jsonDecode(response.text!);
+        if (data.containsKey('error')) {
+          throw Exception(data['error']);
+        }
+        return data;
+      } catch (e) {
+        throw Exception('Failed to parse Gemini response: ${response.text}');
+      }
     } else {
-      throw Exception('Failed to analyze food: ${response.body}');
+      throw Exception('Empty response from Gemini');
     }
   }
 
-  /// Analyze food image using GPT-4 Vision
+  /// Analyze food image using Gemini Vision
   Future<Map<String, dynamic>> analyzeFoodImage(String imagePath) async {
      final apiKey = await _getApiKey();
     if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('OpenAI API Key not found');
+      throw Exception('Gemini API Key not found');
     }
 
-    final bytes = await File(imagePath).readAsBytes();
-    final base64Image = base64Encode(bytes);
-    
-    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': 'gpt-4o', 
-        'messages': [
-          {
-            'role': 'user',
-            'content': [
-              {'type': 'text', 'text': 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with keys: "description" (short name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double).'},
-              {
-                'type': 'image_url',
-                'image_url': {
-                  'url': 'data:image/jpeg;base64,$base64Image',
-                  'detail': 'low'
-                }
-              }
-            ]
-          }
-        ],
-        'max_tokens': 300,
-        'response_format': { "type": "json_object" }
-      }),
+    final model = GenerativeModel(
+      model: 'gemini-1.5-flash',
+      apiKey: apiKey,
+      generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final content = data['choices'][0]['message']['content'];
-      return jsonDecode(content);
+    final bytes = await File(imagePath).readAsBytes();
+    
+    final prompt = 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with keys: "description" (short name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double).';
+    final content = [
+      Content.multi([
+        TextPart(prompt),
+        DataPart('image/jpeg', bytes),
+      ])
+    ];
+
+    final response = await model.generateContent(content);
+
+    if (response.text != null) {
+      try {
+         final Map<String, dynamic> data = jsonDecode(response.text!);
+         return data;
+      } catch (e) {
+        throw Exception('Failed to parse Gemini response: ${response.text}');
+      }
     } else {
-      throw Exception('Failed to analyze image: ${response.body}');
+      throw Exception('Empty response from Gemini');
     }
   }
 }

@@ -15,7 +15,6 @@ class APISettingsScreen extends ConsumerStatefulWidget {
 class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
   final _pexelsController = TextEditingController();
   final _unsplashController = TextEditingController();
-  final _openaiController = TextEditingController();
   final _geminiController = TextEditingController();
   bool _isLoading = true;
   bool _isSaving = false;
@@ -30,14 +29,12 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     final service = ref.read(settingsServiceProvider);
     final pexels = await service.getPexelsKey();
     final unsplash = await service.getUnsplashKey();
-    final openai = await service.getOpenAiKey();
     final gemini = await service.getGeminiKey();
 
     if (mounted) {
       setState(() {
         _pexelsController.text = pexels ?? '';
         _unsplashController.text = unsplash ?? '';
-        _openaiController.text = openai ?? '';
         _geminiController.text = gemini ?? '';
         _isLoading = false;
       });
@@ -48,7 +45,6 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
   void dispose() {
     _pexelsController.dispose();
     _unsplashController.dispose();
-    _openaiController.dispose();
     _geminiController.dispose();
     super.dispose();
   }
@@ -58,7 +54,6 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     final service = ref.read(settingsServiceProvider);
     await service.setPexelsKey(_pexelsController.text.trim());
     await service.setUnsplashKey(_unsplashController.text.trim());
-    await service.setOpenAiKey(_openaiController.text.trim());
     await service.setGeminiKey(_geminiController.text.trim());
     
     // Invalidate providers
@@ -118,12 +113,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                      icon: Icons.camera_alt,
                    ),
                    const SizedBox(height: 16),
-                   _buildTextField(
-                     controller: _openaiController,
-                     label: 'OpenAI API Key',
-                     hint: 'Alternative AI provider',
-                     icon: Icons.smart_toy,
-                   ),
+
                    
                    const SizedBox(height: 32),
                    

@@ -1,0 +1,8 @@
+Analyzing momentum...                                           
+
+  error • Expected to find ';' • lib/features/workout/presentation/create_workout_screen.dart:218:9 • expected_token
+  error • Expected an identifier • lib/features/workout/presentation/create_workout_screen.dart:218:11 • missing_identifier
+  error • Unexpected text 'else' • lib/features/workout/presentation/create_workout_screen.dart:218:11 • unexpected_token
+warning • The declaration '_showAddWorkoutDialog' isn't referenced • lib/features/workout/presentation/workout_screen.dart:274:8 • unused_element
+
+4 issues found. (ran in 1.9s)
