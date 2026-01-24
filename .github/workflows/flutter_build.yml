@@ -19,6 +19,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Remove local Java Home from gradle.properties
+        run: |
+          if [ -f android/gradle.properties ]; then
+            sed -i '/org.gradle.java.home/d' android/gradle.properties
+          fi
       
       - uses: subosito/flutter-action@v2
         with:
