@@ -51,7 +51,14 @@ class AppTheme {
   }
 
   static ThemeData dark({ColorScheme? dynamicScheme}) {
-    return _buildTheme(tealPrimary, tealDark);
+    return _buildTheme(
+      primary: tealPrimary,
+      primaryContainer: tealDark,
+      background: darkBackground,
+      surface: darkSurface,
+      surfaceContainer: darkSurfaceContainer,
+      border: darkBorder,
+    );
   }
   
   // Theme Modes

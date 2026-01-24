@@ -7,7 +7,7 @@ import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import 'active_workout_screen.dart';
-import 'create_workout_screen.dart';
+import 'edit_workout_screen.dart';
 
 /// Workout screen - shows list of workouts with completion states
 /// Design: Date header, focus subtitle, workout cards with status badges

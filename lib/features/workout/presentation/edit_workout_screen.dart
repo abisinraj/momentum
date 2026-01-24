@@ -203,7 +203,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
         decoration: BoxDecoration(
           color: AppTheme.darkSurfaceContainer.withOpacity(0.5),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.darkBorder, style: BorderStyle.dashed),
+          border: Border.all(color: AppTheme.darkBorder),
         ),
         child: Center(
           child: Text(
@@ -412,7 +412,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
         await db.deleteExercisesForWorkout(w.id);
         
         for (int i = 0; i < _exercises.length; i++) {
-          final ex = _exercises[index]; // Note: index mismatch risk in valid loop?
+          final ex = _exercises[i];
           // Using loop index 'i'
           final e = _exercises[i];
           await db.addExercise(ExercisesCompanion(
