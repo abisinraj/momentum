@@ -33,6 +33,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   final _pageController = PageController();
   final _nameController = TextEditingController();
   
+  late int _selectedSplitIndex; // 0-based index
   int _currentStep = 0;
   String? _selectedThumbnail;
   String _searchQuery = '';
@@ -49,6 +50,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedSplitIndex = widget.index - 1; // Default to passed index (0-based)
     if (widget.existingWorkout != null) {
       _loadExistingData();
     }
@@ -308,7 +310,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
         name: drift.Value(_nameController.text.trim()),
         shortCode: drift.Value(_nameController.text.trim()[0].toUpperCase()),
         thumbnailUrl: drift.Value(_selectedThumbnail),
-        orderIndex: drift.Value(widget.index - 1), // 0-based index
+        orderIndex: drift.Value(_selectedSplitIndex), // Use selected index
         clockType: drift.Value(_selectedClock),
       ),
     );
@@ -366,6 +368,49 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                   textCapitalization: TextCapitalization.words,
                   onChanged: (_) => setState(() {}),
                 ),
+                
+                if (widget.isStandalone) ...[
+                  const SizedBox(height: 48),
+                  Text(
+                    'ASSIGN TO DAY',
+                    style: TextStyle(
+                      fontSize: 12, 
+                      fontWeight: FontWeight.bold, 
+                      color: AppTheme.tealPrimary, 
+                      letterSpacing: 1.2
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: List.generate(widget.totalDays, (index) {
+                      final isSelected = _selectedSplitIndex == index;
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedSplitIndex = index),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppTheme.tealPrimary : AppTheme.darkSurfaceContainer,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            'Day ${index + 1}',
+                            style: TextStyle(
+                              color: isSelected ? AppTheme.darkBackground : AppTheme.textSecondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
               ],
             ),
           ),
