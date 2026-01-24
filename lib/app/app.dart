@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import '../core/services/settings_service.dart';
 
 import 'theme/app_theme.dart';
 import 'router.dart';
@@ -12,6 +13,8 @@ class MomentumApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeModeAsync = ref.watch(appThemeModeProvider);
+    final themeKey = themeModeAsync.valueOrNull ?? 'teal';
     
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
@@ -19,9 +22,10 @@ class MomentumApp extends ConsumerWidget {
           title: 'Momentum',
           debugShowCheckedModeBanner: false,
           
-          // Theme configuration - Momentum uses dark theme with dynamic colors if available
-          theme: AppTheme.dark(dynamicScheme: lightDynamic),
-          darkTheme: AppTheme.dark(dynamicScheme: darkDynamic),
+          // Theme configuration
+          // Only force dark mode for now, but use our custom theme generation
+          theme: AppTheme.getTheme(themeKey),
+          darkTheme: AppTheme.getTheme(themeKey),
           themeMode: ThemeMode.dark,
           
           // Router configuration

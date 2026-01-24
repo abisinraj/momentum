@@ -49,71 +49,98 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
         ),
         backgroundColor: Colors.transparent,
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 40),
-          
-          // Instruction or Result
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Text(
-              _finalBpm == null 
-                  ? "Gently place your finger tip covering the back camera and flash."
-                  : "Measurement Complete",
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20), // Reduced top spacing
+                    
+                    // Instruction or Result
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            _finalBpm == null 
+                                ? "Place finger on camera"
+                                : "Measurement Complete",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            _finalBpm == null 
+                                ? "Cover the back camera lens completely with your index finger. Keep still."
+                                : "Great job! Recording your heart rate.",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const Spacer(),
+                    
+                    // Main Measurement Widget
+                    if (_finalBpm == null)
+                      _buildMeasurementUI()
+                    else
+                      _buildResultUI(_finalBpm!),
+                      
+                    const Spacer(),
+                    
+                    // Result Actions
+                    if (_finalBpm != null)
+                       Padding(
+                         padding: const EdgeInsets.only(bottom: 40.0, left: 24, right: 24),
+                         child: Column(
+                           children: [
+                             SizedBox(
+                               width: double.infinity,
+                               child: FilledButton(
+                                 onPressed: _saveMeasurement,
+                                 style: FilledButton.styleFrom(
+                                   backgroundColor: AppTheme.tealPrimary,
+                                   foregroundColor: Colors.black,
+                                   padding: const EdgeInsets.symmetric(vertical: 20),
+                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                 ),
+                                 child: const Text(
+                                   'SAVE MEASUREMENT',
+                                   style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                                 ),
+                               ),
+                             ),
+                             const SizedBox(height: 16),
+                             TextButton(
+                               onPressed: _retry,
+                               child: const Text('RETAKE', style: TextStyle(color: Colors.white70)),
+                             ),
+                           ],
+                         ),
+                       ),
+                       
+                    // Spacer if measuring to keep layout balanced
+                    if (_finalBpm == null)
+                      const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
-          ),
-          
-          const Spacer(),
-          
-          // Main Measurement Widget
-          if (_finalBpm == null)
-            _buildMeasurementUI()
-          else
-            _buildResultUI(_finalBpm!),
-            
-          const Spacer(),
-          
-          // Result Actions
-          if (_finalBpm != null)
-             Padding(
-               padding: const EdgeInsets.only(bottom: 40.0, left: 24, right: 24),
-               child: Column(
-                 children: [
-                   SizedBox(
-                     width: double.infinity,
-                     child: FilledButton(
-                       onPressed: _saveMeasurement,
-                       style: FilledButton.styleFrom(
-                         backgroundColor: AppTheme.tealPrimary,
-                         foregroundColor: Colors.black,
-                         padding: const EdgeInsets.symmetric(vertical: 20),
-                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                       ),
-                       child: const Text(
-                         'SAVE MEASUREMENT',
-                         style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.0),
-                       ),
-                     ),
-                   ),
-                   const SizedBox(height: 16),
-                   TextButton(
-                     onPressed: _retry,
-                     child: const Text('RETAKE', style: TextStyle(color: Colors.white70)),
-                   ),
-                 ],
-               ),
-             ),
-             
-          // Spacer if measuring to keep layout balanced
-          if (_finalBpm == null)
-            const SizedBox(height: 100),
-        ],
+          );
+        },
       ),
     );
   }

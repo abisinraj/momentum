@@ -64,12 +64,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildThemeOption(BuildContext context, WidgetRef ref, String label, String value, String current) {
+  void _showAppThemeSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.darkSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+           final currentThemeAsync = ref.watch(appThemeModeProvider);
+           
+           return Container(
+             padding: const EdgeInsets.all(24),
+             child: Column(
+               mainAxisSize: MainAxisSize.min,
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text('App Interface Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+                 const SizedBox(height: 16),
+                 currentThemeAsync.when(
+                   data: (current) => Column(
+                     children: [
+                       _buildThemeOption(context, ref, 'Teal (Default)', 'teal', current, isAppTheme: true),
+                       const SizedBox(height: 12),
+                       _buildThemeOption(context, ref, 'Cyber Yellow', 'yellow', current, isAppTheme: true),
+                       const SizedBox(height: 12),
+                       _buildThemeOption(context, ref, 'Crimson Red', 'red', current, isAppTheme: true),
+                       const SizedBox(height: 12),
+                       _buildThemeOption(context, ref, 'OLED Black', 'black', current, isAppTheme: true),
+                     ],
+                   ),
+                   loading: () => const Center(child: CircularProgressIndicator()),
+                   error: (_, _) => const Text('Error loading settings', style: TextStyle(color: Colors.red)),
+                 ),
+                 const SizedBox(height: 16),
+               ],
+             ),
+           );
+        },
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(BuildContext context, WidgetRef ref, String label, String value, String current, {bool isAppTheme = false}) {
     final isSelected = value == current;
     return InkWell(
       onTap: () async {
         Navigator.pop(context);
-        await ref.read(widgetThemeProvider.notifier).setTheme(value);
+        if (isAppTheme) {
+          await ref.read(appThemeModeProvider.notifier).setTheme(value);
+        } else {
+          await ref.read(widgetThemeProvider.notifier).setTheme(value);
+        }
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
@@ -155,17 +202,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    const SizedBox(height: 12),
                    // Duplicate "Home Screen Widget" removed from here
                    const SizedBox(height: 12),
-                   _buildSettingsTile(
-                     icon: Icons.palette_outlined,
-                     iconColor: Colors.purpleAccent,
-                     title: 'Appearance',
-                     subtitle: 'System Default',
-                     onTap: () {
-                       ScaffoldMessenger.of(context).showSnackBar(
-                         const SnackBar(content: Text('Appearance settings coming soon')),
-                       );
-                     },
-                   ),
+                    _buildSettingsTile(
+                      icon: Icons.palette_outlined,
+                      iconColor: Colors.purpleAccent,
+                      title: 'Appearance',
+                      subtitle: 'App Theme',
+                      onTap: () => _showAppThemeSelector(context),
+                    ),
 
                    const SizedBox(height: 32),
 

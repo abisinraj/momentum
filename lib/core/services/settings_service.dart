@@ -13,6 +13,7 @@ class SettingsService {
   static const String _keyRestTimer = 'rest_timer_seconds';
   static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
   static const String _keyWidgetTheme = 'widget_theme'; // 'classic', 'liquid_glass'
+  static const String _keyAppTheme = 'app_theme'; // 'teal', 'yellow', 'red', 'black'
 
   final _storage = const FlutterSecureStorage();
 
@@ -24,6 +25,16 @@ class SettingsService {
   Future<String> getWidgetTheme() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyWidgetTheme) ?? 'classic';
+  }
+
+  Future<void> setAppTheme(String theme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyAppTheme, theme);
+  }
+
+  Future<String> getAppTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyAppTheme) ?? 'teal';
   }
 
   Future<void> setRestTimer(int seconds) async {
@@ -142,6 +153,22 @@ class WidgetTheme extends _$WidgetTheme {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(settingsServiceProvider).setWidgetTheme(theme);
+      return theme;
+    });
+  }
+}
+
+@riverpod
+class AppThemeMode extends _$AppThemeMode {
+  @override
+  Future<String> build() async {
+    return ref.read(settingsServiceProvider).getAppTheme();
+  }
+
+  Future<void> setTheme(String theme) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(settingsServiceProvider).setAppTheme(theme);
       return theme;
     });
   }

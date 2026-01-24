@@ -50,22 +50,43 @@ class AppTheme {
     return dark(dynamicScheme: null);
   }
   
-  // Create the Momentum dark theme
-  static ThemeData dark({ColorScheme? dynamicScheme}) {
+  // Theme Modes
+  static const String themeTeal = 'teal';
+  static const String themeYellow = 'yellow';
+  static const String themeRed = 'red';
+  static const String themeBlack = 'black';
+
+  // Get theme based on key
+  static ThemeData getTheme(String themeKey) {
+    switch (themeKey) {
+      case themeYellow:
+        return _buildTheme(const Color(0xFFFFEB3B), const Color(0xFFFBC02D));
+      case themeRed:
+        return _buildTheme(const Color(0xFFE53935), const Color(0xFFC62828));
+      case themeBlack:
+        return _buildTheme(const Color(0xFFFFFFFF), const Color(0xFFB0B8C1), isMonochrome: true);
+      case themeTeal:
+      default:
+        return _buildTheme(tealPrimary, tealDark);
+    }
+  }
+
+  // Create the Momentum dark theme with dynamic primary
+  static ThemeData _buildTheme(Color primary, Color primaryContainer, {bool isMonochrome = false}) {
     final colorScheme = ColorScheme(
       brightness: Brightness.dark,
-      primary: tealPrimary,
-      onPrimary: darkBackground,
-      primaryContainer: tealDark,
-      onPrimaryContainer: Colors.white,
-      secondary: yellowAccent,
+      primary: primary,
+      onPrimary: isMonochrome ? Colors.black : darkBackground,
+      primaryContainer: primaryContainer,
+      onPrimaryContainer: isMonochrome ? Colors.black : Colors.white,
+      secondary: isMonochrome ? Colors.white : yellowAccent,
       onSecondary: darkBackground,
-      secondaryContainer: yellowDark.withValues(alpha: 0.2),
-      onSecondaryContainer: yellowAccent,
-      tertiary: tealLight,
+      secondaryContainer: isMonochrome ? const Color(0xFF333333) : yellowDark.withValues(alpha: 0.2),
+      onSecondaryContainer: isMonochrome ? Colors.white : yellowAccent,
+      tertiary: isMonochrome ? Colors.grey : tealLight,
       onTertiary: darkBackground,
-      tertiaryContainer: tealDark.withValues(alpha: 0.3),
-      onTertiaryContainer: tealLight,
+      tertiaryContainer: isMonochrome ? Colors.grey.withValues(alpha: 0.3) : tealDark.withValues(alpha: 0.3),
+      onTertiaryContainer: isMonochrome ? Colors.white : tealLight,
       error: error,
       onError: Colors.white,
       errorContainer: error.withValues(alpha: 0.2),
@@ -80,7 +101,7 @@ class AppTheme {
       scrim: Colors.black,
       inverseSurface: Colors.white,
       onInverseSurface: darkBackground,
-      inversePrimary: tealDark,
+      inversePrimary: primaryContainer,
     );
     
     return ThemeData(
@@ -117,8 +138,8 @@ class AppTheme {
       // Primary button (teal)
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: tealPrimary,
-          foregroundColor: darkBackground,
+          backgroundColor: primary,
+          foregroundColor: isMonochrome ? Colors.black : darkBackground,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -146,8 +167,8 @@ class AppTheme {
       // Outlined button
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: tealPrimary,
-          side: BorderSide(color: tealPrimary.withValues(alpha: 0.5)),
+          foregroundColor: primary,
+          side: BorderSide(color: primary.withValues(alpha: 0.5)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -158,7 +179,7 @@ class AppTheme {
       // Text button
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: tealPrimary,
+          foregroundColor: primary,
         ),
       ),
       
@@ -176,7 +197,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: tealPrimary, width: 2),
+          borderSide: BorderSide(color: primary, width: 2),
         ),
         hintStyle: TextStyle(color: textMuted),
         labelStyle: TextStyle(color: textSecondary),
@@ -186,11 +207,11 @@ class AppTheme {
       // Navigation bar (bottom)
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: darkSurface,
-        indicatorColor: tealPrimary.withValues(alpha: 0.2),
+        indicatorColor: primary.withValues(alpha: 0.2),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(color: tealPrimary);
+            return IconThemeData(color: primary);
           }
           return IconThemeData(color: textMuted);
         }),
@@ -199,7 +220,7 @@ class AppTheme {
             return GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: tealPrimary,
+              color: primary,
             );
           }
           return GoogleFonts.outfit(
@@ -219,7 +240,7 @@ class AppTheme {
       // Chip
       chipTheme: ChipThemeData(
         backgroundColor: darkSurfaceContainer,
-        selectedColor: tealPrimary.withValues(alpha: 0.2),
+        selectedColor: primary.withValues(alpha: 0.2),
         labelStyle: GoogleFonts.outfit(color: textPrimary),
         side: BorderSide.none,
         shape: RoundedRectangleBorder(
@@ -268,7 +289,7 @@ class AppTheme {
       
       // Progress indicator
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: tealPrimary,
+        color: primary,
         circularTrackColor: darkBorder,
       ),
     );

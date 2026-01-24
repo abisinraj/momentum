@@ -24,49 +24,110 @@
         let camera, scene, renderer;
         let group, particles, linesMesh;
 
+        // Data for heatmap interaction
+        // Stores which particle index belongs to which muscle group
+        const particleGroups = []; // { group: 'chest', indices: [0, 1, 2...] }
+        let currentColorsAttribute;
+
         // Configuration
-        const PARTICLE_COUNT = 1800;
-        const CONNECTIVITY_DISTANCE = 15;
-        const COLOR_PRIMARY = 0x00D9B8; // Teal
-        const COLOR_SECONDARY = 0xFFFFFF; // White
+        const CONNECTIVITY_DISTANCE = 16;
+        const COLOR_PRIMARY = new THREE.Color(0x00D9B8); // Teal
+        const COLOR_SECONDARY = new THREE.Color(0xFFFFFF); // White
+        const COLOR_HOT = new THREE.Color(0xFF5500); // Orange/Red for heat
 
         init();
         animate();
 
-        function init() {
-            // Scene
-            scene = new THREE.Scene();
+        // Expose function to Flutter/JS
+        window.setMuscleHeatmap = function (data) {
+            // data format: { 'Chest': 0.8, 'Legs': 0.2 } (0.0 to 1.0 intensity)
+            if (!particles || !currentColorsAttribute) return;
 
-            // Camera
+            const colors = currentColorsAttribute.array;
+            const targetColor = new THREE.Color();
+
+            // Iterate over defined groups
+            for (const groupName in data) {
+                // Find visible particles belonging to this group
+                // Note: We need to know which indices map to which group.
+                // Refactor: We will regenerate the color buffer based on 'data'.
+
+                const intensity = Math.max(0, Math.min(1, data[groupName]));
+                if (intensity <= 0) continue;
+
+                // Find indices for this group
+                const groupIndices = particleMap[groupName.toLowerCase()];
+                if (!groupIndices) continue;
+
+                for (const i of groupIndices) {
+                    // Mix primary with HOT color based on intensity
+                    // Base: Random mix of Teal/White. 
+                    // Heat: Lerp towards Orange.
+
+                    // Re-calculate base (randomized statics aren't saved per particle easily without extra memory, 
+                    // effectively we just push them towards HOT)
+
+                    const baseR = colors[i * 3];
+                    const baseG = colors[i * 3 + 1];
+                    const baseB = colors[i * 3 + 2];
+
+                    const baseColor = new THREE.Color(baseR, baseG, baseB);
+                    const finalColor = baseColor.lerp(COLOR_HOT, intensity * 0.8);
+
+                    colors[i * 3] = finalColor.r;
+                    colors[i * 3 + 1] = finalColor.g;
+                    colors[i * 3 + 2] = finalColor.b;
+                }
+            }
+            currentColorsAttribute.needsUpdate = true;
+        };
+
+        // Reset heatmap
+        window.resetHeatmap = function () {
+            // Just reload or reset colors to base teal/white? 
+            // Simplest is to keep track of "base" colors.
+            // For now, let's just re-init or accept that 'setMuscleHeatmap({})' won't clear previous.
+            // Let's implement a base color restore if needed, but for MVP, we assume updates overwrite?
+            // Actually, `lerp` modifies array in place. We need original colors.
+            if (originalColors) {
+                currentColorsAttribute.array.set(originalColors);
+                currentColorsAttribute.needsUpdate = true;
+            }
+        };
+
+        let particleMap = {}; // 'chest': [0, 1, 2...]
+        let originalColors = null;
+
+        function init() {
+            scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
             camera.position.z = 400;
-            camera.position.y = 50; // Look slightly down/center
+            camera.position.y = 50;
 
-            // Group
             group = new THREE.Group();
             scene.add(group);
 
-            // --- ANATOMY GENERATION ---
             const musclePoints = [];
             const colors = [];
-            const c1 = new THREE.Color(COLOR_PRIMARY);
-            const c2 = new THREE.Color(COLOR_SECONDARY);
+
+            let particleIndex = 0;
+
+            function registerParticle(groupName, index) {
+                const key = groupName.toLowerCase();
+                if (!particleMap[key]) particleMap[key] = [];
+                particleMap[key].push(index);
+            }
 
             // Helper: Create a muscle between two points
-            function createMuscle(start, end, count, radius, bulge = 1.0) {
+            function createMuscle(start, end, count, radius, bulge, groupName) {
                 const curve = new THREE.LineCurve3(start, end);
 
                 for (let i = 0; i < count; i++) {
                     const t = Math.random();
-                    // Get point on line
                     const point = curve.getPoint(t);
-
-                    // Calculate thickness (bulge in middle, taper at ends)
-                    // Parabola: 4 * t * (1-t) gives 0 at ends, 1 at center
                     const shapeFactor = 4 * t * (1 - t);
                     const r = radius * (0.5 + 0.5 * shapeFactor * bulge);
 
-                    // Random offset in sphere
                     const u = Math.random();
                     const v = Math.random();
                     const theta = 2 * Math.PI * u;
@@ -74,18 +135,21 @@
 
                     const x = point.x + r * Math.sin(phi) * Math.cos(theta);
                     const y = point.y + r * Math.sin(phi) * Math.sin(theta);
-                    const z = point.z + r * Math.cos(phi); // Flatten Z slightly for muscles? No, keep round for now.
+                    const z = point.z + r * Math.cos(phi);
 
                     musclePoints.push(x, y, z);
 
+                    // Register group
+                    registerParticle(groupName, particleIndex++);
+
                     // Color mix
-                    const mixColor = c1.clone().lerp(c2, Math.random() * 0.6); // Mostly primary
+                    const mixColor = COLOR_PRIMARY.clone().lerp(COLOR_SECONDARY, Math.random() * 0.6);
                     colors.push(mixColor.r, mixColor.g, mixColor.b);
                 }
             }
 
-            // --- SKELETON DEFINITION (Simple Approx) ---
-            const headCenter = new THREE.Vector3(0, 165, 0);
+            // --- SKELETON & MUSCLES (Mapped to Real Groups) ---
+            const head = new THREE.Vector3(0, 165, 0);
             const neck = new THREE.Vector3(0, 150, 0);
             const shoulderL = new THREE.Vector3(-45, 145, 0);
             const shoulderR = new THREE.Vector3(45, 145, 0);
@@ -93,13 +157,10 @@
             const elbowR = new THREE.Vector3(65, 105, 10);
             const handL = new THREE.Vector3(-75, 70, 20);
             const handR = new THREE.Vector3(75, 70, 20);
-
             const spineTop = new THREE.Vector3(0, 145, -5);
-            const spineMid = new THREE.Vector3(0, 120, -10);
             const spineBase = new THREE.Vector3(0, 100, -5);
             const hipL = new THREE.Vector3(-25, 95, 0);
             const hipR = new THREE.Vector3(25, 95, 0);
-
             const kneeL = new THREE.Vector3(-30, 50, 10);
             const kneeR = new THREE.Vector3(30, 50, 10);
             const ankleL = new THREE.Vector3(-30, 5, 0);
@@ -107,40 +168,43 @@
             const footL = new THREE.Vector3(-30, 0, 15);
             const footR = new THREE.Vector3(30, 0, 15);
 
-            // --- MUSCLE GROUPS ---
-
-            // Head & Neck
-            createMuscle(headCenter, new THREE.Vector3(0, 185, 0), 150, 22, 0.2); // Cranium
-            createMuscle(new THREE.Vector3(0, 150, 0), headCenter, 80, 12, 0.5); // Neck
+            // Head/Neck
+            createMuscle(head, new THREE.Vector3(0, 185, 0), 120, 22, 0.2, 'Head');
+            createMuscle(neck, head, 60, 12, 0.5, 'Traps'); // Traps/Neck
 
             // Torso
-            createMuscle(shoulderL, shoulderR, 100, 10, 0.2); // Clavicles
-            createMuscle(shoulderL, hipL, 120, 15, 1.5); // Lats/Obliques L
-            createMuscle(shoulderR, hipR, 120, 15, 1.5); // Lats/Obliques R
-            createMuscle(spineTop, spineBase, 150, 18, 1.2); // Spine/Back
-            createMuscle(new THREE.Vector3(-15, 140, 10), new THREE.Vector3(-10, 100, 12), 100, 15, 1.0); // Pecs/Abs L
-            createMuscle(new THREE.Vector3(15, 140, 10), new THREE.Vector3(10, 100, 12), 100, 15, 1.0); // Pecs/Abs R
+            createMuscle(shoulderL, shoulderR, 80, 10, 0.2, 'Shoulders');
+            createMuscle(shoulderL, hipL, 100, 15, 1.5, 'Back'); // Lats
+            createMuscle(shoulderR, hipR, 100, 15, 1.5, 'Back');
+            createMuscle(spineTop, spineBase, 120, 18, 1.2, 'Back'); // Spine
+            createMuscle(new THREE.Vector3(-15, 140, 10), new THREE.Vector3(-10, 100, 12), 80, 15, 1.0, 'Chest');
+            createMuscle(new THREE.Vector3(15, 140, 10), new THREE.Vector3(10, 100, 12), 80, 15, 1.0, 'Chest');
+            createMuscle(new THREE.Vector3(-10, 100, 12), new THREE.Vector3(-10, 70, 10), 60, 12, 0.5, 'Abs');
+            createMuscle(new THREE.Vector3(10, 100, 12), new THREE.Vector3(10, 70, 10), 60, 12, 0.5, 'Abs');
 
             // Arms
-            createMuscle(shoulderL, elbowL, 90, 12, 1.8); // Bicep/Tricep L
-            createMuscle(shoulderR, elbowR, 90, 12, 1.8); // Bicep/Tricep R
-            createMuscle(elbowL, handL, 70, 9, 1.4); // Forearm L
-            createMuscle(elbowR, handR, 70, 9, 1.4); // Forearm R
+            createMuscle(shoulderL, elbowL, 70, 12, 1.8, 'Arms'); // Bicep/Tricep
+            createMuscle(shoulderR, elbowR, 70, 12, 1.8, 'Arms');
+            createMuscle(elbowL, handL, 50, 9, 1.4, 'Arms'); // Forearm
+            createMuscle(elbowR, handR, 50, 9, 1.4, 'Arms');
 
             // Legs
-            createMuscle(hipL, kneeL, 130, 16, 1.8); // Quads/Hams L
-            createMuscle(hipR, kneeR, 130, 16, 1.8); // Quads/Hams R
-            createMuscle(kneeL, ankleL, 90, 11, 1.6); // Calves L
-            createMuscle(kneeR, ankleR, 90, 11, 1.6); // Calves R
-            createMuscle(ankleL, footL, 40, 8, 1.0); // Foot L
-            createMuscle(ankleR, footR, 40, 8, 1.0); // Foot R
+            createMuscle(hipL, kneeL, 110, 16, 1.8, 'Legs'); // Quads
+            createMuscle(hipR, kneeR, 110, 16, 1.8, 'Legs');
+            createMuscle(kneeL, ankleL, 80, 11, 1.6, 'Calves');
+            createMuscle(kneeR, ankleR, 80, 11, 1.6, 'Calves');
+            createMuscle(ankleL, footL, 30, 8, 1.0, 'Legs'); // Feet
+            createMuscle(ankleR, footR, 30, 8, 1.0, 'Legs');
 
-            // --- BUILD GEOMETRY ---
+            // Build Geometry
             const geometry = new THREE.BufferGeometry();
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(musclePoints, 3));
             geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-            // Particles Material
+            currentColorsAttribute = geometry.attributes.color;
+            // Save original colors for reset
+            originalColors = new Float32Array(colors);
+
             const pMaterial = new THREE.PointsMaterial({
                 size: 3,
                 vertexColors: true,
@@ -153,15 +217,11 @@
             particles = new THREE.Points(geometry, pMaterial);
             group.add(particles);
 
-            // --- CONNECTIVITY (The "Plexus" Lines) ---
-            // Calculate connections once (static mesh for performance)
+            // Connections (Plexus)
             const linePositions = [];
             const lineColors = [];
-            // Optimize: simple n^2 check is fine for < 2000 points once at startup
             const pos = geometry.attributes.position.array;
             const thresholdSq = CONNECTIVITY_DISTANCE * CONNECTIVITY_DISTANCE;
-
-            // Limit connections to avoid over-drawing
             const maxConnections = 6;
 
             for (let i = 0; i < musclePoints.length / 3; i++) {
@@ -170,26 +230,18 @@
                 const z1 = pos[i * 3 + 2];
                 let connections = 0;
 
-                // Look at a subset of other points to save time? 
-                // Just doing full check for quality, it runs once.
                 for (let j = i + 1; j < musclePoints.length / 3; j++) {
                     const x2 = pos[j * 3];
                     const y2 = pos[j * 3 + 1];
                     const z2 = pos[j * 3 + 2];
-
-                    const dx = x1 - x2;
-                    const dy = y1 - y2;
-                    const dz = z1 - z2;
-                    const distSq = dx * dx + dy * dy + dz * dz;
+                    const distSq = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2);
 
                     if (distSq < thresholdSq) {
                         linePositions.push(x1, y1, z1);
                         linePositions.push(x2, y2, z2);
-
                         // Faint line color
-                        lineColors.push(c1.r, c1.g, c1.b); // Start teal
-                        lineColors.push(c1.r, c1.g, c1.b); // End teal
-
+                        lineColors.push(COLOR_PRIMARY.r, COLOR_PRIMARY.g, COLOR_PRIMARY.b);
+                        lineColors.push(COLOR_PRIMARY.r, COLOR_PRIMARY.g, COLOR_PRIMARY.b);
                         connections++;
                         if (connections >= maxConnections) break;
                     }
@@ -203,7 +255,7 @@
             const lineMat = new THREE.LineBasicMaterial({
                 vertexColors: true,
                 transparent: true,
-                opacity: 0.15, // Very faint connections
+                opacity: 0.15,
                 blending: THREE.AdditiveBlending
             });
 
@@ -216,18 +268,14 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Interaction
             window.addEventListener('resize', onWindowResize);
 
-            // Input handling
+            // Interaction
             let isDragging = false;
             let previousMousePosition = { x: 0, y: 0 };
 
-            const onDown = (x, y) => {
-                isDragging = true;
-                previousMousePosition = { x, y };
-            };
-
+            const onDown = (x, y) => { isDragging = true; previousMousePosition = { x, y }; };
+            const onUp = () => isDragging = false;
             const onMove = (x, y) => {
                 if (isDragging) {
                     const deltaX = x - previousMousePosition.x;
@@ -238,14 +286,9 @@
                 }
             };
 
-            const onUp = () => isDragging = false;
-
-            // Touch events
             document.addEventListener('touchstart', e => onDown(e.touches[0].clientX, e.touches[0].clientY));
             document.addEventListener('touchmove', e => onMove(e.touches[0].clientX, e.touches[0].clientY));
             document.addEventListener('touchend', onUp);
-
-            // Mouse events
             document.addEventListener('mousedown', e => onDown(e.clientX, e.clientY));
             document.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
             document.addEventListener('mouseup', onUp);
@@ -259,15 +302,10 @@
 
         function animate() {
             requestAnimationFrame(animate);
-
-            // Slow auto-rotation
             group.rotation.y += 0.002;
-
-            // Breathing animation
             const time = Date.now() * 0.002;
             const scale = 1 + Math.sin(time) * 0.005;
             group.scale.set(scale, scale, scale);
-
             renderer.render(scene, camera);
         }
     </script>

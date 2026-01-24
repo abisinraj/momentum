@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class ThreeDManWidget extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/dashboard_providers.dart';
+import 'dart:convert';
+
+class ThreeDManWidget extends ConsumerStatefulWidget {
   final double height;
   final bool transparent;
 
@@ -14,12 +18,13 @@ class ThreeDManWidget extends StatefulWidget {
   });
 
   @override
-  State<ThreeDManWidget> createState() => _ThreeDManWidgetState();
+  ConsumerState<ThreeDManWidget> createState() => _ThreeDManWidgetState();
 }
 
-class _ThreeDManWidgetState extends State<ThreeDManWidget> {
+class _ThreeDManWidgetState extends ConsumerState<ThreeDManWidget> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  bool _isPageLoaded = false;
 
   @override
   void initState() {
@@ -30,26 +35,62 @@ class _ThreeDManWidgetState extends State<ThreeDManWidget> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (String url) {
-            if (mounted) setState(() => _isLoading = false);
+            _isPageLoaded = true;
+            if (mounted) {
+              setState(() => _isLoading = false);
+              _updateHeatmap(); // Initial sync
+            }
           },
         ),
       );
       
     _loadHtmlFromAssets();
   }
+  
+  @override
+  void didUpdateWidget(ThreeDManWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If we supported external data passing, we'd check here.
+    // Instead we rely on ref.listen in build or ref.watch logic triggering rebuilds that call _updateHeatmap
+  }
 
   Future<void> _loadHtmlFromAssets() async {
-    // Load the HTML file from assets
     String fileHtmlContents = await rootBundle.loadString('assets/www/index.html');
-    
-    // Load it into the webview
-    // We use loadHtmlString because loadFlutterAsset is sometimes tricky with relative paths in JS modules
-    // but here we are using a CDN for Three.js so loadHtmlString is safest.
     _controller.loadHtmlString(fileHtmlContents);
+  }
+  
+  void _updateHeatmap() {
+    if (!_isPageLoaded) return;
+    
+    final workloadAsync = ref.read(muscleWorkloadProvider);
+    
+    workloadAsync.whenData((data) {
+      // Normalize data (max score = 1.0)
+      if (data.isEmpty) return;
+      
+      final maxScore = data.values.fold<int>(0, (max, v) => v > max ? v : max);
+      if (maxScore == 0) return;
+      
+      final normalized = <String, double>{};
+      data.forEach((k, v) {
+        // Map simplified muscle names if needed
+        // Assuming database uses standard names "Chest", "Back", "Legs"
+        normalized[k] = v / maxScore; 
+      });
+      
+      final jsonStr = jsonEncode(normalized);
+      _controller.runJavaScript("if (window.resetHeatmap) window.resetHeatmap();");
+      _controller.runJavaScript("if (window.setMuscleHeatmap) window.setMuscleHeatmap($jsonStr);");
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Listen to changes in muscle workload
+    ref.listen(muscleWorkloadProvider, (previous, next) {
+      _updateHeatmap();
+    });
+
     return SizedBox(
       height: widget.height,
       width: double.infinity,
