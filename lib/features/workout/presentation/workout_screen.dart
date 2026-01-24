@@ -163,11 +163,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-               builder: (context) => CreateWorkoutScreen(
-                 // Default to Day 1 (index 1) for standalone creation so it highlights the first option
-                 index: 1,
-                 totalDays: userAsync.value?.splitDays ?? 3,
-                 isStandalone: true,
+               // Add new workout (default to day 0 or next available, but standalone logic applies)
+               builder: (context) => EditWorkoutScreen(
+                 splitIndex: currentSplitIndex, // Pre-select current day or 0
                ),
             ),
           );
@@ -400,17 +398,15 @@ class _WorkoutCard extends StatelessWidget {
                             color: AppTheme.darkSurfaceContainerHigh,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             onSelected: (value) {
-                              if (value == 'edit') {
-                                // Navigate to edit
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => CreateWorkoutScreen(
-                                      index: index + 1,
-                                      totalDays: total,
-                                      existingWorkout: workout,
+                                if (value == 'edit') {
+                                  // Navigate to edit
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => EditWorkoutScreen(
+                                        existingWorkout: workout,
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
                               } else if (value == 'delete') {
                                 onDelete();
                               }

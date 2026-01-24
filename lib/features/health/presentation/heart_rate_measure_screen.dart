@@ -23,6 +23,7 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
   void initState() {
     super.initState();
     _checkPermission();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showInstructions());
   }
 
   Future<void> _checkPermission() async {
@@ -37,6 +38,47 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
     }
   }
 
+  void _showInstructions() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('How to Measure', style: TextStyle(color: Colors.white)),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '1. Place your index finger gently on the back camera lens.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '2. Make sure the lens is completely covered.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '3. Hold still and do not press too hard.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '4. Ensure you are in a well-lit environment (flash may turn on).',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('GOT IT', style: TextStyle(color: AppTheme.tealPrimary)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,98 +91,88 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
         ),
         backgroundColor: Colors.transparent,
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20), // Reduced top spacing
-                    
-                    // Instruction or Result
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            _finalBpm == null 
-                                ? "Place finger on camera"
-                                : "Measurement Complete",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            _finalBpm == null 
-                                ? "Cover the back camera lens completely with your index finger. Keep still."
-                                : "Great job! Recording your heart rate.",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
+      body: CustomScrollView(
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              child: Column(
+                children: [
+                  // Instruction or Result headers
+                  Column(
+                    children: [
+                      Text(
+                        _finalBpm == null 
+                            ? "Place finger on camera"
+                            : "Measurement Complete",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _finalBpm == null 
+                            ? "Cover the back camera lens completely with your index finger. Keep still."
+                            : "Great job! Recording your heart rate.",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const Spacer(),
+                  
+                  // Main Measurement Widget
+                  if (_finalBpm == null)
+                    _buildMeasurementUI()
+                  else
+                    _buildResultUI(_finalBpm!),
                     
-                    const Spacer(),
-                    
-                    // Main Measurement Widget
-                    if (_finalBpm == null)
-                      _buildMeasurementUI()
-                    else
-                      _buildResultUI(_finalBpm!),
-                      
-                    const Spacer(),
-                    
-                    // Result Actions
-                    if (_finalBpm != null)
-                       Padding(
-                         padding: const EdgeInsets.only(bottom: 40.0, left: 24, right: 24),
-                         child: Column(
-                           children: [
-                             SizedBox(
-                               width: double.infinity,
-                               child: FilledButton(
-                                 onPressed: _saveMeasurement,
-                                 style: FilledButton.styleFrom(
-                                   backgroundColor: AppTheme.tealPrimary,
-                                   foregroundColor: Colors.black,
-                                   padding: const EdgeInsets.symmetric(vertical: 20),
-                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                 ),
-                                 child: const Text(
-                                   'SAVE MEASUREMENT',
-                                   style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.0),
-                                 ),
-                               ),
+                  const Spacer(),
+                  
+                  // Result Actions
+                  if (_finalBpm != null)
+                     Column(
+                       children: [
+                         SizedBox(
+                           width: double.infinity,
+                           child: FilledButton(
+                             onPressed: _saveMeasurement,
+                             style: FilledButton.styleFrom(
+                               backgroundColor: AppTheme.tealPrimary,
+                               foregroundColor: Colors.black,
+                               padding: const EdgeInsets.symmetric(vertical: 20),
+                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                              ),
-                             const SizedBox(height: 16),
-                             TextButton(
-                               onPressed: _retry,
-                               child: const Text('RETAKE', style: TextStyle(color: Colors.white70)),
+                             child: const Text(
+                               'SAVE MEASUREMENT',
+                               style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.0),
                              ),
-                           ],
+                           ),
                          ),
-                       ),
-                       
-                    // Spacer if measuring to keep layout balanced
-                    if (_finalBpm == null)
-                      const SizedBox(height: 40),
-                  ],
-                ),
+                         const SizedBox(height: 16),
+                         TextButton(
+                           onPressed: _retry,
+                           child: const Text('RETAKE', style: TextStyle(color: Colors.white70)),
+                         ),
+                       ],
+                     ),
+                     
+                  // Bottom padding for visual balance
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -280,10 +312,40 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
     
     final average = sublist.reduce((a, b) => a + b) ~/ sublist.length;
     
+    // Validation: Check for realistic Human Heart Rate bounds (e.g., 40 to 180)
+    if (average < 40 || average > 180) {
+      _showInvalidReadingDialog(average);
+      return;
+    }
+
     setState(() {
       _isMeasuring = false;
       _finalBpm = average;
     });
+  }
+
+  void _showInvalidReadingDialog(int value) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('Invalid Reading', style: TextStyle(color: Colors.redAccent)),
+        content: Text(
+          'We detected a heart rate of $value BPM, which seems physically unlikely.\n\nPlease ensure your finger completely covers the lens and you are holding still.',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _retry();
+            },
+            child: Text('RETAKE', style: TextStyle(color: AppTheme.tealPrimary)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _retry() {
