@@ -1,1 +1,19 @@
 Starting a Gradle Daemon, 1 busy Daemon could not be reused, use --status for details
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Timeout waiting to lock build logic queue. It is currently in use by another Gradle instance.
+Owner PID: 360177
+Our PID: 360425
+Owner Operation: 
+Our operation: 
+Lock file: /home/abisin/Desktop/momentum/android/.gradle/noVersion/buildLogic.lock
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 5m 2s
