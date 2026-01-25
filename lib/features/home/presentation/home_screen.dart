@@ -889,7 +889,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     
     return heatmapAsync.when(
       data: (heatmap) => BodyModelViewer(heatmap: heatmap),
-      loading: () => const SizedBox(height: 300, child: SkeletonLoader()),
+      loading: () => const SkeletonLoader(width: double.infinity, height: 400, borderRadius: 16),
       error: (_, __) => const SizedBox.shrink(),
     );
   }
