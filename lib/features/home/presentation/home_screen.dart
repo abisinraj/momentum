@@ -19,6 +19,9 @@ import '../../../core/providers/health_connect_provider.dart';
 
 
 import '../../../core/providers/smart_suggestion_provider.dart';
+import '../../home/presentation/widgets/body_model_viewer.dart';
+import '../../../core/providers/heatmap_provider.dart';
+
 
 
 import 'package:momentum/core/utils/screen_utils.dart';
@@ -149,6 +152,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _buildConsistencyGrid(ref),
               
               const SizedBox(height: 16),
+              
+              // 5. 3D Body Heatmap
+              _buildBodyHeatmap(ref),
+              
+              const SizedBox(height: 16),
+
               
               // Bottom stats row (Existing - maybe redundant now? Let's keep for day-specific stats)
               _buildSectionHeader(context, "THIS WEEK"),
@@ -875,7 +884,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
   
+  Widget _buildBodyHeatmap(WidgetRef ref) {
+    final heatmapAsync = ref.watch(muscleHeatmapProvider);
+    
+    return heatmapAsync.when(
+      data: (heatmap) => BodyModelViewer(heatmap: heatmap),
+      loading: () => const SizedBox(height: 300, child: SkeletonLoader()),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
   Widget _buildStatsRow(BuildContext context, WidgetRef ref) {
+
     final statsAsync = ref.watch(weeklyStatsProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;

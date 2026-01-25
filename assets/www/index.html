@@ -26,8 +26,10 @@
 
         // Data for heatmap interaction
         // Stores which particle index belongs to which muscle group
-        const particleGroups = []; // { group: 'chest', indices: [0, 1, 2...] }
         let currentColorsAttribute;
+        let particleMap = {}; // 'chest': [0, 1, 2...]
+        let originalColors = null;
+
 
         // Configuration
         const CONNECTIVITY_DISTANCE = 16;
@@ -84,19 +86,12 @@
 
         // Reset heatmap
         window.resetHeatmap = function () {
-            // Just reload or reset colors to base teal/white? 
-            // Simplest is to keep track of "base" colors.
-            // For now, let's just re-init or accept that 'setMuscleHeatmap({})' won't clear previous.
-            // Let's implement a base color restore if needed, but for MVP, we assume updates overwrite?
-            // Actually, `lerp` modifies array in place. We need original colors.
-            if (originalColors) {
+            if (originalColors && currentColorsAttribute) {
                 currentColorsAttribute.array.set(originalColors);
                 currentColorsAttribute.needsUpdate = true;
             }
         };
 
-        let particleMap = {}; // 'chest': [0, 1, 2...]
-        let originalColors = null;
 
         function init() {
             scene = new THREE.Scene();
@@ -148,64 +143,121 @@
                 }
             }
 
-            // --- SKELETON & MUSCLES (Mapped to Real Groups) ---
-            // More realistic ratios (Head height ~22-24 units)
-            // Total height approx 170-180 units
-            const head = new THREE.Vector3(0, 168, 0);
-            const neck = new THREE.Vector3(0, 152, 0);
+            // --- SKELETON & MUSCLES (REALISTIC PROPORTIONS) ---
+            // Unit scale approx 1 unit = 1 cm
+            // Total Height ~ 175cm
 
-            // Shoulders: Reduced width from 90 (±45) to 76 (±38) for realistic athletic build
-            const shoulderL = new THREE.Vector3(-38, 148, 0);
-            const shoulderR = new THREE.Vector3(38, 148, 0);
+            // Center Y is roughly at hip or feet? Let's keep feet at 0.
 
-            // Arms: Length ratios adjusted
-            const elbowL = new THREE.Vector3(-58, 108, 10);
-            const elbowR = new THREE.Vector3(58, 108, 10);
-            const handL = new THREE.Vector3(-68, 70, 20);
-            const handR = new THREE.Vector3(68, 70, 20);
+            // Major Landmarks
+            const yHeadTop = 175;
+            const yNeckBase = 150;
+            const yShoulder = 145;
+            const yChest = 135;
+            const yWaist = 110;
+            const yHip = 95;
+            const yKnee = 50;
+            const yAnkle = 8;
+            const yFoot = 0;
 
-            const spineTop = new THREE.Vector3(0, 148, -5);
-            const spineBase = new THREE.Vector3(0, 102, -5);
+            // Widths (Total Width / 2)
+            const xShoulder = 23; // 46cm spread
+            const xHip = 15; // 30cm spread
+            const xKnee = 12; // Slight stance
+            const xFoot = 15; // Stance width
 
-            // Hips: Slightly narrower to match new shoulders
-            const hipL = new THREE.Vector3(-22, 98, 0);
-            const hipR = new THREE.Vector3(22, 98, 0);
+            // Z Depths
+            const zSpine = -5;
 
-            // Legs: Longer relative to torso for better proportions
-            const kneeL = new THREE.Vector3(-26, 52, 12);
-            const kneeR = new THREE.Vector3(26, 52, 12);
-            const ankleL = new THREE.Vector3(-26, 6, 0);
-            const ankleR = new THREE.Vector3(26, 6, 0);
-            const footL = new THREE.Vector3(-26, 0, 18);
-            const footR = new THREE.Vector3(26, 0, 18);
+            // Points
+            const head = new THREE.Vector3(0, 168, 0); // Center of head
+            const neck = new THREE.Vector3(0, yNeckBase, 0);
 
-            // Head/Neck
-            createMuscle(head, new THREE.Vector3(0, 185, 0), 120, 22, 0.2, 'Head');
-            createMuscle(neck, head, 60, 12, 0.5, 'Traps'); // Traps/Neck
+            const shoulderL = new THREE.Vector3(-xShoulder, yShoulder, 0);
+            const shoulderR = new THREE.Vector3(xShoulder, yShoulder, 0);
+
+            const hipL = new THREE.Vector3(-xHip, yHip, 0);
+            const hipR = new THREE.Vector3(xHip, yHip, 0);
+
+            const kneeL = new THREE.Vector3(-xKnee, yKnee, 5);
+            const kneeR = new THREE.Vector3(xKnee, yKnee, 5);
+
+            const ankleL = new THREE.Vector3(-xFoot, yAnkle, 0);
+            const ankleR = new THREE.Vector3(xFoot, yAnkle, 0);
+
+            const footL = new THREE.Vector3(-xFoot, yFoot, 15);
+            const footR = new THREE.Vector3(xFoot, yFoot, 15);
+
+            // Arms (Realistic Length & Volume)
+            const yArmEnd = 78; // Reaches mid-thigh
+            const yElbow = 118;
+
+            const elbowL = new THREE.Vector3(-30, yElbow, 5);
+            const elbowR = new THREE.Vector3(30, yElbow, 5);
+            const handL = new THREE.Vector3(-32, yArmEnd, 10);
+            const handR = new THREE.Vector3(32, yArmEnd, 10);
+
+
+            // --- MUSCLE CREATION ---
+
+            // Head & Neck
+            createMuscle(new THREE.Vector3(0, yHeadTop - 10, 0), new THREE.Vector3(0, yHeadTop, 0), 100, 12, 0.4, 'Head');
+            createMuscle(neck, new THREE.Vector3(0, yHeadTop - 5, 0), 80, 10, 0.2, 'Traps');
 
             // Torso
-            createMuscle(shoulderL, shoulderR, 80, 10, 0.2, 'Shoulders');
-            createMuscle(shoulderL, hipL, 100, 15, 1.5, 'Back'); // Lats
-            createMuscle(shoulderR, hipR, 100, 15, 1.5, 'Back');
-            createMuscle(spineTop, spineBase, 120, 18, 1.2, 'Back'); // Spine
-            createMuscle(new THREE.Vector3(-15, 140, 10), new THREE.Vector3(-10, 100, 12), 80, 15, 1.0, 'Chest');
-            createMuscle(new THREE.Vector3(15, 140, 10), new THREE.Vector3(10, 100, 12), 80, 15, 1.0, 'Chest');
-            createMuscle(new THREE.Vector3(-10, 100, 12), new THREE.Vector3(-10, 70, 10), 60, 12, 0.5, 'Abs');
-            createMuscle(new THREE.Vector3(10, 100, 12), new THREE.Vector3(10, 70, 10), 60, 12, 0.5, 'Abs');
+            // Spine/Center
+            createMuscle(new THREE.Vector3(0, yNeckBase, zSpine), new THREE.Vector3(0, yHip, zSpine), 150, 14, 1.0, 'Back');
 
-            // Arms
-            createMuscle(shoulderL, elbowL, 70, 12, 1.8, 'Arms'); // Bicep/Tricep
-            createMuscle(shoulderR, elbowR, 70, 12, 1.8, 'Arms');
-            createMuscle(elbowL, handL, 50, 9, 1.4, 'Arms'); // Forearm
-            createMuscle(elbowR, handR, 50, 9, 1.4, 'Arms');
+            // Traps/Shoulders upper
+            createMuscle(neck, shoulderL, 50, 8, 0.5, 'Traps');
+            createMuscle(neck, shoulderR, 50, 8, 0.5, 'Traps');
+
+            // Deltoids
+            createMuscle(shoulderL, new THREE.Vector3(-xShoulder, yShoulder - 10, 0), 60, 11, 1.5, 'Shoulders');
+            createMuscle(shoulderR, new THREE.Vector3(xShoulder, yShoulder - 10, 0), 60, 11, 1.5, 'Shoulders');
+
+            // Chest (Pectorals)
+            createMuscle(new THREE.Vector3(-5, yChest, 10), new THREE.Vector3(-xShoulder + 10, yShoulder - 5, 5), 80, 14, 1.2, 'Chest');
+            createMuscle(new THREE.Vector3(5, yChest, 10), new THREE.Vector3(xShoulder - 10, yShoulder - 5, 5), 80, 14, 1.2, 'Chest');
+
+            // Abs (Rectus Abdominis)
+            createMuscle(new THREE.Vector3(-4, yChest - 10, 11), new THREE.Vector3(-4, yWaist, 10), 60, 10, 0.3, 'Abs');
+            createMuscle(new THREE.Vector3(4, yChest - 10, 11), new THREE.Vector3(4, yWaist, 10), 60, 10, 0.3, 'Abs');
+
+            // Lats (Wings)
+            createMuscle(new THREE.Vector3(-xShoulder + 5, yShoulder - 15, -5), new THREE.Vector3(-xHip + 5, yWaist + 10, -5), 90, 12, 1.4, 'Back');
+            createMuscle(new THREE.Vector3(xShoulder - 5, yShoulder - 15, -5), new THREE.Vector3(xHip - 5, yWaist + 10, -5), 90, 12, 1.4, 'Back');
+
+            // Arms (Full Volume)
+            // L Upper Arm (Bicep + Tricep)
+            createMuscle(shoulderL, elbowL, 60, 8, 1.4, 'Arms'); // Bicep side
+            createMuscle(new THREE.Vector3(-xShoulder, yShoulder, -3), new THREE.Vector3(-28, yElbow, -2), 60, 9, 1.6, 'Arms'); // Tricep side
+
+            // R Upper Arm
+            createMuscle(shoulderR, elbowR, 60, 8, 1.4, 'Arms');
+            createMuscle(new THREE.Vector3(xShoulder, yShoulder, -3), new THREE.Vector3(28, yElbow, -2), 60, 9, 1.6, 'Arms');
+
+            // Forearms
+            createMuscle(elbowL, handL, 50, 7, 1.2, 'Arms');
+            createMuscle(elbowR, handR, 50, 7, 1.2, 'Arms');
+            // Back of forearms for thickness
+            createMuscle(new THREE.Vector3(-28, yElbow, 2), new THREE.Vector3(-30, yArmEnd, 4), 40, 6, 1.1, 'Arms');
+            createMuscle(new THREE.Vector3(28, yElbow, 2), new THREE.Vector3(30, yArmEnd, 4), 40, 6, 1.1, 'Arms');
+
 
             // Legs
-            createMuscle(hipL, kneeL, 110, 16, 1.8, 'Legs'); // Quads
-            createMuscle(hipR, kneeR, 110, 16, 1.8, 'Legs');
-            createMuscle(kneeL, ankleL, 80, 11, 1.6, 'Calves');
-            createMuscle(kneeR, ankleR, 80, 11, 1.6, 'Calves');
-            createMuscle(ankleL, footL, 30, 8, 1.0, 'Legs'); // Feet
-            createMuscle(ankleR, footR, 30, 8, 1.0, 'Legs');
+            // Quads/Hams (Upper Leg)
+            createMuscle(hipL, kneeL, 100, 13, 1.6, 'Legs');
+            createMuscle(hipR, kneeR, 100, 13, 1.6, 'Legs');
+
+            // Calves (Lower Leg)
+            createMuscle(kneeL, ankleL, 80, 9, 1.5, 'Calves');
+            createMuscle(kneeR, ankleR, 80, 9, 1.5, 'Calves');
+
+            // Feet
+            createMuscle(ankleL, footL, 40, 7, 1.0, 'Legs');
+            createMuscle(ankleR, footR, 40, 7, 1.0, 'Legs');
+
 
             // Build Geometry
             const geometry = new THREE.BufferGeometry();

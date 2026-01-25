@@ -1,0 +1,6 @@
+Analyzing 3 items...                                            
+
+  error • The named parameter 'height' is required, but there's no corresponding argument • lib/features/home/presentation/home_screen.dart:892:57 • missing_required_argument
+  error • The named parameter 'width' is required, but there's no corresponding argument • lib/features/home/presentation/home_screen.dart:892:57 • missing_required_argument
+
+2 issues found. (ran in 25.4s)
