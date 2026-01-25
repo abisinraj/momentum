@@ -3,6 +3,7 @@ name: Flutter Build
 on:
   push:
     branches: [ "main" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
 
@@ -10,6 +11,8 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       _JAVA_OPTIONS: -Xmx5g
       DART_VM_OPTIONS: --old_gen_heap_size=4096
@@ -50,8 +53,24 @@ jobs:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx5120m -XX:MaxMetaspaceSize=1024m"
         run: flutter build apk --release -v
         
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
+          name: Release ${{ github.ref_name }}
+          body: |
+            Automated Release for ${{ github.ref_name }}
+            
+            Changes in this version:
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
