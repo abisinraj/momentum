@@ -1,6 +1,0 @@
-Analyzing active_workout_screen.dart...                         
-
-   info • Use 'const' with the constructor to improve performance • lib/features/workout/presentation/active_workout_screen.dart:211:24 • prefer_const_constructors
-   info • Use 'const' with the constructor to improve performance • lib/features/workout/presentation/active_workout_screen.dart:587:48 • prefer_const_constructors
-
-2 issues found. (ran in 1.7s)

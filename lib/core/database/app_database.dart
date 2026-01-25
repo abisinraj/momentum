@@ -229,6 +229,11 @@ class AppDatabase extends _$AppDatabase {
   /// Delete a workout
   Future<int> deleteWorkout(int id) =>
       (delete(workouts)..where((w) => w.id.equals(id))).go();
+      
+  /// Get a single workout by ID
+  Future<Workout?> getWorkout(int id) =>
+      (select(workouts)..where((w) => w.id.equals(id))).getSingleOrNull();
+
   
   // ===== Session Operations =====
   
@@ -258,6 +263,15 @@ class AppDatabase extends _$AppDatabase {
         workoutId: Value(workoutId),
         startedAt: Value(DateTime.now()),
       ));
+      
+  /// Get the currently active session (if any)
+  Future<Session?> getActiveSession() =>
+      (select(sessions)
+        ..where((s) => s.completedAt.isNull())
+        ..orderBy([(s) => OrderingTerm.desc(s.startedAt)])
+        ..limit(1))
+      .getSingleOrNull();
+
   
   /// Complete a session
   /// Complete a session

@@ -35,9 +35,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ScreenUtils.printScreenInfo(context);
+        // Check for crashed session
+        ref.read(activeWorkoutSessionProvider.notifier).checkResumableSession();
       }
     });
   }
+
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -93,6 +96,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               
               const SizedBox(height: 24),
               
+              if (activeSession != null) ...[
+                _buildResumeBanner(context, activeSession),
+                const SizedBox(height: 24),
+              ],
+
+              
               // Main workout content
               switch (nextWorkoutAsync) {
                 AsyncData(:final value) => _buildWorkoutContent(context, ref, value, activeSession, todayCompleted),
@@ -142,7 +151,89 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
   
+  Widget _buildResumeBanner(BuildContext context, ActiveSession session) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.errorContainer, // Urgent color
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.error.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.error.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: colorScheme.onErrorContainer),
+              const SizedBox(width: 8),
+              Text(
+                'Workout Interrupted',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onErrorContainer,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'It seems Momentum crashed during "${session.workoutName}".',
+            style: TextStyle(color: colorScheme.onErrorContainer),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ActiveWorkoutScreen(session: session),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Resume'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colorScheme.error,
+                    foregroundColor: colorScheme.onError,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              OutlinedButton(
+                onPressed: () {
+                   // Cancel
+                   // Note: This effectively discards the session or we could prompt to save partial.
+                   // For now simple discard/completion.
+                   ref.read(activeWorkoutSessionProvider.notifier).cancelWorkout();
+                },
+                style: OutlinedButton.styleFrom(
+                   foregroundColor: colorScheme.error,
+                   side: BorderSide(color: colorScheme.error),
+                ),
+                child: const Text('Discard'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  
   Widget _buildHeader(BuildContext context, String userName) {
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Row(

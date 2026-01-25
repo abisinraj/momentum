@@ -38,8 +38,34 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
   @override
   ActiveSession? build() => null;
   
+  /// Check for any crashed/incomplete sessions and restore state
+  Future<void> checkResumableSession() async {
+    // Prevent overwriting if already running (though unlikely on clean start)
+    if (state != null) return;
+    
+    final db = ref.read(appDatabaseProvider);
+    final session = await db.getActiveSession();
+    
+    if (session != null) {
+      final workout = await db.getWorkout(session.workoutId);
+      if (workout != null) {
+        state = ActiveSession(
+          sessionId: session.id,
+          workoutId: workout.id,
+          workoutName: workout.name,
+          clockType: workout.clockType,
+          timerDuration: workout.timerDurationSeconds != null 
+              ? Duration(seconds: workout.timerDurationSeconds!)
+              : null,
+          startedAt: session.startedAt,
+        );
+      }
+    }
+  }
+
   /// Start a workout session
   Future<void> startWorkout(Workout workout) async {
+
     final db = ref.read(appDatabaseProvider);
     final sessionId = await db.startSession(workout.id);
     
