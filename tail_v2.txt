@@ -1,0 +1,524 @@
+[ +227 ms] executing: uname -m
+[ +162 ms] Exit code 0 from: uname -m
+[        ] x86_64
+[  +16 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[        ] executing: [/home/abisin/development/flutter/] git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[ +746 ms] Exit code 0 from: git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[        ] 2026-01-13 13:47:42 -0800
+[ +143 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[  +55 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[ +462 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[  +83 ms] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[ +112 ms] executing: [/home/abisin/Desktop/momentum/] /home/abisin/development/flutter/bin/cache/dart-sdk/bin/dart pub --suppress-analytics --directory . get --example
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (93.0.0 available)
+  analyzer 7.6.0 (10.0.1 available)
+  analyzer_plugin 0.13.4 (0.14.1 available)
+  build 2.5.4 (4.0.4 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+  build_runner 2.5.4 (2.10.5 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  camera 0.10.6 (0.11.3 available)
+  characters 1.4.0 (1.4.1 available)
+  connectivity_plus 6.1.5 (7.0.0 available)
+  custom_lint_core 0.7.5 (0.8.2 available)
+  custom_lint_visitor 1.0.0+7.7.0 (1.0.0+9.0.0 available)
+  dart_style 3.1.1 (3.1.4 available)
+  device_info_plus 10.1.2 (12.3.0 available)
+  drift 2.28.2 (2.30.1 available)
+  drift_dev 2.28.0 (2.30.1 available)
+  flutter_launcher_icons 0.13.1 (0.14.4 available)
+  flutter_lints 4.0.0 (6.0.0 available)
+  flutter_riverpod 2.6.1 (3.2.0 available)
+  flutter_secure_storage 9.2.4 (10.0.0 available)
+  flutter_secure_storage_linux 1.2.3 (3.0.0 available)
+  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+  flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
+  flutter_secure_storage_web 1.2.1 (2.1.0 available)
+  flutter_secure_storage_windows 3.1.2 (4.1.0 available)
+  freezed 2.5.8 (3.2.4 available)
+  freezed_annotation 2.4.4 (3.1.0 available)
+  go_router 14.8.1 (17.0.1 available)
+  google_fonts 6.3.3 (8.0.0 available)
+  health 11.1.1 (13.2.1 available)
+  home_widget 0.7.0+1 (0.9.0 available)
+  intl 0.19.0 (0.20.2 available)
+  js 0.6.7 (0.7.2 available)
+  json_serializable 6.9.5 (6.11.4 available)
+  lints 4.0.0 (6.0.0 available)
+  matcher 0.12.17 (0.12.18 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.17.0 (1.18.0 available)
+  permission_handler 11.4.0 (12.0.1 available)
+  permission_handler_android 12.1.0 (13.0.1 available)
+  riverpod 2.6.1 (3.2.0 available)
+  riverpod_analyzer_utils 0.5.9 (0.5.10 available)
+  riverpod_annotation 2.6.1 (4.0.1 available)
+  riverpod_generator 2.6.4 (4.0.2 available)
+  source_gen 2.0.0 (4.2.0 available)
+  source_helper 1.3.7 (1.3.10 available)
+  sqlite3 2.9.4 (3.1.4 available)
+  sqlparser 0.41.2 (0.43.0 available)
+  test_api 0.7.7 (0.7.9 available)
+  timezone 0.10.1 (0.11.0 available)
+  win32_registry 1.1.5 (2.1.0 available)
+Got dependencies!
+52 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+[+7223 ms] Found plugin webview_flutter at /home/abisin/.pub-cache/hosted/pub.dev/webview_flutter-4.13.1/
+[   +3 ms] Found plugin webview_flutter_wkwebview at /home/abisin/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.23.5/
+[   +2 ms] Found plugin webview_flutter_android at /home/abisin/.pub-cache/hosted/pub.dev/webview_flutter_android-4.10.11/
+[   +1 ms] Found plugin wakelock_plus at /home/abisin/.pub-cache/hosted/pub.dev/wakelock_plus-1.4.0/
+[   +7 ms] Found plugin package_info_plus at /home/abisin/.pub-cache/hosted/pub.dev/package_info_plus-9.0.0/
+[   +5 ms] Found plugin sqlite3_flutter_libs at /home/abisin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.41/
+[   +2 ms] Found plugin shared_preferences at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences-2.5.4/
+[   +1 ms] Found plugin shared_preferences_windows at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +1 ms] Found plugin path_provider_windows at /home/abisin/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +5 ms] Found plugin shared_preferences_web at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +1 ms] Found plugin shared_preferences_linux at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[   +1 ms] Found plugin path_provider_linux at /home/abisin/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +1 ms] Found plugin shared_preferences_foundation at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[   +1 ms] Found plugin shared_preferences_android at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.18/
+[   +1 ms] Found plugin permission_handler at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler-11.4.0/
+[   +3 ms] Found plugin permission_handler_windows at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.1/
+[   +5 ms] Found plugin permission_handler_html at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.3+5/
+[   +2 ms] Found plugin permission_handler_apple at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/
+[   +1 ms] Found plugin permission_handler_android at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/
+[   +2 ms] Found plugin path_provider at /home/abisin/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[   +1 ms] Found plugin path_provider_foundation at /home/abisin/.pub-cache/hosted/pub.dev/path_provider_foundation-2.6.0/
+[   +4 ms] Found plugin path_provider_android at /home/abisin/.pub-cache/hosted/pub.dev/path_provider_android-2.2.22/
+[   +3 ms] Found plugin url_launcher at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher-6.3.2/
+[   +1 ms] Found plugin url_launcher_windows at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[   +1 ms] Found plugin url_launcher_web at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.2/
+[   +1 ms] Found plugin url_launcher_macos at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.5/
+[   +1 ms] Found plugin url_launcher_linux at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[   +1 ms] Found plugin url_launcher_ios at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.6/
+[   +1 ms] Found plugin url_launcher_android at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.28/
+[   +1 ms] Found plugin android_intent_plus at /home/abisin/.pub-cache/hosted/pub.dev/android_intent_plus-6.0.0/
+[   +2 ms] Found plugin image_picker at /home/abisin/.pub-cache/hosted/pub.dev/image_picker-1.2.1/
+[   +1 ms] Found plugin image_picker_windows at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.2/
+[   +3 ms] Found plugin file_selector_windows at /home/abisin/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+5/
+[   +1 ms] Found plugin image_picker_macos at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.2+1/
+[        ] Found plugin file_selector_macos at /home/abisin/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.5/
+[        ] Found plugin image_picker_linux at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.2/
+[        ] Found plugin file_selector_linux at /home/abisin/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.4/
+[        ] Found plugin image_picker_ios at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.13+3/
+[   +1 ms] Found plugin image_picker_for_web at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_for_web-3.1.1/
+[        ] Found plugin image_picker_android at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+12/
+[        ] Found plugin flutter_plugin_android_lifecycle at /home/abisin/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33/
+[        ] Found plugin home_widget at /home/abisin/.pub-cache/hosted/pub.dev/home_widget-0.7.0+1/
+[   +2 ms] Found plugin camera at /home/abisin/.pub-cache/hosted/pub.dev/camera-0.10.6/
+[        ] Found plugin camera_web at /home/abisin/.pub-cache/hosted/pub.dev/camera_web-0.3.5+3/
+[   +1 ms] Found plugin camera_avfoundation at /home/abisin/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.22+9/
+[        ] Found plugin camera_android at /home/abisin/.pub-cache/hosted/pub.dev/camera_android-0.10.10+14/
+[        ] Found plugin health at /home/abisin/.pub-cache/hosted/pub.dev/health-11.1.1/
+[   +2 ms] Found plugin device_info_plus at /home/abisin/.pub-cache/hosted/pub.dev/device_info_plus-10.1.2/
+[   +4 ms] Found plugin flutter_secure_storage at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage-9.2.4/
+[        ] Found plugin flutter_secure_storage_windows at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage_windows-3.1.2/
+[   +1 ms] Found plugin flutter_secure_storage_web at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage_web-1.2.1/
+[        ] Found plugin flutter_secure_storage_macos at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.3/
+[        ] Found plugin flutter_secure_storage_linux at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.3/
+[   +1 ms] Found plugin flutter_local_notifications at /home/abisin/.pub-cache/hosted/pub.dev/flutter_local_notifications-19.5.0/
+[        ] Found plugin flutter_local_notifications_windows at /home/abisin/.pub-cache/hosted/pub.dev/flutter_local_notifications_windows-1.0.3/
+[   +1 ms] Found plugin flutter_local_notifications_linux at /home/abisin/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-6.0.0/
+[        ] Found plugin flutter_background_service at /home/abisin/.pub-cache/hosted/pub.dev/flutter_background_service-5.1.0/
+[   +1 ms] Found plugin flutter_background_service_ios at /home/abisin/.pub-cache/hosted/pub.dev/flutter_background_service_ios-5.0.3/
+[        ] Found plugin flutter_background_service_android at /home/abisin/.pub-cache/hosted/pub.dev/flutter_background_service_android-6.3.1/
+[   +1 ms] Found plugin dynamic_color at /home/abisin/.pub-cache/hosted/pub.dev/dynamic_color-1.8.1/
+[   +1 ms] Found plugin connectivity_plus at /home/abisin/.pub-cache/hosted/pub.dev/connectivity_plus-6.1.5/
+[  +50 ms] Found plugin webview_flutter at /home/abisin/.pub-cache/hosted/pub.dev/webview_flutter-4.13.1/
+[   +1 ms] Found plugin webview_flutter_wkwebview at /home/abisin/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.23.5/
+[   +1 ms] Found plugin webview_flutter_android at /home/abisin/.pub-cache/hosted/pub.dev/webview_flutter_android-4.10.11/
+[        ] Found plugin wakelock_plus at /home/abisin/.pub-cache/hosted/pub.dev/wakelock_plus-1.4.0/
+[   +1 ms] Found plugin package_info_plus at /home/abisin/.pub-cache/hosted/pub.dev/package_info_plus-9.0.0/
+[   +2 ms] Found plugin sqlite3_flutter_libs at /home/abisin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.41/
+[        ] Found plugin shared_preferences at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences-2.5.4/
+[        ] Found plugin shared_preferences_windows at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[        ] Found plugin path_provider_windows at /home/abisin/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +1 ms] Found plugin shared_preferences_web at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[        ] Found plugin shared_preferences_linux at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] Found plugin path_provider_linux at /home/abisin/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +1 ms] Found plugin shared_preferences_foundation at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[   +1 ms] Found plugin shared_preferences_android at /home/abisin/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.18/
+[   +1 ms] Found plugin permission_handler at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler-11.4.0/
+[        ] Found plugin permission_handler_windows at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.1/
+[   +1 ms] Found plugin permission_handler_html at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.3+5/
+[        ] Found plugin permission_handler_apple at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/
+[        ] Found plugin permission_handler_android at /home/abisin/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/
+[        ] Found plugin path_provider at /home/abisin/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] Found plugin path_provider_foundation at /home/abisin/.pub-cache/hosted/pub.dev/path_provider_foundation-2.6.0/
+[   +1 ms] Found plugin path_provider_android at /home/abisin/.pub-cache/hosted/pub.dev/path_provider_android-2.2.22/
+[        ] Found plugin url_launcher at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher-6.3.2/
+[        ] Found plugin url_launcher_windows at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[        ] Found plugin url_launcher_web at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.2/
+[        ] Found plugin url_launcher_macos at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.5/
+[        ] Found plugin url_launcher_linux at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[        ] Found plugin url_launcher_ios at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.6/
+[        ] Found plugin url_launcher_android at /home/abisin/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.28/
+[        ] Found plugin android_intent_plus at /home/abisin/.pub-cache/hosted/pub.dev/android_intent_plus-6.0.0/
+[        ] Found plugin image_picker at /home/abisin/.pub-cache/hosted/pub.dev/image_picker-1.2.1/
+[        ] Found plugin image_picker_windows at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.2/
+[        ] Found plugin file_selector_windows at /home/abisin/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+5/
+[        ] Found plugin image_picker_macos at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.2+1/
+[        ] Found plugin file_selector_macos at /home/abisin/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.5/
+[        ] Found plugin image_picker_linux at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.2/
+[        ] Found plugin file_selector_linux at /home/abisin/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.4/
+[        ] Found plugin image_picker_ios at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.13+3/
+[        ] Found plugin image_picker_for_web at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_for_web-3.1.1/
+[   +1 ms] Found plugin image_picker_android at /home/abisin/.pub-cache/hosted/pub.dev/image_picker_android-0.8.13+12/
+[        ] Found plugin flutter_plugin_android_lifecycle at /home/abisin/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.33/
+[        ] Found plugin home_widget at /home/abisin/.pub-cache/hosted/pub.dev/home_widget-0.7.0+1/
+[   +1 ms] Found plugin camera at /home/abisin/.pub-cache/hosted/pub.dev/camera-0.10.6/
+[        ] Found plugin camera_web at /home/abisin/.pub-cache/hosted/pub.dev/camera_web-0.3.5+3/
+[        ] Found plugin camera_avfoundation at /home/abisin/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.22+9/
+[        ] Found plugin camera_android at /home/abisin/.pub-cache/hosted/pub.dev/camera_android-0.10.10+14/
+[        ] Found plugin health at /home/abisin/.pub-cache/hosted/pub.dev/health-11.1.1/
+[        ] Found plugin device_info_plus at /home/abisin/.pub-cache/hosted/pub.dev/device_info_plus-10.1.2/
+[   +1 ms] Found plugin flutter_secure_storage at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage-9.2.4/
+[        ] Found plugin flutter_secure_storage_windows at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage_windows-3.1.2/
+[        ] Found plugin flutter_secure_storage_web at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage_web-1.2.1/
+[        ] Found plugin flutter_secure_storage_macos at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.3/
+[        ] Found plugin flutter_secure_storage_linux at /home/abisin/.pub-cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.3/
+[        ] Found plugin flutter_local_notifications at /home/abisin/.pub-cache/hosted/pub.dev/flutter_local_notifications-19.5.0/
+[        ] Found plugin flutter_local_notifications_windows at /home/abisin/.pub-cache/hosted/pub.dev/flutter_local_notifications_windows-1.0.3/
+[        ] Found plugin flutter_local_notifications_linux at /home/abisin/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-6.0.0/
+[        ] Found plugin flutter_background_service at /home/abisin/.pub-cache/hosted/pub.dev/flutter_background_service-5.1.0/
+[        ] Found plugin flutter_background_service_ios at /home/abisin/.pub-cache/hosted/pub.dev/flutter_background_service_ios-5.0.3/
+[        ] Found plugin flutter_background_service_android at /home/abisin/.pub-cache/hosted/pub.dev/flutter_background_service_android-6.3.1/
+[        ] Found plugin dynamic_color at /home/abisin/.pub-cache/hosted/pub.dev/dynamic_color-1.8.1/
+[        ] Found plugin connectivity_plus at /home/abisin/.pub-cache/hosted/pub.dev/connectivity_plus-6.1.5/
+[ +263 ms] Generating /home/abisin/Desktop/momentum/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+[  +33 ms] Skipping generating GeneratedPluginRegistrant.java because it is up-to-date.
+[  +45 ms] Top-level Gradle build file not found, skipping migration of task "clean".
+[        ] Android Studio version could not be detected, skipping Gradle-Java version compatibility check.
+[  +11 ms] CMake project not found, skipping support Android 15 16k page size migration.
+[  +19 ms] Using gradle from /home/abisin/Desktop/momentum/android/gradlew.
+[  +36 ms] LocalFile: '/home/abisin/Desktop/momentum/android/build.gradle.kts' doesn't provide an AGP version. Checking settings.
+[        ] LocalFile: '/home/abisin/Desktop/momentum/android/settings.gradle.kts' provides AGP version: 8.9.1
+[        ] Running Gradle task 'assembleRelease'...
+[        ] executing: [/home/abisin/Desktop/momentum/android/] /home/abisin/Desktop/momentum/android/gradlew --full-stacktrace --info -Pverbose=true -Ptarget-platform=android-arm,android-arm64,android-x64 -Ptarget=lib/main.dart -Pbase-application-name=android.app.Application -Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTMuMzguNw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049M2I2MmVmYzJhMw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NzhmYzMwMTJlNA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMC43 -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=true assembleRelease
+[+1971 ms] Initialized native services in: /home/abisin/.gradle/native
+[        ] Initialized jansi services in: /home/abisin/.gradle/native
+[ +522 ms] Removing 6 daemon stop events from registry
+[   +1 ms] Starting a Gradle Daemon, 1 busy Daemon could not be reused, use --status for details
+[        ] Received JVM installation metadata from '/home/abisin/development/jdk-17': {JAVA_HOME=/home/abisin/development/jdk-17, JAVA_VERSION=17.0.18, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=17.0.18+8, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=17.0.18+8, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+[  +99 ms] Starting process 'Gradle build daemon'. Working directory: /home/abisin/.gradle/daemon/8.13 Command: /home/abisin/development/jdk-17/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED -XX:MaxMetaspaceSize=512m -Xmx1024m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -cp /home/abisin/.gradle/wrapper/dists/gradle-8.13-bin/5xuhj0ry160q40clulazy9h7d/gradle-8.13/lib/gradle-daemon-main-8.13.jar -javaagent:/home/abisin/.gradle/wrapper/dists/gradle-8.13-bin/5xuhj0ry160q40clulazy9h7d/gradle-8.13/lib/agents/gradle-instrumentation-agent-8.13.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.13
+[   +1 ms] Successfully started process 'Gradle build daemon'
+[+4897 ms] An attempt to start the daemon took 4.904 secs.
+[ +200 ms] The client will now receive all logging from the daemon (pid: 175231). The daemon log file: /home/abisin/.gradle/daemon/8.13/daemon-175231.out.log
+[        ] Starting build in new daemon [memory: 1 GiB]
+[ +799 ms] Using 4 worker leases.
+[ +500 ms] Received JVM installation metadata from '/home/abisin/development/jdk-17': {JAVA_HOME=/home/abisin/development/jdk-17, JAVA_VERSION=17.0.18, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=17.0.18+8, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=17.0.18+8, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+[ +399 ms] Watching the file system is configured to be enabled if available
+[        ] Now considering [/home/abisin/Desktop/momentum/android] as hierarchies to watch
+[        ] File system watching is active
+[ +800 ms] Starting Build
+[+1598 ms] Now considering [/home/abisin/development/flutter/packages/flutter_tools/gradle, /home/abisin/Desktop/momentum/android] as hierarchies to watch
+[ +200 ms] Using local directory build cache for build ':gradle' (location = /home/abisin/.gradle/caches/build-cache-1, remove unused entries = after 7 days).
+[+2302 ms] > Configure project :gradle
+[        ] Evaluating project ':gradle' using build file '/home/abisin/development/flutter/packages/flutter_tools/gradle/build.gradle.kts'.
+[        ] Resolved plugin [id: 'org.gradle.java-gradle-plugin']
+[        ] Resolved plugin [id: 'org.gradle.groovy']
+[        ] Resolved plugin [id: 'org.gradle.kotlin.kotlin-dsl', version: '5.2.0']
+[        ] Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.20']
+[+2396 ms] Using Kotlin Gradle Plugin gradle85 variant
+[ +800 ms] kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+[  +99 ms] kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+[ +299 ms] file or directory '/home/abisin/development/flutter/packages/flutter_tools/gradle/src/main/java', not found
+[ +799 ms] Resolved plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+[        ] Resolved plugin [id: 'com.android.application', version: '8.9.1', apply: false]
+[        ] Resolved plugin [id: 'org.jetbrains.kotlin.android', version: '2.1.0', apply: false]
+[+60899 ms] FAILURE: Build failed with an exception.
+[   +5 ms] * What went wrong:
+[        ] Timeout waiting to lock build logic queue. It is currently in use by another Gradle instance.
+[        ] Owner PID: 20955
+[        ] Our PID: 175231
+[        ] Owner Operation: 
+[        ] Our operation: 
+[        ] Lock file: /home/abisin/Desktop/momentum/android/.gradle/noVersion/buildLogic.lock
+[        ] * Try:
+[        ] > Run with --debug option to get more log output.
+[        ] > Run with --scan to get full insights.
+[        ] > Get more help at https://help.gradle.org.
+[        ] * Exception is:
+[        ] org.gradle.cache.LockTimeoutException: Timeout waiting to lock build logic queue. It is currently in use by another Gradle instance.
+[        ] Owner PID: 20955
+[        ] Our PID: 175231
+[   +3 ms] Owner Operation: 
+[        ] Our operation: 
+[        ] Lock file: /home/abisin/Desktop/momentum/android/.gradle/noVersion/buildLogic.lock
+[        ] 	at org.gradle.cache.internal.DefaultFileLockManager$DefaultFileLock.timeoutException(DefaultFileLockManager.java:374)
+[        ] 	at org.gradle.cache.internal.DefaultFileLockManager$DefaultFileLock.lock(DefaultFileLockManager.java:335)
+[        ] 	at org.gradle.cache.internal.DefaultFileLockManager$DefaultFileLock.<init>(DefaultFileLockManager.java:179)
+[        ] 	at org.gradle.cache.internal.DefaultFileLockManager.lock(DefaultFileLockManager.java:125)
+[        ] 	at org.gradle.cache.internal.DefaultFileLockManager.lock(DefaultFileLockManager.java:106)
+[        ] 	at org.gradle.cache.internal.DefaultFileLockManager.lock(DefaultFileLockManager.java:101)
+[        ] 	at org.gradle.api.internal.initialization.DefaultBuildLogicBuildQueue.lockBuildLogicQueueFile(DefaultBuildLogicBuildQueue.java:130)
+[        ] 	at org.gradle.api.internal.initialization.DefaultBuildLogicBuildQueue.lambda$withBuildLogicQueueLock$4(DefaultBuildLogicBuildQueue.java:116)
+[        ] 	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:46)
+[        ] 	at org.gradle.api.internal.initialization.DefaultBuildLogicBuildQueue.withBuildLogicQueueLock(DefaultBuildLogicBuildQueue.java:114)
+[        ] 	at org.gradle.api.internal.initialization.DefaultBuildLogicBuildQueue.access$000(DefaultBuildLogicBuildQueue.java:42)
+[        ] 	at org.gradle.api.internal.initialization.DefaultBuildLogicBuildQueue$1.call(DefaultBuildLogicBuildQueue.java:103)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+[        ] 	at org.gradle.api.internal.initialization.DefaultBuildLogicBuildQueue.withBuildLogicQueueLockInBuildOperation(DefaultBuildLogicBuildQueue.java:100)
+[        ] 	at org.gradle.api.internal.initialization.DefaultBuildLogicBuildQueue.build(DefaultBuildLogicBuildQueue.java:76)
+[        ] 	at org.gradle.api.internal.initialization.DefaultBuildLogicBuilder.resolveClassPath(DefaultBuildLogicBuilder.java:61)
+[        ] 	at org.gradle.api.internal.initialization.DefaultScriptHandler.lambda$getInstrumentedScriptClassPath$0(DefaultScriptHandler.java:109)
+[        ] 	at org.gradle.api.internal.artifacts.configurations.DefaultConfiguration.callAndResetResolutionState(DefaultConfiguration.java:900)
+[        ] 	at org.gradle.api.internal.initialization.DefaultScriptHandler.getInstrumentedScriptClassPath(DefaultScriptHandler.java:113)
+[        ] 	at org.gradle.plugin.use.internal.DefaultPluginRequestApplicator.applyPlugins(DefaultPluginRequestApplicator.java:129)
+[        ] 	at org.gradle.kotlin.dsl.provider.PluginRequestsHandler.handle(PluginRequestsHandler.kt:45)
+[        ] 	at org.gradle.kotlin.dsl.provider.StandardKotlinScriptEvaluator$InterpreterHost.applyPluginsTo(KotlinScriptEvaluator.kt:242)
+[        ] 	at org.gradle.kotlin.dsl.execution.Interpreter$ProgramHost.applyPluginsTo(Interpreter.kt:387)
+[        ] 	at Program.execute(Unknown Source)
+[        ] 	at org.gradle.kotlin.dsl.execution.Interpreter$ProgramHost.eval(Interpreter.kt:516)
+[        ] 	at org.gradle.kotlin.dsl.execution.Interpreter.eval(Interpreter.kt:214)
+[        ] 	at org.gradle.kotlin.dsl.provider.StandardKotlinScriptEvaluator.evaluate(KotlinScriptEvaluator.kt:133)
+[        ] 	at org.gradle.kotlin.dsl.provider.KotlinScriptPluginFactory$create$1.invoke(KotlinScriptPluginFactory.kt:61)
+[        ] 	at org.gradle.kotlin.dsl.provider.KotlinScriptPluginFactory$create$1.invoke(KotlinScriptPluginFactory.kt:52)
+[        ] 	at org.gradle.kotlin.dsl.provider.KotlinScriptPlugin.apply(KotlinScriptPlugin.kt:35)
+[        ] 	at org.gradle.configuration.BuildOperationScriptPlugin$1.run(BuildOperationScriptPlugin.java:68)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
+[        ] 	at org.gradle.configuration.BuildOperationScriptPlugin.lambda$apply$0(BuildOperationScriptPlugin.java:65)
+[        ] 	at org.gradle.internal.code.DefaultUserCodeApplicationContext.apply(DefaultUserCodeApplicationContext.java:44)
+[        ] 	at org.gradle.configuration.BuildOperationScriptPlugin.apply(BuildOperationScriptPlugin.java:65)
+[        ] 	at org.gradle.initialization.ScriptEvaluatingSettingsProcessor.applySettingsScript(ScriptEvaluatingSettingsProcessor.java:75)
+[        ] 	at org.gradle.initialization.ScriptEvaluatingSettingsProcessor.process(ScriptEvaluatingSettingsProcessor.java:68)
+[        ] 	at org.gradle.initialization.SettingsEvaluatedCallbackFiringSettingsProcessor.process(SettingsEvaluatedCallbackFiringSettingsProcessor.java:34)
+[        ] 	at org.gradle.initialization.RootBuildCacheControllerSettingsProcessor.process(RootBuildCacheControllerSettingsProcessor.java:47)
+[        ] 	at org.gradle.initialization.BuildOperationSettingsProcessor$2.call(BuildOperationSettingsProcessor.java:49)
+[        ] 	at org.gradle.initialization.BuildOperationSettingsProcessor$2.call(BuildOperationSettingsProcessor.java:46)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+[        ] 	at org.gradle.initialization.BuildOperationSettingsProcessor.process(BuildOperationSettingsProcessor.java:46)
+[        ] 	at org.gradle.initialization.DefaultSettingsLoader.findSettingsAndLoadIfAppropriate(DefaultSettingsLoader.java:183)
+[        ] 	at org.gradle.initialization.DefaultSettingsLoader.findAndLoadSettings(DefaultSettingsLoader.java:86)
+[        ] 	at org.gradle.initialization.SettingsAttachingSettingsLoader.findAndLoadSettings(SettingsAttachingSettingsLoader.java:33)
+[   +3 ms] 	at org.gradle.internal.composite.CommandLineIncludedBuildSettingsLoader.findAndLoadSettings(CommandLineIncludedBuildSettingsLoader.java:35)
+[        ] 	at org.gradle.internal.composite.ChildBuildRegisteringSettingsLoader.findAndLoadSettings(ChildBuildRegisteringSettingsLoader.java:44)
+[        ] 	at org.gradle.internal.composite.CompositeBuildSettingsLoader.findAndLoadSettings(CompositeBuildSettingsLoader.java:35)
+[        ] 	at org.gradle.initialization.InitScriptHandlingSettingsLoader.findAndLoadSettings(InitScriptHandlingSettingsLoader.java:33)
+[        ] 	at org.gradle.api.internal.initialization.CacheConfigurationsHandlingSettingsLoader.findAndLoadSettings(CacheConfigurationsHandlingSettingsLoader.java:36)
+[        ] 	at org.gradle.initialization.GradlePropertiesHandlingSettingsLoader.findAndLoadSettings(GradlePropertiesHandlingSettingsLoader.java:38)
+[        ] 	at org.gradle.initialization.DefaultSettingsPreparer.prepareSettings(DefaultSettingsPreparer.java:31)
+[        ] 	at org.gradle.initialization.BuildOperationFiringSettingsPreparer$LoadBuild.doLoadBuild(BuildOperationFiringSettingsPreparer.java:71)
+[        ] 	at org.gradle.initialization.BuildOperationFiringSettingsPreparer$LoadBuild.run(BuildOperationFiringSettingsPreparer.java:66)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
+[        ] 	at org.gradle.initialization.BuildOperationFiringSettingsPreparer.prepareSettings(BuildOperationFiringSettingsPreparer.java:54)
+[        ] 	at org.gradle.initialization.VintageBuildModelController.lambda$prepareSettings$1(VintageBuildModelController.java:80)
+[        ] 	at org.gradle.internal.model.StateTransitionController.lambda$doTransition$14(StateTransitionController.java:255)
+[        ] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+[        ] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:254)
+[        ] 	at org.gradle.internal.model.StateTransitionController.lambda$transitionIfNotPreviously$11(StateTransitionController.java:213)
+[        ] 	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:36)
+[        ] 	at org.gradle.internal.model.StateTransitionController.transitionIfNotPreviously(StateTransitionController.java:209)
+[        ] 	at org.gradle.initialization.VintageBuildModelController.prepareSettings(VintageBuildModelController.java:80)
+[        ] 	at org.gradle.initialization.VintageBuildModelController.prepareToScheduleTasks(VintageBuildModelController.java:70)
+[        ] 	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$prepareToScheduleTasks$6(DefaultBuildLifecycleController.java:175)
+[        ] 	at org.gradle.internal.model.StateTransitionController.lambda$doTransition$14(StateTransitionController.java:255)
+[        ] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+[        ] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:254)
+[        ] 	at org.gradle.internal.model.StateTransitionController.lambda$maybeTransition$9(StateTransitionController.java:190)
+[        ] 	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:36)
+[        ] 	at org.gradle.internal.model.StateTransitionController.maybeTransition(StateTransitionController.java:186)
+[        ] 	at org.gradle.internal.build.DefaultBuildLifecycleController.prepareToScheduleTasks(DefaultBuildLifecycleController.java:173)
+[        ] 	at org.gradle.internal.buildtree.DefaultBuildTreeWorkPreparer.scheduleRequestedTasks(DefaultBuildTreeWorkPreparer.java:36)
+[        ] 	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController$scheduleAndRunRequestedTasks$1.apply(VintageBuildTreeWorkController.kt:36)
+[        ] 	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController$scheduleAndRunRequestedTasks$1.apply(VintageBuildTreeWorkController.kt:35)
+[        ] 	at org.gradle.composite.internal.DefaultIncludedBuildTaskGraph.withNewWorkGraph(DefaultIncludedBuildTaskGraph.java:112)
+[        ] 	at org.gradle.internal.cc.impl.VintageBuildTreeWorkController.scheduleAndRunRequestedTasks(VintageBuildTreeWorkController.kt:35)
+[        ] 	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.lambda$scheduleAndRunTasks$1(DefaultBuildTreeLifecycleController.java:77)
+[        ] 	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.lambda$runBuild$4(DefaultBuildTreeLifecycleController.java:120)
+[        ] 	at org.gradle.internal.model.StateTransitionController.lambda$transition$6(StateTransitionController.java:169)
+[        ] 	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+[        ] 	at org.gradle.internal.model.StateTransitionController.lambda$transition$7(StateTransitionController.java:169)
+[        ] 	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:46)
+[        ] 	at org.gradle.internal.model.StateTransitionController.transition(StateTransitionController.java:169)
+[        ] 	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.runBuild(DefaultBuildTreeLifecycleController.java:117)
+[        ] 	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.scheduleAndRunTasks(DefaultBuildTreeLifecycleController.java:77)
+[        ] 	at org.gradle.internal.buildtree.DefaultBuildTreeLifecycleController.scheduleAndRunTasks(DefaultBuildTreeLifecycleController.java:72)
+[        ] 	at org.gradle.tooling.internal.provider.ExecuteBuildActionRunner.run(ExecuteBuildActionRunner.java:31)
+[        ] 	at org.gradle.launcher.exec.ChainingBuildActionRunner.run(ChainingBuildActionRunner.java:35)
+[        ] 	at org.gradle.internal.buildtree.ProblemReportingBuildActionRunner.run(ProblemReportingBuildActionRunner.java:49)
+[        ] 	at org.gradle.launcher.exec.BuildOutcomeReportingBuildActionRunner.run(BuildOutcomeReportingBuildActionRunner.java:71)
+[        ] 	at org.gradle.tooling.internal.provider.FileSystemWatchingBuildActionRunner.run(FileSystemWatchingBuildActionRunner.java:135)
+[        ] 	at org.gradle.launcher.exec.BuildCompletionNotifyingBuildActionRunner.run(BuildCompletionNotifyingBuildActionRunner.java:41)
+[        ] 	at org.gradle.launcher.exec.RootBuildLifecycleBuildActionExecutor.lambda$execute$0(RootBuildLifecycleBuildActionExecutor.java:54)
+[        ] 	at org.gradle.composite.internal.DefaultRootBuildState.run(DefaultRootBuildState.java:130)
+[        ] 	at org.gradle.launcher.exec.RootBuildLifecycleBuildActionExecutor.execute(RootBuildLifecycleBuildActionExecutor.java:54)
+[        ] 	at org.gradle.internal.buildtree.InitDeprecationLoggingActionExecutor.execute(InitDeprecationLoggingActionExecutor.java:62)
+[        ] 	at org.gradle.internal.buildtree.InitProblems.execute(InitProblems.java:36)
+[        ] 	at org.gradle.internal.buildtree.DefaultBuildTreeContext.execute(DefaultBuildTreeContext.java:40)
+[        ] 	at org.gradle.launcher.exec.BuildTreeLifecycleBuildActionExecutor.lambda$execute$0(BuildTreeLifecycleBuildActionExecutor.java:71)
+[        ] 	at org.gradle.internal.buildtree.BuildTreeState.run(BuildTreeState.java:60)
+[        ] 	at org.gradle.launcher.exec.BuildTreeLifecycleBuildActionExecutor.execute(BuildTreeLifecycleBuildActionExecutor.java:71)
+[        ] 	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor$2.call(RunAsBuildOperationBuildActionExecutor.java:67)
+[   +1 ms] 	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor$2.call(RunAsBuildOperationBuildActionExecutor.java:63)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+[        ] 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+[        ] 	at org.gradle.launcher.exec.RunAsBuildOperationBuildActionExecutor.execute(RunAsBuildOperationBuildActionExecutor.java:63)
+[        ] 	at org.gradle.launcher.exec.RunAsWorkerThreadBuildActionExecutor.lambda$execute$0(RunAsWorkerThreadBuildActionExecutor.java:36)
+[        ] 	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+[        ] 	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+[        ] 	at org.gradle.launcher.exec.RunAsWorkerThreadBuildActionExecutor.execute(RunAsWorkerThreadBuildActionExecutor.java:36)
+[        ] 	at org.gradle.tooling.internal.provider.continuous.ContinuousBuildActionExecutor.execute(ContinuousBuildActionExecutor.java:110)
+[        ] 	at org.gradle.tooling.internal.provider.SubscribableBuildActionExecutor.execute(SubscribableBuildActionExecutor.java:64)
+[   +2 ms] 	at org.gradle.internal.session.DefaultBuildSessionContext.execute(DefaultBuildSessionContext.java:46)
+[        ] 	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor$ActionImpl.apply(BuildSessionLifecycleBuildActionExecutor.java:92)
+[        ] 	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor$ActionImpl.apply(BuildSessionLifecycleBuildActionExecutor.java:80)
+[        ] 	at org.gradle.internal.session.BuildSessionState.run(BuildSessionState.java:73)
+[        ] 	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor.execute(BuildSessionLifecycleBuildActionExecutor.java:62)
+[        ] 	at org.gradle.internal.buildprocess.execution.BuildSessionLifecycleBuildActionExecutor.execute(BuildSessionLifecycleBuildActionExecutor.java:41)
+[        ] 	at org.gradle.internal.buildprocess.execution.StartParamsValidatingActionExecutor.execute(StartParamsValidatingActionExecutor.java:64)
+[        ] 	at org.gradle.internal.buildprocess.execution.StartParamsValidatingActionExecutor.execute(StartParamsValidatingActionExecutor.java:32)
+[        ] 	at org.gradle.internal.buildprocess.execution.SessionFailureReportingActionExecutor.execute(SessionFailureReportingActionExecutor.java:51)
+[        ] 	at org.gradle.internal.buildprocess.execution.SessionFailureReportingActionExecutor.execute(SessionFailureReportingActionExecutor.java:39)
+[        ] 	at org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:47)
+[        ] 	at org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:31)
+[        ] 	at org.gradle.launcher.daemon.server.exec.ExecuteBuild.doBuild(ExecuteBuild.java:70)
+[        ] 	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+[        ] 	at org.gradle.launcher.daemon.server.exec.WatchForDisconnection.execute(WatchForDisconnection.java:39)
+[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+[        ] 	at org.gradle.launcher.daemon.server.exec.ResetDeprecationLogger.execute(ResetDeprecationLogger.java:29)
+[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+[        ] 	at org.gradle.launcher.daemon.server.exec.RequestStopIfSingleUsedDaemon.execute(RequestStopIfSingleUsedDaemon.java:35)
+[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+[        ] 	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.lambda$execute$0(ForwardClientInput.java:40)
+[        ] 	at org.gradle.internal.daemon.clientinput.ClientInputForwarder.forwardInput(ClientInputForwarder.java:80)
+[        ] 	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.execute(ForwardClientInput.java:37)
+[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+[        ] 	at org.gradle.launcher.daemon.server.exec.LogAndCheckHealth.execute(LogAndCheckHealth.java:64)
+[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+[        ] 	at org.gradle.launcher.daemon.server.exec.LogToClient.doBuild(LogToClient.java:63)
+[        ] 	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+[        ] 	at org.gradle.launcher.daemon.server.exec.EstablishBuildEnvironment.doBuild(EstablishBuildEnvironment.java:84)
+[        ] 	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+[        ] 	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+[        ] 	at org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy$1.run(StartBuildOrRespondWithBusy.java:52)
+[        ] 	at org.gradle.launcher.daemon.server.DaemonStateCoordinator.lambda$runCommand$0(DaemonStateCoordinator.java:321)
+[        ] 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+[        ] 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+[        ] 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+[        ] 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+[        ] 	at java.base/java.lang.Thread.run(Thread.java:840)
+[        ] BUILD FAILED in 1m 19s
+[ +353 ms] Running Gradle task 'assembleRelease'... (completed in 80.0s)
+[   +5 ms] "flutter apk" took 88,682ms.
+[  +16 ms] Gradle task assembleRelease failed with exit code 1
+[        ] 
+           #0      throwToolExit (package:flutter_tools/src/base/common.dart:34:3)
+           #1      AndroidGradleBuilder.buildGradleApp (package:flutter_tools/src/android/gradle.dart:592:7)
+           <asynchronous suspension>
+           #2      AndroidGradleBuilder.buildApk (package:flutter_tools/src/android/gradle.dart:234:5)
+           <asynchronous suspension>
+           #3      BuildApkCommand.runCommand (package:flutter_tools/src/commands/build_apk.dart:131:5)
+           <asynchronous suspension>
+           #4      FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1559:27)
+           <asynchronous suspension>
+           #5      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #6      CommandRunner.runCommand (package:args/command_runner.dart:212:13)
+           <asynchronous suspension>
+           #7      FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:487:9)
+           <asynchronous suspension>
+           #8      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #9      FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:422:5)
+           <asynchronous suspension>
+           #10     run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:104:11)
+           <asynchronous suspension>
+           #11     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #12     main (package:flutter_tools/executable.dart:103:3)
+           <asynchronous suspension>
+
+
+[        ] Running 1 shutdown hook
+[        ] Shutdown hooks complete
+[        ] exiting with code 1
