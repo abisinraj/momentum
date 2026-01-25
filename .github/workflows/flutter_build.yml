@@ -10,6 +10,9 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    env:
+      _JAVA_OPTIONS: -Xmx5g
+      DART_VM_OPTIONS: --old_gen_heap_size=4096
     
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +47,7 @@ jobs:
 
       - name: Build APK
         env:
-          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=512m"
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx5120m -XX:MaxMetaspaceSize=1024m"
         run: flutter build apk --release -v
         
       - name: Upload APK

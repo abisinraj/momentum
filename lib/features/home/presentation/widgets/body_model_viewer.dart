@@ -31,7 +31,7 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
           },
         ),
       )
-      ..loadFlutterAsset('assets/www/index.html');
+      ..loadFlutterAsset('assets/3d/index.html');
   }
 
   @override
