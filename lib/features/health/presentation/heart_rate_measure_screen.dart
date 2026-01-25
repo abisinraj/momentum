@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:heart_bpm/heart_bpm.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:momentum/app/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,40 +38,41 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
   }
 
   void _showInstructions() {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text('How to Measure', style: TextStyle(color: Colors.white)),
-        content: const Column(
+        backgroundColor: colorScheme.surfaceContainer,
+        title: Text('How to Measure', style: TextStyle(color: colorScheme.onSurface)),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               '1. Place your index finger gently on the back camera lens.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '2. Make sure the lens is completely covered.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '3. Hold still and do not press too hard.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '4. Ensure you are in a well-lit environment (flash may turn on).',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('GOT IT', style: TextStyle(color: AppTheme.tealPrimary)),
+            child: Text('GOT IT', style: TextStyle(color: colorScheme.primary)),
           ),
         ],
       ),
@@ -81,8 +81,11 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('Heart Rate Monitor'),
         leading: IconButton(
@@ -109,8 +112,8 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
                               ? "Place finger on camera"
                               : "Measurement Complete",
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -121,8 +124,8 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
                               ? "Cover the back camera lens completely with your index finger. Keep still."
                               : "Great job! Recording your heart rate.",
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
                             fontSize: 14,
                             height: 1.5,
                           ),
@@ -149,8 +152,8 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
                              child: FilledButton(
                                onPressed: _saveMeasurement,
                                style: FilledButton.styleFrom(
-                                 backgroundColor: AppTheme.tealPrimary,
-                                 foregroundColor: Colors.black,
+                                 backgroundColor: colorScheme.primary,
+                                 foregroundColor: colorScheme.onPrimary,
                                  padding: const EdgeInsets.symmetric(vertical: 20),
                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                ),
@@ -163,7 +166,7 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
                            const SizedBox(height: 16),
                            TextButton(
                              onPressed: _retry,
-                             child: const Text('RETAKE', style: TextStyle(color: Colors.white70)),
+                             child: Text('RETAKE', style: TextStyle(color: colorScheme.onSurfaceVariant)),
                            ),
                          ],
                        )
@@ -184,6 +187,7 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
   }
 
   Widget _buildMeasurementUI() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         // The Camera/BPM Widget
@@ -193,12 +197,12 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: AppTheme.tealPrimary.withValues(alpha: 0.3),
+              color: colorScheme.primary.withValues(alpha: 0.3),
               width: 4,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.tealPrimary.withValues(alpha: 0.2),
+                color: colorScheme.primary.withValues(alpha: 0.2),
                 blurRadius: 20,
                 spreadRadius: 2,
               ),
@@ -239,17 +243,17 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
             children: [
               Text(
                 "${_recentReadings.last}",
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 64,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                 ),
               ),
-              const Text(
+              Text(
                 "BPM",
                 style: TextStyle(
                   fontSize: 18,
-                  color: AppTheme.tealPrimary,
+                  color: colorScheme.primary,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2.0,
                 ),
@@ -257,12 +261,12 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
             ],
           )
         else
-          const Text(
+          Text(
             "Detecting Pulse...",
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w300,
-              color: Colors.white54,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           
@@ -273,8 +277,8 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
           width: 200,
           child: LinearProgressIndicator(
             value: _progress / 100,
-            backgroundColor: Colors.white12,
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.tealPrimary),
+            backgroundColor: colorScheme.onSurface.withValues(alpha: 0.1),
+            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
           ),
         ),
       ],
@@ -282,25 +286,26 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
   }
 
   Widget _buildResultUI(int bpm) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.monitor_heart, color: AppTheme.tealPrimary, size: 80),
+        Icon(Icons.monitor_heart, color: colorScheme.primary, size: 80),
         const SizedBox(height: 24),
         Text(
           "$bpm",
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 80,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: colorScheme.onSurface,
             height: 1.0,
           ),
         ),
-        const Text(
+        Text(
           "BPM",
           style: TextStyle(
             fontSize: 24,
-            color: Colors.white54,
+            color: colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
             letterSpacing: 1.5,
           ),
@@ -331,15 +336,16 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
   }
 
   void _showInvalidReadingDialog(int value) {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text('Invalid Reading', style: TextStyle(color: Colors.redAccent)),
+        backgroundColor: colorScheme.surfaceContainer,
+        title: Text('Invalid Reading', style: TextStyle(color: colorScheme.error)),
         content: Text(
           'We detected a heart rate of $value BPM, which seems physically unlikely.\n\nPlease ensure your finger completely covers the lens and you are holding still.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -347,7 +353,7 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
               Navigator.of(context).pop();
               _retry();
             },
-            child: Text('RETAKE', style: TextStyle(color: AppTheme.tealPrimary)),
+            child: Text('RETAKE', style: TextStyle(color: colorScheme.primary)),
           ),
         ],
       ),
@@ -368,7 +374,7 @@ class _HeartRateMeasureScreenState extends ConsumerState<HeartRateMeasureScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Heart Rate ($_finalBpm BPM) Saved'),
-        backgroundColor: AppTheme.tealPrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
     context.pop();

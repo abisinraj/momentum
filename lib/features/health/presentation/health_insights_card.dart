@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router.dart';
 import '../../../core/providers/health_connect_provider.dart';
+import '../../../core/services/settings_service.dart';
 import '../../health/presentation/heart_rate_measure_screen.dart';
+
 import '../../home/presentation/widgets/themed_card.dart';
 
 /// Card widget displaying health insights on the home screen.
@@ -73,7 +78,8 @@ class HealthInsightsCard extends ConsumerWidget {
             if (!healthState.hasPermissions)
               _buildConnectPrompt(context, ref, colorScheme)
             else
-              _buildHealthData(context, healthState, colorScheme),
+              _buildHealthData(context, ref, healthState, colorScheme),
+
 
             // Error message
             if (healthState.error != null)
@@ -123,8 +129,12 @@ class HealthInsightsCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildHealthData(BuildContext context, HealthState state, ColorScheme colorScheme) {
+  Widget _buildHealthData(BuildContext context, WidgetRef ref, HealthState state, ColorScheme colorScheme) {
+    final weightUnitAsync = ref.watch(weightUnitProvider);
+    final weightUnit = weightUnitAsync.valueOrNull ?? 'kg';
+
     return Row(
+
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildMetric(
@@ -135,10 +145,9 @@ class HealthInsightsCard extends ConsumerWidget {
           color: colorScheme.primary,
         ),
         InkWell(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const HeartRateMeasureScreen()),
-          ),
+          onTap: () => context.push(AppRoute.heartRate.path),
           borderRadius: BorderRadius.circular(12),
+
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: _buildMetric(
@@ -146,8 +155,9 @@ class HealthInsightsCard extends ConsumerWidget {
               icon: Icons.favorite_rounded,
               value: state.latestHeartRate != null ? '${state.latestHeartRate}' : '--',
               label: 'BPM (Tap to Measure)',
-              color: Colors.red,
+              color: colorScheme.error,
             ),
+
           ),
         ),
         _buildMetric(
@@ -155,18 +165,24 @@ class HealthInsightsCard extends ConsumerWidget {
           icon: Icons.bedtime_rounded,
           value: state.lastNightSleep != null ? _formatSleep(state.lastNightSleep!) : '--',
           label: 'Sleep',
-          color: Colors.indigo,
+          color: colorScheme.secondary,
         ),
+
         _buildMetric(
           context,
           icon: Icons.monitor_weight_rounded,
-          value: state.latestWeight != null ? state.latestWeight!.toStringAsFixed(1) : '--',
-          label: 'kg',
+          value: state.latestWeight != null 
+              ? (weightUnit == 'lbs' 
+                  ? (state.latestWeight! * 2.20462).toStringAsFixed(1)
+                  : state.latestWeight!.toStringAsFixed(1))
+              : '--',
+          label: weightUnit,
           color: colorScheme.tertiary,
         ),
       ],
     );
   }
+
 
   Widget _buildMetric(
     BuildContext context, {

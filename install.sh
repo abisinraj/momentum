@@ -1,7 +1,7 @@
 #!/bin/bash
 # Helper script to install Momentum (Debug)
-ADB_PATH="/home/abisinraj/Android/Sdk/platform-tools/adb"
-APK_PATH="/home/abisinraj/Desktop/momentum/build/app/outputs/flutter-apk/app-debug.apk"
+ADB_PATH="/home/abisin/development/android-sdk/platform-tools/adb"
+APK_PATH="/home/abisin/Desktop/momentum/build/app/outputs/flutter-apk/app-debug.apk"
 
 echo "Looking for adb at $ADB_PATH..."
 if [ ! -f "$ADB_PATH" ]; then

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/user_providers.dart';
+
 
 /// One-time setup screen for first launch
 /// Design: Single page with goal presets
@@ -44,7 +44,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Please enter your name'),
-          backgroundColor: AppTheme.darkSurfaceContainerHigh,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
         ),
       );
       return;
@@ -97,9 +97,12 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
+
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -110,7 +113,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 children: [
                   Icon(
                     Icons.build_outlined,
-                    color: AppTheme.tealPrimary,
+                    color: colorScheme.primary,
                     size: 18,
                   ),
                   const SizedBox(width: 8),
@@ -119,10 +122,11 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.tealPrimary,
+                      color: colorScheme.primary,
                       letterSpacing: 1.5,
                     ),
                   ),
+
                 ],
               ),
               
@@ -134,7 +138,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
+                    color: colorScheme.onSurface,
                     height: 1.2,
                   ),
                   children: [
@@ -142,13 +146,14 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     TextSpan(
                       text: 'Baseline',
                       style: TextStyle(
-                        color: AppTheme.tealPrimary,
+                        color: colorScheme.primary,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
                   ],
                 ),
               ),
+
               
               const SizedBox(height: 12),
               
@@ -156,32 +161,37 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 'To track your momentum, we need to know where you\'re starting.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
+
               
               const SizedBox(height: 32),
               
               // Display Name field
-              _buildLabel('DISPLAY NAME'),
+              _buildLabel(context, 'DISPLAY NAME'),
               const SizedBox(height: 8),
               _buildTextField(
+                context,
                 controller: _nameController,
                 hint: 'How should we call you?',
                 suffixIcon: Icons.person_outline,
               ),
+
               
               const SizedBox(height: 24),
               
               // Age field
-              _buildLabel('AGE'),
+              _buildLabel(context, 'AGE'),
               const SizedBox(height: 8),
               _buildTextField(
+                context,
                 controller: _ageController,
                 hint: '00',
                 keyboardType: TextInputType.number,
                 suffixIcon: Icons.calendar_today_outlined,
               ),
+
               
               const SizedBox(height: 24),
               
@@ -192,14 +202,17 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildLabel('HEIGHT'),
+                        _buildLabel(context, 'HEIGHT'),
                         const SizedBox(height: 8),
+
                         _buildTextField(
+                          context,
                           controller: _heightController,
                           hint: '000',
                           keyboardType: TextInputType.number,
-                          suffix: _buildUnitChip('CM'),
+                          suffix: _buildUnitChip(context, 'CM'),
                         ),
+
                       ],
                     ),
                   ),
@@ -208,14 +221,17 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildLabel('WEIGHT'),
+                        _buildLabel(context, 'WEIGHT'),
                         const SizedBox(height: 8),
+
                         _buildTextField(
+                          context,
                           controller: _weightController,
                           hint: '00.0',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          suffix: _buildUnitDropdown(),
+                          suffix: _buildUnitDropdown(context),
                         ),
+
                       ],
                     ),
                   ),
@@ -227,15 +243,17 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               // Primary Goal section
               Row(
                 children: [
-                  _buildLabel('PRIMARY GOAL'),
+                  _buildLabel(context, 'PRIMARY GOAL'),
                   const SizedBox(width: 8),
+
                   Text(
                     '(Optional)',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppTheme.textMuted,
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                     ),
                   ),
+
                 ],
               ),
               const SizedBox(height: 12),
@@ -243,8 +261,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               // Goal options
               ...(_goalOptions.map((goal) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _buildGoalOption(goal.$1, goal.$2, goal.$3),
+                child: _buildGoalOption(context, goal.$1, goal.$2, goal.$3),
               ))),
+
               
               const SizedBox(height: 32),
               
@@ -254,21 +273,23 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 child: FilledButton(
                   onPressed: _isSubmitting ? null : _completeSetup,
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppTheme.tealPrimary,
-                    foregroundColor: AppTheme.darkBackground,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
+
                   child: _isSubmitting
                       ? SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: AppTheme.darkBackground,
+                            color: colorScheme.onPrimary,
                           ),
+
                         )
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -295,78 +316,85 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     );
   }
   
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(BuildContext context, String text) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Text(
       text,
       style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        color: AppTheme.textMuted,
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
         letterSpacing: 1.0,
       ),
     );
   }
   
-  Widget _buildTextField({
+  Widget _buildTextField(
+    BuildContext context, {
     required TextEditingController controller,
     required String hint,
     TextInputType? keyboardType,
     IconData? suffixIcon,
     Widget? suffix,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         style: TextStyle(
-          color: AppTheme.textPrimary,
+          color: colorScheme.onSurface,
           fontSize: 16,
         ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: AppTheme.textMuted),
+          hintStyle: TextStyle(color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           suffixIcon: suffix ?? (suffixIcon != null
-              ? Icon(suffixIcon, color: AppTheme.textMuted, size: 20)
+              ? Icon(suffixIcon, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6), size: 20)
               : null),
         ),
       ),
     );
   }
+
   
-  Widget _buildUnitChip(String text) {
+  Widget _buildUnitChip(BuildContext context, String text) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.tealPrimary,
+        color: colorScheme.primary,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: AppTheme.darkBackground,
+          color: colorScheme.onPrimary,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
+
   
-  Widget _buildUnitDropdown() {
+  Widget _buildUnitDropdown(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppTheme.tealPrimary.withValues(alpha: 0.1),
+        color: colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -374,29 +402,31 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           Text(
             'KG',
             style: TextStyle(
-              color: AppTheme.tealPrimary,
+              color: colorScheme.primary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),
-          Icon(Icons.keyboard_arrow_down, color: AppTheme.tealPrimary, size: 16),
+          Icon(Icons.keyboard_arrow_down, color: colorScheme.primary, size: 16),
         ],
       ),
     );
   }
+
   
-  Widget _buildGoalOption(String title, String subtitle, IconData icon) {
+  Widget _buildGoalOption(BuildContext context, String title, String subtitle, IconData icon) {
     final isSelected = _selectedGoal == title;
+    final colorScheme = Theme.of(context).colorScheme;
     
     return GestureDetector(
       onTap: () => setState(() => _selectedGoal = isSelected ? null : title),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.1) : AppTheme.darkSurfaceContainer,
+          color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppTheme.tealPrimary : AppTheme.darkBorder.withValues(alpha: 0.3),
+            color: isSelected ? colorScheme.primary : colorScheme.outlineVariant.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -406,12 +436,12 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.2) : AppTheme.darkSurfaceContainerHigh,
+                color: isSelected ? colorScheme.primary.withValues(alpha: 0.2) : colorScheme.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
-                color: isSelected ? AppTheme.tealPrimary : AppTheme.textMuted,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(width: 16),
@@ -424,7 +454,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -432,7 +462,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppTheme.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -443,14 +473,14 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? AppTheme.tealPrimary : Colors.transparent,
+                color: isSelected ? colorScheme.primary : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? AppTheme.tealPrimary : AppTheme.textMuted,
+                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                   width: 2,
                 ),
               ),
               child: isSelected
-                  ? Icon(Icons.check, color: AppTheme.darkBackground, size: 16)
+                  ? Icon(Icons.check, color: colorScheme.onPrimary, size: 16)
                   : null,
             ),
           ],
@@ -458,4 +488,5 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       ),
     );
   }
+
 }

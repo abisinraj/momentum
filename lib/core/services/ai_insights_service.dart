@@ -8,14 +8,12 @@ class AIInsightsService {
   // We'll store it in SharedPreferences for now if provided by user.
   static const String _defaultApiKey = 'YOUR_API_KEY_HERE'; 
 
-  Future<String> getDailyInsight(User user, List<Map<String, dynamic>> recentSessions) async {
+  Future<String> getDailyInsight(User user, List<Map<String, dynamic>> recentSessions, String? apiKey) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      String apiKey = prefs.getString('gemini_api_key') ?? _defaultApiKey;
-
-      if (apiKey == 'YOUR_API_KEY_HERE' || apiKey.isEmpty) {
+      if (apiKey == null || apiKey == 'YOUR_API_KEY_HERE' || apiKey.isEmpty) {
         return "Configure your Gemini API Key in Settings to unlock AI insights.";
       }
+
 
       // Use the stable 'gemini-pro' model
       final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);

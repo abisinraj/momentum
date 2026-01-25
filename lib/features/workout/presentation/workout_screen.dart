@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
+
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import 'active_workout_screen.dart';
@@ -38,9 +38,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       _ => 0,
     };
     
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -59,10 +62,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.tealPrimary,
+                          color: colorScheme.primary,
                           letterSpacing: 1.0,
                         ),
                       ),
+
                       // Toggle: Today / All
                       GestureDetector(
                         onTap: () => setState(() => _showAllWorkouts = !_showAllWorkouts),
@@ -70,14 +74,15 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: _showAllWorkouts 
-                                ? AppTheme.tealPrimary.withValues(alpha: 0.15) 
-                                : AppTheme.darkSurfaceContainer,
+                                ? colorScheme.primary.withValues(alpha: 0.15) 
+                                : colorScheme.surfaceContainer,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: _showAllWorkouts 
-                                  ? AppTheme.tealPrimary 
-                                  : AppTheme.darkBorder,
+                                  ? colorScheme.primary 
+                                  : colorScheme.outlineVariant,
                             ),
+
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -86,9 +91,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                                 _showAllWorkouts ? Icons.calendar_view_week : Icons.today,
                                 size: 16,
                                 color: _showAllWorkouts 
-                                    ? AppTheme.tealPrimary 
-                                    : AppTheme.textMuted,
+                                    ? colorScheme.primary 
+                                    : colorScheme.onSurfaceVariant,
                               ),
+
                               const SizedBox(width: 4),
                               Text(
                                 _showAllWorkouts ? 'All' : 'Current',
@@ -96,9 +102,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: _showAllWorkouts 
-                                      ? AppTheme.tealPrimary 
-                                      : AppTheme.textMuted,
+                                      ? colorScheme.primary 
+                                      : colorScheme.onSurfaceVariant,
                                 ),
+
                               ),
                             ],
                           ),
@@ -113,18 +120,20 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
+
                   const SizedBox(height: 4),
                   // Focus subtitle
                   Text(
                     'Focus: $userGoal',
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppTheme.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
+
                 ],
               ),
             ),
@@ -148,11 +157,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 AsyncError(:final error) => Center(
                     child: Text(
                       'Error: $error',
-                      style: TextStyle(color: AppTheme.error),
+                      style: TextStyle(color: colorScheme.error),
                     ),
                   ),
+
                 _ => Center(
-                    child: CircularProgressIndicator(color: AppTheme.tealPrimary),
+                    child: CircularProgressIndicator(color: colorScheme.primary),
                   ),
               },
             ),
@@ -170,39 +180,45 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             ),
           );
         },
-        backgroundColor: AppTheme.tealPrimary,
-        child: Icon(Icons.add, color: AppTheme.darkBackground),
+        backgroundColor: colorScheme.primary,
+        child: Icon(Icons.add, color: colorScheme.onPrimary),
       ),
+
     );
   }
   
   Widget _buildEmptyState(String message) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
+
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.fitness_center_outlined,
             size: 64,
-            color: AppTheme.textMuted,
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
+
           const SizedBox(height: 16),
           Text(
             message,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+              color: colorScheme.onSurface,
             ),
           ),
+
           const SizedBox(height: 8),
           Text(
             'Tap + to add a workout',
             style: TextStyle(
               fontSize: 14,
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
+
         ],
       ),
     );
@@ -252,6 +268,48 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   }
   
   Future<void> _startWorkout(BuildContext context, WidgetRef ref, Workout workout) async {
+    // Rest Day Logic
+    if (workout.isRestDay) {
+       final colorScheme = Theme.of(context).colorScheme;
+       
+       final confirm = await showDialog<bool>(
+         context: context,
+         builder: (ctx) => AlertDialog(
+           backgroundColor: colorScheme.surfaceContainerHigh,
+           title: Text('Rest Day', style: TextStyle(color: colorScheme.onSurface)),
+           content: Text(
+             'Mark this days as rested? Proper recovery is key to progress.',
+             style: TextStyle(color: colorScheme.onSurfaceVariant),
+           ),
+           actions: [
+             TextButton(
+               onPressed: () => Navigator.pop(ctx, false),
+               child: Text('Cancel', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+             ),
+             FilledButton(
+               onPressed: () => Navigator.pop(ctx, true),
+               style: FilledButton.styleFrom(backgroundColor: colorScheme.primary),
+               child: Text('Confirm Rest', style: TextStyle(color: colorScheme.onPrimary)),
+             ),
+           ],
+         ),
+       );
+       
+       if (confirm == true) {
+         await logRestDay(ref, workout);
+         if (context.mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: Text('Rest day logged. Recovery mode on!'),
+               backgroundColor: colorScheme.primary,
+             ),
+           );
+         }
+       }
+       return;
+    }
+
+    // Standard Workout Logic
     await ref.read(activeWorkoutSessionProvider.notifier).startWorkout(workout);
     
     if (context.mounted) {
@@ -265,27 +323,31 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       }
     }
   }
+
   
 
   
   void _confirmDelete(BuildContext context, WidgetRef ref, Workout workout) {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.darkSurface,
+        backgroundColor: colorScheme.surfaceContainerHigh,
         title: Text(
           'Delete Workout?',
-          style: TextStyle(color: AppTheme.textPrimary),
+          style: TextStyle(color: colorScheme.onSurface),
         ),
         content: Text(
           'Are you sure you want to delete "${workout.name}"?',
-          style: TextStyle(color: AppTheme.textSecondary),
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
+
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+            child: Text('Cancel', style: TextStyle(color: colorScheme.onSurfaceVariant)),
           ),
+
           FilledButton(
             onPressed: () async {
               await ref.read(workoutManagerProvider.notifier).deleteWorkout(workout.id);
@@ -293,7 +355,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 Navigator.pop(context);
               }
             },
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.error),
+            style: FilledButton.styleFrom(backgroundColor: colorScheme.error),
+
             child: const Text('Delete'),
           ),
         ],
@@ -326,6 +389,7 @@ class _WorkoutCard extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isDisabled = isCompleted || isLocked;
     
     return GestureDetector(
@@ -337,16 +401,17 @@ class _WorkoutCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isActive
-                ? AppTheme.tealPrimary.withValues(alpha: 0.1)
-                : AppTheme.darkSurfaceContainer,
+                ? colorScheme.primary.withValues(alpha: 0.1)
+                : colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isActive
-                  ? AppTheme.tealPrimary
-                  : AppTheme.darkBorder.withValues(alpha: 0.3),
+                  ? colorScheme.primary
+                  : colorScheme.outlineVariant.withValues(alpha: 0.3),
               width: isActive ? 2 : 1,
             ),
           ),
+
           child: Row(
             children: [
             // Gradient thumbnail / icon
@@ -361,12 +426,14 @@ class _WorkoutCard extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
+              ),
               child: Icon(
-                _getWorkoutIcon(workout.clockType),
+                workout.isRestDay ? Icons.spa : _getWorkoutIcon(workout.clockType),
                 color: Colors.white,
                 size: 24,
               ),
             ),
+
             const SizedBox(width: 16),
             
             // Content
@@ -383,9 +450,10 @@ class _WorkoutCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: isCompleted ? AppTheme.textMuted : AppTheme.textPrimary,
+                            color: isCompleted ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
                             decoration: isCompleted ? TextDecoration.lineThrough : null,
                           ),
+
                         ),
                       ),
                       // Edit/Delete Menu (Only if not locked)
@@ -394,8 +462,9 @@ class _WorkoutCard extends StatelessWidget {
                           width: 32,
                           height: 32,
                           child: PopupMenuButton<String>(
-                            icon: Icon(Icons.more_vert, color: AppTheme.textSecondary, size: 20),
-                            color: AppTheme.darkSurfaceContainerHigh,
+                            icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant, size: 20),
+                            color: colorScheme.surfaceContainerHigh,
+
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             onSelected: (value) {
                                 if (value == 'edit') {
@@ -445,7 +514,7 @@ class _WorkoutCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppTheme.tealPrimary,
+                            color: colorScheme.primary,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -453,26 +522,29 @@ class _WorkoutCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.darkBackground,
+                              color: colorScheme.onPrimary,
                             ),
                           ),
+
                         ),
                         const SizedBox(width: 8),
                       ],
                       if (isCompleted)
                         Icon(
                           Icons.check_circle,
-                          color: AppTheme.tealPrimary,
+                          color: colorScheme.primary,
                           size: 16,
                         ),
+
                       if (isCompleted) const SizedBox(width: 4),
                       Text(
                         _getSubtitle(),
                         style: TextStyle(
                           fontSize: 12,
-                          color: isCompleted ? AppTheme.tealPrimary : AppTheme.textMuted,
+                          color: isCompleted ? colorScheme.primary : colorScheme.onSurfaceVariant,
                         ),
                       ),
+
                       const Spacer(),
                       
                       // Play button (miniature) if not completed/active
@@ -481,14 +553,16 @@ class _WorkoutCard extends StatelessWidget {
                           width: 28,
                           height: 28,
                           decoration: BoxDecoration(
-                            color: AppTheme.tealPrimary,
+                            color: colorScheme.primary,
                             shape: BoxShape.circle,
                           ),
+
                           child: Icon(
                             Icons.play_arrow,
-                            color: AppTheme.darkBackground,
+                            color: colorScheme.onPrimary,
                             size: 16,
                           ),
+
                         ),
                     ],
                   ),
@@ -509,8 +583,15 @@ class _WorkoutCard extends StatelessWidget {
       [const Color(0xFFE91E63), const Color(0xFF9C27B0)], // Pink
       [const Color(0xFF00D9B8), const Color(0xFF00A88A)], // Teal
     ];
+    
+    if (workout.isRestDay) {
+      return [const Color(0xFF56CCF2), const Color(0xFF2F80ED)]; // Light Blue for Rest
+    }
+
+    
     return gradients[index % gradients.length];
   }
+
   
   IconData _getWorkoutIcon(ClockType type) {
     return switch (type) {
@@ -523,7 +604,9 @@ class _WorkoutCard extends StatelessWidget {
   
   String _getSubtitle() {
     if (isCompleted) return 'Completed';
+    if (workout.isRestDay) return 'Rest & Recovery';
     return switch (workout.clockType) {
+
       ClockType.none => 'Freestyle',
       ClockType.stopwatch => 'Stopwatch',
       ClockType.timer => workout.timerDurationSeconds != null

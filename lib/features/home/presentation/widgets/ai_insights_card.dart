@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Add riverpod import
-import 'package:momentum/app/theme/app_theme.dart';
 import 'package:momentum/core/providers/ai_providers.dart';
 import 'package:momentum/features/home/presentation/widgets/themed_card.dart';
 import 'package:shimmer/shimmer.dart';
@@ -11,6 +10,7 @@ class AIInsightsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final insightAsync = ref.watch(dailyInsightProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return ThemedCard(
       child: Stack(
@@ -27,12 +27,12 @@ class AIInsightsCard extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppTheme.tealPrimary.withValues(alpha: 0.2),
+                        color: colorScheme.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.auto_awesome,
-                        color: AppTheme.tealPrimary,
+                        color: colorScheme.primary,
                         size: 20,
                       ),
                     ),
@@ -43,13 +43,13 @@ class AIInsightsCard extends ConsumerWidget {
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
-                        color: AppTheme.tealPrimary,
+                        color: colorScheme.primary,
                       ),
                     ),
                     const Spacer(),
                     // Refresh Button (re-triggers provider)
                     IconButton(
-                      icon: Icon(Icons.refresh, color: AppTheme.textMuted, size: 20),
+                      icon: Icon(Icons.refresh, color: colorScheme.onSurfaceVariant, size: 20),
                       onPressed: () {
                          // ignore: unused_result
                          ref.refresh(dailyInsightProvider);
@@ -65,23 +65,23 @@ class AIInsightsCard extends ConsumerWidget {
                 insightAsync.when(
                   data: (insight) => Text(
                     insight,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       height: 1.5,
                       fontWeight: FontWeight.w500,
-                      color: AppTheme.textPrimary,
+                      color: colorScheme.onSurface,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
-                  loading: () => _buildLoadingShimmer(),
+                  loading: () => _buildLoadingShimmer(context),
                   error: (err, stack) => Row(
                     children: [
-                      Icon(Icons.error_outline, color: AppTheme.error, size: 20),
+                      Icon(Icons.error_outline, color: colorScheme.error, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           "Couldn't generate insight. Check connection.",
-                          style: TextStyle(color: AppTheme.error, fontSize: 14),
+                          style: TextStyle(color: colorScheme.error, fontSize: 14),
                         ),
                       ),
                     ],
@@ -95,10 +95,11 @@ class AIInsightsCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildLoadingShimmer() {
+  Widget _buildLoadingShimmer(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Shimmer.fromColors(
-      baseColor: AppTheme.darkSurface,
-      highlightColor: AppTheme.darkSurface.withValues(alpha: 0.5), // Lighter highlight
+      baseColor: colorScheme.surfaceContainer,
+      highlightColor: colorScheme.surfaceContainer.withValues(alpha: 0.5), // Lighter highlight
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

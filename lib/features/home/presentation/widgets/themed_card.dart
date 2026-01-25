@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/services/settings_service.dart';
-import 'package:momentum/app/theme/app_theme.dart';
 
 class ThemedCard extends ConsumerWidget {
   final Widget child;
@@ -30,6 +29,8 @@ class ThemedCard extends ConsumerWidget {
   }
 
   Widget _buildLiquidGlass(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Container(
       margin: margin,
       child: ClipRRect(
@@ -47,20 +48,20 @@ class ThemedCard extends ConsumerWidget {
                  decoration: BoxDecoration(
                    borderRadius: BorderRadius.circular(24),
                    border: Border.all(
-                     color: Colors.white.withValues(alpha: 0.15), 
+                     color: colorScheme.onSurface.withValues(alpha: 0.15), 
                      width: 1.5
                    ),
                    gradient: LinearGradient(
                      begin: Alignment.topLeft,
                      end: Alignment.bottomRight,
                      colors: [
-                       AppTheme.darkSurfaceContainer.withValues(alpha: 0.7),
-                       AppTheme.darkSurfaceContainer.withValues(alpha: 0.3),
+                       colorScheme.surfaceContainer.withValues(alpha: 0.7),
+                       colorScheme.surfaceContainer.withValues(alpha: 0.3),
                      ],
                    ),
                    boxShadow: [
                      BoxShadow(
-                       color: AppTheme.tealPrimary.withValues(alpha: 0.05),
+                       color: colorScheme.primary.withValues(alpha: 0.05),
                        blurRadius: 20,
                        offset: const Offset(0, 8),
                      ),

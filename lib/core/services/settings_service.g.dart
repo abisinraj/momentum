@@ -57,6 +57,23 @@ final unsplashApiKeyProvider = AutoDisposeFutureProvider<String?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef UnsplashApiKeyRef = AutoDisposeFutureProviderRef<String?>;
+String _$geminiApiKeyHash() => r'8a984ce5e87b011a33d4d4769b88a594397ed8ef';
+
+/// See also [geminiApiKey].
+@ProviderFor(geminiApiKey)
+final geminiApiKeyProvider = AutoDisposeFutureProvider<String?>.internal(
+  geminiApiKey,
+  name: r'geminiApiKeyProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$geminiApiKeyHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GeminiApiKeyRef = AutoDisposeFutureProviderRef<String?>;
 String _$restTimerHash() => r'79a520d0b7f9e619498a5447e78e56df345832b8';
 
 /// See also [restTimer].

@@ -133,6 +133,12 @@ Future<String?> unsplashApiKey(Ref ref) async {
 }
 
 @riverpod
+Future<String?> geminiApiKey(Ref ref) async {
+  return ref.watch(settingsServiceProvider).getGeminiKey();
+}
+
+
+@riverpod
 Future<int> restTimer(Ref ref) async {
   return ref.watch(settingsServiceProvider).getRestTimer();
 }

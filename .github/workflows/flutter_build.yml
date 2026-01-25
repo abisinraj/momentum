@@ -40,6 +40,8 @@ jobs:
         run: flutter clean
 
       - name: Build APK
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=512m"
         run: flutter build apk --release -v
         
       - name: Upload APK

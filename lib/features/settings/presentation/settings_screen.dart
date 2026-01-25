@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
-import '../../../app/theme/app_theme.dart';
 import '../../../core/services/settings_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -28,13 +27,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showWidgetThemeSelector(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.darkSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Consumer(
         builder: (context, ref, _) {
            final currentThemeAsync = ref.watch(widgetThemeProvider);
+           final colorScheme = Theme.of(context).colorScheme;
            
            return Container(
              padding: const EdgeInsets.all(24),
@@ -42,7 +42,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                mainAxisSize: MainAxisSize.min,
                crossAxisAlignment: CrossAxisAlignment.start,
                children: [
-                 Text('Widget Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+                 Text('Widget Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: colorScheme.onSurface)),
                  const SizedBox(height: 16),
                  currentThemeAsync.when(
                    data: (current) => Column(
@@ -53,7 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      ],
                    ),
                    loading: () => const Center(child: CircularProgressIndicator()),
-                   error: (_, _) => const Text('Error loading settings', style: TextStyle(color: Colors.red)),
+                   error: (_, _) => Text('Error loading settings', style: TextStyle(color: colorScheme.error)),
                  ),
                  const SizedBox(height: 16),
                ],
@@ -67,13 +67,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showAppThemeSelector(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.darkSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Consumer(
         builder: (context, ref, _) {
            final currentThemeAsync = ref.watch(appThemeModeProvider);
+           final colorScheme = Theme.of(context).colorScheme;
            
            return Container(
              padding: const EdgeInsets.all(24),
@@ -81,7 +82,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                mainAxisSize: MainAxisSize.min,
                crossAxisAlignment: CrossAxisAlignment.start,
                children: [
-                 Text('App Interface Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+                 Text('App Interface Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: colorScheme.onSurface)),
                  const SizedBox(height: 16),
                  currentThemeAsync.when(
                    data: (current) => Column(
@@ -96,7 +97,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      ],
                    ),
                    loading: () => const Center(child: CircularProgressIndicator()),
-                   error: (_, _) => const Text('Error loading settings', style: TextStyle(color: Colors.red)),
+                   error: (_, _) => Text('Error loading settings', style: TextStyle(color: colorScheme.error)),
                  ),
                  const SizedBox(height: 16),
                ],
@@ -108,7 +109,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildThemeOption(BuildContext context, WidgetRef ref, String label, String value, String current, {bool isAppTheme = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = value == current;
+    
     return InkWell(
       onTap: () async {
         Navigator.pop(context);
@@ -122,10 +125,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.tealPrimary.withValues(alpha: 0.1) : AppTheme.darkSurfaceContainer,
+          color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppTheme.tealPrimary : Colors.transparent, 
+            color: isSelected ? colorScheme.primary : Colors.transparent, 
             width: 2
           ),
         ),
@@ -133,7 +136,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             Icon(
               value == 'liquid_glass' ? Icons.water_drop_outlined : Icons.dashboard_outlined,
-              color: isSelected ? AppTheme.tealPrimary : AppTheme.textSecondary,
+              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 16),
             Text(
@@ -141,12 +144,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? AppTheme.tealPrimary : AppTheme.textPrimary,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
               ),
             ),
             const Spacer(),
             if (isSelected) 
-              Icon(Icons.check_circle, color: AppTheme.tealPrimary),
+              Icon(Icons.check_circle, color: colorScheme.primary),
           ],
         ),
       ),
@@ -155,8 +158,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('Settings'),
         leading: IconButton(
@@ -169,33 +175,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   _buildSectionHeader('General'),
+                   _buildSectionHeader(context, 'General'),
                    const SizedBox(height: 16),
                    
                    _buildSettingsTile(
+                     context: context,
                      icon: Icons.tune,
-                     iconColor: AppTheme.tealPrimary,
+                     iconColor: colorScheme.primary,
                      title: 'Workout Settings',
                      subtitle: 'Timer, units, and preferences',
                      onTap: () => context.push(AppRoute.workoutPreferences.path),
                    ),
                    const SizedBox(height: 12),
                    _buildSettingsTile(
+                     context: context,
                      icon: Icons.widgets_outlined,
-                     iconColor: Colors.blueAccent,
+                     iconColor: colorScheme.tertiary,
                      title: 'Widget Theme',
                      subtitle: 'Liquid Glass & More',
                      onTap: () => _showWidgetThemeSelector(context),
                    ),
                    const SizedBox(height: 12),
                    _buildSettingsTile(
+                     context: context,
                      icon: Icons.notifications_outlined,
-                     iconColor: AppTheme.yellowAccent,
+                     iconColor: colorScheme.secondary,
                      title: 'Notifications',
                      subtitle: 'On',
                      onTap: () {
                        ScaffoldMessenger.of(context).showSnackBar(
-                         const SnackBar(content: Text('Notification settings coming soon')),
+                         SnackBar(content: Text('Notification settings coming soon', style: TextStyle(color: colorScheme.onSurface))),
                        );
                      },
                    ),
@@ -203,8 +212,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    // Duplicate "Home Screen Widget" removed from here
                    const SizedBox(height: 12),
                     _buildSettingsTile(
+                      context: context,
                       icon: Icons.palette_outlined,
-                      iconColor: Colors.purpleAccent,
+                      iconColor: colorScheme.primary,
                       title: 'Appearance',
                       subtitle: 'App Theme',
                       onTap: () => _showAppThemeSelector(context),
@@ -214,8 +224,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                    const SizedBox(height: 12),
                    _buildSettingsTile(
+                     context: context,
                      icon: Icons.api_rounded,
-                     iconColor: Colors.orangeAccent,
+                     iconColor: colorScheme.error,
                      title: 'API Settings',
                      subtitle: 'Gemini, Pexels, OpenAI',
                      onTap: () => context.push(AppRoute.apiSettings.path),
@@ -228,17 +239,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
 
   Widget _buildSettingsTile({
+    required BuildContext context,
     required IconData icon,
     required Color iconColor,
     required String title,
     String? subtitle,
     VoidCallback? onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
       ),
       child: ListTile(
         leading: Container(
@@ -251,31 +264,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         title: Text(
           title,
-          style: const TextStyle(
-            color: AppTheme.textPrimary,
+          style: TextStyle(
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
         subtitle: subtitle != null ? Text(
           subtitle,
-          style: const TextStyle(
-            color: AppTheme.textSecondary,
+          style: TextStyle(
+            color: colorScheme.onSurfaceVariant,
             fontSize: 12,
           ),
         ) : null,
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textSecondary),
+        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: colorScheme.onSurfaceVariant),
         onTap: onTap,
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Text(
       title,
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: AppTheme.tealPrimary,
+        color: Theme.of(context).colorScheme.primary,
       ),
     );
   }

@@ -28,6 +28,29 @@ class ActiveSession {
   });
 }
 
+/// Helper method to log a rest day completion immediately
+Future<void> logRestDay(Ref ref, Workout workout) async {
+  final db = ref.read(appDatabaseProvider);
+  
+  // Start and immediately complete
+  final sessionId = await db.startSession(workout.id);
+  await db.completeSession(sessionId, 0); // 0 duration for rest days
+  
+  // Trigger standard invalidations
+  ref.invalidate(todayCompletedWorkoutIdsProvider);
+  ref.invalidate(nextWorkoutProvider);
+  ref.invalidate(weeklyStatsProvider);
+  ref.invalidate(weeklyInsightProvider);
+  ref.invalidate(sessionHistoryProvider);
+  
+  // Dashboard & AI
+  ref.invalidate(dailyInsightProvider); 
+  
+  // Sync widgets
+  final _ = ref.refresh(widgetSyncProvider);
+}
+
+
 /// Notifier for managing active workout session
 @riverpod
 class ActiveWorkoutSession extends _$ActiveWorkoutSession {
@@ -109,7 +132,9 @@ class WorkoutManager extends _$WorkoutManager {
   Future<void> addWorkout({
     required String name,
     required String shortCode,
+    bool isRestDay = false,
     ClockType clockType = ClockType.none,
+
     Duration? timerDuration,
     int? orderIndex, // If provided, use this; otherwise append at end
   }) async {
@@ -120,8 +145,10 @@ class WorkoutManager extends _$WorkoutManager {
     
     await db.addWorkout(WorkoutsCompanion.insert(
       name: name,
-      shortCode: shortCode,
+      shortCode: isRestDay ? 'R' : shortCode,
+      isRestDay: Value(isRestDay),
       orderIndex: index,
+
       clockType: Value(clockType),
       timerDurationSeconds: timerDuration != null 
           ? Value(timerDuration.inSeconds)

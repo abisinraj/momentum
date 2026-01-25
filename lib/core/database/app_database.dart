@@ -33,7 +33,9 @@ class Workouts extends Table {
   TextColumn get description => text().nullable()();
   TextColumn get thumbnailUrl => text().nullable()(); // URL or asset path
   IntColumn get orderIndex => integer()(); // Position in cycle
+  BoolColumn get isRestDay => boolean().withDefault(const Constant(false))();
   IntColumn get clockType => intEnum<ClockType>().withDefault(const Constant(0))();
+
   IntColumn get timerDurationSeconds => integer().nullable()(); // For timer type
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -87,7 +89,8 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
+
   
   @override
   MigrationStrategy get migration {
@@ -133,7 +136,13 @@ class AppDatabase extends _$AppDatabase {
           // Add weightKg to session_exercises
           await m.addColumn(sessionExercises, sessionExercises.weightKg);
         }
+        if (from < 8) {
+          // Schema v8 changes:
+          // Add isRestDay to workouts
+          await m.addColumn(workouts, workouts.isRestDay);
+        }
       },
+
     );
   }
   

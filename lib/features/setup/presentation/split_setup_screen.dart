@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/user_providers.dart';
 
 /// Screen to select number of days in the split
@@ -18,8 +17,10 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -38,7 +39,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -46,7 +47,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                           'How many days a week do you plan to workout? We\'ll help you organize your routine.',
                           style: TextStyle(
                             fontSize: 16,
-                            color: AppTheme.textSecondary,
+                            color: colorScheme.onSurfaceVariant,
                             height: 1.5,
                           ),
                         ),
@@ -63,7 +64,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                                 style: TextStyle(
                                   fontSize: 120,
                                   fontWeight: FontWeight.bold,
-                                  color: AppTheme.tealPrimary,
+                                  color: colorScheme.primary,
                                   height: 1.0,
                                 ),
                               ),
@@ -72,7 +73,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppTheme.tealPrimary,
+                                  color: colorScheme.primary,
                                   letterSpacing: 2.0,
                                 ),
                               ),
@@ -84,11 +85,11 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                         // Slider
                         SliderTheme(
                           data: SliderTheme.of(context).copyWith(
-                            activeTrackColor: AppTheme.tealPrimary,
-                            inactiveTrackColor: AppTheme.darkSurfaceContainerHighest,
-                            thumbColor: AppTheme.darkBackground,
-                            overlayColor: AppTheme.tealPrimary.withValues(alpha: 0.2),
-                            thumbShape: _CustomThumbShape(),
+                            activeTrackColor: colorScheme.primary,
+                            inactiveTrackColor: colorScheme.surfaceContainerHighest,
+                            thumbColor: colorScheme.surface,
+                            overlayColor: colorScheme.primary.withValues(alpha: 0.2),
+                            thumbShape: _CustomThumbShape(colorScheme),
                             trackHeight: 8,
                           ),
                           child: Slider(
@@ -118,8 +119,8 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                               }
                             },
                             style: FilledButton.styleFrom(
-                              backgroundColor: AppTheme.tealPrimary,
-                              foregroundColor: AppTheme.darkBackground,
+                              backgroundColor: colorScheme.primary,
+                              foregroundColor: colorScheme.onPrimary,
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -127,16 +128,16 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
+                              children: const [
+                                Text(
                                   'Start Building',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.arrow_forward),
+                                SizedBox(width: 8),
+                                Icon(Icons.arrow_forward),
                               ],
                             ),
                           ),
@@ -155,6 +156,9 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
 }
 
 class _CustomThumbShape extends SliderComponentShape {
+  final ColorScheme colorScheme;
+  _CustomThumbShape(this.colorScheme);
+
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return const Size(32, 32);
@@ -179,14 +183,14 @@ class _CustomThumbShape extends SliderComponentShape {
     
     // Outer ring
     final paintOuter = Paint()
-      ..color = AppTheme.tealPrimary
+      ..color = colorScheme.primary
       ..style = PaintingStyle.fill;
     
     canvas.drawCircle(center, 16, paintOuter);
     
     // Inner circle
     final paintInner = Paint()
-      ..color = AppTheme.darkBackground
+      ..color = colorScheme.surface
       ..style = PaintingStyle.fill;
       
     canvas.drawCircle(center, 8, paintInner);

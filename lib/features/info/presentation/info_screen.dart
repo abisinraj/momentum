@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
 
-import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/dashboard_providers.dart';
@@ -18,9 +17,11 @@ class InfoScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final activityAsync = ref.watch(activityGridProvider(365));
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -33,10 +34,9 @@ class InfoScreen extends ConsumerWidget {
                 children: [
                   Text(
                     'Account & Settings',
-                    style: TextStyle(
-                      fontSize: 24,
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   GestureDetector(
@@ -45,10 +45,10 @@ class InfoScreen extends ConsumerWidget {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: AppTheme.darkSurfaceContainer,
+                        color: colorScheme.surfaceContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(Icons.settings_outlined, color: AppTheme.tealPrimary, size: 20),
+                      child: Icon(Icons.settings_outlined, color: colorScheme.primary, size: 20),
                     ),
                   ),
                 ],
@@ -59,8 +59,8 @@ class InfoScreen extends ConsumerWidget {
               // Profile section
               switch (userAsync) {
                 AsyncData(:final value) => _buildProfileSection(context, value, activityAsync),
-                AsyncError(:final error) => Text('Error: $error', style: TextStyle(color: AppTheme.error)),
-                _ => Center(child: CircularProgressIndicator(color: AppTheme.tealPrimary)),
+                AsyncError(:final error) => Text('Error: $error', style: TextStyle(color: colorScheme.error)),
+                _ => Center(child: CircularProgressIndicator(color: colorScheme.primary)),
               },
             ],
           ),
@@ -70,6 +70,9 @@ class InfoScreen extends ConsumerWidget {
   }
   
   Widget _buildProfileSection(BuildContext context, User? user, AsyncValue<Map<DateTime, String>> activityAsync) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     final activeDays = switch (activityAsync) {
       AsyncData(:final value) => value.length,
       _ => 0,
@@ -96,7 +99,7 @@ class InfoScreen extends ConsumerWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppTheme.tealPrimary, AppTheme.tealDark],
+                        colors: [colorScheme.primary, colorScheme.primaryContainer],
                       ),
                     ),
                     child: Center(
@@ -105,7 +108,7 @@ class InfoScreen extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.darkBackground,
+                          color: colorScheme.onPrimary,
                         ),
                       ),
                     ),
@@ -117,11 +120,11 @@ class InfoScreen extends ConsumerWidget {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: AppTheme.tealPrimary,
+                        color: colorScheme.primary,
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.darkBackground, width: 3),
+                        border: Border.all(color: colorScheme.surface, width: 3),
                       ),
-                      child: Icon(Icons.edit, color: AppTheme.darkBackground, size: 14),
+                      child: Icon(Icons.edit, color: colorScheme.onPrimary, size: 14),
                     ),
                   ),
                 ],
@@ -130,10 +133,9 @@ class InfoScreen extends ConsumerWidget {
               // Name
               Text(
                 user?.name ?? 'Athlete',
-                style: TextStyle(
-                  fontSize: 24,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
@@ -144,7 +146,7 @@ class InfoScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.tealPrimary.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -152,7 +154,7 @@ class InfoScreen extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.tealPrimary,
+                        color: colorScheme.primary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -160,14 +162,14 @@ class InfoScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Text(
                     '|',
-                    style: TextStyle(color: AppTheme.textMuted),
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Joined $joinYear',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppTheme.textMuted,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -184,11 +186,11 @@ class InfoScreen extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatColumn('$activeDays', 'WORKOUTS'),
-              _buildDivider(),
-              _buildStatColumn('${(activeDays * 0.75).toInt()}h', 'ACTIVE'),
-              _buildDivider(),
-              _buildStatColumn('${activeDays * 85}', 'CALORIES'),
+              _buildStatColumn(context, '$activeDays', 'WORKOUTS'),
+              _buildDivider(context),
+              _buildStatColumn(context, '${(activeDays * 0.75).toInt()}h', 'ACTIVE'),
+              _buildDivider(context),
+              _buildStatColumn(context, '${activeDays * 85}', 'CALORIES'),
             ],
           ),
         ),
@@ -213,14 +215,14 @@ class InfoScreen extends ConsumerWidget {
         ),
         
         // Data Management section
-        _buildSectionLabel('DATA MANAGEMENT'),
+        _buildSectionLabel(context, 'DATA MANAGEMENT'),
         const SizedBox(height: 12),
         
         // Google Drive Sync card
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.darkSurfaceContainer,
+            color: colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -232,7 +234,7 @@ class InfoScreen extends ConsumerWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4285F4).withValues(alpha: 0.1),
+                      color: colorScheme.tertiary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Image.network(
@@ -241,7 +243,7 @@ class InfoScreen extends ConsumerWidget {
                       height: 24,
                       errorBuilder: (_, _, _) => Icon(
                         Icons.cloud_outlined,
-                        color: const Color(0xFF4285F4),
+                        color: colorScheme.tertiary,
                       ),
                     ),
                   ),
@@ -255,7 +257,7 @@ class InfoScreen extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                         Row(
@@ -263,60 +265,60 @@ class InfoScreen extends ConsumerWidget {
                             Container(
                               width: 6,
                               height: 6,
-                              decoration: BoxDecoration(
-                                color: AppTheme.success,
+                              decoration: const BoxDecoration(
+                                color: Colors.green, // Keep semantic green for "Success/Secure"
                                 shape: BoxShape.circle,
                               ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              'Data secure',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.green,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Data secure',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppTheme.success,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Last backup: Today, 08:00 AM',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Google Drive backup coming soon!'),
-                          backgroundColor: AppTheme.darkSurfaceContainerHigh,
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                    icon: Icon(Icons.cloud_upload_outlined, size: 18),
-                    label: const Text('Manual Backup'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.tealPrimary,
-                      side: BorderSide(color: AppTheme.tealPrimary.withValues(alpha: 0.5)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Last backup: Today, 08:00 AM',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Google Drive backup coming soon!'),
+                        backgroundColor: colorScheme.surfaceContainerHighest,
                       ),
+                    );
+                  },
+                  icon: const Icon(Icons.cloud_upload_outlined, size: 18),
+                  label: const Text('Manual Backup'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colorScheme.primary,
+                    side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.5)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ),
         
         const SizedBox(height: 32),
@@ -328,11 +330,11 @@ class InfoScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildFooterLink('Privacy Policy'),
-                  _buildFooterDot(),
-                  _buildFooterLink('Terms of Service'),
-                  _buildFooterDot(),
-                  _buildFooterLink('Support'),
+                  _buildFooterLink(context, 'Privacy Policy'),
+                  _buildFooterDot(context),
+                  _buildFooterLink(context, 'Terms of Service'),
+                  _buildFooterDot(context),
+                  _buildFooterLink(context, 'Support'),
                 ],
               ),
               const SizedBox(height: 8),
@@ -340,7 +342,7 @@ class InfoScreen extends ConsumerWidget {
                 'v2.4.0 (Build 002)',
                 style: TextStyle(
                   fontSize: 11,
-                  color: AppTheme.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -352,27 +354,25 @@ class InfoScreen extends ConsumerWidget {
     );
   }
   
-
-  
-  Widget _buildFooterLink(String text) {
+  Widget _buildFooterLink(BuildContext context, String text) {
     return GestureDetector(
       onTap: () {},
       child: Text(
         text,
         style: TextStyle(
           fontSize: 12,
-          color: AppTheme.textSecondary,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
   }
   
-  Widget _buildFooterDot() {
+  Widget _buildFooterDot(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Text(
         '•',
-        style: TextStyle(color: AppTheme.textMuted),
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }
@@ -385,19 +385,20 @@ class InfoScreen extends ConsumerWidget {
     return 'MOMENTUM MEMBER';
   }
 
-  Widget _buildSectionLabel(String text) {
+  Widget _buildSectionLabel(BuildContext context, String text) {
     return Text(
       text,
       style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        color: AppTheme.textMuted,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         letterSpacing: 1.0,
       ),
     );
   }
 
-  Widget _buildStatColumn(String value, String label) {
+  Widget _buildStatColumn(BuildContext context, String value, String label) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Text(
@@ -405,7 +406,7 @@ class InfoScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 4),
@@ -414,7 +415,7 @@ class InfoScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w500,
-            color: AppTheme.textMuted,
+            color: theme.colorScheme.onSurfaceVariant,
             letterSpacing: 0.5,
           ),
         ),
@@ -422,11 +423,11 @@ class InfoScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context) {
     return Container(
       width: 1,
       height: 40,
-      color: AppTheme.darkBorder,
+      color: Theme.of(context).colorScheme.outlineVariant,
     );
   }
 }

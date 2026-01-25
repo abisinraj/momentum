@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/app_theme.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
@@ -53,6 +52,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final userAsync = ref.watch(currentUserProvider);
     final activeSession = ref.watch(activeWorkoutSessionProvider);
     final todayCompletedAsync = ref.watch(todayCompletedWorkoutIdsProvider);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     // If there's an active session, navigate to it
     // REMOVED: User prefers manual control
@@ -80,6 +81,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     };
     
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
@@ -110,7 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 32),
               
               // === DASHBOARD 2.0 ===
-              _buildSectionHeader("ANALYTICS"),
+              _buildSectionHeader(context, "ANALYTICS"),
               const SizedBox(height: 16),
               
               // 1. Recovery Score
@@ -122,15 +124,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 16),
               
               // 3. Consistency Grid
-
-              
               // 4. Consistency Grid
               _buildConsistencyGrid(ref),
               
               const SizedBox(height: 16),
               
               // Bottom stats row (Existing - maybe redundant now? Let's keep for day-specific stats)
-              _buildSectionHeader("THIS WEEK"),
+              _buildSectionHeader(context, "THIS WEEK"),
               const SizedBox(height: 16),
               _buildStatsRow(context, ref),
               
@@ -143,6 +143,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   
   Widget _buildHeader(BuildContext context, String userName) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -154,17 +156,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: AppTheme.textMuted,
+                color: colorScheme.onSurfaceVariant,
                 letterSpacing: 1.5,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               userName,
-              style: const TextStyle(
-                fontSize: 20,
+              style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+                color: colorScheme.onSurface,
               ),
             ),
           ],
@@ -177,6 +178,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (workout == null) {
       return _buildEmptyState(context);
     }
+    
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     // Check if this workout was completed today
     final isCompletedToday = todayCompleted.contains(workout.id);
@@ -201,7 +205,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       width: double.infinity,
       constraints: BoxConstraints(minHeight: responsiveMinHeight),
       decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(32),
         image: imageProvider != null ? DecorationImage(
           image: imageProvider,
@@ -266,7 +270,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         border: Border.all(
                           color: isCompletedToday 
                               ? Colors.green.withValues(alpha: 0.9)
-                              : AppTheme.tealPrimary.withValues(alpha: 0.5),
+                              : colorScheme.primary.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Row(
@@ -275,7 +279,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Icon(
                             isCompletedToday ? Icons.check_circle : Icons.bolt,
                             size: 16,
-                            color: isCompletedToday ? Colors.white : AppTheme.tealPrimary,
+                            color: isCompletedToday ? Colors.white : colorScheme.primary,
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -283,7 +287,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: isCompletedToday ? Colors.white : AppTheme.tealPrimary,
+                              color: isCompletedToday ? Colors.white : colorScheme.primary,
                               letterSpacing: 1.0,
                             ),
                           ),
@@ -308,7 +312,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     Icon(
                       _getWorkoutIcon(workout.clockType),
-                      color: AppTheme.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                       size: 16,
                     ),
                     const SizedBox(width: 8),
@@ -316,7 +320,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       _getWorkoutDescription(workout),
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppTheme.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -326,7 +330,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 24),
                 
                 // Progress Insight (Semi-transparent to blend)
-                _buildProgressInsight(ref, workout),
+                _buildProgressInsight(context, ref, workout),
                 
                 const SizedBox(height: 24),
                 
@@ -365,6 +369,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   
   Widget _buildActionButtons(BuildContext context, WidgetRef ref, Workout workout, ActiveSession? activeSession, bool isCompletedToday) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     if (activeSession != null && activeSession.workoutId == workout.id) {
       return Column(
         children: [
@@ -382,8 +389,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 }
               },
               style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.tealPrimary,
-                foregroundColor: AppTheme.darkBackground,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -415,16 +422,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                  final confirm = await showDialog<bool>(
                    context: context,
                    builder: (context) => AlertDialog(
-                     backgroundColor: AppTheme.darkSurface,
-                     title: const Text('Stop Workout?', style: TextStyle(color: Colors.white)),
-                     content: const Text('This will finish the current session.', style: TextStyle(color: Colors.white70)),
+                     backgroundColor: colorScheme.surfaceContainer,
+                     title: Text('Stop Workout?', style: TextStyle(color: colorScheme.onSurface)),
+                     content: Text('This will finish the current session.', style: TextStyle(color: colorScheme.onSurfaceVariant)),
                      actions: [
                        TextButton(
                          onPressed: () => Navigator.pop(context, false),
                          child: const Text('Cancel'),
                        ),
                        FilledButton(
-                         style: FilledButton.styleFrom(backgroundColor: AppTheme.error),
+                         style: FilledButton.styleFrom(backgroundColor: colorScheme.error),
                          onPressed: () => Navigator.pop(context, true),
                          child: const Text('Stop'),
                        ),
@@ -437,7 +444,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                  }
               },
               style: TextButton.styleFrom(
-                foregroundColor: AppTheme.error,
+                foregroundColor: colorScheme.error,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: const Text('STOP WORKOUT'),
@@ -485,14 +492,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: FilledButton(
           onPressed: () => _onStartPressed(context, ref, workout),
           style: FilledButton.styleFrom(
-            backgroundColor: AppTheme.tealPrimary,
-            foregroundColor: AppTheme.darkBackground,
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
             padding: const EdgeInsets.symmetric(vertical: 20),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
             elevation: 4,
-            shadowColor: AppTheme.tealPrimary.withValues(alpha: 0.4),
+            shadowColor: colorScheme.primary.withValues(alpha: 0.4),
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -526,7 +533,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return clockDesc;
   }
   
-  Widget _buildProgressInsight(WidgetRef ref, Workout workout) {
+  Widget _buildProgressInsight(BuildContext context, WidgetRef ref, Workout workout) {
     final db = ref.watch(appDatabaseProvider);
     
     // Combined async operation to avoid nested FutureBuilders
@@ -572,6 +579,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         // First session case
         if (data['firstSession'] == true) {
           return _buildInsightCard(
+            context: context,
             icon: Icons.rocket_launch,
             title: 'First Session',
             subtitle: "Let's set your baseline!",
@@ -590,6 +598,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final insight = aiInsight ?? '$sessionCount sessions • avg $avgMinutes min';
         
         return _buildInsightCard(
+          context: context,
           icon: lastMinutes < avgMinutes ? Icons.trending_up : Icons.trending_flat,
           title: 'Last: $lastMinutes min',
           subtitle: insight,
@@ -600,17 +609,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   
   Widget _buildInsightCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
     bool? trend,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -619,13 +630,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 48,
             decoration: BoxDecoration(
               color: trend == true 
-                  ? AppTheme.tealPrimary.withValues(alpha: 0.15)
-                  : AppTheme.textMuted.withValues(alpha: 0.1),
+                  ? colorScheme.primary.withValues(alpha: 0.15)
+                  : colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              color: trend == true ? AppTheme.tealPrimary : AppTheme.textMuted,
+              color: trend == true ? colorScheme.primary : colorScheme.onSurfaceVariant,
               size: 24,
             ),
           ),
@@ -639,7 +650,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -647,7 +658,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   subtitle,
                   style: TextStyle(
                     fontSize: 13,
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -662,6 +673,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   
   Widget _buildStatsRow(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(weeklyStatsProvider);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     final stats = switch (statsAsync) {
       AsyncData(:final value) => value,
@@ -674,14 +687,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Expanded(
             child: _buildStatItem(
+              context: context,
               icon: Icons.local_fire_department_outlined,
               value: '$calories',
               label: 'KCAL BURNED',
@@ -690,10 +704,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Container(
             width: 1,
             height: 50,
-            color: AppTheme.darkBorder,
+            color: colorScheme.outline,
           ),
           Expanded(
             child: _buildStatItem(
+              context: context,
               icon: Icons.timer_outlined,
               value: '${durationSec ~/ 60}m',
               label: 'ACTIVE MIN',
@@ -705,20 +720,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   
   Widget _buildStatItem({
+    required BuildContext context,
     required IconData icon,
     required String value,
     required String label,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
-        Icon(icon, color: AppTheme.tealPrimary, size: 24),
+        Icon(icon, color: colorScheme.primary, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 4),
@@ -727,7 +744,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w500,
-            color: AppTheme.textMuted,
+            color: colorScheme.onSurfaceVariant,
             letterSpacing: 0.5,
           ),
         ),
@@ -736,12 +753,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   
   Widget _buildEmptyState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         Icon(
           Icons.fitness_center_outlined,
           size: 80,
-          color: AppTheme.textMuted,
+          color: colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 24),
         Text(
@@ -749,14 +767,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         Text(
           'Create your training split to start\nbuilding momentum',
           style: TextStyle(
             fontSize: 14,
-            color: AppTheme.textSecondary,
+            color: colorScheme.onSurfaceVariant,
           ),
           textAlign: TextAlign.center,
         ),
@@ -769,8 +787,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: const Icon(Icons.add),
           label: const Text('Create Your First Workout'),
           style: FilledButton.styleFrom(
-            backgroundColor: AppTheme.tealPrimary,
-            foregroundColor: AppTheme.darkBackground,
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
         ),
@@ -779,12 +797,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   
   Widget _buildErrorState(BuildContext context, String error) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         Icon(
           Icons.error_outline,
           size: 64,
-          color: AppTheme.error,
+          color: colorScheme.error,
         ),
         const SizedBox(height: 16),
         Text(
@@ -792,7 +811,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -800,7 +819,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           error,
           style: TextStyle(
             fontSize: 14,
-            color: AppTheme.textSecondary,
+            color: colorScheme.onSurfaceVariant,
           ),
           textAlign: TextAlign.center,
         ),
@@ -843,7 +862,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     };
   }
   
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4.0),
       child: Text(
@@ -852,7 +871,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           fontSize: 14,
           fontWeight: FontWeight.bold,
           letterSpacing: 2.0,
-          color: AppTheme.tealPrimary,
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
     );

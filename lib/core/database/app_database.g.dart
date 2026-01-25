@@ -631,6 +631,21 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isRestDayMeta = const VerificationMeta(
+    'isRestDay',
+  );
+  @override
+  late final GeneratedColumn<bool> isRestDay = GeneratedColumn<bool>(
+    'is_rest_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_rest_day" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   late final GeneratedColumnWithTypeConverter<ClockType, int> clockType =
       GeneratedColumn<int>(
@@ -671,6 +686,7 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
     description,
     thumbnailUrl,
     orderIndex,
+    isRestDay,
     clockType,
     timerDurationSeconds,
     createdAt,
@@ -732,6 +748,12 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
     } else if (isInserting) {
       context.missing(_orderIndexMeta);
     }
+    if (data.containsKey('is_rest_day')) {
+      context.handle(
+        _isRestDayMeta,
+        isRestDay.isAcceptableOrUnknown(data['is_rest_day']!, _isRestDayMeta),
+      );
+    }
     if (data.containsKey('timer_duration_seconds')) {
       context.handle(
         _timerDurationSecondsMeta,
@@ -780,6 +802,10 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
         DriftSqlType.int,
         data['${effectivePrefix}order_index'],
       )!,
+      isRestDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_rest_day'],
+      )!,
       clockType: $WorkoutsTable.$converterclockType.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -813,6 +839,7 @@ class Workout extends DataClass implements Insertable<Workout> {
   final String? description;
   final String? thumbnailUrl;
   final int orderIndex;
+  final bool isRestDay;
   final ClockType clockType;
   final int? timerDurationSeconds;
   final DateTime createdAt;
@@ -823,6 +850,7 @@ class Workout extends DataClass implements Insertable<Workout> {
     this.description,
     this.thumbnailUrl,
     required this.orderIndex,
+    required this.isRestDay,
     required this.clockType,
     this.timerDurationSeconds,
     required this.createdAt,
@@ -840,6 +868,7 @@ class Workout extends DataClass implements Insertable<Workout> {
       map['thumbnail_url'] = Variable<String>(thumbnailUrl);
     }
     map['order_index'] = Variable<int>(orderIndex);
+    map['is_rest_day'] = Variable<bool>(isRestDay);
     {
       map['clock_type'] = Variable<int>(
         $WorkoutsTable.$converterclockType.toSql(clockType),
@@ -864,6 +893,7 @@ class Workout extends DataClass implements Insertable<Workout> {
           ? const Value.absent()
           : Value(thumbnailUrl),
       orderIndex: Value(orderIndex),
+      isRestDay: Value(isRestDay),
       clockType: Value(clockType),
       timerDurationSeconds: timerDurationSeconds == null && nullToAbsent
           ? const Value.absent()
@@ -884,6 +914,7 @@ class Workout extends DataClass implements Insertable<Workout> {
       description: serializer.fromJson<String?>(json['description']),
       thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
       orderIndex: serializer.fromJson<int>(json['orderIndex']),
+      isRestDay: serializer.fromJson<bool>(json['isRestDay']),
       clockType: $WorkoutsTable.$converterclockType.fromJson(
         serializer.fromJson<int>(json['clockType']),
       ),
@@ -903,6 +934,7 @@ class Workout extends DataClass implements Insertable<Workout> {
       'description': serializer.toJson<String?>(description),
       'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
       'orderIndex': serializer.toJson<int>(orderIndex),
+      'isRestDay': serializer.toJson<bool>(isRestDay),
       'clockType': serializer.toJson<int>(
         $WorkoutsTable.$converterclockType.toJson(clockType),
       ),
@@ -918,6 +950,7 @@ class Workout extends DataClass implements Insertable<Workout> {
     Value<String?> description = const Value.absent(),
     Value<String?> thumbnailUrl = const Value.absent(),
     int? orderIndex,
+    bool? isRestDay,
     ClockType? clockType,
     Value<int?> timerDurationSeconds = const Value.absent(),
     DateTime? createdAt,
@@ -928,6 +961,7 @@ class Workout extends DataClass implements Insertable<Workout> {
     description: description.present ? description.value : this.description,
     thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
     orderIndex: orderIndex ?? this.orderIndex,
+    isRestDay: isRestDay ?? this.isRestDay,
     clockType: clockType ?? this.clockType,
     timerDurationSeconds: timerDurationSeconds.present
         ? timerDurationSeconds.value
@@ -948,6 +982,7 @@ class Workout extends DataClass implements Insertable<Workout> {
       orderIndex: data.orderIndex.present
           ? data.orderIndex.value
           : this.orderIndex,
+      isRestDay: data.isRestDay.present ? data.isRestDay.value : this.isRestDay,
       clockType: data.clockType.present ? data.clockType.value : this.clockType,
       timerDurationSeconds: data.timerDurationSeconds.present
           ? data.timerDurationSeconds.value
@@ -965,6 +1000,7 @@ class Workout extends DataClass implements Insertable<Workout> {
           ..write('description: $description, ')
           ..write('thumbnailUrl: $thumbnailUrl, ')
           ..write('orderIndex: $orderIndex, ')
+          ..write('isRestDay: $isRestDay, ')
           ..write('clockType: $clockType, ')
           ..write('timerDurationSeconds: $timerDurationSeconds, ')
           ..write('createdAt: $createdAt')
@@ -980,6 +1016,7 @@ class Workout extends DataClass implements Insertable<Workout> {
     description,
     thumbnailUrl,
     orderIndex,
+    isRestDay,
     clockType,
     timerDurationSeconds,
     createdAt,
@@ -994,6 +1031,7 @@ class Workout extends DataClass implements Insertable<Workout> {
           other.description == this.description &&
           other.thumbnailUrl == this.thumbnailUrl &&
           other.orderIndex == this.orderIndex &&
+          other.isRestDay == this.isRestDay &&
           other.clockType == this.clockType &&
           other.timerDurationSeconds == this.timerDurationSeconds &&
           other.createdAt == this.createdAt);
@@ -1006,6 +1044,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
   final Value<String?> description;
   final Value<String?> thumbnailUrl;
   final Value<int> orderIndex;
+  final Value<bool> isRestDay;
   final Value<ClockType> clockType;
   final Value<int?> timerDurationSeconds;
   final Value<DateTime> createdAt;
@@ -1016,6 +1055,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     this.description = const Value.absent(),
     this.thumbnailUrl = const Value.absent(),
     this.orderIndex = const Value.absent(),
+    this.isRestDay = const Value.absent(),
     this.clockType = const Value.absent(),
     this.timerDurationSeconds = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1027,6 +1067,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     this.description = const Value.absent(),
     this.thumbnailUrl = const Value.absent(),
     required int orderIndex,
+    this.isRestDay = const Value.absent(),
     this.clockType = const Value.absent(),
     this.timerDurationSeconds = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1040,6 +1081,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     Expression<String>? description,
     Expression<String>? thumbnailUrl,
     Expression<int>? orderIndex,
+    Expression<bool>? isRestDay,
     Expression<int>? clockType,
     Expression<int>? timerDurationSeconds,
     Expression<DateTime>? createdAt,
@@ -1051,6 +1093,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
       if (description != null) 'description': description,
       if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
       if (orderIndex != null) 'order_index': orderIndex,
+      if (isRestDay != null) 'is_rest_day': isRestDay,
       if (clockType != null) 'clock_type': clockType,
       if (timerDurationSeconds != null)
         'timer_duration_seconds': timerDurationSeconds,
@@ -1065,6 +1108,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     Value<String?>? description,
     Value<String?>? thumbnailUrl,
     Value<int>? orderIndex,
+    Value<bool>? isRestDay,
     Value<ClockType>? clockType,
     Value<int?>? timerDurationSeconds,
     Value<DateTime>? createdAt,
@@ -1076,6 +1120,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
       description: description ?? this.description,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       orderIndex: orderIndex ?? this.orderIndex,
+      isRestDay: isRestDay ?? this.isRestDay,
       clockType: clockType ?? this.clockType,
       timerDurationSeconds: timerDurationSeconds ?? this.timerDurationSeconds,
       createdAt: createdAt ?? this.createdAt,
@@ -1103,6 +1148,9 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     if (orderIndex.present) {
       map['order_index'] = Variable<int>(orderIndex.value);
     }
+    if (isRestDay.present) {
+      map['is_rest_day'] = Variable<bool>(isRestDay.value);
+    }
     if (clockType.present) {
       map['clock_type'] = Variable<int>(
         $WorkoutsTable.$converterclockType.toSql(clockType.value),
@@ -1126,6 +1174,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
           ..write('description: $description, ')
           ..write('thumbnailUrl: $thumbnailUrl, ')
           ..write('orderIndex: $orderIndex, ')
+          ..write('isRestDay: $isRestDay, ')
           ..write('clockType: $clockType, ')
           ..write('timerDurationSeconds: $timerDurationSeconds, ')
           ..write('createdAt: $createdAt')
@@ -3246,6 +3295,7 @@ typedef $$WorkoutsTableCreateCompanionBuilder =
       Value<String?> description,
       Value<String?> thumbnailUrl,
       required int orderIndex,
+      Value<bool> isRestDay,
       Value<ClockType> clockType,
       Value<int?> timerDurationSeconds,
       Value<DateTime> createdAt,
@@ -3258,6 +3308,7 @@ typedef $$WorkoutsTableUpdateCompanionBuilder =
       Value<String?> description,
       Value<String?> thumbnailUrl,
       Value<int> orderIndex,
+      Value<bool> isRestDay,
       Value<ClockType> clockType,
       Value<int?> timerDurationSeconds,
       Value<DateTime> createdAt,
@@ -3341,6 +3392,11 @@ class $$WorkoutsTableFilterComposer
 
   ColumnFilters<int> get orderIndex => $composableBuilder(
     column: $table.orderIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isRestDay => $composableBuilder(
+    column: $table.isRestDay,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3450,6 +3506,11 @@ class $$WorkoutsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isRestDay => $composableBuilder(
+    column: $table.isRestDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get clockType => $composableBuilder(
     column: $table.clockType,
     builder: (column) => ColumnOrderings(column),
@@ -3498,6 +3559,9 @@ class $$WorkoutsTableAnnotationComposer
     column: $table.orderIndex,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isRestDay =>
+      $composableBuilder(column: $table.isRestDay, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<ClockType, int> get clockType =>
       $composableBuilder(column: $table.clockType, builder: (column) => column);
@@ -3595,6 +3659,7 @@ class $$WorkoutsTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> thumbnailUrl = const Value.absent(),
                 Value<int> orderIndex = const Value.absent(),
+                Value<bool> isRestDay = const Value.absent(),
                 Value<ClockType> clockType = const Value.absent(),
                 Value<int?> timerDurationSeconds = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -3605,6 +3670,7 @@ class $$WorkoutsTableTableManager
                 description: description,
                 thumbnailUrl: thumbnailUrl,
                 orderIndex: orderIndex,
+                isRestDay: isRestDay,
                 clockType: clockType,
                 timerDurationSeconds: timerDurationSeconds,
                 createdAt: createdAt,
@@ -3617,6 +3683,7 @@ class $$WorkoutsTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<String?> thumbnailUrl = const Value.absent(),
                 required int orderIndex,
+                Value<bool> isRestDay = const Value.absent(),
                 Value<ClockType> clockType = const Value.absent(),
                 Value<int?> timerDurationSeconds = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -3627,6 +3694,7 @@ class $$WorkoutsTableTableManager
                 description: description,
                 thumbnailUrl: thumbnailUrl,
                 orderIndex: orderIndex,
+                isRestDay: isRestDay,
                 clockType: clockType,
                 timerDurationSeconds: timerDurationSeconds,
                 createdAt: createdAt,

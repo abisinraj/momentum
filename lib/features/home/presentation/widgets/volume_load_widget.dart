@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:momentum/app/theme/app_theme.dart';
 import 'themed_card.dart';
 
 class VolumeLoadWidget extends StatelessWidget {
@@ -16,6 +15,7 @@ class VolumeLoadWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final diff = currentWeekVolume - lastWeekVolume;
     final isPositive = diff >= 0;
+    final colorScheme = Theme.of(context).colorScheme;
     
     return ThemedCard(
       padding: const EdgeInsets.all(20),
@@ -24,15 +24,15 @@ class VolumeLoadWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.monitor_weight_outlined, color: Theme.of(context).colorScheme.primary, size: 20),
+              Icon(Icons.monitor_weight_outlined, color: colorScheme.primary, size: 20),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'VOLUME LOAD',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
-                  color: AppTheme.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -44,10 +44,10 @@ class VolumeLoadWidget extends StatelessWidget {
             children: [
               Text(
                 _formatVolume(currentWeekVolume),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 8),
@@ -56,7 +56,7 @@ class VolumeLoadWidget extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ),
             ],
@@ -66,7 +66,7 @@ class VolumeLoadWidget extends StatelessWidget {
             children: [
               Icon(
                 isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                color: isPositive ? AppTheme.tealPrimary : Colors.orangeAccent,
+                color: isPositive ? colorScheme.primary : Colors.orangeAccent,
                 size: 14,
               ),
               const SizedBox(width: 4),
@@ -74,7 +74,7 @@ class VolumeLoadWidget extends StatelessWidget {
                 "${_formatVolume(diff.abs())} kg vs last week",
                 style: TextStyle(
                   fontSize: 12,
-                  color: isPositive ? AppTheme.tealPrimary : Colors.orangeAccent,
+                  color: isPositive ? colorScheme.primary : Colors.orangeAccent,
                 ),
               ),
             ],

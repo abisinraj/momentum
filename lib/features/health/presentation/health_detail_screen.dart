@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health/health.dart';
 import '../../../core/providers/health_connect_provider.dart';
+import '../../../core/services/settings_service.dart';
+
 
 /// Screen showing detailed health data from Health Connect.
 class HealthDetailScreen extends ConsumerWidget {
@@ -40,7 +42,7 @@ class HealthDetailScreen extends ConsumerWidget {
           ? _buildNotAvailable(context)
           : !healthState.hasPermissions
               ? _buildPermissionsRequired(context, ref)
-              : _buildHealthDetails(context, healthState),
+               : _buildHealthDetails(context, ref, healthState),
     );
   }
 
@@ -110,11 +112,15 @@ class HealthDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHealthDetails(BuildContext context, HealthState state) {
+  Widget _buildHealthDetails(BuildContext context, WidgetRef ref, HealthState state) {
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final weightUnitAsync = ref.watch(weightUnitProvider);
+    final weightUnit = weightUnitAsync.valueOrNull ?? 'kg';
 
     return ListView(
+
       padding: const EdgeInsets.all(16),
       children: [
         // Today's Summary
@@ -138,9 +144,10 @@ class HealthDetailScreen extends ConsumerWidget {
                 icon: Icons.favorite_rounded,
                 value: state.latestHeartRate?.toString() ?? '--',
                 label: 'Heart Rate (BPM)',
-                color: Colors.red,
+                color: colorScheme.error,
               ),
             ),
+
           ],
         ),
         const SizedBox(height: 12),
@@ -154,19 +161,25 @@ class HealthDetailScreen extends ConsumerWidget {
                     ? '${state.lastNightSleep!.inHours}h ${state.lastNightSleep!.inMinutes % 60}m'
                     : '--',
                 label: 'Last Night Sleep',
-                color: Colors.indigo,
+                color: colorScheme.secondary,
               ),
             ),
+
             const SizedBox(width: 12),
             Expanded(
               child: _buildStatCard(
                 context,
                 icon: Icons.monitor_weight_rounded,
-                value: state.latestWeight?.toStringAsFixed(1) ?? '--',
-                label: 'Weight (kg)',
+                value: state.latestWeight != null 
+                    ? (weightUnit == 'lbs' 
+                        ? (state.latestWeight! * 2.20462).toStringAsFixed(1)
+                        : state.latestWeight!.toStringAsFixed(1))
+                    : '--',
+                label: 'Weight ($weightUnit)',
                 color: colorScheme.tertiary,
               ),
             ),
+
           ],
         ),
 

@@ -2,6 +2,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/services/ai_insights_service.dart';
 import 'package:momentum/core/providers/database_providers.dart';
+import 'package:momentum/core/services/settings_service.dart';
+
 
 
 /// Provider for the AI Insights Service
@@ -30,9 +32,11 @@ final dailyInsightProvider = FutureProvider.autoDispose<String>((ref) async {
   // Get recent 5 sessions for context
   final history = await db.getRecentSessionsWithDetails(limit: 5);
   
-  // Get service
-  final service = ref.watch(aiInsightsServiceProvider);
+  // Get API Key
+  final apiKey = ref.watch(geminiApiKeyProvider).valueOrNull;
+
   
   // Generate insight
-  return service.getDailyInsight(user, history);
+  return ref.watch(aiInsightsServiceProvider).getDailyInsight(user, history, apiKey);
+
 });

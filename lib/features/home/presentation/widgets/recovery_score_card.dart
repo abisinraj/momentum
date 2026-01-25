@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'themed_card.dart';
-import 'package:momentum/app/theme/app_theme.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class RecoveryScoreCard extends StatelessWidget {
@@ -39,6 +38,7 @@ class RecoveryScoreCard extends StatelessWidget {
     
     score = score.clamp(0, 100);
     final isGood = score > 70;
+    final colorScheme = Theme.of(context).colorScheme;
     
     return ThemedCard(
       padding: const EdgeInsets.all(20),
@@ -50,10 +50,10 @@ class RecoveryScoreCard extends StatelessWidget {
             percent: score / 100,
             center: Text(
               "${score.toInt()}",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0, color: Colors.white),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0, color: colorScheme.onSurface),
             ),
-            progressColor: isGood ? Theme.of(context).colorScheme.primary : Colors.orange,
-            backgroundColor: Colors.white10,
+            progressColor: isGood ? colorScheme.primary : Colors.orange,
+            backgroundColor: colorScheme.onSurface.withValues(alpha: 0.1),
             circularStrokeCap: CircularStrokeCap.round,
           ),
           const SizedBox(width: 20),
@@ -61,13 +61,13 @@ class RecoveryScoreCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "RECOVERY SCORE",
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
-                    color: AppTheme.textMuted,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -76,7 +76,7 @@ class RecoveryScoreCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: isGood ? Colors.white : Colors.orangeAccent,
+                    color: isGood ? colorScheme.onSurface : Colors.orangeAccent,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -84,9 +84,9 @@ class RecoveryScoreCard extends StatelessWidget {
                   isGood 
                     ? "Great sleep & volume balance." 
                     : "Sleep is low or volume is high.",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

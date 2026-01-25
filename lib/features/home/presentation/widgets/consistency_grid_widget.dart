@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:momentum/app/theme/app_theme.dart';
 import 'themed_card.dart';
 
 class ConsistencyGridWidget extends StatelessWidget {
@@ -23,6 +22,8 @@ class ConsistencyGridWidget extends StatelessWidget {
     final weekday = startDate.weekday; // 1=Mon, 7=Sun
     final alignedStartDate = startDate.subtract(Duration(days: weekday - 1));
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ThemedCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -30,21 +31,21 @@ class ConsistencyGridWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_month_rounded, color: AppTheme.tealPrimary, size: 20),
+              Icon(Icons.calendar_month_rounded, color: colorScheme.primary, size: 20),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'CONSISTENCY',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
-                  color: AppTheme.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const Spacer(),
               Text(
                 'Last 12 Weeks',
-                style: TextStyle(fontSize: 10, color: AppTheme.textMuted.withValues(alpha: 0.5)),
+                style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
               ),
             ],
           ),
@@ -91,7 +92,7 @@ class ConsistencyGridWidget extends StatelessWidget {
     } else if (active) {
       color = Theme.of(context).colorScheme.primary;
     } else {
-      color = Colors.white.withValues(alpha: 0.05);
+      color = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1);
     }
 
     return Container(

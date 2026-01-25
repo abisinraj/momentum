@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:momentum/app/theme/app_theme.dart';
 import 'themed_card.dart';
 
 /// Muscle Heatmap Widget
@@ -14,6 +13,8 @@ class MuscleHeatmapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ThemedCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -21,15 +22,15 @@ class MuscleHeatmapWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.accessibility_new_rounded, color: AppTheme.tealPrimary, size: 20),
+              Icon(Icons.accessibility_new_rounded, color: colorScheme.primary, size: 20),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'MUSCLE RECOVERY',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
-                  color: AppTheme.textMuted,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -39,35 +40,36 @@ class MuscleHeatmapWidget extends StatelessWidget {
           // Simplified Visual Representation (List of bars for MVP)
           // A full 3D body map requires complex assets or painter.
           // Let's do a sleek "Power Bar" list for major groups.
-          _buildPowerBar("CHEST", muscleWorkload['Chest'] ?? 0),
+          _buildPowerBar(context, "CHEST", muscleWorkload['Chest'] ?? 0),
           const SizedBox(height: 12),
-          _buildPowerBar("BACK", muscleWorkload['Back'] ?? 0),
+          _buildPowerBar(context, "BACK", muscleWorkload['Back'] ?? 0),
           const SizedBox(height: 12),
-          _buildPowerBar("LEGS", muscleWorkload['Legs'] ?? 0),
+          _buildPowerBar(context, "LEGS", muscleWorkload['Legs'] ?? 0),
           const SizedBox(height: 12),
-          _buildPowerBar("ARMS", muscleWorkload['Arms'] ?? 0),
+          _buildPowerBar(context, "ARMS", muscleWorkload['Arms'] ?? 0),
           const SizedBox(height: 12),
-          _buildPowerBar("CORE", muscleWorkload['Core'] ?? 0),
+          _buildPowerBar(context, "CORE", muscleWorkload['Core'] ?? 0),
         ],
       ),
     );
   }
 
-  Widget _buildPowerBar(String label, int intensity) {
-    // Intensity: 0 = Fresh (Green), >0 = Worked (Redder)
+  Widget _buildPowerBar(BuildContext context, String label, int intensity) {
+    final colorScheme = Theme.of(context).colorScheme;
+    // Intensity: 0 = Fresh (Green/Primary), >0 = Worked (Redder/Error)
     // 1-3 = Recovering, 4+ = Strained/Sore
     
     final Color barColor;
     final String status;
     
     if (intensity == 0) {
-      barColor = Colors.greenAccent;
+      barColor = colorScheme.primary;
       status = "Fresh";
     } else if (intensity < 3) {
       barColor = Colors.orangeAccent;
       status = "Recovering";
     } else {
-      barColor = Colors.redAccent;
+      barColor = colorScheme.error;
       status = "Sore";
     }
 
@@ -77,10 +79,10 @@ class MuscleHeatmapWidget extends StatelessWidget {
           width: 50,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -91,7 +93,7 @@ class MuscleHeatmapWidget extends StatelessWidget {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: Colors.white10,
+                  color: colorScheme.onSurface.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
