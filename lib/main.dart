@@ -3,10 +3,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/services/background_service.dart';
+
 import 'app/app.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await BackgroundService().initialize();
+
 
   // Global error handling
   FlutterError.onError = (details) {
