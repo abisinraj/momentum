@@ -7,9 +7,9 @@ plugins {
 
 android {
     namespace = "com.momentum.momentum"
-    compileSdk = 36
+    compileSdk = 35
     // buildToolsVersion = "35.0.0" // Let AGP decide or use default
-    ndkVersion = "28.2.13676358" // Explicitly set to installed version
+    ndkVersion = "27.0.12077973" // Stable version widely available on CI
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
