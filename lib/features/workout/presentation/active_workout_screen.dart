@@ -152,39 +152,94 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   }
   
   Future<void> _confirmAndCompleteWorkout() async {
+    int intensity = 5; // Default moderate
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        title: Text(
-          'Finish Workout?',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        content: Text(
-          'Are you sure you want to mark this workout as complete?',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Finish'),
-          ),
-        ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final colorScheme = Theme.of(context).colorScheme;
+          return AlertDialog(
+            backgroundColor: colorScheme.surface,
+            title: Text('Finish Workout?', style: TextStyle(color: colorScheme.onSurface)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Great job! How intense was this session?',
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('RPE: $intensity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colorScheme.primary)),
+                    Text(
+                      _getIntensityLabel(intensity),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _getIntensityColor(intensity),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                Slider(
+                  value: intensity.toDouble(),
+                  min: 1,
+                  max: 10,
+                  divisions: 9,
+                  label: intensity.toString(),
+                  onChanged: (value) {
+                    setDialogState(() => intensity = value.round());
+                  },
+                ),
+                Text(
+                  '1 (Easy) - 10 (Max Effort)',
+                  style: TextStyle(fontSize: 12, color: colorScheme.outline),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text('Cancel', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text('Finish'),
+              ),
+            ],
+          );
+        }
       ),
     );
     
     if (confirmed == true) {
-      await _completeWorkout();
+      await _completeWorkout(intensity);
     }
   }
+
+  String _getIntensityLabel(int rpe) {
+    if (rpe <= 3) return 'Easy Recovery';
+    if (rpe <= 6) return 'Moderate';
+    if (rpe <= 8) return 'Hard';
+    return 'Max Effort';
+  }
+
+  Color _getIntensityColor(int rpe) {
+    if (rpe <= 3) return Colors.green;
+    if (rpe <= 6) return Colors.amber;
+    if (rpe <= 8) return Colors.orange;
+    return Colors.red;
+  }
+
   
-  Future<void> _completeWorkout() async {
+  Future<void> _completeWorkout(int intensity) async {
     _timer?.cancel();
-    await ref.read(activeWorkoutSessionProvider.notifier).completeWorkout();
+    await ref.read(activeWorkoutSessionProvider.notifier).completeWorkout(intensity: intensity);
+
     if (mounted) {
       Navigator.pop(context);
     }

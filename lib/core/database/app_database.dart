@@ -58,6 +58,7 @@ class Sessions extends Table {
   DateTimeColumn get startedAt => dateTime()();
   DateTimeColumn get completedAt => dateTime().nullable()();
   IntColumn get durationSeconds => integer().nullable()();
+  IntColumn get intensity => integer().nullable()(); // RPE 1-10
 }
 
 /// SessionExercises table - stores completed exercise data per session
@@ -89,7 +90,8 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
+
 
   
   @override
@@ -141,7 +143,13 @@ class AppDatabase extends _$AppDatabase {
           // Add isRestDay to workouts
           await m.addColumn(workouts, workouts.isRestDay);
         }
+        if (from < 9) {
+          // Schema v9 changes:
+          // Add intensity to sessions
+          await m.addColumn(sessions, sessions.intensity);
+        }
       },
+
 
     );
   }
@@ -252,12 +260,15 @@ class AppDatabase extends _$AppDatabase {
       ));
   
   /// Complete a session
-  Future<void> completeSession(int sessionId, int durationSeconds) =>
+  /// Complete a session
+  Future<void> completeSession(int sessionId, int durationSeconds, {int? intensity}) =>
       (update(sessions)..where((s) => s.id.equals(sessionId)))
           .write(SessionsCompanion(
             completedAt: Value(DateTime.now()),
             durationSeconds: Value(durationSeconds),
+            intensity: intensity != null ? Value(intensity) : const Value.absent(),
           ));
+
   
   // ===== Session Exercises Operations =====
   

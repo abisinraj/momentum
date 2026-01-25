@@ -296,7 +296,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
        );
        
        if (confirm == true) {
-         await logRestDay(ref, workout);
+         await ref.read(workoutManagerProvider.notifier).logRestDay(workout);
+
          if (context.mounted) {
            ScaffoldMessenger.of(context).showSnackBar(
              SnackBar(
@@ -426,8 +427,8 @@ class _WorkoutCard extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
-              ),
               child: Icon(
+
                 workout.isRestDay ? Icons.spa : _getWorkoutIcon(workout.clockType),
                 color: Colors.white,
                 size: 24,

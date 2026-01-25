@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 
 import '../database/app_database.dart';
 import '../services/widget_service.dart';
@@ -28,27 +30,6 @@ class ActiveSession {
   });
 }
 
-/// Helper method to log a rest day completion immediately
-Future<void> logRestDay(Ref ref, Workout workout) async {
-  final db = ref.read(appDatabaseProvider);
-  
-  // Start and immediately complete
-  final sessionId = await db.startSession(workout.id);
-  await db.completeSession(sessionId, 0); // 0 duration for rest days
-  
-  // Trigger standard invalidations
-  ref.invalidate(todayCompletedWorkoutIdsProvider);
-  ref.invalidate(nextWorkoutProvider);
-  ref.invalidate(weeklyStatsProvider);
-  ref.invalidate(weeklyInsightProvider);
-  ref.invalidate(sessionHistoryProvider);
-  
-  // Dashboard & AI
-  ref.invalidate(dailyInsightProvider); 
-  
-  // Sync widgets
-  final _ = ref.refresh(widgetSyncProvider);
-}
 
 
 /// Notifier for managing active workout session
@@ -75,13 +56,14 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
   }
   
   /// Complete the current workout session
-  Future<void> completeWorkout() async {
+  Future<void> completeWorkout({int? intensity}) async {
     if (state == null) return;
     
     final db = ref.read(appDatabaseProvider);
     final duration = DateTime.now().difference(state!.startedAt);
     
-    await db.completeSession(state!.sessionId, duration.inSeconds);
+    await db.completeSession(state!.sessionId, duration.inSeconds, intensity: intensity);
+
     
     // Invalidate providers that depend on session data
     ref.invalidate(todayCompletedWorkoutIdsProvider);
@@ -181,4 +163,27 @@ class WorkoutManager extends _$WorkoutManager {
     ref.invalidate(workoutsStreamProvider);
     ref.invalidate(nextWorkoutProvider);
   }
+
+  /// Log a rest day completion immediately
+  Future<void> logRestDay(Workout workout) async {
+    final db = ref.read(appDatabaseProvider);
+    
+    // Start and immediately complete
+    final sessionId = await db.startSession(workout.id);
+    await db.completeSession(sessionId, 0); // 0 duration for rest days
+    
+    // Trigger standard invalidations
+    ref.invalidate(todayCompletedWorkoutIdsProvider);
+    ref.invalidate(nextWorkoutProvider);
+    ref.invalidate(weeklyStatsProvider);
+    ref.invalidate(weeklyInsightProvider);
+    ref.invalidate(sessionHistoryProvider);
+    
+    // Dashboard & AI
+    ref.invalidate(dailyInsightProvider); 
+    
+    // Sync widgets
+    final _ = ref.refresh(widgetSyncProvider);
+  }
+
 }
