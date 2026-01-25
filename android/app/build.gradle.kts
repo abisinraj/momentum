@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.momentum.momentum"
-    compileSdk = 35
+    compileSdk = 34
     // buildToolsVersion = "35.0.0" // Let AGP decide or use default
     ndkVersion = "27.0.12077973" // Stable version widely available on CI
 
@@ -26,7 +26,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 21
-        targetSdk = 35
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
