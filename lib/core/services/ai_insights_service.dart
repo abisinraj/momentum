@@ -1,6 +1,5 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:momentum/core/database/app_database.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AIInsightsService {
   // TODO: Ideally, move this to a secure backend or use --dart-define
@@ -10,9 +9,10 @@ class AIInsightsService {
 
   Future<String> getDailyInsight(User user, List<Map<String, dynamic>> recentSessions, String? apiKey) async {
     try {
-      if (apiKey == null || apiKey == 'YOUR_API_KEY_HERE' || apiKey.isEmpty) {
+      if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
         return "Configure your Gemini API Key in Settings to unlock AI insights.";
       }
+
 
 
       // Use the stable 'gemini-pro' model

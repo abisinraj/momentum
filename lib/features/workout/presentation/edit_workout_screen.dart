@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_providers.dart';
-import '../../../core/providers/workout_providers.dart';
 
 class EditWorkoutScreen extends ConsumerStatefulWidget {
   final int? splitIndex; // For adding new: which day index?
@@ -93,13 +92,13 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
           TextButton(
             onPressed: _isSaving ? null : _save,
             child: _isSaving 
-              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.tealPrimary))
-              : Text('SAVE', style: TextStyle(color: AppTheme.tealPrimary, fontWeight: FontWeight.bold)),
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.tealPrimary))
+              : const Text('SAVE', style: TextStyle(color: AppTheme.tealPrimary, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
       body: _isLoading 
-          ? Center(child: CircularProgressIndicator(color: AppTheme.tealPrimary))
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.tealPrimary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Form(
@@ -112,7 +111,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _nameController,
-                      style: TextStyle(color: AppTheme.textPrimary),
+                      style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: InputDecoration(
                         labelText: 'Workout Name',
                         hintText: 'e.g. Upper Body Power',
@@ -126,7 +125,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
                     
                     // Day Selection (if adding new, or maybe editing too?)
                     // Let's allow editing the day assignment
-                    Text('Assigned Day', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                    const Text('Assigned Day', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                     const SizedBox(height: 8),
                     _buildDaySelector(),
                     
@@ -157,7 +156,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
         color: AppTheme.tealPrimary,
@@ -201,11 +200,12 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.darkSurfaceContainer.withOpacity(0.5),
+          color: AppTheme.darkSurfaceContainer.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
+
           border: Border.all(color: AppTheme.darkBorder),
         ),
-        child: Center(
+        child: const Center(
           child: Text(
             'No exercises added yet',
             style: TextStyle(color: AppTheme.textMuted),
@@ -237,9 +237,9 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            leading: Icon(Icons.drag_handle, color: AppTheme.textMuted),
-            title: Text(ex.name, style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w500)),
-            subtitle: Text('${ex.sets} sets × ${ex.reps} reps', style: TextStyle(color: AppTheme.textSecondary)),
+            leading: const Icon(Icons.drag_handle, color: AppTheme.textMuted),
+            title: Text(ex.name, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w500)),
+            subtitle: Text('${ex.sets} sets × ${ex.reps} reps', style: const TextStyle(color: AppTheme.textSecondary)),
             trailing: IconButton(
               icon: const Icon(Icons.close, color: Colors.redAccent, size: 20),
               onPressed: () => setState(() => _exercises.removeAt(index)),
@@ -256,12 +256,13 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
       decoration: BoxDecoration(
         color: AppTheme.darkSurfaceContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.tealPrimary.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Quick Add', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+          const Text('Quick Add', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -269,10 +270,10 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
                 flex: 3,
                 child: TextField(
                   controller: _exNameController,
-                  style: TextStyle(color: AppTheme.textPrimary),
+                  style: const TextStyle(color: AppTheme.textPrimary),
                   decoration: InputDecoration(
                     hintText: 'Exercise',
-                    hintStyle: TextStyle(color: AppTheme.textMuted),
+                    hintStyle: const TextStyle(color: AppTheme.textMuted),
                     filled: true,
                     fillColor: AppTheme.darkBackground,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -286,7 +287,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
                 flex: 1,
                 child: TextField(
                   controller: _setsController,
-                  style: TextStyle(color: AppTheme.textPrimary),
+                  style: const TextStyle(color: AppTheme.textPrimary),
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
@@ -303,7 +304,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
                 flex: 1,
                 child: TextField(
                   controller: _repsController,
-                  style: TextStyle(color: AppTheme.textPrimary),
+                  style: const TextStyle(color: AppTheme.textPrimary),
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
@@ -355,7 +356,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
           value: _selectedClock,
           dropdownColor: AppTheme.darkSurfaceContainer,
           isExpanded: true,
-          icon: Icon(Icons.arrow_drop_down, color: AppTheme.tealPrimary),
+          icon: const Icon(Icons.arrow_drop_down, color: AppTheme.tealPrimary),
           items: ClockType.values.map((type) {
             final (label, icon) = switch (type) {
               ClockType.none => ('None', Icons.check_circle_outline),
@@ -369,7 +370,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
                 children: [
                   Icon(icon, size: 20, color: AppTheme.textSecondary),
                   const SizedBox(width: 12),
-                  Text(label, style: TextStyle(color: AppTheme.textPrimary)),
+                  Text(label, style: const TextStyle(color: AppTheme.textPrimary)),
                 ],
               ),
             );
@@ -412,10 +413,10 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
         await db.deleteExercisesForWorkout(w.id);
         
         for (int i = 0; i < _exercises.length; i++) {
-          final ex = _exercises[i];
           // Using loop index 'i'
           final e = _exercises[i];
           await db.addExercise(ExercisesCompanion(
+
             workoutId: drift.Value(w.id),
             name: drift.Value(e.name),
             sets: drift.Value(e.sets),

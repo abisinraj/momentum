@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
 import '../../../core/providers/health_connect_provider.dart';
 import '../../../core/services/settings_service.dart';
-import '../../health/presentation/heart_rate_measure_screen.dart';
 
 import '../../home/presentation/widgets/themed_card.dart';
 

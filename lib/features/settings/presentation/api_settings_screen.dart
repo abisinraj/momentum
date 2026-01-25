@@ -143,12 +143,12 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.lock_outline, color: AppTheme.tealPrimary, size: 20),
+          const Icon(Icons.lock_outline, color: AppTheme.tealPrimary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
             ),
           ),
         ],
@@ -168,7 +168,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: AppTheme.textPrimary,
             fontSize: 14,
             fontWeight: FontWeight.w500,

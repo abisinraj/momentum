@@ -73,7 +73,7 @@ class DietService {
 
     final bytes = await File(imagePath).readAsBytes();
     
-    final prompt = 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with keys: "description" (short name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double).';
+    const prompt = 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with keys: "description" (short name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double).';
     final content = [
       Content.multi([
         TextPart(prompt),

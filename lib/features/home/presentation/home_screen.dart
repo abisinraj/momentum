@@ -15,7 +15,8 @@ import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/recovery_score_card.dart';
 import '../../home/presentation/widgets/volume_load_widget.dart';
 import '../../../core/providers/dashboard_providers.dart';
-// cleaned
+import '../../../core/providers/health_connect_provider.dart';
+
 
 import '../../../core/providers/smart_suggestion_provider.dart';
 

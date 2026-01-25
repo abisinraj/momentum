@@ -252,8 +252,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: primary, width: 2),
         ),
-        hintStyle: TextStyle(color: textMuted),
-        labelStyle: TextStyle(color: textSecondary),
+        hintStyle: const TextStyle(color: textMuted),
+        labelStyle: const TextStyle(color: textSecondary),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       
@@ -266,7 +266,7 @@ class AppTheme {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(color: primary);
           }
-          return IconThemeData(color: textMuted);
+          return const IconThemeData(color: textMuted);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -302,7 +302,7 @@ class AppTheme {
       ),
       
       // Icon theme
-      iconTheme: IconThemeData(color: textSecondary),
+      iconTheme: const IconThemeData(color: textSecondary),
       
       // FAB
       floatingActionButtonTheme: FloatingActionButtonThemeData(

@@ -22,9 +22,9 @@ class ProgressScreen extends ConsumerWidget {
           (AsyncData(value: final activity), AsyncData(value: final stats), AsyncData(value: final insight)) => 
               _buildContent(context, activity, stats, insight),
           (AsyncError(:final error), _, _) => Center(
-              child: Text('Error: $error', style: TextStyle(color: AppTheme.error)),
+              child: Text('Error: $error', style: const TextStyle(color: AppTheme.error)),
             ),
-           _ => Center(child: CircularProgressIndicator(color: AppTheme.tealPrimary)),
+           _ => const Center(child: CircularProgressIndicator(color: AppTheme.tealPrimary)),
         },
       ),
     );
@@ -44,7 +44,7 @@ class ProgressScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Progress',
                 style: TextStyle(
                   fontSize: 32,
@@ -64,14 +64,14 @@ class ProgressScreen extends ConsumerWidget {
                   children: [
                     Text(
                       _getCurrentMonth(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: AppTheme.textSecondary,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down, color: AppTheme.textMuted, size: 18),
+                    const Icon(Icons.keyboard_arrow_down, color: AppTheme.textMuted, size: 18),
                   ],
                 ),
               ),
@@ -84,7 +84,7 @@ class ProgressScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Consistency',
                 style: TextStyle(
                   fontSize: 18,
@@ -103,11 +103,11 @@ class ProgressScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.local_fire_department, color: AppTheme.tealPrimary, size: 14),
+                    const Icon(Icons.local_fire_department, color: AppTheme.tealPrimary, size: 14),
                     const SizedBox(width: 4),
                     Text(
                       '$streak Day Streak',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.tealPrimary,
@@ -130,7 +130,7 @@ class ProgressScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Less', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+              const Text('Less', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
               const SizedBox(width: 8),
               ...AppTheme.gridIntensity.map((color) => Container(
                 width: 12,
@@ -142,14 +142,14 @@ class ProgressScreen extends ConsumerWidget {
                 ),
               )),
               const SizedBox(width: 8),
-              Text('More', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+              const Text('More', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
             ],
           ),
           
           const SizedBox(height: 32),
           
           // Activity Log section
-          Row(
+          const Row(
             children: [
               Text(
                 'Activity Log',
@@ -159,10 +159,10 @@ class ProgressScreen extends ConsumerWidget {
                   color: AppTheme.textPrimary,
                 ),
               ),
-              const Spacer(),
+              Spacer(),
               // Tabs
               _TabButton(label: 'Calories', isSelected: true),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               _TabButton(label: 'Minutes', isSelected: false),
             ],
           ),
@@ -179,7 +179,7 @@ class ProgressScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
                     Text(
                       'Calories Burned',
@@ -195,14 +195,14 @@ class ProgressScreen extends ConsumerWidget {
                   children: [
                     Text(
                       '$calories',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Text(
+                    const Text(
                       'kcal',
                       style: TextStyle(
                         fontSize: 14,
@@ -251,7 +251,7 @@ class ProgressScreen extends ConsumerWidget {
                   children: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
                       .map((day) => Text(
                             day,
-                            style: TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                            style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
                           ))
                       .toList(),
                 ),
@@ -278,14 +278,14 @@ class ProgressScreen extends ConsumerWidget {
                     color: AppTheme.tealPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.auto_awesome, color: AppTheme.tealPrimary),
+                  child: const Icon(Icons.auto_awesome, color: AppTheme.tealPrimary),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Weekly Insight',
                         style: TextStyle(
                           fontSize: 14,
@@ -296,7 +296,7 @@ class ProgressScreen extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(
                         insight,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           color: AppTheme.textSecondary,
                           height: 1.4,
@@ -312,7 +312,7 @@ class ProgressScreen extends ConsumerWidget {
           const SizedBox(height: 32),
           
           // Session History Section
-          Text(
+          const Text(
             'Session History',
             style: TextStyle(
               fontSize: 18,
@@ -335,7 +335,7 @@ class ProgressScreen extends ConsumerWidget {
                       color: AppTheme.darkSurfaceContainer,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         'No completed sessions yet',
                         style: TextStyle(color: AppTheme.textMuted),
@@ -352,7 +352,7 @@ class ProgressScreen extends ConsumerWidget {
                       sessionId: (session['session'] as dynamic).id as int,
                     )).toList(),
                   ),
-                AsyncError(:final error) => Text('Error: $error', style: TextStyle(color: AppTheme.error)),
+                AsyncError(:final error) => Text('Error: $error', style: const TextStyle(color: AppTheme.error)),
                 _ => const Center(child: CircularProgressIndicator()),
               };
             },
@@ -390,7 +390,7 @@ class ProgressScreen extends ConsumerWidget {
             children: [
               Text(
                 value,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -398,7 +398,7 @@ class ProgressScreen extends ConsumerWidget {
               ),
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color: AppTheme.textMuted,
@@ -493,7 +493,7 @@ class _ContributionGrid extends StatelessWidget {
                       child: Center(
                         child: Text(
                           day,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                             color: AppTheme.textMuted,
@@ -535,7 +535,7 @@ class _ContributionGrid extends StatelessWidget {
                       ? Center(
                           child: Text(
                             activity,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary,
@@ -657,7 +657,7 @@ class _SessionHistoryCard extends StatelessWidget {
               children: [
                 Text(
                   completedAt != null ? completedAt!.day.toString() : '--',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.tealPrimary,
@@ -681,7 +681,7 @@ class _SessionHistoryCard extends StatelessWidget {
               children: [
                 Text(
                   workoutName,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
@@ -690,18 +690,18 @@ class _SessionHistoryCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.timer_outlined, size: 14, color: AppTheme.textMuted),
+                    const Icon(Icons.timer_outlined, size: 14, color: AppTheme.textMuted),
                     const SizedBox(width: 4),
                     Text(
                       durationStr,
-                      style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                      style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
                     ),
                     const SizedBox(width: 12),
-                    Icon(Icons.fitness_center, size: 14, color: AppTheme.textMuted),
+                    const Icon(Icons.fitness_center, size: 14, color: AppTheme.textMuted),
                     const SizedBox(width: 4),
                     Text(
                       '$completedSets sets',
-                      style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                      style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
                     ),
                   ],
                 ),
@@ -709,7 +709,7 @@ class _SessionHistoryCard extends StatelessWidget {
             ),
           ),
           // Arrow
-          Icon(Icons.chevron_right, color: AppTheme.textMuted),
+          const Icon(Icons.chevron_right, color: AppTheme.textMuted),
         ],
       ),
     );

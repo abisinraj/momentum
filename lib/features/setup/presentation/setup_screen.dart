@@ -291,7 +291,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                           ),
 
                         )
-                      : Row(
+                      : const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -301,7 +301,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Icon(Icons.arrow_forward, size: 20),
                           ],
                         ),

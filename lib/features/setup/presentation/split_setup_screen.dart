@@ -126,9 +126,9 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: Row(
+                            child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
+                              children: [
                                 Text(
                                   'Start Building',
                                   style: TextStyle(

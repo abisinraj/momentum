@@ -755,10 +755,10 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
     
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please enter an exercise name', style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: 2),
         ),
       );
       return;

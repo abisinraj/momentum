@@ -74,7 +74,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ),
                   const SizedBox(height: 32),
                   // App name
-                  Text(
+                  const Text(
                     'Momentum',
                     style: TextStyle(
                       fontSize: 32,
@@ -99,7 +99,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ),
             ),
             // Bottom tagline
-            Positioned(
+            const Positioned(
               bottom: 60,
               left: 0,
               right: 0,
@@ -134,7 +134,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           debugPrint('Error loading logo: $error');
-          return Icon(
+          return const Icon(
             Icons.broken_image_outlined,
             color: AppTheme.tealPrimary,
             size: 40,

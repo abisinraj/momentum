@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -86,12 +85,12 @@ class BackgroundService {
 
     String workoutName = "Workout";
     
-    Timer? _timer;
-    DateTime? _startedAt;
+    Timer? timer;
+    DateTime? startedAt;
 
     // Listen for stop
     service.on('stopService').listen((event) {
-      _timer?.cancel();
+      timer?.cancel();
       service.stopSelf();
     });
     
@@ -107,12 +106,12 @@ class BackgroundService {
     service.on('set_start_time').listen((event) {
       if (event != null && event['epoch'] != null) {
         final epoch = event['epoch'] as int;
-        _startedAt = DateTime.fromMillisecondsSinceEpoch(epoch);
+        startedAt = DateTime.fromMillisecondsSinceEpoch(epoch);
         
-        _timer?.cancel();
-        _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-           if (_startedAt == null) return;
-           final diff = DateTime.now().difference(_startedAt!);
+        timer?.cancel();
+        timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+           if (startedAt == null) return;
+           final diff = DateTime.now().difference(startedAt!);
            final hours = diff.inHours;
            final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
            final seconds = (diff.inSeconds % 60).toString().padLeft(2, '0');

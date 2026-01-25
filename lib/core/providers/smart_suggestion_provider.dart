@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/database/app_database.dart';
 import 'package:momentum/core/providers/database_providers.dart';
-import 'package:momentum/core/providers/workout_providers.dart';
 
 /// Types of suggestions
 enum SuggestionType {

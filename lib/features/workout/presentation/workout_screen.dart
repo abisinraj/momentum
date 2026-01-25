@@ -301,7 +301,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
          if (context.mounted) {
            ScaffoldMessenger.of(context).showSnackBar(
              SnackBar(
-               content: Text('Rest day logged. Recovery mode on!'),
+               content: const Text('Rest day logged. Recovery mode on!'),
                backgroundColor: colorScheme.primary,
              ),
            );

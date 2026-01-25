@@ -208,7 +208,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: Text('Finish'),
+                child: const Text('Finish'),
               ),
             ],
           );
@@ -584,7 +584,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                                     if (isCoolingDown)
                                       Text(
                                         'Cooldown: $_cooldownTimeDisplay',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.cyanAccent,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 12,

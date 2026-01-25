@@ -74,20 +74,20 @@ class WorkoutCardSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Thumbnail skeleton
-          const SkeletonLoader(width: double.infinity, height: 140, borderRadius: 12),
-          const SizedBox(height: 16),
+          SkeletonLoader(width: double.infinity, height: 140, borderRadius: 12),
+          SizedBox(height: 16),
           // Title skeleton
-          const SkeletonLoader(width: 150, height: 24, borderRadius: 4),
-          const SizedBox(height: 8),
+          SkeletonLoader(width: 150, height: 24, borderRadius: 4),
+          SizedBox(height: 8),
           // Subtitle skeleton
-          const SkeletonLoader(width: 200, height: 16, borderRadius: 4),
-          const SizedBox(height: 16),
+          SkeletonLoader(width: 200, height: 16, borderRadius: 4),
+          SizedBox(height: 16),
           // Button skeleton
-          const SkeletonLoader(width: double.infinity, height: 48, borderRadius: 12),
+          SkeletonLoader(width: double.infinity, height: 48, borderRadius: 12),
         ],
       ),
     );
@@ -109,9 +109,9 @@ class StatsRowSkeleton extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
+          const Expanded(
             child: Column(
-              children: const [
+              children: [
                 SkeletonLoader(width: 40, height: 40, borderRadius: 20),
                 SizedBox(height: 8),
                 SkeletonLoader(width: 60, height: 24, borderRadius: 4),
@@ -121,9 +121,9 @@ class StatsRowSkeleton extends StatelessWidget {
             ),
           ),
           Container(width: 1, height: 50, color: AppTheme.darkBorder),
-          Expanded(
+          const Expanded(
             child: Column(
-              children: const [
+              children: [
                 SkeletonLoader(width: 40, height: 40, borderRadius: 20),
                 SizedBox(height: 8),
                 SkeletonLoader(width: 60, height: 24, borderRadius: 4),
@@ -153,9 +153,9 @@ class ProgressGridSkeleton extends StatelessWidget {
       child: Column(
         children: [
           // Header skeleton
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               SkeletonLoader(width: 100, height: 20, borderRadius: 4),
               SkeletonLoader(width: 60, height: 20, borderRadius: 4),
             ],
