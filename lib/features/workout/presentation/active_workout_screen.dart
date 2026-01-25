@@ -464,7 +464,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: () {
+                onTap: () async {
                   final current = _completedSets[ex.id] ?? 0;
                   // Cycle: 0 -> 1 -> ... -> Max -> 0
                   final next = (current + 1) % (targetSets + 1);
@@ -485,6 +485,22 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                      _startCooldown(ex.id);
                      _restController.stop(); // Stop rest if running
                      setState(() => _restingExerciseId = null);
+                     
+                     // Check if ALL exercises are now done
+                     final allDone = exercisesList.every((e) {
+                        // Use updated value for current exercise
+                        final sets = e.id == ex.id ? next : (_completedSets[e.id] ?? 0);
+                        return sets >= e.sets;
+                     });
+                     
+                     if (allDone) {
+                        // Give a small delay so user sees the tick animation
+                        await Future.delayed(const Duration(milliseconds: 500));
+                        if (mounted) {
+                           _confirmAndCompleteWorkout();
+                        }
+                     }
+                     
                   } else if (next > current) {
                      // Set Complete -> Rest
                      _startRestTimer(ex.id);
@@ -496,6 +512,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                      setState(() => _restingExerciseId = null);
                   }
                 },
+
                 onLongPress: () => _showRepInputDialog(ex),
                 child: Column(
                   children: [
