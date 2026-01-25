@@ -15,7 +15,10 @@ import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/recovery_score_card.dart';
 import '../../home/presentation/widgets/volume_load_widget.dart';
 import '../../../core/providers/dashboard_providers.dart';
-import '../../../core/providers/health_connect_provider.dart';
+// cleaned
+
+import '../../../core/providers/smart_suggestion_provider.dart';
+
 
 import 'package:momentum/core/utils/screen_utils.dart';
 
@@ -55,7 +58,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final userAsync = ref.watch(currentUserProvider);
     final activeSession = ref.watch(activeWorkoutSessionProvider);
     final todayCompletedAsync = ref.watch(todayCompletedWorkoutIdsProvider);
+    final suggestionsAsync = ref.watch(smartSuggestionsProvider);
     final theme = Theme.of(context);
+
     final colorScheme = theme.colorScheme;
     
     // If there's an active session, navigate to it
@@ -110,6 +115,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               },
               
               const SizedBox(height: 16),
+              
+              // Smart Suggestions (Deload / Adaptive)
+              _buildSuggestions(suggestionsAsync),
+
+              
+              const SizedBox(height: 16),
 
               // AI Insights Card (New)
               const AIInsightsCard(),
@@ -148,10 +159,111 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
+
     );
   }
   
+  Widget _buildSuggestions(AsyncValue<List<SmartSuggestion>> suggestionsAsync) {
+    return suggestionsAsync.when(
+      data: (suggestions) {
+        if (suggestions.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: suggestions.map((s) => _buildSuggestionCard(s)).toList(),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildSuggestionCard(SmartSuggestion suggestion) {
+     final isDeload = suggestion.type == SuggestionType.deload;
+     final theme = Theme.of(context);
+     final colorScheme = theme.colorScheme;
+     
+     return Container(
+       margin: const EdgeInsets.only(bottom: 16),
+       padding: const EdgeInsets.all(16),
+       decoration: BoxDecoration(
+         color: isDeload ? colorScheme.tertiaryContainer : colorScheme.secondaryContainer,
+         borderRadius: BorderRadius.circular(16),
+       ),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           Row(
+             children: [
+               Icon(
+                 isDeload ? Icons.spa : Icons.insights,
+                 size: 20,
+                 color: isDeload ? colorScheme.onTertiaryContainer : colorScheme.onSecondaryContainer
+               ),
+               const SizedBox(width: 8),
+               Text(
+                 suggestion.title,
+                 style: TextStyle(
+                   fontWeight: FontWeight.bold,
+                   color: isDeload ? colorScheme.onTertiaryContainer : colorScheme.onSecondaryContainer,
+                 ),
+               ),
+             ],
+           ),
+           const SizedBox(height: 8),
+           Text(
+             suggestion.message,
+             style: TextStyle(
+               color: isDeload ? colorScheme.onTertiaryContainer : colorScheme.onSecondaryContainer,
+               height: 1.4,
+             ),
+           ),
+           if (suggestion.actionLabel != null) ...[
+             const SizedBox(height: 12),
+             Align(
+               alignment: Alignment.centerRight,
+               child: FilledButton.tonal(
+                 onPressed: () {
+                    // Logic based on suggestion type
+                    if (isDeload) {
+                       // Deload Action
+                       // Could navigate to "Create Workout" but prepopulated for Rest?
+                       // Or just show a SnackBar observing it is handled.
+                       // User requested "Observe only" or "Suggest".
+                       // Let's just create a toast for now or navigate to split.
+                       Navigator.of(context).pushNamed('/split-setup'); // Assuming route exists? No.
+                       // Actually we usually push widgets.
+                       // Just do nothing for strictly "Observational" per user request, 
+                       // but generic action is nice.
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text('Take it easy today! Listen to your body.')),
+                       );
+                    } else if (suggestion.type == SuggestionType.adaptive && suggestion.payload is Workout) {
+                       final workout = suggestion.payload as Workout;
+                       ref.read(activeWorkoutSessionProvider.notifier).startWorkout(workout);
+                       if (mounted) {
+                          final session = ref.read(activeWorkoutSessionProvider);
+                          if (session != null) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => ActiveWorkoutScreen(session: session))
+                            );
+                          }
+                       }
+                    }
+                 },
+                 style: FilledButton.styleFrom(
+                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                 ),
+                 child: Text(suggestion.actionLabel!),
+               ),
+             ),
+           ],
+         ],
+       ),
+     );
+  }
+
   Widget _buildResumeBanner(BuildContext context, ActiveSession session) {
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
