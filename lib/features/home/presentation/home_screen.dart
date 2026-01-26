@@ -742,43 +742,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   
   Widget _buildProgressInsight(BuildContext context, WidgetRef ref, Workout workout) {
-    final db = ref.watch(appDatabaseProvider);
+    final insightAsync = ref.watch(workoutInsightProvider(workout.id));
     
-    // Combined async operation to avoid nested FutureBuilders
-    Future<Map<String, dynamic>> fetchInsightData() async {
-      // Check connectivity (with timeout to avoid blocking)
-      final connectivity = await Connectivity().checkConnectivity().timeout(
-        const Duration(seconds: 2),
-        onTimeout: () => [ConnectivityResult.wifi],
-      );
-      
-      if (connectivity.contains(ConnectivityResult.none)) {
-        return {'offline': true};
-      }
-      
-      // Fetch workout progress
-      final progressData = await db.getWorkoutProgressSummary(workout.id, days: 30);
-      final sessionCount = progressData['sessionCount'] as int;
-      
-      if (sessionCount == 0) {
-        return {'firstSession': true};
-      }
-      
-      return {
-        ...progressData,
-      };
-    }
-    
-    return FutureBuilder<Map<String, dynamic>>(
-      future: fetchInsightData(),
-      builder: (context, snapshot) {
-        // Loading or error: show nothing to avoid layout shift
-        if (!snapshot.hasData) {
-          return const SizedBox.shrink();
-        }
-        
-        final data = snapshot.data!;
-        
+    return insightAsync.when(
+      data: (data) {
         // Offline case
         if (data['offline'] == true) {
           return const SizedBox.shrink();
@@ -795,7 +762,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
         
         // Normal case with data
-        final sessionCount = data['sessionCount'] as int;
+        // final sessionCount = data['sessionCount'] as int; // Unused
         final lastDuration = data['lastDuration'] as int?;
         final avgDuration = data['averageDuration'] as double;
         final aiInsight = data['aiInsight'] as String?;
@@ -813,6 +780,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           trend: lastMinutes < avgMinutes,
         );
       },
+      error: (e, st) => const SizedBox.shrink(),
+      loading: () => const SizedBox.shrink(),
     );
   }
   
