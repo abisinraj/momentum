@@ -10,7 +10,7 @@ import android.content.SharedPreferences
 /**
  * Momentum Home Screen Widget
  * 
- * Displays the last 30 days of workout activity as a contribution grid.
+ * Displays current streak and workout status.
  * Data is synced from Flutter via SharedPreferences using home_widget package.
  */
 class MomentumWidgetProvider : AppWidgetProvider() {

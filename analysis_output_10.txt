@@ -1,0 +1,5 @@
+Analyzing momentum...                                           
+
+warning • The value of 'refresh' should be used • lib/core/providers/workout_providers.dart:188:15 • unused_result
+
+1 issue found. (ran in 25.9s)
