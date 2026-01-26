@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:momentum/app/theme/app_theme.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class BodyModelViewer extends StatefulWidget {
   final Map<String, double> heatmap;
@@ -39,15 +37,6 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
           },
         ),
       );
-
-    // Platform-specific configuration to allow local assets (CORS fix)
-    if (_controller.platform is AndroidWebViewController) {
-      final androidController = _controller.platform as AndroidWebViewController;
-      androidController.setAllowFileAccess(true);
-      // These are crucial for CORS with file:///
-      androidController.setAllowFileAccessFromFileURLs(true);
-      androidController.setAllowUniversalAccessFromFileURLs(true);
-    }
 
     // Delay loading to prioritize main UI rendering
     Future.delayed(const Duration(milliseconds: 500), () {

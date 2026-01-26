@@ -332,15 +332,17 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         final isCompleted = todayCompleted.contains(workout.id);
         final isActive = activeSession?.workoutId == workout.id;
         
+        final isToday = workout.orderIndex == currentSplitIndex;
+        
         return _WorkoutCard(
           key: ValueKey(workout.id),
           workout: workout,
           isCompleted: isCompleted,
           isActive: isActive,
-          isLocked: false,
+          isLocked: !isToday, // Lock visual if not today
           index: workout.orderIndex, 
           total: totalCount,
-          onTap: () => _startWorkout(context, ref, workout),
+          onTap: isToday ? () => _startWorkout(context, ref, workout) : null,
           onDelete: () => _confirmDelete(context, ref, workout),
         );
       },

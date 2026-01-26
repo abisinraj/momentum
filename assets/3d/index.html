@@ -18,8 +18,9 @@
 </head>
 
 <body>
-    <script type="module">
-        import * as THREE from './three.module.js';
+    <script src="three_global.js"></script>
+    <script>
+        const THREE = window.THREE;
 
         let camera, scene, renderer;
         let group, particles, linesMesh;
