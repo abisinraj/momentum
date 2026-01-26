@@ -1259,24 +1259,6 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _avgBpmMeta = const VerificationMeta('avgBpm');
-  @override
-  late final GeneratedColumn<int> avgBpm = GeneratedColumn<int>(
-    'avg_bpm',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _maxBpmMeta = const VerificationMeta('maxBpm');
-  @override
-  late final GeneratedColumn<int> maxBpm = GeneratedColumn<int>(
-    'max_bpm',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1285,8 +1267,6 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     completedAt,
     durationSeconds,
     intensity,
-    avgBpm,
-    maxBpm,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1343,18 +1323,6 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         intensity.isAcceptableOrUnknown(data['intensity']!, _intensityMeta),
       );
     }
-    if (data.containsKey('avg_bpm')) {
-      context.handle(
-        _avgBpmMeta,
-        avgBpm.isAcceptableOrUnknown(data['avg_bpm']!, _avgBpmMeta),
-      );
-    }
-    if (data.containsKey('max_bpm')) {
-      context.handle(
-        _maxBpmMeta,
-        maxBpm.isAcceptableOrUnknown(data['max_bpm']!, _maxBpmMeta),
-      );
-    }
     return context;
   }
 
@@ -1388,14 +1356,6 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         DriftSqlType.int,
         data['${effectivePrefix}intensity'],
       ),
-      avgBpm: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}avg_bpm'],
-      ),
-      maxBpm: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}max_bpm'],
-      ),
     );
   }
 
@@ -1412,8 +1372,6 @@ class Session extends DataClass implements Insertable<Session> {
   final DateTime? completedAt;
   final int? durationSeconds;
   final int? intensity;
-  final int? avgBpm;
-  final int? maxBpm;
   const Session({
     required this.id,
     required this.workoutId,
@@ -1421,8 +1379,6 @@ class Session extends DataClass implements Insertable<Session> {
     this.completedAt,
     this.durationSeconds,
     this.intensity,
-    this.avgBpm,
-    this.maxBpm,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1438,12 +1394,6 @@ class Session extends DataClass implements Insertable<Session> {
     }
     if (!nullToAbsent || intensity != null) {
       map['intensity'] = Variable<int>(intensity);
-    }
-    if (!nullToAbsent || avgBpm != null) {
-      map['avg_bpm'] = Variable<int>(avgBpm);
-    }
-    if (!nullToAbsent || maxBpm != null) {
-      map['max_bpm'] = Variable<int>(maxBpm);
     }
     return map;
   }
@@ -1462,12 +1412,6 @@ class Session extends DataClass implements Insertable<Session> {
       intensity: intensity == null && nullToAbsent
           ? const Value.absent()
           : Value(intensity),
-      avgBpm: avgBpm == null && nullToAbsent
-          ? const Value.absent()
-          : Value(avgBpm),
-      maxBpm: maxBpm == null && nullToAbsent
-          ? const Value.absent()
-          : Value(maxBpm),
     );
   }
 
@@ -1483,8 +1427,6 @@ class Session extends DataClass implements Insertable<Session> {
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
       durationSeconds: serializer.fromJson<int?>(json['durationSeconds']),
       intensity: serializer.fromJson<int?>(json['intensity']),
-      avgBpm: serializer.fromJson<int?>(json['avgBpm']),
-      maxBpm: serializer.fromJson<int?>(json['maxBpm']),
     );
   }
   @override
@@ -1497,8 +1439,6 @@ class Session extends DataClass implements Insertable<Session> {
       'completedAt': serializer.toJson<DateTime?>(completedAt),
       'durationSeconds': serializer.toJson<int?>(durationSeconds),
       'intensity': serializer.toJson<int?>(intensity),
-      'avgBpm': serializer.toJson<int?>(avgBpm),
-      'maxBpm': serializer.toJson<int?>(maxBpm),
     };
   }
 
@@ -1509,8 +1449,6 @@ class Session extends DataClass implements Insertable<Session> {
     Value<DateTime?> completedAt = const Value.absent(),
     Value<int?> durationSeconds = const Value.absent(),
     Value<int?> intensity = const Value.absent(),
-    Value<int?> avgBpm = const Value.absent(),
-    Value<int?> maxBpm = const Value.absent(),
   }) => Session(
     id: id ?? this.id,
     workoutId: workoutId ?? this.workoutId,
@@ -1520,8 +1458,6 @@ class Session extends DataClass implements Insertable<Session> {
         ? durationSeconds.value
         : this.durationSeconds,
     intensity: intensity.present ? intensity.value : this.intensity,
-    avgBpm: avgBpm.present ? avgBpm.value : this.avgBpm,
-    maxBpm: maxBpm.present ? maxBpm.value : this.maxBpm,
   );
   Session copyWithCompanion(SessionsCompanion data) {
     return Session(
@@ -1535,8 +1471,6 @@ class Session extends DataClass implements Insertable<Session> {
           ? data.durationSeconds.value
           : this.durationSeconds,
       intensity: data.intensity.present ? data.intensity.value : this.intensity,
-      avgBpm: data.avgBpm.present ? data.avgBpm.value : this.avgBpm,
-      maxBpm: data.maxBpm.present ? data.maxBpm.value : this.maxBpm,
     );
   }
 
@@ -1548,9 +1482,7 @@ class Session extends DataClass implements Insertable<Session> {
           ..write('startedAt: $startedAt, ')
           ..write('completedAt: $completedAt, ')
           ..write('durationSeconds: $durationSeconds, ')
-          ..write('intensity: $intensity, ')
-          ..write('avgBpm: $avgBpm, ')
-          ..write('maxBpm: $maxBpm')
+          ..write('intensity: $intensity')
           ..write(')'))
         .toString();
   }
@@ -1563,8 +1495,6 @@ class Session extends DataClass implements Insertable<Session> {
     completedAt,
     durationSeconds,
     intensity,
-    avgBpm,
-    maxBpm,
   );
   @override
   bool operator ==(Object other) =>
@@ -1575,9 +1505,7 @@ class Session extends DataClass implements Insertable<Session> {
           other.startedAt == this.startedAt &&
           other.completedAt == this.completedAt &&
           other.durationSeconds == this.durationSeconds &&
-          other.intensity == this.intensity &&
-          other.avgBpm == this.avgBpm &&
-          other.maxBpm == this.maxBpm);
+          other.intensity == this.intensity);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
@@ -1587,8 +1515,6 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<DateTime?> completedAt;
   final Value<int?> durationSeconds;
   final Value<int?> intensity;
-  final Value<int?> avgBpm;
-  final Value<int?> maxBpm;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.workoutId = const Value.absent(),
@@ -1596,8 +1522,6 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.completedAt = const Value.absent(),
     this.durationSeconds = const Value.absent(),
     this.intensity = const Value.absent(),
-    this.avgBpm = const Value.absent(),
-    this.maxBpm = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1606,8 +1530,6 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.completedAt = const Value.absent(),
     this.durationSeconds = const Value.absent(),
     this.intensity = const Value.absent(),
-    this.avgBpm = const Value.absent(),
-    this.maxBpm = const Value.absent(),
   }) : workoutId = Value(workoutId),
        startedAt = Value(startedAt);
   static Insertable<Session> custom({
@@ -1617,8 +1539,6 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<DateTime>? completedAt,
     Expression<int>? durationSeconds,
     Expression<int>? intensity,
-    Expression<int>? avgBpm,
-    Expression<int>? maxBpm,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1627,8 +1547,6 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       if (completedAt != null) 'completed_at': completedAt,
       if (durationSeconds != null) 'duration_seconds': durationSeconds,
       if (intensity != null) 'intensity': intensity,
-      if (avgBpm != null) 'avg_bpm': avgBpm,
-      if (maxBpm != null) 'max_bpm': maxBpm,
     });
   }
 
@@ -1639,8 +1557,6 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Value<DateTime?>? completedAt,
     Value<int?>? durationSeconds,
     Value<int?>? intensity,
-    Value<int?>? avgBpm,
-    Value<int?>? maxBpm,
   }) {
     return SessionsCompanion(
       id: id ?? this.id,
@@ -1649,8 +1565,6 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       completedAt: completedAt ?? this.completedAt,
       durationSeconds: durationSeconds ?? this.durationSeconds,
       intensity: intensity ?? this.intensity,
-      avgBpm: avgBpm ?? this.avgBpm,
-      maxBpm: maxBpm ?? this.maxBpm,
     );
   }
 
@@ -1675,12 +1589,6 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (intensity.present) {
       map['intensity'] = Variable<int>(intensity.value);
     }
-    if (avgBpm.present) {
-      map['avg_bpm'] = Variable<int>(avgBpm.value);
-    }
-    if (maxBpm.present) {
-      map['max_bpm'] = Variable<int>(maxBpm.value);
-    }
     return map;
   }
 
@@ -1692,9 +1600,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('startedAt: $startedAt, ')
           ..write('completedAt: $completedAt, ')
           ..write('durationSeconds: $durationSeconds, ')
-          ..write('intensity: $intensity, ')
-          ..write('avgBpm: $avgBpm, ')
-          ..write('maxBpm: $maxBpm')
+          ..write('intensity: $intensity')
           ..write(')'))
         .toString();
   }
@@ -1784,6 +1690,18 @@ class $ExercisesTable extends Exercises
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _targetWeightMeta = const VerificationMeta(
+    'targetWeight',
+  );
+  @override
+  late final GeneratedColumn<double> targetWeight = GeneratedColumn<double>(
+    'target_weight',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1793,6 +1711,7 @@ class $ExercisesTable extends Exercises
     reps,
     primaryMuscleGroup,
     orderIndex,
+    targetWeight,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1854,6 +1773,15 @@ class $ExercisesTable extends Exercises
     } else if (isInserting) {
       context.missing(_orderIndexMeta);
     }
+    if (data.containsKey('target_weight')) {
+      context.handle(
+        _targetWeightMeta,
+        targetWeight.isAcceptableOrUnknown(
+          data['target_weight']!,
+          _targetWeightMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1891,6 +1819,10 @@ class $ExercisesTable extends Exercises
         DriftSqlType.int,
         data['${effectivePrefix}order_index'],
       )!,
+      targetWeight: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}target_weight'],
+      )!,
     );
   }
 
@@ -1908,6 +1840,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
   final int reps;
   final String? primaryMuscleGroup;
   final int orderIndex;
+  final double targetWeight;
   const Exercise({
     required this.id,
     required this.workoutId,
@@ -1916,6 +1849,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     required this.reps,
     this.primaryMuscleGroup,
     required this.orderIndex,
+    required this.targetWeight,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1929,6 +1863,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       map['primary_muscle_group'] = Variable<String>(primaryMuscleGroup);
     }
     map['order_index'] = Variable<int>(orderIndex);
+    map['target_weight'] = Variable<double>(targetWeight);
     return map;
   }
 
@@ -1943,6 +1878,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           ? const Value.absent()
           : Value(primaryMuscleGroup),
       orderIndex: Value(orderIndex),
+      targetWeight: Value(targetWeight),
     );
   }
 
@@ -1961,6 +1897,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
         json['primaryMuscleGroup'],
       ),
       orderIndex: serializer.fromJson<int>(json['orderIndex']),
+      targetWeight: serializer.fromJson<double>(json['targetWeight']),
     );
   }
   @override
@@ -1974,6 +1911,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       'reps': serializer.toJson<int>(reps),
       'primaryMuscleGroup': serializer.toJson<String?>(primaryMuscleGroup),
       'orderIndex': serializer.toJson<int>(orderIndex),
+      'targetWeight': serializer.toJson<double>(targetWeight),
     };
   }
 
@@ -1985,6 +1923,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     int? reps,
     Value<String?> primaryMuscleGroup = const Value.absent(),
     int? orderIndex,
+    double? targetWeight,
   }) => Exercise(
     id: id ?? this.id,
     workoutId: workoutId ?? this.workoutId,
@@ -1995,6 +1934,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
         ? primaryMuscleGroup.value
         : this.primaryMuscleGroup,
     orderIndex: orderIndex ?? this.orderIndex,
+    targetWeight: targetWeight ?? this.targetWeight,
   );
   Exercise copyWithCompanion(ExercisesCompanion data) {
     return Exercise(
@@ -2009,6 +1949,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       orderIndex: data.orderIndex.present
           ? data.orderIndex.value
           : this.orderIndex,
+      targetWeight: data.targetWeight.present
+          ? data.targetWeight.value
+          : this.targetWeight,
     );
   }
 
@@ -2021,7 +1964,8 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           ..write('sets: $sets, ')
           ..write('reps: $reps, ')
           ..write('primaryMuscleGroup: $primaryMuscleGroup, ')
-          ..write('orderIndex: $orderIndex')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('targetWeight: $targetWeight')
           ..write(')'))
         .toString();
   }
@@ -2035,6 +1979,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     reps,
     primaryMuscleGroup,
     orderIndex,
+    targetWeight,
   );
   @override
   bool operator ==(Object other) =>
@@ -2046,7 +1991,8 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           other.sets == this.sets &&
           other.reps == this.reps &&
           other.primaryMuscleGroup == this.primaryMuscleGroup &&
-          other.orderIndex == this.orderIndex);
+          other.orderIndex == this.orderIndex &&
+          other.targetWeight == this.targetWeight);
 }
 
 class ExercisesCompanion extends UpdateCompanion<Exercise> {
@@ -2057,6 +2003,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
   final Value<int> reps;
   final Value<String?> primaryMuscleGroup;
   final Value<int> orderIndex;
+  final Value<double> targetWeight;
   const ExercisesCompanion({
     this.id = const Value.absent(),
     this.workoutId = const Value.absent(),
@@ -2065,6 +2012,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     this.reps = const Value.absent(),
     this.primaryMuscleGroup = const Value.absent(),
     this.orderIndex = const Value.absent(),
+    this.targetWeight = const Value.absent(),
   });
   ExercisesCompanion.insert({
     this.id = const Value.absent(),
@@ -2074,6 +2022,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     this.reps = const Value.absent(),
     this.primaryMuscleGroup = const Value.absent(),
     required int orderIndex,
+    this.targetWeight = const Value.absent(),
   }) : workoutId = Value(workoutId),
        name = Value(name),
        orderIndex = Value(orderIndex);
@@ -2085,6 +2034,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     Expression<int>? reps,
     Expression<String>? primaryMuscleGroup,
     Expression<int>? orderIndex,
+    Expression<double>? targetWeight,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2095,6 +2045,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
       if (primaryMuscleGroup != null)
         'primary_muscle_group': primaryMuscleGroup,
       if (orderIndex != null) 'order_index': orderIndex,
+      if (targetWeight != null) 'target_weight': targetWeight,
     });
   }
 
@@ -2106,6 +2057,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     Value<int>? reps,
     Value<String?>? primaryMuscleGroup,
     Value<int>? orderIndex,
+    Value<double>? targetWeight,
   }) {
     return ExercisesCompanion(
       id: id ?? this.id,
@@ -2115,6 +2067,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
       reps: reps ?? this.reps,
       primaryMuscleGroup: primaryMuscleGroup ?? this.primaryMuscleGroup,
       orderIndex: orderIndex ?? this.orderIndex,
+      targetWeight: targetWeight ?? this.targetWeight,
     );
   }
 
@@ -2142,6 +2095,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     if (orderIndex.present) {
       map['order_index'] = Variable<int>(orderIndex.value);
     }
+    if (targetWeight.present) {
+      map['target_weight'] = Variable<double>(targetWeight.value);
+    }
     return map;
   }
 
@@ -2154,7 +2110,8 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
           ..write('sets: $sets, ')
           ..write('reps: $reps, ')
           ..write('primaryMuscleGroup: $primaryMuscleGroup, ')
-          ..write('orderIndex: $orderIndex')
+          ..write('orderIndex: $orderIndex, ')
+          ..write('targetWeight: $targetWeight')
           ..write(')'))
         .toString();
   }
@@ -3994,8 +3951,6 @@ typedef $$SessionsTableCreateCompanionBuilder =
       Value<DateTime?> completedAt,
       Value<int?> durationSeconds,
       Value<int?> intensity,
-      Value<int?> avgBpm,
-      Value<int?> maxBpm,
     });
 typedef $$SessionsTableUpdateCompanionBuilder =
     SessionsCompanion Function({
@@ -4005,8 +3960,6 @@ typedef $$SessionsTableUpdateCompanionBuilder =
       Value<DateTime?> completedAt,
       Value<int?> durationSeconds,
       Value<int?> intensity,
-      Value<int?> avgBpm,
-      Value<int?> maxBpm,
     });
 
 final class $$SessionsTableReferences
@@ -4085,16 +4038,6 @@ class $$SessionsTableFilterComposer
 
   ColumnFilters<int> get intensity => $composableBuilder(
     column: $table.intensity,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get avgBpm => $composableBuilder(
-    column: $table.avgBpm,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get maxBpm => $composableBuilder(
-    column: $table.maxBpm,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4181,16 +4124,6 @@ class $$SessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get avgBpm => $composableBuilder(
-    column: $table.avgBpm,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get maxBpm => $composableBuilder(
-    column: $table.maxBpm,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   $$WorkoutsTableOrderingComposer get workoutId {
     final $$WorkoutsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4242,12 +4175,6 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<int> get intensity =>
       $composableBuilder(column: $table.intensity, builder: (column) => column);
-
-  GeneratedColumn<int> get avgBpm =>
-      $composableBuilder(column: $table.avgBpm, builder: (column) => column);
-
-  GeneratedColumn<int> get maxBpm =>
-      $composableBuilder(column: $table.maxBpm, builder: (column) => column);
 
   $$WorkoutsTableAnnotationComposer get workoutId {
     final $$WorkoutsTableAnnotationComposer composer = $composerBuilder(
@@ -4332,8 +4259,6 @@ class $$SessionsTableTableManager
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<int?> durationSeconds = const Value.absent(),
                 Value<int?> intensity = const Value.absent(),
-                Value<int?> avgBpm = const Value.absent(),
-                Value<int?> maxBpm = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
                 workoutId: workoutId,
@@ -4341,8 +4266,6 @@ class $$SessionsTableTableManager
                 completedAt: completedAt,
                 durationSeconds: durationSeconds,
                 intensity: intensity,
-                avgBpm: avgBpm,
-                maxBpm: maxBpm,
               ),
           createCompanionCallback:
               ({
@@ -4352,8 +4275,6 @@ class $$SessionsTableTableManager
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<int?> durationSeconds = const Value.absent(),
                 Value<int?> intensity = const Value.absent(),
-                Value<int?> avgBpm = const Value.absent(),
-                Value<int?> maxBpm = const Value.absent(),
               }) => SessionsCompanion.insert(
                 id: id,
                 workoutId: workoutId,
@@ -4361,8 +4282,6 @@ class $$SessionsTableTableManager
                 completedAt: completedAt,
                 durationSeconds: durationSeconds,
                 intensity: intensity,
-                avgBpm: avgBpm,
-                maxBpm: maxBpm,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -4465,6 +4384,7 @@ typedef $$ExercisesTableCreateCompanionBuilder =
       Value<int> reps,
       Value<String?> primaryMuscleGroup,
       required int orderIndex,
+      Value<double> targetWeight,
     });
 typedef $$ExercisesTableUpdateCompanionBuilder =
     ExercisesCompanion Function({
@@ -4475,6 +4395,7 @@ typedef $$ExercisesTableUpdateCompanionBuilder =
       Value<int> reps,
       Value<String?> primaryMuscleGroup,
       Value<int> orderIndex,
+      Value<double> targetWeight,
     });
 
 final class $$ExercisesTableReferences
@@ -4560,6 +4481,11 @@ class $$ExercisesTableFilterComposer
 
   ColumnFilters<int> get orderIndex => $composableBuilder(
     column: $table.orderIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get targetWeight => $composableBuilder(
+    column: $table.targetWeight,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4651,6 +4577,11 @@ class $$ExercisesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get targetWeight => $composableBuilder(
+    column: $table.targetWeight,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$WorkoutsTableOrderingComposer get workoutId {
     final $$WorkoutsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4703,6 +4634,11 @@ class $$ExercisesTableAnnotationComposer
 
   GeneratedColumn<int> get orderIndex => $composableBuilder(
     column: $table.orderIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get targetWeight => $composableBuilder(
+    column: $table.targetWeight,
     builder: (column) => column,
   );
 
@@ -4790,6 +4726,7 @@ class $$ExercisesTableTableManager
                 Value<int> reps = const Value.absent(),
                 Value<String?> primaryMuscleGroup = const Value.absent(),
                 Value<int> orderIndex = const Value.absent(),
+                Value<double> targetWeight = const Value.absent(),
               }) => ExercisesCompanion(
                 id: id,
                 workoutId: workoutId,
@@ -4798,6 +4735,7 @@ class $$ExercisesTableTableManager
                 reps: reps,
                 primaryMuscleGroup: primaryMuscleGroup,
                 orderIndex: orderIndex,
+                targetWeight: targetWeight,
               ),
           createCompanionCallback:
               ({
@@ -4808,6 +4746,7 @@ class $$ExercisesTableTableManager
                 Value<int> reps = const Value.absent(),
                 Value<String?> primaryMuscleGroup = const Value.absent(),
                 required int orderIndex,
+                Value<double> targetWeight = const Value.absent(),
               }) => ExercisesCompanion.insert(
                 id: id,
                 workoutId: workoutId,
@@ -4816,6 +4755,7 @@ class $$ExercisesTableTableManager
                 reps: reps,
                 primaryMuscleGroup: primaryMuscleGroup,
                 orderIndex: orderIndex,
+                targetWeight: targetWeight,
               ),
           withReferenceMapper: (p0) => p0
               .map(
