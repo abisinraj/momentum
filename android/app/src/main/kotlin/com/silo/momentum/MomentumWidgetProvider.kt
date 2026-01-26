@@ -64,7 +64,7 @@ class MomentumWidgetProvider : AppWidgetProvider() {
             val title = prefs.getString("widget_title", "No Workout") ?: "No Workout"
             val desc = prefs.getString("widget_desc", "Tap to view") ?: "Tap to view"
             val nextWorkout = prefs.getString("widget_next_workout", "") ?: ""
-            val weeklyProgress = prefs.getString("widget_cycle_progress", "1/3") ?: "1/3"
+            val weeklyProgress = prefs.getString("widget_cycle_progress", "--/--") ?: "--/--"
             
             // Update views
             views.setTextViewText(R.id.widget_streak, "\uD83D\uDD25 $streak") // Fire emoji

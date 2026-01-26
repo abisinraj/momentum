@@ -218,12 +218,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     
     // 1. Identify "Today's Target" (Current Split Index)
     final todaysWorkouts = workouts.where((w) => w.orderIndex == currentSplitIndex).toList();
-    final otherWorkouts = workouts.where((w) => w.orderIndex != currentSplitIndex).toList();
     
-    // If user toggled "Show All", just show the old list style, or maybe mix them?
-    // User request: "let it show today's split name ... scrollable"
-    // Let's make "Show All" toggle between the Dashboard View (Comparison) and the List View (Management).
-    
+    // If user toggled "Show All", show standard list view
     if (_showAllWorkouts) {
       return _buildWorkoutList(context, ref, workouts, todayCompletedAsync, workouts.length, currentSplitIndex);
     }
@@ -238,47 +234,48 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           // Main Comparison Card(s) for Today
-           ...todaysWorkouts.map((workout) => Padding(
-             padding: const EdgeInsets.only(bottom: 24.0),
-             child: WorkoutComparisonCard(
-               workoutId: workout.id,
-               onStart: () => _startWorkout(context, ref, workout),
-             ),
-           )),
+           // Logic: If multiple workouts for today, show as list to avoid clutter.
+           // If single, show the rich Comparison Card.
            
-           if (otherWorkouts.isNotEmpty) ...[
-             const SizedBox(height: 16),
+           if (todaysWorkouts.length > 1) ...[
              Text(
-               "OTHER WORKOUTS",
+               "TODAY'S SPLIT",
                style: TextStyle(
                  fontSize: 12,
                  fontWeight: FontWeight.bold,
-                 color: Theme.of(context).colorScheme.onSurfaceVariant,
+                 color: Theme.of(context).colorScheme.primary,
                  letterSpacing: 1.2,
                ),
              ),
-             const SizedBox(height: 12),
-             // Compact list for others
-             ...otherWorkouts.map((w) => _WorkoutCard(
-               workout: w,
-               isCompleted: todayCompleted.contains(w.id),
-               isActive: false, // Dashboard handles active separately usually
-               isLocked: true, // Locked/Dimmed to emphasize focus
-               index: w.orderIndex,
+             const SizedBox(height: 16),
+             ...todaysWorkouts.map((workout) => _WorkoutCard(
+               workout: workout,
+               isCompleted: todayCompleted.contains(workout.id),
+               isActive: false, 
+               isLocked: false,
+               index: workout.orderIndex,
                total: workouts.length,
-               onDelete: () {}, // Disable delete from here for safety
-               onTap: null, // Lock interaction in focus mode
+               onTap: () => _startWorkout(context, ref, workout),
+               onDelete: () => _confirmDelete(context, ref, workout),
              )),
-             
-             Center(
-               child: TextButton(
-                 onPressed: () => setState(() => _showAllWorkouts = true),
-                 child: const Text("Manage All Workouts"),
-               ),
+           ] else ...[
+             // Single Focus Mode
+             WorkoutComparisonCard(
+               workoutId: todaysWorkouts.first.id,
+               onStart: () => _startWorkout(context, ref, todaysWorkouts.first),
              ),
-             const SizedBox(height: 40), // Bottom padding
-           ]
+           ],
+           
+           const SizedBox(height: 24),
+           
+           // "Manage All" button
+           Center(
+             child: TextButton(
+               onPressed: () => setState(() => _showAllWorkouts = true),
+               child: const Text("Manage Future Workouts"),
+             ),
+           ),
+           const SizedBox(height: 40), 
         ],
       ),
     );
