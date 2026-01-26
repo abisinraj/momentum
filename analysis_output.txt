@@ -1,5 +1,6 @@
 Analyzing momentum...                                           
 
-  error • The returned type 'Stream<Map<DateTime, String>>' isn't returnable from a 'FutureOr<Map<DateTime, String>>' function, as required by the closure's context • lib/core/providers/database_providers.g.dart:203:18 • return_of_invalid_type_from_closure
+warning • The value of the local variable 'totalSetDuration' isn't used • lib/core/database/app_database.dart:592:9 • unused_local_variable
+   info • Use 'const' with the constructor to improve performance • lib/features/workout/presentation/active_workout_screen.dart:346:25 • prefer_const_constructors
 
-1 issue found. (ran in 4.2s)
+2 issues found. (ran in 12.4s)

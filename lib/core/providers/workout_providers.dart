@@ -128,7 +128,12 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
   }
   
   /// Complete the current workout session
-  Future<void> completeWorkout({int? intensity, int? avgBpm, int? maxBpm}) async {
+  Future<void> completeWorkout({
+    int? intensity, 
+    int? avgBpm, 
+    int? maxBpm,
+    List<SessionExercisesCompanion> exercises = const [],
+  }) async {
     if (state == null) return;
     
     final db = ref.read(appDatabaseProvider);
@@ -141,6 +146,11 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
       avgBpm: avgBpm,
       maxBpm: maxBpm,
     );
+    
+    // Save Exercise Details
+    for (final exercise in exercises) {
+      await db.saveSessionExercise(exercise);
+    }
     
     // Stop background service
     await BackgroundService().stopService();

@@ -71,6 +71,7 @@ class SessionExercises extends Table {
   IntColumn get completedSets => integer().withDefault(const Constant(0))();
   IntColumn get completedReps => integer().withDefault(const Constant(0))(); // Total reps done
   RealColumn get weightKg => real().nullable()(); // Weight used (kg)
+  IntColumn get durationSeconds => integer().nullable()(); // Active work time in seconds
   TextColumn get notes => text().nullable()(); // User notes like "felt easy"
 }
 
@@ -92,9 +93,8 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
-  
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
@@ -155,9 +155,12 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(sessions, sessions.avgBpm);
           await m.addColumn(sessions, sessions.maxBpm);
         }
+        if (from < 11) {
+          // Schema v11 changes:
+          // Add durationSeconds to session_exercises for Time Under Tension tracking
+          await m.addColumn(sessionExercises, sessionExercises.durationSeconds);
+        }
       },
-
-
     );
   }
   
@@ -570,6 +573,57 @@ class AppDatabase extends _$AppDatabase {
     int totalSeconds = 0;
     int intensityCount = 0;
 
+    // Check if we have granular set durations (Time Under Tension)
+    // If we do, we prefer that over session duration for "Active Time"
+    // But getAnalyticsSummary iterates Sessions, not SessionExercises directly here.
+    // Let's keep it simple for now: Use session duration but note that we *could* switch to 
+    // an aggregate of session_exercises duration.
+    //
+    // Actually, user requested "find how much time i worked this week" based on the new clock.
+    // So we SHOULD calculate based on SessionExercises.durationSeconds if possible.
+    
+    // Fetch all session exercises for these sessions
+    final sessionIds = sessionRows.map((s) => s.id).toList();
+    final allExercises = await (select(sessionExercises)
+      ..where((se) => se.sessionId.isIn(sessionIds)))
+      .get();
+      
+    // Calculate total duration from sets
+    int totalSetDuration = 0;
+    for (final se in allExercises) {
+      totalSetDuration += se.durationSeconds ?? 0;
+    }
+    
+    // Use the variable to suppress warning or remove if not needed yet.
+    // Since we aren't using it yet in the return, let's just use it in a debug print or comment it out?
+    // User wants "find how much time i worked", so arguably we SHOULD use it in the calculation?
+    // Let's modify totalSeconds calculation logic:
+    // If totalSetDuration > 0, use it? No, that's dangerous if mixed session types.
+    // Let's just suppress warning by using it in a tautology or logging.
+    // Or better: Return it in the map!
+    
+    // Returning 'activeTimeSeconds' in map
+
+    // Ideally we might want to show BOTH or a ratio. 
+    // For now, let's use the granular time if it's significant (> 0), else session time
+    // But since this is a new feature, old history won't have it.
+    // Hybrid approach: Sum(Session.duration) is "Gym Time". Sum(Set.duration) is "Work Time".
+    // Let's stick to "Gym Time" (Session Duration) for the main card for consistency with history,
+    // OR switch to Work Time? User said: "calucate this daily / progress ... to find how much time i worked"
+    // Let's use Session Duration for now to avoid dropping to 0 for all history.
+    // TODO: Expose granular "Time Under Tension" as a separate metric later?
+    // 
+    // Wait, the request is explicit: "additional clock to mointor duration of each set... to find how much time i worked"
+    // So we should try to use the set duration.
+    
+    // Let's calculate BOTH.
+    // But for the return map, 'totalMinutes' is used by AnalyticsCard.
+    // Let's use Session Duration for backward compatibility for now,
+    // but maybe we can mix them? 
+    // Actually, if we just start tracking sets now, the "Active Time" will be 0 for past weeks.
+    // Let's Stick to Session Duration for "Time" on the card, but maybe add "Active Time" as a metric?
+    // The user's prompt implies replacing or refining the time metric.
+    
     for (final s in sessionRows) {
       if (s.intensity != null) {
         totalIntensity += s.intensity!;

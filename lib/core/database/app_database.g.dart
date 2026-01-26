@@ -2242,6 +2242,17 @@ class $SessionExercisesTable extends SessionExercises
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _durationSecondsMeta = const VerificationMeta(
+    'durationSeconds',
+  );
+  @override
+  late final GeneratedColumn<int> durationSeconds = GeneratedColumn<int>(
+    'duration_seconds',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -2259,6 +2270,7 @@ class $SessionExercisesTable extends SessionExercises
     completedSets,
     completedReps,
     weightKg,
+    durationSeconds,
     notes,
   ];
   @override
@@ -2316,6 +2328,15 @@ class $SessionExercisesTable extends SessionExercises
         weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
       );
     }
+    if (data.containsKey('duration_seconds')) {
+      context.handle(
+        _durationSecondsMeta,
+        durationSeconds.isAcceptableOrUnknown(
+          data['duration_seconds']!,
+          _durationSecondsMeta,
+        ),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -2355,6 +2376,10 @@ class $SessionExercisesTable extends SessionExercises
         DriftSqlType.double,
         data['${effectivePrefix}weight_kg'],
       ),
+      durationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_seconds'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -2375,6 +2400,7 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
   final int completedSets;
   final int completedReps;
   final double? weightKg;
+  final int? durationSeconds;
   final String? notes;
   const SessionExercise({
     required this.id,
@@ -2383,6 +2409,7 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
     required this.completedSets,
     required this.completedReps,
     this.weightKg,
+    this.durationSeconds,
     this.notes,
   });
   @override
@@ -2395,6 +2422,9 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
     map['completed_reps'] = Variable<int>(completedReps);
     if (!nullToAbsent || weightKg != null) {
       map['weight_kg'] = Variable<double>(weightKg);
+    }
+    if (!nullToAbsent || durationSeconds != null) {
+      map['duration_seconds'] = Variable<int>(durationSeconds);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -2412,6 +2442,9 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
       weightKg: weightKg == null && nullToAbsent
           ? const Value.absent()
           : Value(weightKg),
+      durationSeconds: durationSeconds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationSeconds),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -2430,6 +2463,7 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
       completedSets: serializer.fromJson<int>(json['completedSets']),
       completedReps: serializer.fromJson<int>(json['completedReps']),
       weightKg: serializer.fromJson<double?>(json['weightKg']),
+      durationSeconds: serializer.fromJson<int?>(json['durationSeconds']),
       notes: serializer.fromJson<String?>(json['notes']),
     );
   }
@@ -2443,6 +2477,7 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
       'completedSets': serializer.toJson<int>(completedSets),
       'completedReps': serializer.toJson<int>(completedReps),
       'weightKg': serializer.toJson<double?>(weightKg),
+      'durationSeconds': serializer.toJson<int?>(durationSeconds),
       'notes': serializer.toJson<String?>(notes),
     };
   }
@@ -2454,6 +2489,7 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
     int? completedSets,
     int? completedReps,
     Value<double?> weightKg = const Value.absent(),
+    Value<int?> durationSeconds = const Value.absent(),
     Value<String?> notes = const Value.absent(),
   }) => SessionExercise(
     id: id ?? this.id,
@@ -2462,6 +2498,9 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
     completedSets: completedSets ?? this.completedSets,
     completedReps: completedReps ?? this.completedReps,
     weightKg: weightKg.present ? weightKg.value : this.weightKg,
+    durationSeconds: durationSeconds.present
+        ? durationSeconds.value
+        : this.durationSeconds,
     notes: notes.present ? notes.value : this.notes,
   );
   SessionExercise copyWithCompanion(SessionExercisesCompanion data) {
@@ -2478,6 +2517,9 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
           ? data.completedReps.value
           : this.completedReps,
       weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
+      durationSeconds: data.durationSeconds.present
+          ? data.durationSeconds.value
+          : this.durationSeconds,
       notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
@@ -2491,6 +2533,7 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
           ..write('completedSets: $completedSets, ')
           ..write('completedReps: $completedReps, ')
           ..write('weightKg: $weightKg, ')
+          ..write('durationSeconds: $durationSeconds, ')
           ..write('notes: $notes')
           ..write(')'))
         .toString();
@@ -2504,6 +2547,7 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
     completedSets,
     completedReps,
     weightKg,
+    durationSeconds,
     notes,
   );
   @override
@@ -2516,6 +2560,7 @@ class SessionExercise extends DataClass implements Insertable<SessionExercise> {
           other.completedSets == this.completedSets &&
           other.completedReps == this.completedReps &&
           other.weightKg == this.weightKg &&
+          other.durationSeconds == this.durationSeconds &&
           other.notes == this.notes);
 }
 
@@ -2526,6 +2571,7 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
   final Value<int> completedSets;
   final Value<int> completedReps;
   final Value<double?> weightKg;
+  final Value<int?> durationSeconds;
   final Value<String?> notes;
   const SessionExercisesCompanion({
     this.id = const Value.absent(),
@@ -2534,6 +2580,7 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
     this.completedSets = const Value.absent(),
     this.completedReps = const Value.absent(),
     this.weightKg = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
     this.notes = const Value.absent(),
   });
   SessionExercisesCompanion.insert({
@@ -2543,6 +2590,7 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
     this.completedSets = const Value.absent(),
     this.completedReps = const Value.absent(),
     this.weightKg = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
     this.notes = const Value.absent(),
   }) : sessionId = Value(sessionId),
        exerciseId = Value(exerciseId);
@@ -2553,6 +2601,7 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
     Expression<int>? completedSets,
     Expression<int>? completedReps,
     Expression<double>? weightKg,
+    Expression<int>? durationSeconds,
     Expression<String>? notes,
   }) {
     return RawValuesInsertable({
@@ -2562,6 +2611,7 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
       if (completedSets != null) 'completed_sets': completedSets,
       if (completedReps != null) 'completed_reps': completedReps,
       if (weightKg != null) 'weight_kg': weightKg,
+      if (durationSeconds != null) 'duration_seconds': durationSeconds,
       if (notes != null) 'notes': notes,
     });
   }
@@ -2573,6 +2623,7 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
     Value<int>? completedSets,
     Value<int>? completedReps,
     Value<double?>? weightKg,
+    Value<int?>? durationSeconds,
     Value<String?>? notes,
   }) {
     return SessionExercisesCompanion(
@@ -2582,6 +2633,7 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
       completedSets: completedSets ?? this.completedSets,
       completedReps: completedReps ?? this.completedReps,
       weightKg: weightKg ?? this.weightKg,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
       notes: notes ?? this.notes,
     );
   }
@@ -2607,6 +2659,9 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
     if (weightKg.present) {
       map['weight_kg'] = Variable<double>(weightKg.value);
     }
+    if (durationSeconds.present) {
+      map['duration_seconds'] = Variable<int>(durationSeconds.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -2622,6 +2677,7 @@ class SessionExercisesCompanion extends UpdateCompanion<SessionExercise> {
           ..write('completedSets: $completedSets, ')
           ..write('completedReps: $completedReps, ')
           ..write('weightKg: $weightKg, ')
+          ..write('durationSeconds: $durationSeconds, ')
           ..write('notes: $notes')
           ..write(')'))
         .toString();
@@ -4861,6 +4917,7 @@ typedef $$SessionExercisesTableCreateCompanionBuilder =
       Value<int> completedSets,
       Value<int> completedReps,
       Value<double?> weightKg,
+      Value<int?> durationSeconds,
       Value<String?> notes,
     });
 typedef $$SessionExercisesTableUpdateCompanionBuilder =
@@ -4871,6 +4928,7 @@ typedef $$SessionExercisesTableUpdateCompanionBuilder =
       Value<int> completedSets,
       Value<int> completedReps,
       Value<double?> weightKg,
+      Value<int?> durationSeconds,
       Value<String?> notes,
     });
 
@@ -4948,6 +5006,11 @@ class $$SessionExercisesTableFilterComposer
 
   ColumnFilters<double> get weightKg => $composableBuilder(
     column: $table.weightKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5032,6 +5095,11 @@ class $$SessionExercisesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -5108,6 +5176,11 @@ class $$SessionExercisesTableAnnotationComposer
 
   GeneratedColumn<double> get weightKg =>
       $composableBuilder(column: $table.weightKg, builder: (column) => column);
+
+  GeneratedColumn<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
@@ -5195,6 +5268,7 @@ class $$SessionExercisesTableTableManager
                 Value<int> completedSets = const Value.absent(),
                 Value<int> completedReps = const Value.absent(),
                 Value<double?> weightKg = const Value.absent(),
+                Value<int?> durationSeconds = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
               }) => SessionExercisesCompanion(
                 id: id,
@@ -5203,6 +5277,7 @@ class $$SessionExercisesTableTableManager
                 completedSets: completedSets,
                 completedReps: completedReps,
                 weightKg: weightKg,
+                durationSeconds: durationSeconds,
                 notes: notes,
               ),
           createCompanionCallback:
@@ -5213,6 +5288,7 @@ class $$SessionExercisesTableTableManager
                 Value<int> completedSets = const Value.absent(),
                 Value<int> completedReps = const Value.absent(),
                 Value<double?> weightKg = const Value.absent(),
+                Value<int?> durationSeconds = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
               }) => SessionExercisesCompanion.insert(
                 id: id,
@@ -5221,6 +5297,7 @@ class $$SessionExercisesTableTableManager
                 completedSets: completedSets,
                 completedReps: completedReps,
                 weightKg: weightKg,
+                durationSeconds: durationSeconds,
                 notes: notes,
               ),
           withReferenceMapper: (p0) => p0
