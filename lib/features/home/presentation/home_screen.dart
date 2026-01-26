@@ -965,7 +965,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 
   Widget _buildConsistencyGrid(WidgetRef ref) {
-    final gridAsync = ref.watch(activityGridProvider(150));
+    final gridAsync = ref.watch(activityGridProvider(200));
     final data = gridAsync.valueOrNull;
     
     // If no data yet, show nothing
