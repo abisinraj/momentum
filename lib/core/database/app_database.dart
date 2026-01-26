@@ -60,6 +60,7 @@ class Sessions extends Table {
   DateTimeColumn get completedAt => dateTime().nullable()();
   IntColumn get durationSeconds => integer().nullable()();
   IntColumn get intensity => integer().nullable()(); // RPE 1-10
+  IntColumn get caloriesBurned => integer().nullable()();
 }
 
 /// SessionExercises table - stores completed exercise data per session
@@ -103,7 +104,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration {
@@ -176,6 +177,11 @@ class AppDatabase extends _$AppDatabase {
           // Schema v13 changes:
           // Add SleepLogs table
           await m.createTable(sleepLogs);
+        }
+        if (from < 14) {
+          // Schema v14 changes:
+          // Add caloriesBurned to sessions
+          await m.addColumn(sessions, sessions.caloriesBurned);
         }
       },
     );
@@ -338,6 +344,10 @@ class AppDatabase extends _$AppDatabase {
   /// Get all exercise data for a specific session
   Future<List<SessionExercise>> getSessionExercises(int sessionId) =>
       (select(sessionExercises)..where((se) => se.sessionId.equals(sessionId))).get();
+  
+  /// Get a single session exercise by ID
+  Future<SessionExercise?> getSessionExerciseById(int id) =>
+      (select(sessionExercises)..where((se) => se.id.equals(id))).getSingleOrNull();
   
   /// Update exercise completion data
   Future<bool> updateSessionExercise(SessionExercisesCompanion data) =>
@@ -658,9 +668,18 @@ class AppDatabase extends _$AppDatabase {
     final avgIntensity = intensityCount > 0 ? (totalIntensity / intensityCount) : 0.0;
     final totalMinutes = totalSeconds ~/ 60;
     
-    // Calorie Estimation Logic: minutes * MET(7.0) * (Intensity/10)
-    // MET 7.0 is a reasonable average for resistance training
-    final calories = (totalMinutes * 7.0 * (avgIntensity / 5.0)).round(); // Adjusted for 5 being "normal"
+    // Calorie Calculation Logic
+    int calories = 0;
+    for (final s in sessionRows) {
+      if (s.caloriesBurned != null) {
+        calories += s.caloriesBurned!;
+      } else {
+        // Fallback to MET formula for legacy/failed AI sessions
+        final mins = (s.durationSeconds ?? 0) ~/ 60;
+        final intentFactor = (s.intensity ?? 5) / 5.0;
+        calories += (mins * 7.0 * intentFactor).round();
+      }
+    }
     
     // We can return the granular active time here if needed for future use
     // For now, let's just log it or ignore the warning by using it

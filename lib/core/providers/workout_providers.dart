@@ -140,8 +140,39 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
     );
     
     // Save Exercise Details
+    final List<SessionExercise> savedExercises = [];
     for (final exercise in exercises) {
-      await db.saveSessionExercise(exercise);
+      final id = await db.saveSessionExercise(exercise);
+      // Fetch the saved exercise to pass to AI
+      final saved = await db.getSessionExerciseById(id);
+      if (saved != null) savedExercises.add(saved);
+    }
+
+    // AI CALORIE ESTIMATION
+    try {
+      final user = await ref.read(currentUserProvider.future);
+      final workout = await db.getWorkout(state!.workoutId);
+      final exerciseDefs = await db.getExercisesForWorkout(state!.workoutId);
+      final apiKey = ref.read(geminiApiKeyProvider).valueOrNull;
+
+      if (user != null && workout != null) {
+        final calories = await ref.read(aiInsightsServiceProvider).estimateCalorieBurn(
+              user: user,
+              workout: workout,
+              exercises: savedExercises,
+              durationSeconds: duration.inSeconds,
+              intensity: intensity,
+              apiKey: apiKey,
+              exerciseDefinitions: exerciseDefs,
+            );
+
+        if (calories != null) {
+          await (db.update(db.sessions)..where((s) => s.id.equals(state!.sessionId)))
+              .write(SessionsCompanion(caloriesBurned: Value(calories)));
+        }
+      }
+    } catch (e) {
+      debugPrint('[DEBUG] Calorie Estimation Error: $e');
     }
 
     // Apply Progressive Overload Logic

@@ -90,4 +90,83 @@ class AIInsightsService {
     - Max length: 20 words.
     ''';
   }
+
+  Future<int?> estimateCalorieBurn({
+    required User user,
+    required Workout workout,
+    required List<SessionExercise> exercises,
+    required int durationSeconds,
+    required int? intensity,
+    required String? apiKey,
+    required List<Exercise> exerciseDefinitions,
+  }) async {
+    try {
+      if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
+        // Fallback to MET formula if no API key
+        // MET 7.0 for resistance training
+        final weight = user.weightKg ?? 70.0;
+        final hours = durationSeconds / 3600.0;
+        final intensityFactor = (intensity ?? 5) / 5.0;
+        return (7.0 * weight * hours * intensityFactor).round();
+      }
+
+      final model = GenerativeModel(model: 'gemini-3-flash-preview', apiKey: apiKey);
+      
+      final prompt = _constructCaloriePrompt(user, workout, exercises, durationSeconds, intensity, exerciseDefinitions);
+      final content = [Content.text(prompt)];
+      
+      final response = await model.generateContent(content);
+      final text = response.text?.trim() ?? "";
+      
+      // Extract number from AI response
+      final numbers = RegExp(r'\d+').allMatches(text);
+      if (numbers.isNotEmpty) {
+        return int.parse(numbers.first.group(0)!);
+      }
+      
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String _constructCaloriePrompt(
+    User user,
+    Workout workout,
+    List<SessionExercise> sessions,
+    int durationSeconds,
+    int? intensity,
+    List<Exercise> exerciseDefinitions,
+  ) {
+    final weight = user.weightKg != null ? '${user.weightKg}kg' : '70kg';
+    final age = user.age ?? 30;
+    
+    StringBuffer exerciseList = StringBuffer();
+    for (var se in sessions) {
+      final def = exerciseDefinitions.firstWhere((e) => e.id == se.exerciseId);
+      exerciseList.writeln("- ${def.name}: ${se.completedSets} sets, ${se.completedReps} total reps, weight: ${se.weightKg ?? 'Bodyweight'}");
+    }
+
+    return '''
+    Task: Estimate calorie burn for a weightlifting session.
+    
+    User Stats:
+    - Weight: $weight
+    - Age: $age
+    
+    Workout Details:
+    - Name: ${workout.name}
+    - Duration: ${durationSeconds ~/ 60} minutes
+    - Intensity (RPE 1-10): ${intensity ?? 'Moderate (5)'}
+    
+    Exercises Performed:
+    ${exerciseList.toString()}
+    
+    Instructions:
+    Return ONLY the estimated number of calories burned as a single integer. No words, no explanation.
+    
+    Example:
+    350
+    ''';
+  }
 }

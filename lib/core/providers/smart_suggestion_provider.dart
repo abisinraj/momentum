@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/database/app_database.dart';
 import 'package:momentum/core/providers/database_providers.dart';
 import 'package:momentum/core/services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Types of suggestions
 enum SuggestionType {
@@ -82,11 +83,20 @@ final smartSuggestionsProvider = FutureProvider.autoDispose<List<SmartSuggestion
         // suggestions.add(SmartSuggestion(...)) // REMOVED FROM UI
         
         // TRIGGER PUSH NOTIFICATION INSTEAD
-        NotificationService().showNotification(
-          id: workout.id + 1000, // Unique-ish ID
-          title: 'Cycle Balance',
-          body: 'It\'s been a while since you did ${workout.name}. Consider prioritizing it today!',
-        );
+        // RATE LIMIT: At most once every 24 hours
+        final prefs = await SharedPreferences.getInstance();
+        final lastNotifyKey = 'last_balance_notify_${workout.id}';
+        final lastNotifyMs = prefs.getInt(lastNotifyKey) ?? 0;
+        final lastNotify = DateTime.fromMillisecondsSinceEpoch(lastNotifyMs);
+        
+        if (now.difference(lastNotify).inHours >= 24) {
+          NotificationService().showNotification(
+            id: workout.id + 1000, // Unique-ish ID
+            title: 'Cycle Balance',
+            body: 'It\'s been a while since you did ${workout.name}. Consider prioritizing it today!',
+          );
+          await prefs.setInt(lastNotifyKey, now.millisecondsSinceEpoch);
+        }
         
         // Only one adaptive suggestion alert at a time to avoid spam
         break;

@@ -89,28 +89,19 @@ final dailyBurnProvider = FutureProvider<int>((ref) async {
   final todaySessions = await db.getSessionsForDate(DateTime.now());
   final completed = todaySessions.where((s) => s.completedAt != null);
   
-  int totalMinutes = 0;
-  double totalIntensity = 0;
-  int count = 0;
-  
+  int totalCalories = 0;
   for (final s in completed) {
-    totalMinutes += (s.durationSeconds ?? 0) ~/ 60;
-    if (s.intensity != null) {
-      totalIntensity += s.intensity!;
-      count++;
+    if (s.caloriesBurned != null) {
+      totalCalories += s.caloriesBurned!;
+    } else {
+      final mins = (s.durationSeconds ?? 0) ~/ 60;
+      final weight = (await db.getUser())?.weightKg ?? 70.0;
+      final intensityFactor = (s.intensity ?? 5) / 5.0;
+      totalCalories += (6.0 * intensityFactor * weight * (mins / 60.0)).round();
     }
   }
   
-  final avgIntensity = count > 0 ? totalIntensity / count : 5.0; // Default moderate
-  final weight = (await db.getUser())?.weightKg ?? 70.0;
-  
-  // MET Formula: MET * Weight * Hours
-  // Resistance Training ~ 5-7 METs
-  // Adjusted by intensity (1-10) -> (Intensity/5) * 6.0 METs base?
-  final met = 6.0 * (avgIntensity / 5.0);
-  final hours = totalMinutes / 60.0;
-  
-  return (met * weight * hours).round();
+  return totalCalories;
 });
 
 final netCaloriesProvider = FutureProvider<Map<String, int>>((ref) async {

@@ -1259,6 +1259,17 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _caloriesBurnedMeta = const VerificationMeta(
+    'caloriesBurned',
+  );
+  @override
+  late final GeneratedColumn<int> caloriesBurned = GeneratedColumn<int>(
+    'calories_burned',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1267,6 +1278,7 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     completedAt,
     durationSeconds,
     intensity,
+    caloriesBurned,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1323,6 +1335,15 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         intensity.isAcceptableOrUnknown(data['intensity']!, _intensityMeta),
       );
     }
+    if (data.containsKey('calories_burned')) {
+      context.handle(
+        _caloriesBurnedMeta,
+        caloriesBurned.isAcceptableOrUnknown(
+          data['calories_burned']!,
+          _caloriesBurnedMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1356,6 +1377,10 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         DriftSqlType.int,
         data['${effectivePrefix}intensity'],
       ),
+      caloriesBurned: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}calories_burned'],
+      ),
     );
   }
 
@@ -1372,6 +1397,7 @@ class Session extends DataClass implements Insertable<Session> {
   final DateTime? completedAt;
   final int? durationSeconds;
   final int? intensity;
+  final int? caloriesBurned;
   const Session({
     required this.id,
     required this.workoutId,
@@ -1379,6 +1405,7 @@ class Session extends DataClass implements Insertable<Session> {
     this.completedAt,
     this.durationSeconds,
     this.intensity,
+    this.caloriesBurned,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1394,6 +1421,9 @@ class Session extends DataClass implements Insertable<Session> {
     }
     if (!nullToAbsent || intensity != null) {
       map['intensity'] = Variable<int>(intensity);
+    }
+    if (!nullToAbsent || caloriesBurned != null) {
+      map['calories_burned'] = Variable<int>(caloriesBurned);
     }
     return map;
   }
@@ -1412,6 +1442,9 @@ class Session extends DataClass implements Insertable<Session> {
       intensity: intensity == null && nullToAbsent
           ? const Value.absent()
           : Value(intensity),
+      caloriesBurned: caloriesBurned == null && nullToAbsent
+          ? const Value.absent()
+          : Value(caloriesBurned),
     );
   }
 
@@ -1427,6 +1460,7 @@ class Session extends DataClass implements Insertable<Session> {
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
       durationSeconds: serializer.fromJson<int?>(json['durationSeconds']),
       intensity: serializer.fromJson<int?>(json['intensity']),
+      caloriesBurned: serializer.fromJson<int?>(json['caloriesBurned']),
     );
   }
   @override
@@ -1439,6 +1473,7 @@ class Session extends DataClass implements Insertable<Session> {
       'completedAt': serializer.toJson<DateTime?>(completedAt),
       'durationSeconds': serializer.toJson<int?>(durationSeconds),
       'intensity': serializer.toJson<int?>(intensity),
+      'caloriesBurned': serializer.toJson<int?>(caloriesBurned),
     };
   }
 
@@ -1449,6 +1484,7 @@ class Session extends DataClass implements Insertable<Session> {
     Value<DateTime?> completedAt = const Value.absent(),
     Value<int?> durationSeconds = const Value.absent(),
     Value<int?> intensity = const Value.absent(),
+    Value<int?> caloriesBurned = const Value.absent(),
   }) => Session(
     id: id ?? this.id,
     workoutId: workoutId ?? this.workoutId,
@@ -1458,6 +1494,9 @@ class Session extends DataClass implements Insertable<Session> {
         ? durationSeconds.value
         : this.durationSeconds,
     intensity: intensity.present ? intensity.value : this.intensity,
+    caloriesBurned: caloriesBurned.present
+        ? caloriesBurned.value
+        : this.caloriesBurned,
   );
   Session copyWithCompanion(SessionsCompanion data) {
     return Session(
@@ -1471,6 +1510,9 @@ class Session extends DataClass implements Insertable<Session> {
           ? data.durationSeconds.value
           : this.durationSeconds,
       intensity: data.intensity.present ? data.intensity.value : this.intensity,
+      caloriesBurned: data.caloriesBurned.present
+          ? data.caloriesBurned.value
+          : this.caloriesBurned,
     );
   }
 
@@ -1482,7 +1524,8 @@ class Session extends DataClass implements Insertable<Session> {
           ..write('startedAt: $startedAt, ')
           ..write('completedAt: $completedAt, ')
           ..write('durationSeconds: $durationSeconds, ')
-          ..write('intensity: $intensity')
+          ..write('intensity: $intensity, ')
+          ..write('caloriesBurned: $caloriesBurned')
           ..write(')'))
         .toString();
   }
@@ -1495,6 +1538,7 @@ class Session extends DataClass implements Insertable<Session> {
     completedAt,
     durationSeconds,
     intensity,
+    caloriesBurned,
   );
   @override
   bool operator ==(Object other) =>
@@ -1505,7 +1549,8 @@ class Session extends DataClass implements Insertable<Session> {
           other.startedAt == this.startedAt &&
           other.completedAt == this.completedAt &&
           other.durationSeconds == this.durationSeconds &&
-          other.intensity == this.intensity);
+          other.intensity == this.intensity &&
+          other.caloriesBurned == this.caloriesBurned);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
@@ -1515,6 +1560,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<DateTime?> completedAt;
   final Value<int?> durationSeconds;
   final Value<int?> intensity;
+  final Value<int?> caloriesBurned;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.workoutId = const Value.absent(),
@@ -1522,6 +1568,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.completedAt = const Value.absent(),
     this.durationSeconds = const Value.absent(),
     this.intensity = const Value.absent(),
+    this.caloriesBurned = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1530,6 +1577,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.completedAt = const Value.absent(),
     this.durationSeconds = const Value.absent(),
     this.intensity = const Value.absent(),
+    this.caloriesBurned = const Value.absent(),
   }) : workoutId = Value(workoutId),
        startedAt = Value(startedAt);
   static Insertable<Session> custom({
@@ -1539,6 +1587,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<DateTime>? completedAt,
     Expression<int>? durationSeconds,
     Expression<int>? intensity,
+    Expression<int>? caloriesBurned,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1547,6 +1596,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       if (completedAt != null) 'completed_at': completedAt,
       if (durationSeconds != null) 'duration_seconds': durationSeconds,
       if (intensity != null) 'intensity': intensity,
+      if (caloriesBurned != null) 'calories_burned': caloriesBurned,
     });
   }
 
@@ -1557,6 +1607,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Value<DateTime?>? completedAt,
     Value<int?>? durationSeconds,
     Value<int?>? intensity,
+    Value<int?>? caloriesBurned,
   }) {
     return SessionsCompanion(
       id: id ?? this.id,
@@ -1565,6 +1616,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       completedAt: completedAt ?? this.completedAt,
       durationSeconds: durationSeconds ?? this.durationSeconds,
       intensity: intensity ?? this.intensity,
+      caloriesBurned: caloriesBurned ?? this.caloriesBurned,
     );
   }
 
@@ -1589,6 +1641,9 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (intensity.present) {
       map['intensity'] = Variable<int>(intensity.value);
     }
+    if (caloriesBurned.present) {
+      map['calories_burned'] = Variable<int>(caloriesBurned.value);
+    }
     return map;
   }
 
@@ -1600,7 +1655,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('startedAt: $startedAt, ')
           ..write('completedAt: $completedAt, ')
           ..write('durationSeconds: $durationSeconds, ')
-          ..write('intensity: $intensity')
+          ..write('intensity: $intensity, ')
+          ..write('caloriesBurned: $caloriesBurned')
           ..write(')'))
         .toString();
   }
@@ -4428,6 +4484,7 @@ typedef $$SessionsTableCreateCompanionBuilder =
       Value<DateTime?> completedAt,
       Value<int?> durationSeconds,
       Value<int?> intensity,
+      Value<int?> caloriesBurned,
     });
 typedef $$SessionsTableUpdateCompanionBuilder =
     SessionsCompanion Function({
@@ -4437,6 +4494,7 @@ typedef $$SessionsTableUpdateCompanionBuilder =
       Value<DateTime?> completedAt,
       Value<int?> durationSeconds,
       Value<int?> intensity,
+      Value<int?> caloriesBurned,
     });
 
 final class $$SessionsTableReferences
@@ -4515,6 +4573,11 @@ class $$SessionsTableFilterComposer
 
   ColumnFilters<int> get intensity => $composableBuilder(
     column: $table.intensity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get caloriesBurned => $composableBuilder(
+    column: $table.caloriesBurned,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4601,6 +4664,11 @@ class $$SessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get caloriesBurned => $composableBuilder(
+    column: $table.caloriesBurned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$WorkoutsTableOrderingComposer get workoutId {
     final $$WorkoutsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4652,6 +4720,11 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<int> get intensity =>
       $composableBuilder(column: $table.intensity, builder: (column) => column);
+
+  GeneratedColumn<int> get caloriesBurned => $composableBuilder(
+    column: $table.caloriesBurned,
+    builder: (column) => column,
+  );
 
   $$WorkoutsTableAnnotationComposer get workoutId {
     final $$WorkoutsTableAnnotationComposer composer = $composerBuilder(
@@ -4736,6 +4809,7 @@ class $$SessionsTableTableManager
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<int?> durationSeconds = const Value.absent(),
                 Value<int?> intensity = const Value.absent(),
+                Value<int?> caloriesBurned = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
                 workoutId: workoutId,
@@ -4743,6 +4817,7 @@ class $$SessionsTableTableManager
                 completedAt: completedAt,
                 durationSeconds: durationSeconds,
                 intensity: intensity,
+                caloriesBurned: caloriesBurned,
               ),
           createCompanionCallback:
               ({
@@ -4752,6 +4827,7 @@ class $$SessionsTableTableManager
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<int?> durationSeconds = const Value.absent(),
                 Value<int?> intensity = const Value.absent(),
+                Value<int?> caloriesBurned = const Value.absent(),
               }) => SessionsCompanion.insert(
                 id: id,
                 workoutId: workoutId,
@@ -4759,6 +4835,7 @@ class $$SessionsTableTableManager
                 completedAt: completedAt,
                 durationSeconds: durationSeconds,
                 intensity: intensity,
+                caloriesBurned: caloriesBurned,
               ),
           withReferenceMapper: (p0) => p0
               .map(
