@@ -372,6 +372,204 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
     ref.invalidate(workoutsStreamProvider);
   }
 
+  Future<void> _applyPreMadeSplit() async {
+    setState(() => _isSaving = true);
+    
+    try {
+      final db = ref.read(appDatabaseProvider);
+      
+      // Update user split days first
+      final user = await db.getUser();
+      if (user != null) {
+        await db.saveUser(user.toCompanion(true).copyWith(
+          splitDays: const drift.Value(8),
+        ));
+      }
+
+      // Helper to match pre-made structure
+      Future<void> createDay({
+        required String name,
+        required String shortCode,
+        required String thumbnail,
+        required int dayIndex,
+        required ClockType clockType,
+        required bool isRestDay,
+        List<({String name, int sets, int reps})> exercises = const [],
+      }) async {
+        final workoutId = await db.addWorkout(
+          WorkoutsCompanion(
+            name: drift.Value(name),
+            shortCode: drift.Value(shortCode),
+            thumbnailUrl: drift.Value(thumbnail),
+            orderIndex: drift.Value(dayIndex),
+            clockType: drift.Value(clockType),
+            isRestDay: drift.Value(isRestDay),
+          ),
+        );
+
+        if (!isRestDay) {
+          for (int i = 0; i < exercises.length; i++) {
+            final ex = exercises[i];
+            await db.addExercise(
+              ExercisesCompanion(
+                workoutId: drift.Value(workoutId),
+                name: drift.Value(ex.name),
+                sets: drift.Value(ex.sets),
+                reps: drift.Value(ex.reps),
+                orderIndex: drift.Value(i),
+              ),
+            );
+          }
+        }
+      }
+
+      // --- DAY 1: Upper Body Push ---
+      await createDay(
+        name: 'Upper Body Push',
+        shortCode: 'U',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80',
+        dayIndex: 0,
+        clockType: ClockType.stopwatch,
+        isRestDay: false,
+        exercises: [
+          (name: 'Push-ups', sets: 3, reps: 12),
+          (name: 'Pike push-ups', sets: 3, reps: 10),
+          (name: 'Tricep dips', sets: 3, reps: 12),
+          (name: 'Plank hold (sec)', sets: 3, reps: 45),
+        ],
+      );
+
+      // --- DAY 2: Boxing Basics ---
+      await createDay(
+        name: 'Boxing Basics',
+        shortCode: 'B',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?auto=format&fit=crop&q=80',
+        dayIndex: 1,
+        clockType: ClockType.stopwatch,
+        isRestDay: false,
+        exercises: [
+          (name: 'Jump rope (sec)', sets: 3, reps: 120),
+          (name: 'Shadow boxing (sec)', sets: 3, reps: 180),
+          (name: 'Stance/Footwork (sec)', sets: 1, reps: 600),
+          (name: 'Combo practice (sec)', sets: 3, reps: 120),
+        ],
+      );
+
+      // --- DAY 3: Lower Body ---
+      await createDay(
+        name: 'Lower Body',
+        shortCode: 'L',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1434608519344-49d77a699ded?auto=format&fit=crop&q=80',
+        dayIndex: 2,
+        clockType: ClockType.stopwatch,
+        isRestDay: false,
+        exercises: [
+          (name: 'Bodyweight squats', sets: 3, reps: 15),
+          (name: 'Lunges (per leg)', sets: 3, reps: 10),
+          (name: 'Glute bridges', sets: 3, reps: 15),
+          (name: 'Calf raises', sets: 3, reps: 20),
+        ],
+      );
+
+      // --- DAY 4: Upper Body Pull ---
+      await createDay(
+        name: 'Upper Body Pull',
+        shortCode: 'P',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1598971639058-211a73287750?auto=format&fit=crop&q=80',
+        dayIndex: 3,
+        clockType: ClockType.stopwatch,
+        isRestDay: false,
+        exercises: [
+          (name: 'Australian pull-ups', sets: 3, reps: 12),
+          (name: 'Inverted rows', sets: 3, reps: 10),
+          (name: 'Superman holds (sec)', sets: 3, reps: 30),
+          (name: 'Dead hangs (sec)', sets: 3, reps: 30),
+        ],
+      );
+
+      // --- DAY 5: Boxing Basics 2 ---
+      await createDay(
+        name: 'Boxing Basics 2',
+        shortCode: 'B',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&q=80',
+        dayIndex: 4,
+        clockType: ClockType.stopwatch,
+        isRestDay: false,
+        exercises: [
+          (name: 'Jump rope (sec)', sets: 3, reps: 120),
+          (name: 'Heavy bag/Shadow (sec)', sets: 4, reps: 180),
+          (name: 'Slip/Roll drills (sec)', sets: 1, reps: 600),
+          (name: 'Sit-ups', sets: 3, reps: 20),
+          (name: 'Russian twists', sets: 3, reps: 20),
+        ],
+      );
+
+      // --- DAY 6: Full Body ---
+      await createDay(
+        name: 'Full Body',
+        shortCode: 'F',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80',
+        dayIndex: 5,
+        clockType: ClockType.stopwatch,
+        isRestDay: false,
+        exercises: [
+          (name: 'Burpees', sets: 3, reps: 10),
+          (name: 'Mountain climbers', sets: 3, reps: 20),
+          (name: 'Bodyweight squats', sets: 3, reps: 12),
+          (name: 'Push-ups', sets: 3, reps: 10),
+          (name: 'Plank (sec)', sets: 3, reps: 45),
+        ],
+      );
+
+      // --- DAY 7: Conditioning & Core ---
+      await createDay(
+        name: 'Conditioning & Core',
+        shortCode: 'C',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?auto=format&fit=crop&q=80',
+        dayIndex: 6,
+        clockType: ClockType.stopwatch,
+        isRestDay: false,
+        exercises: [
+          (name: 'Jump rope (sec)', sets: 4, reps: 180),
+          (name: 'Burpees', sets: 3, reps: 12),
+          (name: 'Mountain climbers (sec)', sets: 3, reps: 30),
+          (name: 'Plank to Down Dog', sets: 3, reps: 10),
+          (name: 'Bicycle crunches', sets: 3, reps: 20),
+          (name: 'Leg raises', sets: 3, reps: 12),
+          (name: 'Flutter kicks (sec)', sets: 3, reps: 30),
+        ],
+      );
+
+      // --- DAY 8: Rest ---
+      await createDay(
+        name: 'Rest Day',
+        shortCode: 'R',
+        thumbnailUrl: 'assets/images/rest_day.jpg',
+        dayIndex: 7,
+        clockType: ClockType.none,
+        isRestDay: true,
+      );
+
+      // Finish up
+      ref.invalidate(workoutsStreamProvider);
+      ref.invalidate(isSetupCompleteProvider);
+      
+      if (mounted) {
+        context.go('/home');
+      }
+
+    } catch (e) {
+      debugPrint('Error creating pre-made split: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating split: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   // STEP 1: Name
   Widget _buildNameStep() {
     final colorScheme = Theme.of(context).colorScheme;
@@ -430,6 +628,38 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
                   textCapitalization: TextCapitalization.words,
                   onChanged: (_) => setState(() {}),
                 ),
+
+                // Pre-made Split Button (Day 1 only)
+                if (widget.index == 1 && widget.existingWorkout == null) ...[
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: colorScheme.outlineVariant.withValues(alpha: 0.5))),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: colorScheme.outlineVariant.withValues(alpha: 0.5))),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  OutlinedButton.icon(
+                    onPressed: _isSaving ? null : _applyPreMadeSplit,
+                    icon: const Icon(Icons.flash_on),
+                    label: const Text('Use Pre-made Split (8 Days)'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                      side: BorderSide(color: colorScheme.primary),
+                    ),
+                  ),
+                ],
                 
                 if (widget.isStandalone) ...[
                   const SizedBox(height: 48),
