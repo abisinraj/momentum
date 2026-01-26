@@ -13,6 +13,7 @@ import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/analytics_card.dart';
 import '../../home/presentation/widgets/nutrition_card.dart';
 import '../../../core/providers/dashboard_providers.dart';
+import '../../../core/services/widget_service.dart';
 
 
 import '../../../core/providers/smart_suggestion_provider.dart';
@@ -58,6 +59,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final activeSession = ref.watch(activeWorkoutSessionProvider);
     final todayCompletedAsync = ref.watch(todayCompletedWorkoutIdsProvider);
     final suggestionsAsync = ref.watch(smartSuggestionsProvider);
+    // Keep widget sync alive and reactive
+    final _ = ref.watch(widgetSyncProvider);
     final theme = Theme.of(context);
 
     final colorScheme = theme.colorScheme;

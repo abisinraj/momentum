@@ -41,9 +41,21 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
   final db = ref.watch(appDatabaseProvider);
   final widgetService = ref.watch(widgetServiceProvider);
 
+  // WATCH streams to trigger rebuilds on data change
+  // 1. Watch user for cycle progress
+  final user = await ref.watch(StreamProvider((ref) => ref.watch(appDatabaseProvider).watchUser()).future);
+  
+  // 2. Watch grid for streak (just watch last 1 day to trigger on session changes, but calc full streak)
+  // Actually watching activity grid is good, or watching sessions table.
+  // Let's watch specific query: recent sessions.
+  await ref.watch(StreamProvider((ref) => ref.watch(appDatabaseProvider).watchActivityGrid(1)).future);
+  
+  // 3. Watch workouts for next workout definition changes
+  await ref.watch(StreamProvider((ref) => ref.watch(appDatabaseProvider).watchAllWorkouts()).future);
+
   try {
     // 1. Calculate Streak
-    // Get activity for last 365 days to be safe
+    // Get activity for last 365 days
     final activityGrid = await db.getActivityGrid(365);
     int streak = 0;
     final now = DateTime.now();
@@ -51,7 +63,6 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     
     // Check from today backwards
     DateTime checkDate = today;
-    // optimization: if today has activity, include it. If not, check yesterday.
     if (!activityGrid.containsKey(checkDate)) {
       checkDate = today.subtract(const Duration(days: 1));
     }
@@ -69,13 +80,11 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     if (nextWorkout != null) {
       title = nextWorkout.name;
       
-      // Check if done today
+      // Check if done today - this also needs to be reactive
       final completedIds = await db.getTodayCompletedWorkoutIds();
       if (completedIds.contains(nextWorkout.id)) {
         title = 'Done: ${nextWorkout.name}';
         desc = 'All done for today!';
-        // Optional: Show tomorrow's workout?
-        // Since we don't easily know "tomorrow" without user cycle logic, just status is fine.
       } else {
         // Not done
         final exercises = await db.getExercisesForWorkout(nextWorkout.id);
@@ -83,8 +92,7 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
       }
     }
     
-    // 3. Calculate Cycle Progress (Day X of Y)
-    final user = await db.getUser();
+    // 3. Calculate Cycle Progress
     String cycleProgress = 'Day 1';
     
     if (user != null && user.splitDays != null && user.splitDays! > 0) {
@@ -94,6 +102,7 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     }
 
     // 4. Update Widget
+    debugPrint('Syncing Widget: Streak=$streak, Title=$title');
     await widgetService.updateWidget(
       streak: streak,
       title: title,

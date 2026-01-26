@@ -171,6 +171,9 @@ class AppDatabase extends _$AppDatabase {
   
   /// Get the current user (there's only one)
   Future<User?> getUser() => (select(users)..limit(1)).getSingleOrNull();
+
+  /// Watch the current user
+  Stream<User?> watchUser() => (select(users)..limit(1)).watchSingleOrNull();
   
   /// Create or update user
   Future<int> saveUser(UsersCompanion user) =>
