@@ -359,6 +359,7 @@ class ProgressScreen extends ConsumerWidget {
                       exerciseCount: session['exerciseCount'] as int,
                       completedSets: session['completedSets'] as int,
                       sessionId: (session['session'] as dynamic).id as int,
+                      intensity: (session['session'] as dynamic).intensity as int?,
                     )).toList(),
                   ),
                 AsyncError(:final error) => Text('Error: $error', style: TextStyle(color: colorScheme.error)),
@@ -637,6 +638,7 @@ class _SessionHistoryCard extends StatelessWidget {
   final int exerciseCount;
   final int completedSets;
   final int sessionId;
+  final int? intensity;
   
   const _SessionHistoryCard({
     required this.workoutName,
@@ -645,6 +647,7 @@ class _SessionHistoryCard extends StatelessWidget {
     required this.exerciseCount,
     required this.completedSets,
     required this.sessionId,
+    this.intensity,
   });
   
   @override
@@ -697,13 +700,38 @@ class _SessionHistoryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  workoutName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        workoutName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (intensity != null) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _getIntensityColor(intensity!),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'RPE $intensity',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -727,10 +755,17 @@ class _SessionHistoryCard extends StatelessWidget {
             ),
           ),
           // Arrow
+          const SizedBox(width: 8),
           Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
         ],
       ),
     );
+  }
+  
+  Color _getIntensityColor(int rpe) {
+    if (rpe <= 4) return Colors.green;
+    if (rpe <= 7) return Colors.orange;
+    return Colors.red;
   }
   
   String _getSmallMonthAbbr(int month) {

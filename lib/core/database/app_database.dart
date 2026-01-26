@@ -59,6 +59,8 @@ class Sessions extends Table {
   DateTimeColumn get completedAt => dateTime().nullable()();
   IntColumn get durationSeconds => integer().nullable()();
   IntColumn get intensity => integer().nullable()(); // RPE 1-10
+  IntColumn get avgBpm => integer().nullable()(); // Average Heart Rate
+  IntColumn get maxBpm => integer().nullable()(); // Max Heart Rate
 }
 
 /// SessionExercises table - stores completed exercise data per session
@@ -90,8 +92,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 9;
-
+  int get schemaVersion => 10;
 
   
   @override
@@ -147,6 +148,12 @@ class AppDatabase extends _$AppDatabase {
           // Schema v9 changes:
           // Add intensity to sessions
           await m.addColumn(sessions, sessions.intensity);
+        }
+        if (from < 10) {
+          // Schema v10 changes:
+          // Add avgBpm and maxBpm to sessions
+          await m.addColumn(sessions, sessions.avgBpm);
+          await m.addColumn(sessions, sessions.maxBpm);
         }
       },
 
@@ -274,13 +281,14 @@ class AppDatabase extends _$AppDatabase {
 
   
   /// Complete a session
-  /// Complete a session
-  Future<void> completeSession(int sessionId, int durationSeconds, {int? intensity}) =>
+  Future<void> completeSession(int sessionId, int durationSeconds, {int? intensity, int? avgBpm, int? maxBpm}) =>
       (update(sessions)..where((s) => s.id.equals(sessionId)))
           .write(SessionsCompanion(
             completedAt: Value(DateTime.now()),
             durationSeconds: Value(durationSeconds),
             intensity: intensity != null ? Value(intensity) : const Value.absent(),
+            avgBpm: avgBpm != null ? Value(avgBpm) : const Value.absent(),
+            maxBpm: maxBpm != null ? Value(maxBpm) : const Value.absent(),
           ));
 
   

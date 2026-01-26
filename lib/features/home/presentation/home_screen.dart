@@ -744,44 +744,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildProgressInsight(BuildContext context, WidgetRef ref, Workout workout) {
     final insightAsync = ref.watch(workoutInsightProvider(workout.id));
     
-    return insightAsync.when(
-      data: (data) {
-        // Offline case
-        if (data['offline'] == true) {
-          return const SizedBox.shrink();
-        }
-        
-        // First session case
-        if (data['firstSession'] == true) {
-          return _buildInsightCard(
-            context: context,
-            icon: Icons.rocket_launch,
-            title: 'First Session',
-            subtitle: "Let's set your baseline!",
-          );
-        }
-        
-        // Normal case with data
-        // final sessionCount = data['sessionCount'] as int; // Unused
-        final lastDuration = data['lastDuration'] as int?;
-        final avgDuration = data['averageDuration'] as double;
-        final aiInsight = data['aiInsight'] as String?;
-        
-        final lastMinutes = lastDuration != null ? (lastDuration / 60).round() : 0;
-        final avgMinutes = (avgDuration / 60).round();
-        
-        final insight = aiInsight ?? '$sessionCount sessions • avg $avgMinutes min';
-        
-        return _buildInsightCard(
-          context: context,
-          icon: lastMinutes < avgMinutes ? Icons.trending_up : Icons.trending_flat,
-          title: 'Last: $lastMinutes min',
-          subtitle: insight,
-          trend: lastMinutes < avgMinutes,
-        );
-      },
-      error: (e, st) => const SizedBox.shrink(),
-      loading: () => const SizedBox.shrink(),
+    // Use valueOrNull to persist data during refreshes/loading states
+    // This prevents the UI from collapsing (flickering) when the provider updates
+    final data = insightAsync.valueOrNull;
+    
+    // If no data yet (initial load), show nothing
+    if (data == null) return const SizedBox.shrink();
+
+    // Offline case
+    if (data['offline'] == true) {
+      return const SizedBox.shrink();
+    }
+    
+    // First session case
+    if (data['firstSession'] == true) {
+      return _buildInsightCard(
+        context: context,
+        icon: Icons.rocket_launch,
+        title: 'First Session',
+        subtitle: "Let's set your baseline!",
+      );
+    }
+    
+    // Normal case with data
+    final sessionCount = data['sessionCount'] as int;
+    final lastDuration = data['lastDuration'] as int?;
+    final avgDuration = data['averageDuration'] as double;
+    final aiInsight = data['aiInsight'] as String?;
+    
+    final lastMinutes = lastDuration != null ? (lastDuration / 60).round() : 0;
+    final avgMinutes = (avgDuration / 60).round();
+    
+    final insight = aiInsight ?? '$sessionCount sessions • avg $avgMinutes min';
+    
+    return _buildInsightCard(
+      context: context,
+      icon: lastMinutes < avgMinutes ? Icons.trending_up : Icons.trending_flat,
+      title: 'Last: $lastMinutes min',
+      subtitle: insight,
+      trend: lastMinutes < avgMinutes,
     );
   }
   
@@ -855,10 +856,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    final stats = switch (statsAsync) {
-      AsyncData(:final value) => value,
-      _ => {'calories': 0, 'duration': 0},
-    };
+    // Use valueOrNull so we don't reset to 0 during background refreshes
+    final stats = statsAsync.valueOrNull ?? {'calories': 0, 'duration': 0};
     
     final calories = stats['calories'] ?? 0;
     final durationSec = stats['duration'] ?? 0;
@@ -1058,8 +1057,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildRecoveryCard(WidgetRef ref) {
     final healthState = ref.watch(healthNotifierProvider);
-    // ignore: unused_local_variable
-    final volumeAsync = ref.watch(volumeLoadProvider);
+    // volumeLoadProvider removed as it was unused and caused unnecessary rebuilds
     
     final sleepDuration = healthState.lastNightSleep ?? const Duration(hours: 0);
     
@@ -1072,23 +1070,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildVolumeCard(WidgetRef ref) {
     final volumeAsync = ref.watch(volumeLoadProvider);
+    final data = volumeAsync.valueOrNull;
     
-    return volumeAsync.when(
-      data: (data) => VolumeLoadWidget(
-        currentWeekVolume: data[0],
-        lastWeekVolume: data[1],
-      ),
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+    // If no data yet (initial load), show empty/skeleton or nothing
+    if (data == null) return const SizedBox.shrink();
+    
+    return VolumeLoadWidget(
+      currentWeekVolume: data[0],
+      lastWeekVolume: data[1],
     );
   }
 
   Widget _buildConsistencyGrid(WidgetRef ref) {
     final gridAsync = ref.watch(activityGridProvider(30));
-    return gridAsync.when(
-      data: (data) => ConsistencyGridWidget(activityData: data),
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
-    );
+    final data = gridAsync.valueOrNull;
+    
+    // If no data yet, show nothing
+    if (data == null) return const SizedBox.shrink();
+     
+    return ConsistencyGridWidget(activityData: data);
   }
 }

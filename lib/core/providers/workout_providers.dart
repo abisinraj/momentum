@@ -97,13 +97,19 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
   }
   
   /// Complete the current workout session
-  Future<void> completeWorkout({int? intensity}) async {
+  Future<void> completeWorkout({int? intensity, int? avgBpm, int? maxBpm}) async {
     if (state == null) return;
     
     final db = ref.read(appDatabaseProvider);
     final duration = DateTime.now().difference(state!.startedAt);
     
-    await db.completeSession(state!.sessionId, duration.inSeconds, intensity: intensity);
+    await db.completeSession(
+      state!.sessionId, 
+      duration.inSeconds, 
+      intensity: intensity,
+      avgBpm: avgBpm,
+      maxBpm: maxBpm,
+    );
     
     // Stop background service
     await BackgroundService().stopService();

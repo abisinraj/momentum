@@ -62,30 +62,44 @@ class AIInsightsCard extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // Insight Text
-                insightAsync.when(
-                  data: (insight) => Text(
-                    insight,
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 1.5,
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  loading: () => _buildLoadingShimmer(context),
-                  error: (err, stack) => Row(
-                    children: [
-                      Icon(Icons.error_outline, color: colorScheme.error, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          "Couldn't generate insight. Check connection.",
-                          style: TextStyle(color: colorScheme.error, fontSize: 14),
+                Builder(
+                  builder: (context) {
+                    final insight = insightAsync.valueOrNull;
+                    
+                    if (insight != null) {
+                      return Text(
+                        insight,
+                        style: TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurface,
+                          fontStyle: FontStyle.italic,
                         ),
-                      ),
-                    ],
-                  ),
+                      );
+                    }
+                    
+                    if (insightAsync.isLoading) {
+                      return _buildLoadingShimmer(context);
+                    }
+                    
+                    if (insightAsync.hasError) {
+                      return Row(
+                        children: [
+                          Icon(Icons.error_outline, color: colorScheme.error, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "Couldn't generate insight. Check connection.",
+                              style: TextStyle(color: colorScheme.error, fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    
+                    return const SizedBox.shrink();
+                  }
                 ),
               ],
             ),

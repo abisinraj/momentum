@@ -79,7 +79,8 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
 
       try {
         final dietService = ref.read(dietServiceProvider);
-        final result = await dietService.analyzeFoodImage(pickedFile.path);
+        final imageBytes = await File(pickedFile.path).readAsBytes();
+        final result = await dietService.analyzeFoodImage(imageBytes);
         
         if (!mounted) return;
         // Also save image path? 

@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,11 +29,11 @@ class DietService {
     }
 
     final model = GenerativeModel(
-      model: 'gemini-pro',
+      model: 'gemini-1.5-flash-latest',
       apiKey: apiKey,
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
-
+    
     final prompt = '''
     Analyze the following food description and estimate the nutrition facts.
     Return ONLY a JSON object with keys: "description" (short summarized name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double).
@@ -57,27 +58,23 @@ class DietService {
       throw Exception('Empty response from Gemini');
     }
   }
-
-  /// Analyze food image using Gemini Vision
-  Future<Map<String, dynamic>> analyzeFoodImage(String imagePath) async {
+  Future<Map<String, dynamic>> analyzeFoodImage(Uint8List imageBytes) async { 
      final apiKey = await _getApiKey();
-    if (apiKey == null || apiKey.isEmpty) {
+    if (apiKey == null) {
       throw Exception('Gemini API Key not found');
     }
 
     final model = GenerativeModel(
-      model: 'gemini-pro-vision',
+      model: 'gemini-1.5-flash-latest', // Flash supports multimodal (text + images)
       apiKey: apiKey,
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
-
-    final bytes = await File(imagePath).readAsBytes();
     
     const prompt = 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with keys: "description" (short name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double).';
     final content = [
       Content.multi([
         TextPart(prompt),
-        DataPart('image/jpeg', bytes),
+        DataPart('image/jpeg', imageBytes),
       ])
     ];
 

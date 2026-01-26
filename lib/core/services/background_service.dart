@@ -68,99 +68,82 @@ class BackgroundService {
     final service = FlutterBackgroundService();
     service.invoke('set_start_time', {'epoch': startedAt.millisecondsSinceEpoch});
   }
+}
 
+@pragma('vm:entry-point')
+Future<bool> onIosBackground(ServiceInstance service) async {
+  return true;
+}
 
-  @pragma('vm:entry-point')
-  static Future<bool> onIosBackground(ServiceInstance service) async {
-    return true;
-  }
+@pragma('vm:entry-point')
+void onStart(ServiceInstance service) async {
+  // Only available for flutter 3.0.0 and later
+  DartPluginRegistrant.ensureInitialized();
 
-  @pragma('vm:entry-point')
-  static void onStart(ServiceInstance service) async {
-    // Only available for flutter 3.0.0 and later
-    DartPluginRegistrant.ensureInitialized();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
+  String workoutName = "Workout";
+  
+  Timer? timer;
+  DateTime? startedAt;
 
-    String workoutName = "Workout";
-    
-    Timer? timer;
-    DateTime? startedAt;
+  // Listen for stop
+  service.on('stopService').listen((event) {
+    timer?.cancel();
+    service.stopSelf();
+  });
+  
+  // Listen for name update
+  service.on('set_workout_name').listen((event) {
+    if (event != null && event['name'] != null) {
+      workoutName = event['name'] as String;
+      _updateNotification(flutterLocalNotificationsPlugin, workoutName, "00:00");
+    }
+  });
 
-    // Listen for stop
-    service.on('stopService').listen((event) {
+  // Listen for start time
+  service.on('set_start_time').listen((event) {
+    if (event != null && event['epoch'] != null) {
+      final epoch = event['epoch'] as int;
+      startedAt = DateTime.fromMillisecondsSinceEpoch(epoch);
+      
       timer?.cancel();
-      service.stopSelf();
-    });
-    
-    // Listen for name update
-    service.on('set_workout_name').listen((event) {
-      if (event != null && event['name'] != null) {
-        workoutName = event['name'] as String;
-        _updateNotification(flutterLocalNotificationsPlugin, workoutName, "00:00");
-      }
-    });
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          if (startedAt == null) return;
+          final diff = DateTime.now().difference(startedAt!);
+          final hours = diff.inHours;
+          final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
+          final seconds = (diff.inSeconds % 60).toString().padLeft(2, '0');
+          final timeStr = hours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
+          
+          _updateNotification(flutterLocalNotificationsPlugin, workoutName, timeStr);
+      });
+    }
+  });
 
-    // Listen for start time
-    service.on('set_start_time').listen((event) {
-      if (event != null && event['epoch'] != null) {
-        final epoch = event['epoch'] as int;
-        startedAt = DateTime.fromMillisecondsSinceEpoch(epoch);
-        
-        timer?.cancel();
-        timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-           if (startedAt == null) return;
-           final diff = DateTime.now().difference(startedAt!);
-           final hours = diff.inHours;
-           final minutes = (diff.inMinutes % 60).toString().padLeft(2, '0');
-           final seconds = (diff.inSeconds % 60).toString().padLeft(2, '0');
-           final timeStr = hours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
-           
-           _updateNotification(flutterLocalNotificationsPlugin, workoutName, timeStr);
-        });
-      }
-    });
+}
 
-  }
+Future<void> _updateNotification(
+    FlutterLocalNotificationsPlugin plugin,
+    String title,
+    String content) async {
+  
+  plugin.show(
+    888,
+    title,
+    content,
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'momentum_workout_channel',
+        'Workout Controls',
+        icon: 'launcher_icon',
+        ongoing: true,
 
-  static Future<void> _updateNotification(
-      FlutterLocalNotificationsPlugin plugin,
-      String title,
-      String content) async {
-    
-    // Android specific configuration
-    /*
-    // To add buttons (Pause, Finish), we need proper intent handling which is complex 
-    // without a broadcast receiver setup in AndroidManifest.
-    // For now we will stick to a polished display. The user asked for "Pause or finish" controls.
-    // The easiest way to get actions back to Flutter is via the notification tap/action.
-    // However, `flutter_local_notifications` actions require setup.
-    // We will stick to display for iteration 1 to ensure stability, 
-    // unless we use `notification_listener`?
-    // Actually `flutter_background_service` allows simple notification updates.
-    // The notification here is managed by the service.
-    */
-    
-    plugin.show(
-      888,
-      title,
-      content,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'momentum_workout_channel',
-          'Workout Controls',
-          icon: 'launcher_icon',
-          ongoing: true,
-
-          showWhen: false, // Hide timestamp
-          onlyAlertOnce: true, // Don't buzz on updates
-          color: Color(0xFF000000), // Dark background color hint
-          // actions: [
-          //   AndroidNotificationAction('stop_action', 'Stop', cancelNotification: false),
-          // ]
-        ),
+        showWhen: false, // Hide timestamp
+        onlyAlertOnce: true, // Don't buzz on updates
+        color: Color(0xFF000000), // Dark background color hint
       ),
-    );
-  }
+    ),
+  );
 }
