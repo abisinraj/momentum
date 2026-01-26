@@ -15,8 +15,8 @@ class AIInsightsService {
 
 
 
-      // Use the stable 'gemini-1.5-flash' model
-      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+      // Use the latest 'gemini-3-flash' model (2026 Standard)
+      final model = GenerativeModel(model: 'gemini-3-flash', apiKey: apiKey);
 
       final prompt = _constructDetailedPrompt(user, recentSessions);
       final content = [Content.text(prompt)];

@@ -28,7 +28,7 @@ class DietService {
     }
 
     final model = GenerativeModel(
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3-flash',
       apiKey: apiKey,
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
@@ -64,7 +64,7 @@ class DietService {
     }
 
     final model = GenerativeModel(
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3-flash',
       apiKey: apiKey,
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
