@@ -8,7 +8,6 @@ import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import 'active_workout_screen.dart';
 import 'edit_workout_screen.dart';
-import 'workout_comparison_card.dart';
 
 /// Workout screen - shows list of workouts with completion states
 /// Design: Date header, focus subtitle, workout cards with status badges
@@ -36,6 +35,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     // Get user's current split index (manual progression, not tied to weekday)
     final currentSplitIndex = switch (userAsync) {
       AsyncData(:final value) => value?.currentSplitIndex ?? 0,
+      _ => 0,
+    };
+
+    final totalSplitDays = switch (userAsync) {
+      AsyncData(:final value) => value?.splitDays ?? 0,
       _ => 0,
     };
     
@@ -142,7 +146,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             // Workout Content
             Expanded(
               child: switch (workoutsAsync) {
-                AsyncData(:final value) => _buildSplitView(context, ref, value, todayCompletedAsync, currentSplitIndex),
+                AsyncData(:final value) => _buildSplitView(context, ref, value, todayCompletedAsync, currentSplitIndex, totalSplitDays),
                 AsyncError(:final error) => Center(child: Text('Error: $error', style: TextStyle(color: colorScheme.error))),
                 _ => Center(child: CircularProgressIndicator(color: colorScheme.primary)),
               },
@@ -211,6 +215,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     List<Workout> workouts,
     AsyncValue<List<int>> todayCompletedAsync,
     int currentSplitIndex,
+    int totalSplitDays,
   ) {
     if (workouts.isEmpty) return _buildEmptyState('No workouts yet');
 
@@ -219,6 +224,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     // 1. Identify "Today's Target" (Current Split Index)
     final todaysWorkouts = workouts.where((w) => w.orderIndex == currentSplitIndex).toList();
     
+    // 2. Identify "Tomorrow's Target"
+    final nextSplitIndex = totalSplitDays > 0 ? (currentSplitIndex + 1) % totalSplitDays : -1;
+    final tomorrowsWorkouts = nextSplitIndex != -1 
+        ? workouts.where((w) => w.orderIndex == nextSplitIndex).toList()
+        : <Workout>[];
+
     // If user toggled "Show All", show standard list view
     if (_showAllWorkouts) {
       return _buildWorkoutList(context, ref, workouts, todayCompletedAsync, workouts.length, currentSplitIndex);
@@ -234,46 +245,58 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           // Logic: If multiple workouts for today, show as list to avoid clutter.
-           // If single, show the rich Comparison Card.
+           Text(
+             "TODAY'S WORKOUTS",
+             style: TextStyle(
+               fontSize: 12,
+               fontWeight: FontWeight.bold,
+               color: Theme.of(context).colorScheme.primary,
+               letterSpacing: 1.2,
+             ),
+           ),
+           const SizedBox(height: 16),
+           ...todaysWorkouts.map((workout) => _WorkoutCard(
+             workout: workout,
+             isCompleted: todayCompleted.contains(workout.id),
+             isActive: false, 
+             isLocked: false,
+             index: workout.orderIndex,
+             total: workouts.length,
+             onTap: () => _startWorkout(context, ref, workout),
+             onDelete: () => _confirmDelete(context, ref, workout),
+           )),
            
-           if (todaysWorkouts.length > 1) ...[
+           if (tomorrowsWorkouts.isNotEmpty) ...[
+             const SizedBox(height: 32),
              Text(
-               "TODAY'S SPLIT",
+               "TOMORROW'S SPLIT",
                style: TextStyle(
                  fontSize: 12,
                  fontWeight: FontWeight.bold,
-                 color: Theme.of(context).colorScheme.primary,
+                 color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                  letterSpacing: 1.2,
                ),
              ),
              const SizedBox(height: 16),
-             ...todaysWorkouts.map((workout) => _WorkoutCard(
+             ...tomorrowsWorkouts.map((workout) => _WorkoutCard(
                workout: workout,
-               isCompleted: todayCompleted.contains(workout.id),
+               isCompleted: false,
                isActive: false, 
-               isLocked: false,
+               isLocked: true, // Dimmed to show it's for tomorrow
                index: workout.orderIndex,
                total: workouts.length,
-               onTap: () => _startWorkout(context, ref, workout),
+               onTap: null, // Disable start for tomorrow's workouts
                onDelete: () => _confirmDelete(context, ref, workout),
              )),
-           ] else ...[
-             // Single Focus Mode
-             WorkoutComparisonCard(
-               workoutId: todaysWorkouts.first.id,
-               isCompleted: todayCompleted.contains(todaysWorkouts.first.id),
-               onStart: () => _startWorkout(context, ref, todaysWorkouts.first),
-             ),
            ],
-           
-           const SizedBox(height: 24),
+
+           const SizedBox(height: 32),
            
            // "Manage All" button
            Center(
              child: TextButton(
                onPressed: () => setState(() => _showAllWorkouts = true),
-               child: const Text("Manage Future Workouts"),
+               child: const Text("Manage All Workouts"),
              ),
            ),
            const SizedBox(height: 40), 

@@ -274,12 +274,15 @@ class WorkoutComparisonCard extends ConsumerWidget {
         children: [
           Icon(Icons.check_circle, color: colorScheme.primary, size: 28),
           const SizedBox(width: 12),
-          Text(
-            'Done for today. See ya tomorrow!',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onPrimaryContainer,
+          Flexible(
+            child: Text(
+              'Done for today. See ya tomorrow!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onPrimaryContainer,
+              ),
             ),
           ),
         ],
