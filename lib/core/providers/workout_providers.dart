@@ -10,6 +10,7 @@ import 'database_providers.dart';
 
 import 'dashboard_providers.dart';
 import 'ai_providers.dart';
+import '../../features/workout/providers/comparison_provider.dart';
 
 part 'workout_providers.g.dart';
 
@@ -176,6 +177,8 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
     // Dashboard & AI
     ref.invalidate(muscleWorkloadProvider);
     ref.invalidate(volumeLoadProvider);
+    ref.invalidate(analyticsSummaryProvider); // Analytics Card
+    ref.invalidate(workoutComparisonProvider(state!.workoutId)); // Comparison Card
     ref.invalidate(dailyInsightProvider); // Re-generate AI insight based on new completion
     
     // Activity Grid - Explicitly invalidate the one used by Home Screen (150 days)

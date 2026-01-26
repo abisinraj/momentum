@@ -241,7 +241,7 @@ class WorkoutComparisonCard extends ConsumerWidget {
   Widget _buildNutritionSection(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.local_fire_department, color: Colors.orange, size: 20),
+        const Icon(Icons.local_fire_department, color: Colors.orange, size: 20),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
