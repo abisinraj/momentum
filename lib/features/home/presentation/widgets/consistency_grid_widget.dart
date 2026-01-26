@@ -8,17 +8,12 @@ class ConsistencyGridWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Generate last ~84 days (12 weeks)
+    // Generate last ~140 days (20 weeks)
     final now = DateTime.now();
     final endDate = DateTime(now.year, now.month, now.day);
-    final startDate = endDate.subtract(const Duration(days: 83)); // 12 weeks * 7 - 1
+    final startDate = endDate.subtract(const Duration(days: 139)); // 20 weeks * 7 - 1
     
-    // We want to render columns (Weeks) of rows (Days: Mon-Sun)
-    // Actually, GitHub grid is Rows (Days) x Columns (Weeks) mostly, 
-    // but typically rendered as Column of 7 Rows (days) or Row of X Columns (weeks).
-    // Let's do Row of Columns (Weeks).
-    
-    // Adjust start date to previous Monday to align grid?
+    // Adjust start date to previous Monday to align grid
     final weekday = startDate.weekday; // 1=Mon, 7=Sun
     final alignedStartDate = startDate.subtract(Duration(days: weekday - 1));
 
@@ -44,7 +39,7 @@ class ConsistencyGridWidget extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                'Last 12 Weeks',
+                'Last 20 Weeks',
                 style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
               ),
             ],
@@ -53,27 +48,32 @@ class ConsistencyGridWidget extends StatelessWidget {
           
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            reverse: true, // Show newest on right? Standard is usually left-to-right history.
-            // But if we want to see "Today" at the end, standard is LTR.
+            reverse: true, // Standard heatmap: Today is on the far right
             child: Row(
-              children: List.generate(12, (weekIndex) {
+              children: List.generate(20, (weekIndex) {
                  final weekStart = alignedStartDate.add(Duration(days: weekIndex * 7));
                  return Padding(
                    padding: const EdgeInsets.only(right: 4.0),
                    child: Column(
                      children: List.generate(7, (dayIndex) {
                        final date = weekStart.add(Duration(days: dayIndex));
+                       
                        // Check if date is in future
                        if (date.isAfter(endDate)) {
-                         return _buildCell(context, null); // Future
+                         return _buildCell(context, -1); // Future
                        }
                        
-                       // Check activity
-                       // precise lookup
-                       final dateKey = DateTime(date.year, date.month, date.day);
-                       final hasActivity = activityData.containsKey(dateKey);
+                       // Momentum Logic: How many workouts in the 7 days inclusive of this day?
+                       int score = 0;
+                       for (int i = 0; i < 7; i++) {
+                         final checkDate = date.subtract(Duration(days: i));
+                         final key = DateTime(checkDate.year, checkDate.month, checkDate.day);
+                         if (activityData.containsKey(key)) {
+                           score++;
+                         }
+                       }
                        
-                       return _buildCell(context, hasActivity);
+                       return _buildCell(context, score);
                      }),
                    ),
                  );
@@ -85,14 +85,25 @@ class ConsistencyGridWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCell(BuildContext context, bool? active) {
+  Widget _buildCell(BuildContext context, int score) {
+    final colorScheme = Theme.of(context).colorScheme;
     Color color;
-    if (active == null) {
+
+    if (score == -1) {
       color = Colors.transparent; // Future
-    } else if (active) {
-      color = Theme.of(context).colorScheme.primary;
+    } else if (score == 0) {
+      // No workouts in last 7 days - cold
+      color = colorScheme.onSurface.withValues(alpha: 0.05);
     } else {
-      color = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1);
+      // 1-7 scale: Red to Green
+      // We'll use HSL for a smooth transition: 0 is Red, 120 is Green
+      // Score 1 -> ~0 (Red)
+      // Score 7 -> ~120 (Green)
+      final hue = ((score - 1) / 6.0) * 120.0;
+      color = HSLColor.fromAHSL(1.0, hue, 0.7, 0.5).toColor();
+      
+      // Fine-tune: Make it slightly translucent for that "glass" feel
+      color = color.withValues(alpha: 0.9);
     }
 
     return Container(
@@ -102,6 +113,7 @@ class ConsistencyGridWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(3),
+        border: score > 0 ? Border.all(color: Colors.white.withValues(alpha: 0.1), width: 0.5) : null,
       ),
     );
   }

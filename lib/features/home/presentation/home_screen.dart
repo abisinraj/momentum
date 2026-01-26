@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,18 +8,13 @@ import '../../../core/database/app_database.dart';
 import '../../workout/presentation/active_workout_screen.dart';
 import '../../../app/widgets/skeleton_loader.dart';
 import '../../health/presentation/health_insights_card.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../home/presentation/widgets/ai_insights_card.dart';
 import '../../home/presentation/widgets/consistency_grid_widget.dart';
-import '../../home/presentation/widgets/recovery_score_card.dart';
-import '../../home/presentation/widgets/volume_load_widget.dart';
+import '../../home/presentation/widgets/analytics_card.dart';
 import '../../../core/providers/dashboard_providers.dart';
-import '../../../core/providers/health_connect_provider.dart';
 
 
 import '../../../core/providers/smart_suggestion_provider.dart';
-import '../../home/presentation/widgets/body_model_viewer.dart';
-import '../../../core/providers/heatmap_provider.dart';
 
 
 
@@ -139,13 +133,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _buildSectionHeader(context, "ANALYTICS"),
               const SizedBox(height: 16),
               
-              // 1. Recovery Score
-              _buildRecoveryCard(ref),
+              // Unified Momentum Analytics
+              const AnalyticsCard(),
               const SizedBox(height: 16),
               
-              // 2. Volume Load
-              _buildVolumeCard(ref),
-              const SizedBox(height: 16),
               
               // 3. Consistency Grid
               // 4. Consistency Grid
@@ -154,10 +145,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
 
               
-              // Bottom stats row (Existing - maybe redundant now? Let's keep for day-specific stats)
-              _buildSectionHeader(context, "THIS WEEK"),
-              const SizedBox(height: 16),
-              _buildStatsRow(context, ref),
+              const SizedBox(height: 20),
               
               const SizedBox(height: 20),
             ],
@@ -849,87 +837,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
   
-
-  Widget _buildStatsRow(BuildContext context, WidgetRef ref) {
-
-    final statsAsync = ref.watch(weeklyStatsProvider);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    
-    // Use valueOrNull so we don't reset to 0 during background refreshes
-    final stats = statsAsync.valueOrNull ?? {'calories': 0, 'duration': 0};
-    
-    final calories = stats['calories'] ?? 0;
-    final durationSec = stats['duration'] ?? 0;
-    
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatItem(
-              context: context,
-              icon: Icons.local_fire_department_outlined,
-              value: '$calories',
-              label: 'KCAL BURNED',
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 50,
-            color: colorScheme.outline,
-          ),
-          Expanded(
-            child: _buildStatItem(
-              context: context,
-              icon: Icons.timer_outlined,
-              value: '${durationSec ~/ 60}m',
-              label: 'ACTIVE MIN',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildStatItem({
-    required BuildContext context,
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        Icon(icon, color: colorScheme.primary, size: 24),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: colorScheme.onSurfaceVariant,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-  
   Widget _buildEmptyState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Column(
@@ -1055,34 +962,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildRecoveryCard(WidgetRef ref) {
-    final healthState = ref.watch(healthNotifierProvider);
-    // volumeLoadProvider removed as it was unused and caused unnecessary rebuilds
-    
-    final sleepDuration = healthState.lastNightSleep ?? const Duration(hours: 0);
-    
-    return RecoveryScoreCard(
-      sleepHours: sleepDuration.inHours,
-      workoutsLast3Days: 1, // TODO: Connect to real query
-      isRestDay: false, 
-    );
-  }
 
-  Widget _buildVolumeCard(WidgetRef ref) {
-    final volumeAsync = ref.watch(volumeLoadProvider);
-    final data = volumeAsync.valueOrNull;
-    
-    // If no data yet (initial load), show empty/skeleton or nothing
-    if (data == null) return const SizedBox.shrink();
-    
-    return VolumeLoadWidget(
-      currentWeekVolume: data[0],
-      lastWeekVolume: data[1],
-    );
-  }
 
   Widget _buildConsistencyGrid(WidgetRef ref) {
-    final gridAsync = ref.watch(activityGridProvider(30));
+    final gridAsync = ref.watch(activityGridProvider(150));
     final data = gridAsync.valueOrNull;
     
     // If no data yet, show nothing

@@ -56,10 +56,11 @@ Future<Workout?> nextWorkout(Ref ref) async {
 }
 
 /// Provider for activity grid data (last N days)
+/// Provider for activity grid data (last N days)
 @riverpod
-Future<Map<DateTime, String>> activityGrid(Ref ref, int days) async {
+Stream<Map<DateTime, String>> activityGrid(Ref ref, int days) {
   final db = ref.watch(appDatabaseProvider);
-  return db.getActivityGrid(days);
+  return db.watchActivityGrid(days);
 }
 
 /// Provider for exercises in a workout

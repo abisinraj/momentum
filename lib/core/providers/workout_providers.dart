@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -49,7 +50,35 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
     
     if (session != null) {
       final workout = await db.getWorkout(session.workoutId);
+      final scheduledWorkout = await ref.read(nextWorkoutProvider.future);
+
       if (workout != null) {
+        // Multi-Layered Stale Check
+        final now = DateTime.now();
+        final nowUtc = now.toUtc();
+        final startedAtLocal = session.startedAt.toLocal();
+        final startedAtUtc = session.startedAt.isUtc ? session.startedAt : session.startedAt.toUtc();
+        final age = nowUtc.difference(startedAtUtc);
+        
+        // 1. Date Check: If not started today, it's stale
+        final isNotToday = startedAtLocal.year != now.year || 
+                          startedAtLocal.month != now.month || 
+                          startedAtLocal.day != now.day;
+                          
+        // 2. Future Check: Clock drift protection (if session is > 5 mins in future)
+        final isInFuture = age.inMinutes < -5;
+
+        // 3. Strict Matching: If session type doesn't match today's scheduled workout
+        final isDifferentWorkout = scheduledWorkout != null && scheduledWorkout.id != workout.id;
+        final timeoutHours = isDifferentWorkout ? 1 : 4;
+
+        if (isNotToday || isInFuture || age.inHours.abs() >= timeoutHours) {
+          debugPrint('Found stale/ghost session (ID: ${session.id}, NotToday: $isNotToday, Future: $isInFuture, Age: ${age.inHours}h). Cleaning all active.');
+          // Global Cleanup: Close everything to be sure
+          await db.cleanupActiveSessions();
+          return;
+        }
+
         state = ActiveSession(
           sessionId: session.id,
           workoutId: workout.id,
@@ -66,16 +95,18 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
         await service.startService(workout.name);
         service.setStartTime(session.startedAt);
       }
-
-      }
     }
+  }
 
 
 
-  /// Start a workout session
   Future<void> startWorkout(Workout workout) async {
-
     final db = ref.read(appDatabaseProvider);
+    
+    // Aggressive Auto-Cleanup: Close ANY existing active session globally
+    debugPrint('Starting workout "${workout.name}". Running global active session cleanup.');
+    await db.cleanupActiveSessions();
+
     final sessionId = await db.startSession(workout.id);
     
     state = ActiveSession(

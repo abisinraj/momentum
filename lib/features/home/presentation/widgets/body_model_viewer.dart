@@ -20,28 +20,30 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
   void initState() {
     super.initState();
     
+    // Initialize WebView
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (String url) {
-            setState(() => _isLoaded = true);
-            _updateHeatmap();
+            if (mounted) {
+              setState(() => _isLoaded = true);
+              _updateHeatmap();
+            }
           },
           onWebResourceError: (WebResourceError error) {
             debugPrint('WebView Error: ${error.errorCode} - ${error.description}');
           },
-          onNavigationRequest: (request) {
-            debugPrint('Navigating to: ${request.url}');
-            return NavigationDecision.navigate;
-          },
         ),
-      )
-      ..setOnConsoleMessage((message) {
-        debugPrint('WebView Console: ${message.message}');
-      })
-      ..loadFlutterAsset('assets/3d/index.html');
+      );
+
+    // Delay loading to prioritize main UI rendering
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _controller.loadFlutterAsset('assets/3d/index.html');
+      }
+    });
   }
 
   @override

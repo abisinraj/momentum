@@ -291,6 +291,17 @@ class AppDatabase extends _$AppDatabase {
             maxBpm: maxBpm != null ? Value(maxBpm) : const Value.absent(),
           ));
 
+  /// Mark all active sessions as completed (cancelled)
+  Future<void> cleanupActiveSessions() async {
+    final now = DateTime.now();
+    await (update(sessions)..where((s) => s.completedAt.isNull()))
+        .write(SessionsCompanion(
+          completedAt: Value(now),
+          durationSeconds: const Value(1), // Minimal duration for cancelled
+          intensity: const Value(0),
+        ));
+  }
+
   
   // ===== Session Exercises Operations =====
   
@@ -406,6 +417,32 @@ class AppDatabase extends _$AppDatabase {
     return grid;
   }
   
+  /// Watch activity for contribution grid (reactive)
+  Stream<Map<DateTime, String>> watchActivityGrid(int days) {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day).subtract(Duration(days: days));
+    
+    return (select(sessions)
+          ..where((s) => s.startedAt.isBiggerOrEqualValue(start) & 
+                        s.completedAt.isNotNull()))
+        .join([innerJoin(workouts, workouts.id.equalsExp(sessions.workoutId))])
+        .watch()
+        .map((rows) {
+          final Map<DateTime, String> grid = {};
+          for (final row in rows) {
+            final session = row.readTable(sessions);
+            final workout = row.readTable(workouts);
+            final dateKey = DateTime(
+              session.startedAt.year,
+              session.startedAt.month,
+              session.startedAt.day,
+            );
+            grid[dateKey] = workout.shortCode;
+          }
+          return grid;
+        });
+  }
+  
   /// Get muscle workload for heatmap (last N days)
   /// Returns `Map<MuscleName, IntensityScore>` where score is approx sets/volume
   Future<Map<String, int>> getMuscleWorkload(int days) async {
@@ -482,6 +519,109 @@ class AppDatabase extends _$AppDatabase {
     }
     
     return totalVolume;
+  }
+
+  /// Get total reps for a specific period
+  Future<int> getTotalReps(int days, {int offsetDays = 0}) async {
+    final now = DateTime.now();
+    final end = DateTime(now.year, now.month, now.day).subtract(Duration(days: offsetDays));
+    final effectiveEnd = end.add(const Duration(days: 1)); 
+    final start = end.subtract(Duration(days: days));
+    
+    final query = select(sessionExercises)
+        .join([
+          innerJoin(sessions, sessions.id.equalsExp(sessionExercises.sessionId)),
+        ])
+        ..where(sessions.startedAt.isBiggerOrEqualValue(start) & 
+                sessions.startedAt.isSmallerThanValue(effectiveEnd));
+                
+    final result = await query.get();
+    
+    int totalReps = 0;
+    for (final row in result) {
+      final se = row.readTable(sessionExercises);
+      totalReps += se.completedReps;
+    }
+    
+    return totalReps;
+  }
+
+  /// Get comprehensive analytics for the last N days
+  Future<Map<String, dynamic>> getAnalyticsSummary(int days) async {
+    final now = DateTime.now();
+    final start = now.subtract(Duration(days: days));
+    
+    // 1. Fetch Sessions
+    final sessionRows = await (select(sessions)
+      ..where((s) => s.startedAt.isBiggerOrEqualValue(start) & s.completedAt.isNotNull()))
+      .get();
+      
+    if (sessionRows.isEmpty) {
+      return {
+        'avgIntensity': 0.0,
+        'totalMinutes': 0,
+        'calories': 0,
+        'muscleFocus': <MapEntry<String, double>>[],
+        'sessionCount': 0,
+      };
+    }
+
+    double totalIntensity = 0;
+    int totalSeconds = 0;
+    int intensityCount = 0;
+
+    for (final s in sessionRows) {
+      if (s.intensity != null) {
+        totalIntensity += s.intensity!;
+        intensityCount++;
+      }
+      totalSeconds += s.durationSeconds ?? 0;
+    }
+
+    final avgIntensity = intensityCount > 0 ? (totalIntensity / intensityCount) : 0.0;
+    final totalMinutes = totalSeconds ~/ 60;
+    
+    // Calorie Estimation Logic: minutes * MET(7.0) * (Intensity/10)
+    // MET 7.0 is a reasonable average for resistance training
+    final calories = (totalMinutes * 7.0 * (avgIntensity / 5.0)).round(); // Adjusted for 5 being "normal"
+
+    // 2. Fetch Muscle Distribution
+    final muscleQuery = select(sessionExercises).join([
+      innerJoin(sessions, sessions.id.equalsExp(sessionExercises.sessionId)),
+      innerJoin(exercises, exercises.id.equalsExp(sessionExercises.exerciseId)),
+    ])
+    ..where(sessions.startedAt.isBiggerOrEqualValue(start));
+
+    final muscleResult = await muscleQuery.get();
+    final muscleStats = <String, double>{};
+    double totalMuscleVolume = 0;
+
+    for (final row in muscleResult) {
+      final se = row.readTable(sessionExercises);
+      final ex = row.readTable(exercises);
+      final muscle = ex.primaryMuscleGroup ?? 'Other';
+      
+      // We use "Volumetric weight" (reps) as a proxy for focus if weight is null
+      final volume = se.completedReps.toDouble(); 
+      muscleStats[muscle] = (muscleStats[muscle] ?? 0) + volume;
+      totalMuscleVolume += volume;
+    }
+
+    final muscleFocus = muscleStats.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    // Convert to percentages
+    final musclePercentages = muscleFocus.map((e) => 
+      MapEntry(e.key, totalMuscleVolume > 0 ? (e.value / totalMuscleVolume) : 0.0)
+    ).toList();
+
+    return {
+      'avgIntensity': avgIntensity,
+      'totalMinutes': totalMinutes,
+      'calories': calories,
+      'muscleFocus': musclePercentages.take(3).toList(),
+      'sessionCount': sessionRows.length,
+    };
   }
 
   // ===== Cycle Logic =====

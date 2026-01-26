@@ -24,6 +24,20 @@ final volumeLoadProvider = FutureProvider<List<double>>((ref) async {
   return [current, last];
 });
 
+// Calculate Reps Progression (Current vs Last Week) - For Bodyweight
+final repsProgressionProvider = FutureProvider<List<int>>((ref) async {
+  final db = ref.watch(appDatabaseProvider);
+  final current = await db.getTotalReps(7, offsetDays: 0);
+  final last = await db.getTotalReps(7, offsetDays: 7);
+  return [current, last];
+});
+
+// Analytics Summary (Last 30 days)
+final analyticsSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final db = ref.watch(appDatabaseProvider);
+  return db.getAnalyticsSummary(30);
+});
+
 // Workout Progress Insight (Family provider by workout ID)
 // Used in Home Screen to show "velocity" or "consistency" for the specific workout
 final workoutInsightProvider = FutureProvider.family<Map<String, dynamic>, int>((ref, workoutId) async {

@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/user_providers.dart';
-import '../../../core/providers/user_providers.dart';
 
 /// Screen to select number of days in the split OR use a pre-made split
 class SplitSetupScreen extends ConsumerStatefulWidget {
@@ -28,133 +27,76 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header
-                        Text(
-                          'Create Your Split',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Choose how you want to structure your weekly routine.',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: colorScheme.onSurfaceVariant,
-                            height: 1.5,
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 32),
-
-                        // Mode Toggle
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _buildModeButton(
-                                  context,
-                                  title: 'Custom',
-                                  isSelected: !_isPreMadeMode,
-                                  onTap: () => setState(() => _isPreMadeMode = false),
-                                ),
-                              ),
-                              Expanded(
-                                child: _buildModeButton(
-                                  context,
-                                  title: 'Pre-made',
-                                  isSelected: _isPreMadeMode,
-                                  onTap: () => setState(() => _isPreMadeMode = true),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-                        
-                        // Dynamic Content
-                        Expanded(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            child: _isPreMadeMode 
-                              ? _buildPreMadeView(context)
-                              : _buildCustomView(context),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Action Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: _isSaving ? null : () async {
-                              if (_isPreMadeMode) {
-                                await _applyPreMadeSplit();
-                              } else {
-                                // Custom Flow
-                                await ref.read(userSetupProvider.notifier).setSplitDays(_selectedDays);
-                                if (context.mounted) {
-                                  context.push('/create-workout/1/$_selectedDays');
-                                }
-                              }
-                            },
-                            style: FilledButton.styleFrom(
-                              backgroundColor: colorScheme.primary,
-                              foregroundColor: colorScheme.onPrimary,
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: _isSaving
-                              ? SizedBox(
-                                  height: 20, 
-                                  width: 20, 
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary)
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      _isPreMadeMode ? 'Use This Split' : 'Start Building',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Icon(Icons.arrow_forward),
-                                  ],
-                                ),
-                          ),
-                        ),
-                      ],
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Text(
+                      'Create Your Split',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Choose how you want to structure your weekly routine.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Mode Toggle
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildModeButton(
+                              context,
+                              title: 'Custom',
+                              isSelected: !_isPreMadeMode,
+                              onTap: () => setState(() => _isPreMadeMode = false),
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildModeButton(
+                              context,
+                              title: 'Pre-made',
+                              isSelected: _isPreMadeMode,
+                              onTap: () => setState(() => _isPreMadeMode = true),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
+            ),
+
+            // Mode Content
+            if (_isPreMadeMode)
+              SliverToBoxAdapter(child: _buildPreMadeView(context))
+            else
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _buildCustomView(context),
+              ),
+          ],
         ),
       ),
     );
@@ -189,91 +131,146 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
     );
   }
 
+  Widget _buildButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton(
+        onPressed: _isSaving ? null : () async {
+          if (_isPreMadeMode) {
+            await _applyPreMadeSplit();
+          } else {
+            // Custom Flow
+            await ref.read(userSetupProvider.notifier).setSplitDays(_selectedDays);
+            if (context.mounted) {
+              context.push('/create-workout/1/$_selectedDays');
+            }
+          }
+        },
+        style: FilledButton.styleFrom(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: _isSaving
+          ? SizedBox(
+              height: 20, 
+              width: 20, 
+              child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary)
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _isPreMadeMode ? 'Use This Split' : 'Start Building',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward),
+              ],
+            ),
+      ),
+    );
+  }
+
   Widget _buildCustomView(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      key: const ValueKey('custom'),
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-         const Spacer(),
-         Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '$_selectedDays',
-                style: TextStyle(
-                  fontSize: 120,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
-                  height: 1.0,
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+      child: Column(
+        key: const ValueKey('custom'),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+           const Spacer(),
+           Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$_selectedDays',
+                  style: TextStyle(
+                    fontSize: 120,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                    height: 1.0,
+                  ),
                 ),
-              ),
-              Text(
-                'DAYS / WEEK',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.primary,
-                  letterSpacing: 2.0,
+                Text(
+                  'DAYS / WEEK',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.primary,
+                    letterSpacing: 2.0,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 48),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            activeTrackColor: colorScheme.primary,
-            inactiveTrackColor: colorScheme.surfaceContainerHighest,
-            thumbColor: colorScheme.surface,
-            overlayColor: colorScheme.primary.withValues(alpha: 0.2),
-            thumbShape: _CustomThumbShape(colorScheme),
-            trackHeight: 8,
+          const SizedBox(height: 48),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: colorScheme.primary,
+              inactiveTrackColor: colorScheme.surfaceContainerHighest,
+              thumbColor: colorScheme.surface,
+              overlayColor: colorScheme.primary.withValues(alpha: 0.2),
+              thumbShape: _CustomThumbShape(colorScheme),
+              trackHeight: 8,
+            ),
+            child: Slider(
+              value: _selectedDays.toDouble(),
+              min: 1,
+              max: 7,
+              divisions: 6,
+              onChanged: (value) => setState(() => _selectedDays = value.round()),
+            ),
           ),
-          child: Slider(
-            value: _selectedDays.toDouble(),
-            min: 1,
-            max: 7,
-            divisions: 6,
-            onChanged: (value) => setState(() => _selectedDays = value.round()),
-          ),
-        ),
-        const Spacer(),
-      ],
+          const Spacer(),
+          // Button
+          _buildButton(context),
+        ],
+      ),
     );
   }
 
   Widget _buildPreMadeView(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      key: const ValueKey('premade'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: colorScheme.secondary.withValues(alpha: 0.2)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.info_outline, color: colorScheme.secondary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  '8-Day Cycle optimized for balanced strength and conditioning.',
-                  style: TextStyle(color: colorScheme.onSecondaryContainer),
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+      child: Column(
+        key: const ValueKey('premade'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.secondary.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: colorScheme.secondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '8-Day Cycle optimized for balanced strength and conditioning.',
+                    style: TextStyle(color: colorScheme.onSecondaryContainer),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 24),
-        Expanded(
-          child: ListView(
-            children: const [
+          const SizedBox(height: 24),
+          // List Items
+          const Column(
+            children: [
               _SplitItem(day: 1, title: 'Upper Body Push', desc: 'Push-ups, Dips, Plank'),
               _SplitItem(day: 2, title: 'Boxing Basics', desc: 'Rope, Shadow Boxing, Footwork'),
               _SplitItem(day: 3, title: 'Lower Body', desc: 'Squats, Lunges, Calves'),
@@ -284,8 +281,11 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
               _SplitItem(day: 8, title: 'Rest Day', desc: 'Recovery'),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: 24),
+          // Button at bottom of scrollable list
+          _buildButton(context),
+        ],
+      ),
     );
   }
 

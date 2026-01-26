@@ -4,13 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/services/background_service.dart';
+import 'core/services/notification_service.dart';
 
 import 'app/app.dart';
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await BackgroundService().initialize();
+  try {
+    await BackgroundService().initialize();
+    await NotificationService().initialize();
+  } catch (e) {
+    debugPrint('Initialization Failed: $e');
+  }
 
 
   // Global error handling

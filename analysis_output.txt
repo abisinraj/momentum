@@ -1,0 +1,5 @@
+Analyzing momentum...                                           
+
+  error • The returned type 'Stream<Map<DateTime, String>>' isn't returnable from a 'FutureOr<Map<DateTime, String>>' function, as required by the closure's context • lib/core/providers/database_providers.g.dart:203:18 • return_of_invalid_type_from_closure
+
+1 issue found. (ran in 4.2s)

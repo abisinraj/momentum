@@ -123,7 +123,7 @@ final nextWorkoutProvider = AutoDisposeFutureProvider<Workout?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef NextWorkoutRef = AutoDisposeFutureProviderRef<Workout?>;
-String _$activityGridHash() => r'8f9f6366b17adef0b36125acc1e88f4f668b2ad9';
+String _$activityGridHash() => r'3d18482915f88257e3a503f7d3b614e988b930e8';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -147,20 +147,24 @@ class _SystemHash {
 }
 
 /// Provider for activity grid data (last N days)
+/// Provider for activity grid data (last N days)
 ///
 /// Copied from [activityGrid].
 @ProviderFor(activityGrid)
 const activityGridProvider = ActivityGridFamily();
 
 /// Provider for activity grid data (last N days)
+/// Provider for activity grid data (last N days)
 ///
 /// Copied from [activityGrid].
 class ActivityGridFamily extends Family<AsyncValue<Map<DateTime, String>>> {
+  /// Provider for activity grid data (last N days)
   /// Provider for activity grid data (last N days)
   ///
   /// Copied from [activityGrid].
   const ActivityGridFamily();
 
+  /// Provider for activity grid data (last N days)
   /// Provider for activity grid data (last N days)
   ///
   /// Copied from [activityGrid].
@@ -191,10 +195,12 @@ class ActivityGridFamily extends Family<AsyncValue<Map<DateTime, String>>> {
 }
 
 /// Provider for activity grid data (last N days)
+/// Provider for activity grid data (last N days)
 ///
 /// Copied from [activityGrid].
 class ActivityGridProvider
-    extends AutoDisposeFutureProvider<Map<DateTime, String>> {
+    extends AutoDisposeStreamProvider<Map<DateTime, String>> {
+  /// Provider for activity grid data (last N days)
   /// Provider for activity grid data (last N days)
   ///
   /// Copied from [activityGrid].
@@ -226,7 +232,7 @@ class ActivityGridProvider
 
   @override
   Override overrideWith(
-    FutureOr<Map<DateTime, String>> Function(ActivityGridRef provider) create,
+    Stream<Map<DateTime, String>> Function(ActivityGridRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -243,7 +249,7 @@ class ActivityGridProvider
   }
 
   @override
-  AutoDisposeFutureProviderElement<Map<DateTime, String>> createElement() {
+  AutoDisposeStreamProviderElement<Map<DateTime, String>> createElement() {
     return _ActivityGridProviderElement(this);
   }
 
@@ -263,13 +269,13 @@ class ActivityGridProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin ActivityGridRef on AutoDisposeFutureProviderRef<Map<DateTime, String>> {
+mixin ActivityGridRef on AutoDisposeStreamProviderRef<Map<DateTime, String>> {
   /// The parameter `days` of this provider.
   int get days;
 }
 
 class _ActivityGridProviderElement
-    extends AutoDisposeFutureProviderElement<Map<DateTime, String>>
+    extends AutoDisposeStreamProviderElement<Map<DateTime, String>>
     with ActivityGridRef {
   _ActivityGridProviderElement(super.provider);
 

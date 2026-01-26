@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/database/app_database.dart';
 import 'package:momentum/core/providers/database_providers.dart';
+import 'package:momentum/core/services/notification_service.dart';
 
 /// Types of suggestions
 enum SuggestionType {
@@ -78,16 +79,16 @@ final smartSuggestionsProvider = FutureProvider.autoDispose<List<SmartSuggestion
         // We only fetched 30. If user trains daily, that's 30 days.
         // If they skipped it for 30 sessions, it definitely needs attention.
         
-        suggestions.add(SmartSuggestion(
-          id: 'adaptive_${workout.id}',
-          type: SuggestionType.adaptive,
-          title: 'Cycle Balance',
-          message: 'It\'s been a while since you did ${workout.name}. Consider prioritizing it next.',
-          actionLabel: 'Start Now',
-          payload: workout,
-        ));
+        // suggestions.add(SmartSuggestion(...)) // REMOVED FROM UI
         
-        // Only one adaptive suggestion at a time to avoid spam
+        // TRIGGER PUSH NOTIFICATION INSTEAD
+        NotificationService().showNotification(
+          id: workout.id + 1000, // Unique-ish ID
+          title: 'Cycle Balance',
+          body: 'It\'s been a while since you did ${workout.name}. Consider prioritizing it today!',
+        );
+        
+        // Only one adaptive suggestion alert at a time to avoid spam
         break;
       }
     }
