@@ -10,24 +10,19 @@ final workoutComparisonProvider = FutureProvider.family<Map<String, dynamic>, in
   final workout = await db.getWorkout(workoutId);
   if (workout == null) throw Exception('Workout not found');
   
-  // 2. Get Last Completed Session
-  final lastSession = await db.getLastSessionForWorkout(workoutId);
-  
-  if (lastSession == null) {
-    return {
-      'isFirst': true,
-      'workout': workout,
-    };
-  }
-  
-  // 3. Get Exercises for this workout (Target)
+  // 2. Get Exercises for this workout (Target) - Always fetch
   final targetExercises = await db.getExercisesForWorkout(workoutId);
   
-  // 4. Get Exercises for last session (Actuals)
-  final lastExercises = await db.getSessionExercises(lastSession.id);
+  // 3. Get Last Completed Session
+  final lastSession = await db.getLastSessionForWorkout(workoutId);
+  
+  List<SessionExercise> lastExercises = [];
+  if (lastSession != null) {
+     lastExercises = await db.getSessionExercises(lastSession.id);
+  }
   
   return {
-    'isFirst': false,
+    'isFirst': lastSession == null,
     'workout': workout,
     'lastSession': lastSession,
     'targetExercises': targetExercises,
