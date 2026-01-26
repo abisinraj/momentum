@@ -200,63 +200,65 @@
 
             // --- MUSCLE CREATION ---
 
+            // --- MUSCLE CREATION ---
+
             // Head & Neck
             createMuscle(new THREE.Vector3(0, yHeadTop - 10, 0), new THREE.Vector3(0, yHeadTop, 0), 100, 12, 0.4, 'Head');
-            createMuscle(neck, new THREE.Vector3(0, yHeadTop - 5, 0), 80, 10, 0.2, 'Traps');
+            createMuscle(neck, new THREE.Vector3(0, yHeadTop - 5, 0), 80, 12, 0.4, 'Traps'); // Thicker neck
 
             // Torso
             // Spine/Center
-            createMuscle(new THREE.Vector3(0, yNeckBase, zSpine), new THREE.Vector3(0, yHip, zSpine), 150, 14, 1.0, 'Back');
+            createMuscle(new THREE.Vector3(0, yNeckBase, zSpine), new THREE.Vector3(0, yHip, zSpine), 150, 16, 1.0, 'Back'); // Broader core
 
             // Traps/Shoulders upper
-            createMuscle(neck, shoulderL, 50, 8, 0.5, 'Traps');
-            createMuscle(neck, shoulderR, 50, 8, 0.5, 'Traps');
+            createMuscle(neck, shoulderL, 50, 12, 0.7, 'Traps'); // Bigger traps
+            createMuscle(neck, shoulderR, 50, 12, 0.7, 'Traps');
 
-            // Deltoids
-            createMuscle(shoulderL, new THREE.Vector3(-xShoulder, yShoulder - 10, 0), 60, 11, 1.5, 'Shoulders');
-            createMuscle(shoulderR, new THREE.Vector3(xShoulder, yShoulder - 10, 0), 60, 11, 1.5, 'Shoulders');
+            // Deltoids (Shoulders) - Significant increase
+            createMuscle(shoulderL, new THREE.Vector3(-xShoulder, yShoulder - 12, 0), 80, 16, 1.8, 'Shoulders');
+            createMuscle(shoulderR, new THREE.Vector3(xShoulder, yShoulder - 12, 0), 80, 16, 1.8, 'Shoulders');
 
-            // Chest (Pectorals)
-            createMuscle(new THREE.Vector3(-5, yChest, 10), new THREE.Vector3(-xShoulder + 10, yShoulder - 5, 5), 80, 14, 1.2, 'Chest');
-            createMuscle(new THREE.Vector3(5, yChest, 10), new THREE.Vector3(xShoulder - 10, yShoulder - 5, 5), 80, 14, 1.2, 'Chest');
+            // Chest (Pectorals) - Broader and fuller
+            createMuscle(new THREE.Vector3(-5, yChest, 10), new THREE.Vector3(-xShoulder + 10, yShoulder - 5, 8), 100, 18, 1.4, 'Chest');
+            createMuscle(new THREE.Vector3(5, yChest, 10), new THREE.Vector3(xShoulder - 10, yShoulder - 5, 8), 100, 18, 1.4, 'Chest');
 
-            // Abs (Rectus Abdominis)
-            createMuscle(new THREE.Vector3(-4, yChest - 10, 11), new THREE.Vector3(-4, yWaist, 10), 60, 10, 0.3, 'Abs');
-            createMuscle(new THREE.Vector3(4, yChest - 10, 11), new THREE.Vector3(4, yWaist, 10), 60, 10, 0.3, 'Abs');
+            // Abs (Rectus Abdominis) - Defined
+            createMuscle(new THREE.Vector3(-4, yChest - 10, 12), new THREE.Vector3(-4, yWaist, 11), 70, 11, 0.4, 'Abs');
+            createMuscle(new THREE.Vector3(4, yChest - 10, 12), new THREE.Vector3(4, yWaist, 11), 70, 11, 0.4, 'Abs');
 
-            // Lats (Wings)
-            createMuscle(new THREE.Vector3(-xShoulder + 5, yShoulder - 15, -5), new THREE.Vector3(-xHip + 5, yWaist + 10, -5), 90, 12, 1.4, 'Back');
-            createMuscle(new THREE.Vector3(xShoulder - 5, yShoulder - 15, -5), new THREE.Vector3(xHip - 5, yWaist + 10, -5), 90, 12, 1.4, 'Back');
+            // Lats (Wings) - Standard V-taper
+            createMuscle(new THREE.Vector3(-xShoulder + 5, yShoulder - 15, -5), new THREE.Vector3(-xHip + 5, yWaist + 10, -5), 100, 15, 1.6, 'Back');
+            createMuscle(new THREE.Vector3(xShoulder - 5, yShoulder - 15, -5), new THREE.Vector3(xHip - 5, yWaist + 10, -5), 100, 15, 1.6, 'Back');
 
             // Arms (Full Volume)
             // L Upper Arm (Bicep + Tricep)
-            createMuscle(shoulderL, elbowL, 60, 8, 1.4, 'Arms'); // Bicep side
-            createMuscle(new THREE.Vector3(-xShoulder, yShoulder, -3), new THREE.Vector3(-28, yElbow, -2), 60, 9, 1.6, 'Arms'); // Tricep side
+            createMuscle(shoulderL, elbowL, 70, 11, 1.6, 'Arms'); // Bicep peak
+            createMuscle(new THREE.Vector3(-xShoulder, yShoulder, -3), new THREE.Vector3(-28, yElbow, -2), 70, 12, 1.8, 'Arms'); // Tricep horseshoe
 
             // R Upper Arm
-            createMuscle(shoulderR, elbowR, 60, 8, 1.4, 'Arms');
-            createMuscle(new THREE.Vector3(xShoulder, yShoulder, -3), new THREE.Vector3(28, yElbow, -2), 60, 9, 1.6, 'Arms');
+            createMuscle(shoulderR, elbowR, 70, 11, 1.6, 'Arms');
+            createMuscle(new THREE.Vector3(xShoulder, yShoulder, -3), new THREE.Vector3(28, yElbow, -2), 70, 12, 1.8, 'Arms');
 
             // Forearms
-            createMuscle(elbowL, handL, 50, 7, 1.2, 'Arms');
-            createMuscle(elbowR, handR, 50, 7, 1.2, 'Arms');
-            // Back of forearms for thickness
-            createMuscle(new THREE.Vector3(-28, yElbow, 2), new THREE.Vector3(-30, yArmEnd, 4), 40, 6, 1.1, 'Arms');
-            createMuscle(new THREE.Vector3(28, yElbow, 2), new THREE.Vector3(30, yArmEnd, 4), 40, 6, 1.1, 'Arms');
+            createMuscle(elbowL, handL, 60, 9, 1.3, 'Arms');
+            createMuscle(elbowR, handR, 60, 9, 1.3, 'Arms');
+            // Back of forearms
+            createMuscle(new THREE.Vector3(-28, yElbow, 2), new THREE.Vector3(-30, yArmEnd, 4), 50, 8, 1.2, 'Arms');
+            createMuscle(new THREE.Vector3(28, yElbow, 2), new THREE.Vector3(30, yArmEnd, 4), 50, 8, 1.2, 'Arms');
 
 
             // Legs
-            // Quads/Hams (Upper Leg)
-            createMuscle(hipL, kneeL, 100, 13, 1.6, 'Legs');
-            createMuscle(hipR, kneeR, 100, 13, 1.6, 'Legs');
+            // Quads/Hams (Upper Leg) - Athletic base
+            createMuscle(hipL, kneeL, 120, 18, 1.8, 'Legs');
+            createMuscle(hipR, kneeR, 120, 18, 1.8, 'Legs');
 
-            // Calves (Lower Leg)
-            createMuscle(kneeL, ankleL, 80, 9, 1.5, 'Calves');
-            createMuscle(kneeR, ankleR, 80, 9, 1.5, 'Calves');
+            // Calves (Lower Leg) - Diamond calves
+            createMuscle(kneeL, ankleL, 90, 11, 1.7, 'Calves');
+            createMuscle(kneeR, ankleR, 90, 11, 1.7, 'Calves');
 
             // Feet
-            createMuscle(ankleL, footL, 40, 7, 1.0, 'Legs');
-            createMuscle(ankleR, footR, 40, 7, 1.0, 'Legs');
+            createMuscle(ankleL, footL, 50, 8, 1.0, 'Legs');
+            createMuscle(ankleR, footR, 50, 8, 1.0, 'Legs');
 
 
             // Build Geometry
