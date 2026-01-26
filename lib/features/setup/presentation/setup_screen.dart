@@ -390,25 +390,18 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: colorScheme.primary.withValues(alpha: 0.1),
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'KG',
-            style: TextStyle(
-              color: colorScheme.primary,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Icon(Icons.keyboard_arrow_down, color: colorScheme.primary, size: 16),
-        ],
+      child: Text(
+        'KG',
+        style: TextStyle(
+          color: colorScheme.onSurfaceVariant,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
