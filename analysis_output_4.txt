@@ -1,0 +1,5 @@
+Analyzing momentum...                                           
+
+   info • Use 'const' with the constructor to improve performance • lib/features/workout/presentation/active_workout_screen.dart:370:25 • prefer_const_constructors
+
+1 issue found. (ran in 22.8s)

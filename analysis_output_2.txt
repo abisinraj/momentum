@@ -1,0 +1,8 @@
+Analyzing momentum...                                           
+
+warning • The value of the local variable 'totalSetDuration' isn't used • lib/core/database/app_database.dart:592:9 • unused_local_variable
+   info • The private field _cachedExercises could be 'final' • lib/features/workout/presentation/active_workout_screen.dart:65:18 • prefer_final_fields
+warning • The declaration '_incrementSet' isn't referenced • lib/features/workout/presentation/active_workout_screen.dart:193:16 • unused_element
+   info • Use 'const' with the constructor to improve performance • lib/features/workout/presentation/active_workout_screen.dart:370:25 • prefer_const_constructors
+
+4 issues found. (ran in 26.9s)

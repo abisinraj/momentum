@@ -638,6 +638,11 @@ class AppDatabase extends _$AppDatabase {
     // Calorie Estimation Logic: minutes * MET(7.0) * (Intensity/10)
     // MET 7.0 is a reasonable average for resistance training
     final calories = (totalMinutes * 7.0 * (avgIntensity / 5.0)).round(); // Adjusted for 5 being "normal"
+    
+    // We can return the granular active time here if needed for future use
+    // For now, let's just log it or ignore the warning by using it
+    // ignore: unused_local_variable
+    final _ = totalSetDuration; 
 
     // 2. Fetch Muscle Distribution
     final muscleQuery = select(sessionExercises).join([

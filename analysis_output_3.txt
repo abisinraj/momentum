@@ -1,0 +1,6 @@
+Analyzing momentum...                                           
+
+   info • The private field _cachedExercises could be 'final' • lib/features/workout/presentation/active_workout_screen.dart:65:18 • prefer_final_fields
+   info • Use 'const' with the constructor to improve performance • lib/features/workout/presentation/active_workout_screen.dart:370:25 • prefer_const_constructors
+
+2 issues found. (ran in 21.3s)

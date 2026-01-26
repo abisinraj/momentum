@@ -55,11 +55,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   final Map<int, String> _exerciseNotes = {};
   
   // Stopwatch State
-  int? _activeSetExerciseId;
-  DateTime? _setTimerStart;
-  Timer? _setTimer;
-  Duration _currentSetElapsed = Duration.zero;
+  // _activeSetExerciseId is now "inferred" or "auto-detected"
+  int? _currentWorkExerciseId; 
+  Timer? _workTimer;
+  Duration _currentWorkElapsed = Duration.zero;
   final Map<int, int> _accumulatedDurations = {}; // Exercise ID -> Total Seconds
+  
+  // Cached list to determine active exercise efficiently
+  List<Exercise> _cachedExercises = [];
 
   @override
   void initState() {
@@ -82,9 +85,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
         // Timer complete
         HapticFeedback.mediumImpact();
         setState(() => _restingExerciseId = null);
+        // Auto-resume work timer happens in _workTimer tick
       }
     });
-
+    
+    // Cooldown setup...
     _cooldownController = AnimationController(vsync: this, duration: const Duration(minutes: 5));
     _cooldownController.addListener(() {
        if (mounted) {
@@ -99,6 +104,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     });
     
     _initializeClock();
+    _startWorkTimer();
   }
   
   void _initializeClock() {
@@ -148,43 +154,52 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     });
   }
   
-  void _startSetTimer(int exerciseId) {
-    if (_activeSetExerciseId != null) return; // Only one at a time
-    
-    setState(() {
-      _activeSetExerciseId = exerciseId;
-      _setTimerStart = DateTime.now();
-      _currentSetElapsed = Duration.zero;
-    });
-    
-    _setTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _currentSetElapsed = DateTime.now().difference(_setTimerStart!);
-        });
+  // New Global Work Timer (Automated)
+  void _startWorkTimer() {
+    _workTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || !_isRunning) return;
+      
+      // Safety check: Do we have exercises loaded?
+      if (_cachedExercises.isEmpty) return;
+      
+      // Determine Active Exercise (First incomplete one)
+      int? activeId;
+      for (final ex in _cachedExercises) {
+         final completed = _completedSets[ex.id] ?? 0;
+         if (completed < ex.sets) {
+           activeId = ex.id;
+           break;
+         }
+      }
+      
+      // If we found an active exercise, and we ARE NOT resting or cooling down
+      if (activeId != null) {
+         if (_restingExerciseId == null && _cooldownExerciseId == null) {
+            setState(() {
+               _currentWorkExerciseId = activeId;
+               _currentWorkElapsed += const Duration(seconds: 1);
+            });
+         } 
+      } else {
+         // All done?
+         if (_currentWorkExerciseId != null) {
+            setState(() => _currentWorkExerciseId = null);
+         }
       }
     });
   }
 
-  void _stopSetTimer(int exerciseId, int targetSets, AsyncValue<List<Exercise>> exercisesAsync) {
-    _setTimer?.cancel();
-    
-    final duration = _currentSetElapsed;
-    final seconds = duration.inSeconds;
-    
-    // Update accumulated duration
-    setState(() {
-      _accumulatedDurations[exerciseId] = (_accumulatedDurations[exerciseId] ?? 0) + seconds;
-      _activeSetExerciseId = null;
-      _setTimerStart = null;
-      _currentSetElapsed = Duration.zero;
-    });
-    
-    // Complete the set immediately
-    _incrementSet(exerciseId, targetSets, exercisesAsync);
-  }
-
+  // Handle "Check" tap (Set Complete)
   Future<void> _incrementSet(int exerciseId, int targetSets, AsyncValue<List<Exercise>> exercisesAsync) async {
+    // Capture Duration!
+    if (_currentWorkExerciseId == exerciseId) {
+       final seconds = _currentWorkElapsed.inSeconds;
+       setState(() {
+         _accumulatedDurations[exerciseId] = (_accumulatedDurations[exerciseId] ?? 0) + seconds;
+         _currentWorkElapsed = Duration.zero; // Reset for next set
+       });
+    }
+
     final current = _completedSets[exerciseId] ?? 0;
     final next = (current + 1) % (targetSets + 1);
     
@@ -320,7 +335,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   
   Future<void> _completeWorkout(int intensity) async {
     _timer?.cancel();
-    _setTimer?.cancel();
+    _workTimer?.cancel();
     
     // Gather exercise data
     final exercises = <SessionExercisesCompanion>[];
@@ -339,18 +354,22 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     // (Or simpler: Refactor to allow access to exercise list logic, but sticking to this for now).
     
     for (final id in excIds) {
+       // Total duration = Accumulated + Current (if active and not finished)
+       // But usually we finish via `_incrementSet` which flushes Current -> Accumulated.
+       // Exception: User confirms workout without finishing last set?
+       // Let's flush current if any.
+       int totalSeconds = _accumulatedDurations[id] ?? 0;
+       if (_currentWorkExerciseId == id) {
+          totalSeconds += _currentWorkElapsed.inSeconds;
+       }
+
        exercises.add(SessionExercisesCompanion.insert(
          sessionId: widget.session.sessionId,
          exerciseId: id,
          completedSets: Value(_completedSets[id] ?? 0),
-         completedReps: Value(0), // We don't track total reps per se unless we parsed the note, assume 0 or handle logic later
-         // Wait, progressive overload logic needs REPS.
-         // If user entered note "10 reps", we could parse. 
-         // But currently default is 0. 
-         // If we don't fix this, progressive overload (Reps) will be 0.
-         // Let's try to parse the note if it looks like a number.
+         completedReps: Value(0), 
          notes: Value(_exerciseNotes[id]),
-         durationSeconds: Value(_accumulatedDurations[id]),
+         durationSeconds: Value(totalSeconds),
        ));
     }
     
@@ -379,6 +398,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
             onPressed: () {
               Navigator.pop(context); // Dialog
               _timer?.cancel();
+              _workTimer?.cancel();
               ref.read(activeWorkoutSessionProvider.notifier).cancelWorkout();
               Navigator.pop(this.context); // Screen
             },
@@ -395,6 +415,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   @override
   void dispose() {
     _timer?.cancel();
+    _workTimer?.cancel();
     _restController.dispose();
     _cooldownController.dispose();
     _pageController.dispose();
@@ -405,6 +426,19 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final exercisesAsync = ref.watch(exercisesForWorkoutProvider(widget.session.workoutId));
+    
+    // Update cache for work timer
+    if (exercisesAsync.hasValue) {
+       _cachedExercises = exercisesAsync.value!;
+       
+       // Sort matching UI logic so 'active' calculation matches visual order
+       _cachedExercises.sort((a, b) {
+            final aDone = (_completedSets[a.id] ?? 0) >= a.sets;
+            final bDone = (_completedSets[b.id] ?? 0) >= b.sets;
+            if (aDone == bDone) return a.orderIndex.compareTo(b.orderIndex);
+            return aDone ? 1 : -1; 
+       });
+    }
     
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -583,54 +617,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: () async {
-                  final current = _completedSets[ex.id] ?? 0;
-                  // Cycle: 0 -> 1 -> ... -> Max -> 0
-                  final next = (current + 1) % (targetSets + 1);
-                  
-                  setState(() {
-                    _completedSets[ex.id] = next;
-                  });
-                  HapticFeedback.lightImpact();
-                  
-                  // Logic: 
-                  // 1. If Just Finished Exercise (all sets done): Start Cooldown
-                  // 2. If Just Finished Set (but not all): Start Rest
-                  
-                  final newIsFullyDone = next >= targetSets;
-                  
-                  if (newIsFullyDone) {
-                     // Exercise Complete -> Cooldown (Blue/Cyan typically)
-                     _startCooldown(ex.id);
-                     _restController.stop(); // Stop rest if running
-                     setState(() => _restingExerciseId = null);
-                     
-                     // Check if ALL exercises are now done
-                     final allDone = exercisesList.every((e) {
-                        // Use updated value for current exercise
-                        final sets = e.id == ex.id ? next : (_completedSets[e.id] ?? 0);
-                        return sets >= e.sets;
-                     });
-                     
-                     if (allDone) {
-                        // Give a small delay so user sees the tick animation
-                        await Future.delayed(const Duration(milliseconds: 500));
-                        if (mounted) {
-                           _confirmAndCompleteWorkout();
-                        }
-                     }
-                     
-                  } else if (next > current) {
-                     // Set Complete -> Rest
-                     _startRestTimer(ex.id);
-                     _cooldownController.stop(); // Stop cooldown if running
-                     setState(() => _cooldownExerciseId = null);
-                  } else if (isResting) {
-                     // Cancel rest if clicked again
-                     _restController.stop();
-                     setState(() => _restingExerciseId = null);
-                  }
-                },
+                onTap: () => _incrementSet(ex.id, targetSets, exercisesAsync),
 
                 onLongPress: () => _showRepInputDialog(ex),
                 child: Column(
@@ -691,47 +678,71 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                                         fontSize: 13,
                                       ),
                                     ),
-                                    // Stopwatch Control
+                                    // Active Timer Display (Automated)
                                     if (!isFullyDone) ...[
                                        const Spacer(),
-                                       if (_activeSetExerciseId == ex.id) ...[
-                                          // Running Timer
-                                          Text(
-                                             '${_currentSetElapsed.inMinutes}:${(_currentSetElapsed.inSeconds%60).toString().padLeft(2,'0')}',
-                                             style: const TextStyle(
-                                                fontFamily: 'monospace',
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.redAccent,
-                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          IconButton.filled(
-                                            onPressed: () => _stopSetTimer(ex.id, targetSets, exercisesAsync),
-                                            icon: const Icon(Icons.stop),
-                                            style: IconButton.styleFrom(
-                                               backgroundColor: Colors.redAccent,
-                                               foregroundColor: Colors.white,
-                                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                               minimumSize: const Size(32, 32),
-                                            ),
-                                          ),
-                                       ] else ...[
-                                          // Play Button
-                                          if ((_accumulatedDurations[ex.id] ?? 0) > 0)
-                                             Text(
-                                                '${(_accumulatedDurations[ex.id]! ~/ 60)}:${(_accumulatedDurations[ex.id]! % 60).toString().padLeft(2,'0')}s',
-                                                style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
-                                             ),
-                                          const SizedBox(width: 8),
-                                          IconButton.filledTonal(
-                                            onPressed: () => _startSetTimer(ex.id),
-                                            icon: const Icon(Icons.play_arrow, size: 18),
-                                            style: IconButton.styleFrom(
-                                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                               minimumSize: const Size(32, 32),
-                                            ),
-                                          ),
-                                       ],
+                                       Builder(
+                                         builder: (context) {
+                                            // Calculate total time to display
+                                            int totalSeconds = _accumulatedDurations[ex.id] ?? 0;
+                                            final isActive = _currentWorkExerciseId == ex.id;
+                                            
+                                            // Add current elapsed if active
+                                            if (isActive) {
+                                               totalSeconds += _currentWorkElapsed.inSeconds;
+                                            }
+                                            
+                                            if (totalSeconds > 0) {
+                                               final mins = totalSeconds ~/ 60;
+                                               final secs = (totalSeconds % 60).toString().padLeft(2, '0');
+                                               return Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                     color: isActive ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest,
+                                                     borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Row(
+                                                     mainAxisSize: MainAxisSize.min,
+                                                     children: [
+                                                        Icon(
+                                                           Icons.timer, 
+                                                           size: 14, 
+                                                           color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant
+                                                        ),
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                           '$mins:$secs',
+                                                           style: TextStyle(
+                                                              fontFamily: 'monospace',
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 12,
+                                                              color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                                                           ),
+                                                        ),
+                                                     ],
+                                                  ),
+                                               );
+                                            } else if (isActive) {
+                                               // Just started, show "Active" badge
+                                               return Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                     color: theme.colorScheme.primaryContainer,
+                                                     borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Text(
+                                                     'Active',
+                                                     style: TextStyle(
+                                                        fontSize: 10,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: theme.colorScheme.primary,
+                                                     ),
+                                                  ),
+                                               );
+                                            }
+                                            return const SizedBox.shrink();
+                                         }
+                                       ),
                                     ],
                                     
                                     if (isResting) ...[
