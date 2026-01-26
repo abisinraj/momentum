@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../../app/router.dart';
 import '../../../core/providers/health_connect_provider.dart';
 import '../../../core/services/settings_service.dart';
 
@@ -142,22 +140,6 @@ class HealthInsightsCard extends ConsumerWidget {
           value: _formatSteps(state.todaySteps),
           label: 'Steps',
           color: colorScheme.primary,
-        ),
-        InkWell(
-          onTap: () => context.push(AppRoute.heartRate.path),
-          borderRadius: BorderRadius.circular(12),
-
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _buildMetric(
-              context,
-              icon: Icons.favorite_rounded,
-              value: state.latestHeartRate != null ? '${state.latestHeartRate}' : '--',
-              label: 'BPM (Tap to Measure)',
-              color: colorScheme.error,
-            ),
-
-          ),
         ),
         _buildMetric(
           context,

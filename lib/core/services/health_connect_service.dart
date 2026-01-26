@@ -8,7 +8,6 @@ class HealthConnectService {
   /// Data types we want to read from Health Connect.
   static const List<HealthDataType> _dataTypes = [
     HealthDataType.STEPS,
-    HealthDataType.HEART_RATE,
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_AWAKE,
     HealthDataType.WEIGHT,
@@ -60,18 +59,6 @@ class HealthConnectService {
     }
   }
   
-  /// Fetch heart rate data for a given date range.
-  Future<List<HealthDataPoint>> fetchHeartRate(DateTime start, DateTime end) async {
-    try {
-      return await _health.getHealthDataFromTypes(
-        types: [HealthDataType.HEART_RATE],
-        startTime: start,
-        endTime: end,
-      );
-    } catch (e) {
-      return [];
-    }
-  }
   
   /// Fetch sleep data for a given date range.
   Future<List<HealthDataPoint>> fetchSleep(DateTime start, DateTime end) async {

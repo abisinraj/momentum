@@ -49,6 +49,7 @@ class Exercises extends Table {
   IntColumn get reps => integer().withDefault(const Constant(10))();
   TextColumn get primaryMuscleGroup => text().nullable()(); // e.g., "Chest", "Back", "Legs"
   IntColumn get orderIndex => integer()();
+  RealColumn get targetWeight => real().withDefault(const Constant(0.0))();
 }
 
 /// Sessions table - stores completed workout sessions
@@ -59,8 +60,6 @@ class Sessions extends Table {
   DateTimeColumn get completedAt => dateTime().nullable()();
   IntColumn get durationSeconds => integer().nullable()();
   IntColumn get intensity => integer().nullable()(); // RPE 1-10
-  IntColumn get avgBpm => integer().nullable()(); // Average Heart Rate
-  IntColumn get maxBpm => integer().nullable()(); // Max Heart Rate
 }
 
 /// SessionExercises table - stores completed exercise data per session
@@ -93,7 +92,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration {
@@ -150,15 +149,19 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(sessions, sessions.intensity);
         }
         if (from < 10) {
-          // Schema v10 changes:
-          // Add avgBpm and maxBpm to sessions
-          await m.addColumn(sessions, sessions.avgBpm);
-          await m.addColumn(sessions, sessions.maxBpm);
+          // Schema v10 changes: 
+          // Heart rate columns removal logic would go here if we were doing a negative migration,
+          // but for now we just remove the addColumn calls to prevent new DBs from having them.
         }
         if (from < 11) {
           // Schema v11 changes:
           // Add durationSeconds to session_exercises for Time Under Tension tracking
           await m.addColumn(sessionExercises, sessionExercises.durationSeconds);
+        }
+        if (from < 12) {
+          // Schema v12 changes:
+          // Add targetWeight to exercises
+          await m.addColumn(exercises, exercises.targetWeight);
         }
       },
     );
@@ -212,6 +215,10 @@ class AppDatabase extends _$AppDatabase {
   /// Delete all exercises for a workout (used when updating)
   Future<int> deleteExercisesForWorkout(int workoutId) =>
       (delete(exercises)..where((e) => e.workoutId.equals(workoutId))).go();
+
+  /// Get a single exercise by ID
+  Future<Exercise?> getExercise(int id) =>
+      (select(exercises)..where((e) => e.id.equals(id))).getSingleOrNull();
   
   // ===== Workout Operations =====
   
@@ -284,15 +291,14 @@ class AppDatabase extends _$AppDatabase {
 
   
   /// Complete a session
-  Future<void> completeSession(int sessionId, int durationSeconds, {int? intensity, int? avgBpm, int? maxBpm}) =>
-      (update(sessions)..where((s) => s.id.equals(sessionId)))
-          .write(SessionsCompanion(
+  Future<void> completeSession(int sessionId, int durationSeconds, {int? intensity}) async {
+    await (update(sessions)..where((s) => s.id.equals(sessionId)))
+        .write(SessionsCompanion(
             completedAt: Value(DateTime.now()),
             durationSeconds: Value(durationSeconds),
             intensity: intensity != null ? Value(intensity) : const Value.absent(),
-            avgBpm: avgBpm != null ? Value(avgBpm) : const Value.absent(),
-            maxBpm: maxBpm != null ? Value(maxBpm) : const Value.absent(),
           ));
+  }
 
   /// Mark all active sessions as completed (cancelled)
   Future<void> cleanupActiveSessions() async {

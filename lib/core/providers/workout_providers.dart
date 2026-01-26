@@ -10,6 +10,7 @@ import 'database_providers.dart';
 
 import 'dashboard_providers.dart';
 import 'ai_providers.dart';
+import '../services/progression_service.dart';
 import '../../features/workout/providers/comparison_provider.dart';
 
 part 'workout_providers.g.dart';
@@ -131,8 +132,6 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
   /// Complete the current workout session
   Future<void> completeWorkout({
     int? intensity, 
-    int? avgBpm, 
-    int? maxBpm,
     List<SessionExercisesCompanion> exercises = const [],
   }) async {
     if (state == null) return;
@@ -144,14 +143,15 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
       state!.sessionId, 
       duration.inSeconds, 
       intensity: intensity,
-      avgBpm: avgBpm,
-      maxBpm: maxBpm,
     );
     
     // Save Exercise Details
     for (final exercise in exercises) {
       await db.saveSessionExercise(exercise);
     }
+
+    // Apply Progressive Overload Logic
+    await ProgressionService(db).applyProgression(state!.sessionId);
     
     // Stop background service
     await BackgroundService().stopService();

@@ -19,7 +19,6 @@ class HealthState {
   final bool isLoading;
   final int todaySteps;
   final double? latestWeight;
-  final int? latestHeartRate;
   final Duration? lastNightSleep;
   final List<HealthDataPoint> recentWorkouts;
   final String? error;
@@ -31,7 +30,6 @@ class HealthState {
     this.isLoading = false,
     this.todaySteps = 0,
     this.latestWeight,
-    this.latestHeartRate,
     this.lastNightSleep,
     this.recentWorkouts = const [],
     this.error,
@@ -44,7 +42,6 @@ class HealthState {
     bool? isLoading,
     int? todaySteps,
     double? latestWeight,
-    int? latestHeartRate,
     Duration? lastNightSleep,
     List<HealthDataPoint>? recentWorkouts,
     String? error,
@@ -56,7 +53,6 @@ class HealthState {
       isLoading: isLoading ?? this.isLoading,
       todaySteps: todaySteps ?? this.todaySteps,
       latestWeight: latestWeight ?? this.latestWeight,
-      latestHeartRate: latestHeartRate ?? this.latestHeartRate,
       lastNightSleep: lastNightSleep ?? this.lastNightSleep,
       recentWorkouts: recentWorkouts ?? this.recentWorkouts,
       error: error,
@@ -142,15 +138,6 @@ class HealthNotifier extends _$HealthNotifier {
         }
       }
       
-      // Fetch heart rate (today)
-      final hrData = await _service.fetchHeartRate(todayStart, now);
-      int? latestHeartRate;
-      if (hrData.isNotEmpty) {
-        final numericValue = hrData.last.value;
-        if (numericValue is NumericHealthValue) {
-          latestHeartRate = numericValue.numericValue.toInt();
-        }
-      }
       
       // Fetch sleep (last night - from yesterday 6PM to today 12PM)
       final sleepStart = DateTime(yesterdayStart.year, yesterdayStart.month, yesterdayStart.day, 18);
@@ -174,7 +161,6 @@ class HealthNotifier extends _$HealthNotifier {
         isLoading: false,
         todaySteps: steps,
         latestWeight: latestWeight,
-        latestHeartRate: latestHeartRate,
         lastNightSleep: totalSleep,
         recentWorkouts: workouts,
         lastSyncTime: now,

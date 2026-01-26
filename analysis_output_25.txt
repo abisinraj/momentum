@@ -1,0 +1,9 @@
+Analyzing momentum...                                           
+
+warning • The field doesn't override an inherited getter or setter • lib/core/database/app_database.g.dart:1264:35 • override_on_non_overriding_member
+warning • The field doesn't override an inherited getter or setter • lib/core/database/app_database.g.dart:1273:35 • override_on_non_overriding_member
+  error • The getter 'latestHeartRate' isn't defined for the type 'HealthState' • lib/features/health/presentation/health_detail_screen.dart:145:30 • undefined_getter
+warning • Unused import: 'package:go_router/go_router.dart' • lib/features/health/presentation/health_insights_card.dart:4:8 • unused_import
+warning • Unused import: '../../../app/router.dart' • lib/features/health/presentation/health_insights_card.dart:5:8 • unused_import
+
+5 issues found. (ran in 22.7s)

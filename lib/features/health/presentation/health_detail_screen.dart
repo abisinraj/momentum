@@ -137,17 +137,6 @@ class HealthDetailScreen extends ConsumerWidget {
                 color: colorScheme.primary,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.favorite_rounded,
-                value: state.latestHeartRate?.toString() ?? '--',
-                label: 'Heart Rate (BPM)',
-                color: colorScheme.error,
-              ),
-            ),
-
           ],
         ),
         const SizedBox(height: 12),

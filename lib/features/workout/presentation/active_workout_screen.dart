@@ -363,12 +363,20 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
           totalSeconds += _currentWorkElapsed.inSeconds;
        }
 
+       // Parse reps from note if possible (added for progression math)
+       final note = _exerciseNotes[id];
+       int? actualReps;
+       if (note != null && note.contains('reps')) {
+         actualReps = int.tryParse(note.split(' ').first);
+       }
+
        exercises.add(SessionExercisesCompanion.insert(
          sessionId: widget.session.sessionId,
          exerciseId: id,
          completedSets: Value(_completedSets[id] ?? 0),
-         completedReps: const Value(0), 
-         notes: Value(_exerciseNotes[id]),
+         completedReps: Value(actualReps ?? 0), 
+         weightKg: Value(_exerciseWeights[id]),
+         notes: Value(note),
          durationSeconds: Value(totalSeconds),
        ));
     }
@@ -672,7 +680,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      '$targetSets Sets × ${ex.reps} Reps',
+                                      '${ex.targetWeight > 0 ? '${ex.targetWeight}kg × ' : ''}$targetSets Sets × ${ex.reps} Reps',
                                       style: TextStyle(
                                         color: theme.colorScheme.onSurfaceVariant,
                                         fontSize: 13,
@@ -830,21 +838,41 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     );
   }
 
+  // Tracking local actuals per session (not yet in DB until completion)
+  final Map<int, double> _exerciseWeights = {};
+
   void _showRepInputDialog(Exercise ex) {
-    final controller = TextEditingController(text: _exerciseNotes[ex.id] ?? '${ex.reps}');
+    final repController = TextEditingController(text: _exerciseNotes[ex.id]?.split(' ').first ?? '${ex.reps}');
+    final weightController = TextEditingController(text: _exerciseWeights[ex.id]?.toString() ?? '${ex.targetWeight}');
     
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Edit Reps for ${ex.name}'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Actual Reps performed',
-            border: OutlineInputBorder(),
-          ),
+        title: Text('Edit Data for ${ex.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: weightController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Weight (kg)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.fitness_center),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: repController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Actual Reps performed',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.reorder),
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -854,11 +882,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
           FilledButton(
             onPressed: () {
               setState(() {
-                _exerciseNotes[ex.id] = '${controller.text} reps';
+                _exerciseNotes[ex.id] = '${repController.text} reps';
+                _exerciseWeights[ex.id] = double.tryParse(weightController.text) ?? ex.targetWeight;
               });
               Navigator.pop(context);
             },
-            child: const Text('Save Note'),
+            child: const Text('Save Data'),
           ),
         ],
       ),

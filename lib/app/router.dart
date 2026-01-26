@@ -17,7 +17,6 @@ import '../features/settings/presentation/workout_preferences_screen.dart';
 import '../features/settings/presentation/api_settings_screen.dart';
 import '../features/diet/presentation/diet_screen.dart';
 import '../features/health/presentation/health_detail_screen.dart';
-import '../features/health/presentation/heart_rate_measure_screen.dart';
 import '../features/health/presentation/privacy_policy_screen.dart';
 
 import '../core/providers/database_providers.dart';
@@ -38,7 +37,6 @@ enum AppRoute {
   settings('/settings'),
   workoutPreferences('/workout-preferences'),
   healthDetail('/health'),
-  heartRate('/heart-rate'),
   apiSettings('/api-settings'),
   privacyPolicy('/privacy');
 
@@ -202,11 +200,6 @@ GoRouter router(Ref ref) {
         path: AppRoute.healthDetail.path,
         name: AppRoute.healthDetail.name,
         builder: (context, state) => const HealthDetailScreen(),
-      ),
-      GoRoute(
-        path: AppRoute.heartRate.path,
-        name: AppRoute.heartRate.name,
-        builder: (context, state) => const HeartRateMeasureScreen(),
       ),
       GoRoute(
         path: AppRoute.privacyPolicy.path,

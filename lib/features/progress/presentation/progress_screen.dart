@@ -375,8 +375,13 @@ class ProgressScreen extends ConsumerWidget {
             children: [
               Expanded(child: _buildStatCard(context, Icons.timer_outlined, '${durationSec ~/ 60}m', 'ACTIVE TIME')),
               const SizedBox(width: 12),
-              // Avg BPM removed or mocked as we don't have heart rate data
-              Expanded(child: _buildStatCard(context, Icons.favorite_border, '--', 'AVG BPM')),
+              // Avg Intensity from RPE
+              Expanded(child: _buildStatCard(
+                context, 
+                Icons.bolt, 
+                stats['rpe']?.toStringAsFixed(1) ?? '--', 
+                'AVG INTENSITY'
+              )),
             ],
           ),
         ],
