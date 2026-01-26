@@ -7,7 +7,7 @@ part of 'workout_providers.dart';
 // **************************************************************************
 
 String _$activeWorkoutSessionHash() =>
-    r'353d7bc525c5d895ab9b1c1a29a440bf622d77d3';
+    r'f4c90a8107026931c0ce8e930deffbc1f0bd8563';
 
 /// Notifier for managing active workout session
 ///

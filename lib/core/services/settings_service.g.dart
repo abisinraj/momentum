@@ -108,7 +108,7 @@ final weightUnitProvider = AutoDisposeFutureProvider<String>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef WeightUnitRef = AutoDisposeFutureProviderRef<String>;
-String _$widgetThemeHash() => r'2e318dcc2a631bd969b62dec7779b5ab22c5318c';
+String _$widgetThemeHash() => r'82afa081250e3cc8357644552eca71184fe4da87';
 
 /// See also [WidgetTheme].
 @ProviderFor(WidgetTheme)

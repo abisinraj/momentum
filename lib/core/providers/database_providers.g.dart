@@ -63,6 +63,25 @@ final currentUserProvider = AutoDisposeFutureProvider<User?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef CurrentUserRef = AutoDisposeFutureProviderRef<User?>;
+String _$userStreamHash() => r'ab8074f60635aafd3dfcb6c9fb20da7040060835';
+
+/// Provider for watching the current user
+///
+/// Copied from [userStream].
+@ProviderFor(userStream)
+final userStreamProvider = AutoDisposeStreamProvider<User?>.internal(
+  userStream,
+  name: r'userStreamProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$userStreamHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef UserStreamRef = AutoDisposeStreamProviderRef<User?>;
 String _$workoutsStreamHash() => r'851ce9a4b956ebb3ae278a076f0fe0d18aae2907';
 
 /// Provider for all workouts (reactive stream)
