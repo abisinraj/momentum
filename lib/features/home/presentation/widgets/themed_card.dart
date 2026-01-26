@@ -1,4 +1,4 @@
-import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/services/settings_service.dart';
@@ -33,49 +33,38 @@ class ThemedCard extends ConsumerWidget {
     
     return Container(
       margin: margin,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24), // More rounded for liquid feel
-        child: BackdropFilter(
-          // Blur is subtle but adds depth if elements overlap or scrolling
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Material(
-             color: Colors.transparent, // Important for InkWell
-             child: InkWell(
-               onTap: onTap,
+      child: Material(
+         color: Colors.transparent, // Important for InkWell
+         child: InkWell(
+           onTap: onTap,
+           borderRadius: BorderRadius.circular(24),
+           child: Container(
+             padding: padding,
+             decoration: BoxDecoration(
                borderRadius: BorderRadius.circular(24),
-               child: Container(
-                 padding: padding,
-                 decoration: BoxDecoration(
-                   borderRadius: BorderRadius.circular(24),
-                   border: Border.all(
-                     color: colorScheme.onSurface.withValues(alpha: 0.15), 
-                     width: 1.5
-                   ),
-                   gradient: LinearGradient(
-                     begin: Alignment.topLeft,
-                     end: Alignment.bottomRight,
-                     colors: [
-                       colorScheme.surfaceContainer.withValues(alpha: 0.7),
-                       colorScheme.surfaceContainer.withValues(alpha: 0.3),
-                     ],
-                   ),
-                   boxShadow: [
-                     BoxShadow(
-                       color: colorScheme.primary.withValues(alpha: 0.05),
-                       blurRadius: 20,
-                       offset: const Offset(0, 8),
-                     ),
-                   ],
-                 ),
-                 child: AnimatedSize(
-                   duration: const Duration(milliseconds: 300),
-                   curve: Curves.easeInOut,
-                   child: child,
-                 ),
+               border: Border.all(
+                 color: colorScheme.onSurface.withValues(alpha: 0.15), 
+                 width: 1.5
                ),
+               gradient: LinearGradient(
+                 begin: Alignment.topLeft,
+                 end: Alignment.bottomRight,
+                 colors: [
+                   colorScheme.surfaceContainer.withValues(alpha: 0.85),
+                   colorScheme.surfaceContainer.withValues(alpha: 0.45),
+                 ],
+               ),
+               boxShadow: [
+                 BoxShadow(
+                   color: colorScheme.primary.withValues(alpha: 0.05),
+                   blurRadius: 20,
+                   offset: const Offset(0, 8),
+                 ),
+               ],
              ),
-          ),
-        ),
+             child: child,
+           ),
+         ),
       ),
     );
   }
@@ -89,11 +78,7 @@ class ThemedCard extends ConsumerWidget {
         onTap: onTap,
         child: Padding(
           padding: padding ?? EdgeInsets.zero,
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
             child: child,
-          ),
         ),
       ),
     );

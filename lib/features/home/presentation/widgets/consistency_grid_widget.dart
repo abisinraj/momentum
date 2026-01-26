@@ -55,29 +55,31 @@ class ConsistencyGridWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            reverse: false, // Start from the start (Left)
-            child: Row(
-              children: List.generate(26, (index) {
-                // Calculate week range
-                // Index 0 = Current Week
-                // Index 1 = Last Week
-                final weeksAgo = index;
-                final weekStart = currentWeekStart.subtract(Duration(days: weeksAgo * 7));
-                final weekEnd = weekStart.add(const Duration(days: 6));
-                
-                // Calculate Score (0-7)
-                int daysActive = 0;
-                for (int i = 0; i < 7; i++) {
-                  final date = weekStart.add(Duration(days: i));
-                  if (activityData.containsKey(date)) {
-                    daysActive++;
+          RepaintBoundary(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              reverse: false, // Start from the start (Left)
+              child: Row(
+                children: List.generate(26, (index) {
+                  // Calculate week range
+                  // Index 0 = Current Week
+                  // Index 1 = Last Week
+                  final weeksAgo = index;
+                  final weekStart = currentWeekStart.subtract(Duration(days: weeksAgo * 7));
+                  final weekEnd = weekStart.add(const Duration(days: 6));
+                  
+                  // Calculate Score (0-7)
+                  int daysActive = 0;
+                  for (int i = 0; i < 7; i++) {
+                    final date = weekStart.add(Duration(days: i));
+                    if (activityData.containsKey(date)) {
+                      daysActive++;
+                    }
                   }
-                }
-                
-                return _buildWeekBlock(context, daysActive, weekStart, weekEnd, index == 0);
-              }),
+                  
+                  return _buildWeekBlock(context, daysActive, weekStart, weekEnd, index == 0);
+                }),
+              ),
             ),
           ),
         ],
@@ -91,9 +93,9 @@ class ConsistencyGridWidget extends StatelessWidget {
       children: [
         Text('0', style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
         const SizedBox(width: 4),
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: _getColor(0), borderRadius: BorderRadius.circular(2))),
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: _getColor(context, 0), borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 2),
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: _getColor(7), borderRadius: BorderRadius.circular(2))),
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: _getColor(context, 7), borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 4),
         Text('7 days', style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
       ],
