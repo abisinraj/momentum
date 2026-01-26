@@ -1,4 +1,4 @@
-package com.momentum.momentum
+package com.silo.momentum
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
