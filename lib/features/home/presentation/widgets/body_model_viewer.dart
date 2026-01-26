@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:momentum/app/theme/app_theme.dart';
-import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class BodyModelViewer extends StatefulWidget {
   final Map<String, double> heatmap;
@@ -13,9 +13,52 @@ class BodyModelViewer extends StatefulWidget {
 }
 
 class _BodyModelViewerState extends State<BodyModelViewer> {
-  // We can inject JS to color muscles if we know their material names
-  // For now, we just display the model as requested
-  
+  late final WebViewController _controller;
+  bool _isLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (String url) {
+            setState(() => _isLoaded = true);
+            _updateHeatmap();
+          },
+          onWebResourceError: (WebResourceError error) {
+            debugPrint('WebView Error: ${error.errorCode} - ${error.description}');
+          },
+          onNavigationRequest: (request) {
+            debugPrint('Navigating to: ${request.url}');
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..setOnConsoleMessage((message) {
+        debugPrint('WebView Console: ${message.message}');
+      })
+      ..loadFlutterAsset('assets/3d/index.html');
+  }
+
+  @override
+  void didUpdateWidget(covariant BodyModelViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.heatmap != oldWidget.heatmap) {
+      _updateHeatmap();
+    }
+  }
+
+  void _updateHeatmap() {
+    if (!_isLoaded) return;
+    final json = jsonEncode(widget.heatmap);
+    _controller.runJavaScript('setMuscleHeatmap($json)');
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,19 +71,10 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
       ),
       child: Stack(
         children: [
-          // GLB Viewer
+          // WebView
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: ModelViewer(
-              src: 'assets/3d/human.glb',
-              alt: '3D Body Model',
-              autoRotate: true,
-              cameraControls: true,
-              backgroundColor: Colors.transparent,
-              // interactionPrompt: InteractionPrompt.none,
-              ar: false,
-              disableZoom: false,
-            ),
+            child: WebViewWidget(controller: _controller),
           ),
           
           // Labels / Legend
@@ -74,6 +108,11 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
               ],
             ),
           ),
+          
+          if (!_isLoaded)
+            const Center(
+              child: CircularProgressIndicator(color: AppTheme.tealPrimary),
+            ),
         ],
       ),
     );
