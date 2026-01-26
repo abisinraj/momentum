@@ -11,6 +11,7 @@ import '../../health/presentation/health_insights_card.dart';
 import '../../home/presentation/widgets/ai_insights_card.dart';
 import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/analytics_card.dart';
+import '../../home/presentation/widgets/sleep_card.dart';
 import '../../home/presentation/widgets/nutrition_card.dart';
 import '../../../core/providers/dashboard_providers.dart';
 import '../../../core/services/widget_service.dart';
@@ -144,6 +145,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               
               // Unified Momentum Analytics
               const AnalyticsCard(),
+              const SizedBox(height: 16),
+              
+              const SleepCard(),
               const SizedBox(height: 16),
               
               

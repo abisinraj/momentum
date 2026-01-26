@@ -104,3 +104,10 @@ Future<List<Map<String, dynamic>>> sessionExerciseDetails(Ref ref, int sessionId
   final db = ref.watch(appDatabaseProvider);
   return db.getSessionExerciseDetails(sessionId);
 }
+
+/// Provider for sleep logs (last 30 days)
+@riverpod
+Stream<List<SleepLog>> sleepLogs(Ref ref, {int days = 30}) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchSleepLogs(days);
+}

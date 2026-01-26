@@ -752,5 +752,134 @@ class _SessionExerciseDetailsProviderElement
   int get sessionId => (origin as SessionExerciseDetailsProvider).sessionId;
 }
 
+String _$sleepLogsHash() => r'2a74c48584013b2ad578161b5c1ed91bf5838ee3';
+
+/// Provider for sleep logs (last 30 days)
+///
+/// Copied from [sleepLogs].
+@ProviderFor(sleepLogs)
+const sleepLogsProvider = SleepLogsFamily();
+
+/// Provider for sleep logs (last 30 days)
+///
+/// Copied from [sleepLogs].
+class SleepLogsFamily extends Family<AsyncValue<List<SleepLog>>> {
+  /// Provider for sleep logs (last 30 days)
+  ///
+  /// Copied from [sleepLogs].
+  const SleepLogsFamily();
+
+  /// Provider for sleep logs (last 30 days)
+  ///
+  /// Copied from [sleepLogs].
+  SleepLogsProvider call({int days = 30}) {
+    return SleepLogsProvider(days: days);
+  }
+
+  @override
+  SleepLogsProvider getProviderOverride(covariant SleepLogsProvider provider) {
+    return call(days: provider.days);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'sleepLogsProvider';
+}
+
+/// Provider for sleep logs (last 30 days)
+///
+/// Copied from [sleepLogs].
+class SleepLogsProvider extends AutoDisposeStreamProvider<List<SleepLog>> {
+  /// Provider for sleep logs (last 30 days)
+  ///
+  /// Copied from [sleepLogs].
+  SleepLogsProvider({int days = 30})
+    : this._internal(
+        (ref) => sleepLogs(ref as SleepLogsRef, days: days),
+        from: sleepLogsProvider,
+        name: r'sleepLogsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$sleepLogsHash,
+        dependencies: SleepLogsFamily._dependencies,
+        allTransitiveDependencies: SleepLogsFamily._allTransitiveDependencies,
+        days: days,
+      );
+
+  SleepLogsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.days,
+  }) : super.internal();
+
+  final int days;
+
+  @override
+  Override overrideWith(
+    Stream<List<SleepLog>> Function(SleepLogsRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: SleepLogsProvider._internal(
+        (ref) => create(ref as SleepLogsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        days: days,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<List<SleepLog>> createElement() {
+    return _SleepLogsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SleepLogsProvider && other.days == days;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, days.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SleepLogsRef on AutoDisposeStreamProviderRef<List<SleepLog>> {
+  /// The parameter `days` of this provider.
+  int get days;
+}
+
+class _SleepLogsProviderElement
+    extends AutoDisposeStreamProviderElement<List<SleepLog>>
+    with SleepLogsRef {
+  _SleepLogsProviderElement(super.provider);
+
+  @override
+  int get days => (origin as SleepLogsProvider).days;
+}
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

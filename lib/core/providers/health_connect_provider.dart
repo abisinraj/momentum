@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health/health.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:drift/drift.dart' show Value;
 import '../services/health_connect_service.dart';
 import 'database_providers.dart';
 
@@ -161,14 +162,34 @@ class HealthNotifier extends _$HealthNotifier {
       final sleepEnd = DateTime(todayStart.year, todayStart.month, todayStart.day, 12);
       final sleepData = await _service.fetchSleep(sleepStart, sleepEnd);
       Duration? totalSleep;
+      
       if (sleepData.isNotEmpty) {
         int totalMinutes = 0;
+        int? deepSleep;
+        int? remSleep;
+        
         for (final point in sleepData) {
+          final duration = point.dateTo.difference(point.dateFrom).inMinutes;
           if (point.type == HealthDataType.SLEEP_ASLEEP) {
-            totalMinutes += point.dateTo.difference(point.dateFrom).inMinutes;
+            totalMinutes += duration;
+          } else if (point.type == HealthDataType.SLEEP_DEEP) {
+            deepSleep = (deepSleep ?? 0) + duration;
+          } else if (point.type == HealthDataType.SLEEP_REM) {
+            remSleep = (remSleep ?? 0) + duration;
           }
         }
         totalSleep = Duration(minutes: totalMinutes);
+        
+        // PERSIST: Save to database
+        if (totalMinutes > 0) {
+          await ref.read(appDatabaseProvider).addSleepLog(SleepLogsCompanion(
+                date: Value(todayStart),
+                durationMinutes: Value(totalMinutes),
+                deepSleepMinutes: Value(deepSleep),
+                remSleepMinutes: Value(remSleep),
+                isSynced: const Value(true),
+              ));
+        }
       }
       
       // Fetch recent workouts (last 7 days)

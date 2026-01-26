@@ -3134,6 +3134,481 @@ class FoodLogsCompanion extends UpdateCompanion<FoodLog> {
   }
 }
 
+class $SleepLogsTable extends SleepLogs
+    with TableInfo<$SleepLogsTable, SleepLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SleepLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _durationMinutesMeta = const VerificationMeta(
+    'durationMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
+    'duration_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _qualityMeta = const VerificationMeta(
+    'quality',
+  );
+  @override
+  late final GeneratedColumn<int> quality = GeneratedColumn<int>(
+    'quality',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _deepSleepMinutesMeta = const VerificationMeta(
+    'deepSleepMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> deepSleepMinutes = GeneratedColumn<int>(
+    'deep_sleep_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _remSleepMinutesMeta = const VerificationMeta(
+    'remSleepMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> remSleepMinutes = GeneratedColumn<int>(
+    'rem_sleep_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    date,
+    durationMinutes,
+    quality,
+    isSynced,
+    deepSleepMinutes,
+    remSleepMinutes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sleep_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SleepLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('duration_minutes')) {
+      context.handle(
+        _durationMinutesMeta,
+        durationMinutes.isAcceptableOrUnknown(
+          data['duration_minutes']!,
+          _durationMinutesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_durationMinutesMeta);
+    }
+    if (data.containsKey('quality')) {
+      context.handle(
+        _qualityMeta,
+        quality.isAcceptableOrUnknown(data['quality']!, _qualityMeta),
+      );
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
+    if (data.containsKey('deep_sleep_minutes')) {
+      context.handle(
+        _deepSleepMinutesMeta,
+        deepSleepMinutes.isAcceptableOrUnknown(
+          data['deep_sleep_minutes']!,
+          _deepSleepMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('rem_sleep_minutes')) {
+      context.handle(
+        _remSleepMinutesMeta,
+        remSleepMinutes.isAcceptableOrUnknown(
+          data['rem_sleep_minutes']!,
+          _remSleepMinutesMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SleepLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SleepLog(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      durationMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_minutes'],
+      )!,
+      quality: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quality'],
+      ),
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
+      deepSleepMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deep_sleep_minutes'],
+      ),
+      remSleepMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rem_sleep_minutes'],
+      ),
+    );
+  }
+
+  @override
+  $SleepLogsTable createAlias(String alias) {
+    return $SleepLogsTable(attachedDatabase, alias);
+  }
+}
+
+class SleepLog extends DataClass implements Insertable<SleepLog> {
+  final int id;
+  final DateTime date;
+  final int durationMinutes;
+  final int? quality;
+  final bool isSynced;
+  final int? deepSleepMinutes;
+  final int? remSleepMinutes;
+  const SleepLog({
+    required this.id,
+    required this.date,
+    required this.durationMinutes,
+    this.quality,
+    required this.isSynced,
+    this.deepSleepMinutes,
+    this.remSleepMinutes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['date'] = Variable<DateTime>(date);
+    map['duration_minutes'] = Variable<int>(durationMinutes);
+    if (!nullToAbsent || quality != null) {
+      map['quality'] = Variable<int>(quality);
+    }
+    map['is_synced'] = Variable<bool>(isSynced);
+    if (!nullToAbsent || deepSleepMinutes != null) {
+      map['deep_sleep_minutes'] = Variable<int>(deepSleepMinutes);
+    }
+    if (!nullToAbsent || remSleepMinutes != null) {
+      map['rem_sleep_minutes'] = Variable<int>(remSleepMinutes);
+    }
+    return map;
+  }
+
+  SleepLogsCompanion toCompanion(bool nullToAbsent) {
+    return SleepLogsCompanion(
+      id: Value(id),
+      date: Value(date),
+      durationMinutes: Value(durationMinutes),
+      quality: quality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quality),
+      isSynced: Value(isSynced),
+      deepSleepMinutes: deepSleepMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deepSleepMinutes),
+      remSleepMinutes: remSleepMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remSleepMinutes),
+    );
+  }
+
+  factory SleepLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SleepLog(
+      id: serializer.fromJson<int>(json['id']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      durationMinutes: serializer.fromJson<int>(json['durationMinutes']),
+      quality: serializer.fromJson<int?>(json['quality']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+      deepSleepMinutes: serializer.fromJson<int?>(json['deepSleepMinutes']),
+      remSleepMinutes: serializer.fromJson<int?>(json['remSleepMinutes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'date': serializer.toJson<DateTime>(date),
+      'durationMinutes': serializer.toJson<int>(durationMinutes),
+      'quality': serializer.toJson<int?>(quality),
+      'isSynced': serializer.toJson<bool>(isSynced),
+      'deepSleepMinutes': serializer.toJson<int?>(deepSleepMinutes),
+      'remSleepMinutes': serializer.toJson<int?>(remSleepMinutes),
+    };
+  }
+
+  SleepLog copyWith({
+    int? id,
+    DateTime? date,
+    int? durationMinutes,
+    Value<int?> quality = const Value.absent(),
+    bool? isSynced,
+    Value<int?> deepSleepMinutes = const Value.absent(),
+    Value<int?> remSleepMinutes = const Value.absent(),
+  }) => SleepLog(
+    id: id ?? this.id,
+    date: date ?? this.date,
+    durationMinutes: durationMinutes ?? this.durationMinutes,
+    quality: quality.present ? quality.value : this.quality,
+    isSynced: isSynced ?? this.isSynced,
+    deepSleepMinutes: deepSleepMinutes.present
+        ? deepSleepMinutes.value
+        : this.deepSleepMinutes,
+    remSleepMinutes: remSleepMinutes.present
+        ? remSleepMinutes.value
+        : this.remSleepMinutes,
+  );
+  SleepLog copyWithCompanion(SleepLogsCompanion data) {
+    return SleepLog(
+      id: data.id.present ? data.id.value : this.id,
+      date: data.date.present ? data.date.value : this.date,
+      durationMinutes: data.durationMinutes.present
+          ? data.durationMinutes.value
+          : this.durationMinutes,
+      quality: data.quality.present ? data.quality.value : this.quality,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      deepSleepMinutes: data.deepSleepMinutes.present
+          ? data.deepSleepMinutes.value
+          : this.deepSleepMinutes,
+      remSleepMinutes: data.remSleepMinutes.present
+          ? data.remSleepMinutes.value
+          : this.remSleepMinutes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SleepLog(')
+          ..write('id: $id, ')
+          ..write('date: $date, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('quality: $quality, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('deepSleepMinutes: $deepSleepMinutes, ')
+          ..write('remSleepMinutes: $remSleepMinutes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    date,
+    durationMinutes,
+    quality,
+    isSynced,
+    deepSleepMinutes,
+    remSleepMinutes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SleepLog &&
+          other.id == this.id &&
+          other.date == this.date &&
+          other.durationMinutes == this.durationMinutes &&
+          other.quality == this.quality &&
+          other.isSynced == this.isSynced &&
+          other.deepSleepMinutes == this.deepSleepMinutes &&
+          other.remSleepMinutes == this.remSleepMinutes);
+}
+
+class SleepLogsCompanion extends UpdateCompanion<SleepLog> {
+  final Value<int> id;
+  final Value<DateTime> date;
+  final Value<int> durationMinutes;
+  final Value<int?> quality;
+  final Value<bool> isSynced;
+  final Value<int?> deepSleepMinutes;
+  final Value<int?> remSleepMinutes;
+  const SleepLogsCompanion({
+    this.id = const Value.absent(),
+    this.date = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
+    this.quality = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.deepSleepMinutes = const Value.absent(),
+    this.remSleepMinutes = const Value.absent(),
+  });
+  SleepLogsCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime date,
+    required int durationMinutes,
+    this.quality = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.deepSleepMinutes = const Value.absent(),
+    this.remSleepMinutes = const Value.absent(),
+  }) : date = Value(date),
+       durationMinutes = Value(durationMinutes);
+  static Insertable<SleepLog> custom({
+    Expression<int>? id,
+    Expression<DateTime>? date,
+    Expression<int>? durationMinutes,
+    Expression<int>? quality,
+    Expression<bool>? isSynced,
+    Expression<int>? deepSleepMinutes,
+    Expression<int>? remSleepMinutes,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (date != null) 'date': date,
+      if (durationMinutes != null) 'duration_minutes': durationMinutes,
+      if (quality != null) 'quality': quality,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (deepSleepMinutes != null) 'deep_sleep_minutes': deepSleepMinutes,
+      if (remSleepMinutes != null) 'rem_sleep_minutes': remSleepMinutes,
+    });
+  }
+
+  SleepLogsCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? date,
+    Value<int>? durationMinutes,
+    Value<int?>? quality,
+    Value<bool>? isSynced,
+    Value<int?>? deepSleepMinutes,
+    Value<int?>? remSleepMinutes,
+  }) {
+    return SleepLogsCompanion(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      quality: quality ?? this.quality,
+      isSynced: isSynced ?? this.isSynced,
+      deepSleepMinutes: deepSleepMinutes ?? this.deepSleepMinutes,
+      remSleepMinutes: remSleepMinutes ?? this.remSleepMinutes,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (durationMinutes.present) {
+      map['duration_minutes'] = Variable<int>(durationMinutes.value);
+    }
+    if (quality.present) {
+      map['quality'] = Variable<int>(quality.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (deepSleepMinutes.present) {
+      map['deep_sleep_minutes'] = Variable<int>(deepSleepMinutes.value);
+    }
+    if (remSleepMinutes.present) {
+      map['rem_sleep_minutes'] = Variable<int>(remSleepMinutes.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SleepLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('date: $date, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('quality: $quality, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('deepSleepMinutes: $deepSleepMinutes, ')
+          ..write('remSleepMinutes: $remSleepMinutes')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3145,6 +3620,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $FoodLogsTable foodLogs = $FoodLogsTable(this);
+  late final $SleepLogsTable sleepLogs = $SleepLogsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3156,6 +3632,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     exercises,
     sessionExercises,
     foodLogs,
+    sleepLogs,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -5571,6 +6048,238 @@ typedef $$FoodLogsTableProcessedTableManager =
       FoodLog,
       PrefetchHooks Function()
     >;
+typedef $$SleepLogsTableCreateCompanionBuilder =
+    SleepLogsCompanion Function({
+      Value<int> id,
+      required DateTime date,
+      required int durationMinutes,
+      Value<int?> quality,
+      Value<bool> isSynced,
+      Value<int?> deepSleepMinutes,
+      Value<int?> remSleepMinutes,
+    });
+typedef $$SleepLogsTableUpdateCompanionBuilder =
+    SleepLogsCompanion Function({
+      Value<int> id,
+      Value<DateTime> date,
+      Value<int> durationMinutes,
+      Value<int?> quality,
+      Value<bool> isSynced,
+      Value<int?> deepSleepMinutes,
+      Value<int?> remSleepMinutes,
+    });
+
+class $$SleepLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $SleepLogsTable> {
+  $$SleepLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quality => $composableBuilder(
+    column: $table.quality,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deepSleepMinutes => $composableBuilder(
+    column: $table.deepSleepMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get remSleepMinutes => $composableBuilder(
+    column: $table.remSleepMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SleepLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SleepLogsTable> {
+  $$SleepLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quality => $composableBuilder(
+    column: $table.quality,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deepSleepMinutes => $composableBuilder(
+    column: $table.deepSleepMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get remSleepMinutes => $composableBuilder(
+    column: $table.remSleepMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SleepLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SleepLogsTable> {
+  $$SleepLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get quality =>
+      $composableBuilder(column: $table.quality, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<int> get deepSleepMinutes => $composableBuilder(
+    column: $table.deepSleepMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get remSleepMinutes => $composableBuilder(
+    column: $table.remSleepMinutes,
+    builder: (column) => column,
+  );
+}
+
+class $$SleepLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SleepLogsTable,
+          SleepLog,
+          $$SleepLogsTableFilterComposer,
+          $$SleepLogsTableOrderingComposer,
+          $$SleepLogsTableAnnotationComposer,
+          $$SleepLogsTableCreateCompanionBuilder,
+          $$SleepLogsTableUpdateCompanionBuilder,
+          (SleepLog, BaseReferences<_$AppDatabase, $SleepLogsTable, SleepLog>),
+          SleepLog,
+          PrefetchHooks Function()
+        > {
+  $$SleepLogsTableTableManager(_$AppDatabase db, $SleepLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SleepLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SleepLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SleepLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<int> durationMinutes = const Value.absent(),
+                Value<int?> quality = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<int?> deepSleepMinutes = const Value.absent(),
+                Value<int?> remSleepMinutes = const Value.absent(),
+              }) => SleepLogsCompanion(
+                id: id,
+                date: date,
+                durationMinutes: durationMinutes,
+                quality: quality,
+                isSynced: isSynced,
+                deepSleepMinutes: deepSleepMinutes,
+                remSleepMinutes: remSleepMinutes,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime date,
+                required int durationMinutes,
+                Value<int?> quality = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<int?> deepSleepMinutes = const Value.absent(),
+                Value<int?> remSleepMinutes = const Value.absent(),
+              }) => SleepLogsCompanion.insert(
+                id: id,
+                date: date,
+                durationMinutes: durationMinutes,
+                quality: quality,
+                isSynced: isSynced,
+                deepSleepMinutes: deepSleepMinutes,
+                remSleepMinutes: remSleepMinutes,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SleepLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SleepLogsTable,
+      SleepLog,
+      $$SleepLogsTableFilterComposer,
+      $$SleepLogsTableOrderingComposer,
+      $$SleepLogsTableAnnotationComposer,
+      $$SleepLogsTableCreateCompanionBuilder,
+      $$SleepLogsTableUpdateCompanionBuilder,
+      (SleepLog, BaseReferences<_$AppDatabase, $SleepLogsTable, SleepLog>),
+      SleepLog,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5587,4 +6296,6 @@ class $AppDatabaseManager {
       $$SessionExercisesTableTableManager(_db, _db.sessionExercises);
   $$FoodLogsTableTableManager get foodLogs =>
       $$FoodLogsTableTableManager(_db, _db.foodLogs);
+  $$SleepLogsTableTableManager get sleepLogs =>
+      $$SleepLogsTableTableManager(_db, _db.sleepLogs);
 }

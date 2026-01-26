@@ -86,13 +86,24 @@ class FoodLogs extends Table {
   TextColumn get imageUrl => text().nullable()(); // Local path
 }
 
+/// SleepLogs table - stores sleep data (sync or manual)
+class SleepLogs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get date => dateTime()(); // The night this sleep refers to
+  IntColumn get durationMinutes => integer()();
+  IntColumn get quality => integer().nullable()(); // 1-10
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+  IntColumn get deepSleepMinutes => integer().nullable()();
+  IntColumn get remSleepMinutes => integer().nullable()();
+}
+
 /// The main application database
-@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises, FoodLogs])
+@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises, FoodLogs, SleepLogs])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
@@ -159,9 +170,12 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(sessionExercises, sessionExercises.durationSeconds);
         }
         if (from < 12) {
-          // Schema v12 changes:
-          // Add targetWeight to exercises
           await m.addColumn(exercises, exercises.targetWeight);
+        }
+        if (from < 13) {
+          // Schema v13 changes:
+          // Add SleepLogs table
+          await m.createTable(sleepLogs);
         }
       },
     );
@@ -960,6 +974,36 @@ class AppDatabase extends _$AppDatabase {
       'carbs': carbs,
       'fats': fats,
     };
+  }
+
+  // ===== Sleep Log Operations =====
+
+  /// Add or update a sleep log entry
+  Future<int> addSleepLog(SleepLogsCompanion entry) =>
+      into(sleepLogs).insertOnConflictUpdate(entry);
+
+  /// Get sleep logs for the last N days
+  Future<List<SleepLog>> getSleepLogs(int days) {
+    final start = DateTime.now().subtract(Duration(days: days));
+    return (select(sleepLogs)
+          ..where((s) => s.date.isBiggerOrEqualValue(start))
+          ..orderBy([(s) => OrderingTerm.desc(s.date)]))
+        .get();
+  }
+
+  /// Watch sleep logs (reactive)
+  Stream<List<SleepLog>> watchSleepLogs(int days) {
+    final start = DateTime.now().subtract(Duration(days: days));
+    return (select(sleepLogs)
+          ..where((s) => s.date.isBiggerOrEqualValue(start))
+          ..orderBy([(s) => OrderingTerm.desc(s.date)]))
+        .watch();
+  }
+
+  /// Get sleep log for a specific date
+  Future<SleepLog?> getSleepLogForDate(DateTime date) {
+    final day = DateTime(date.year, date.month, date.day);
+    return (select(sleepLogs)..where((s) => s.date.equals(day))).getSingleOrNull();
   }
 }
 
