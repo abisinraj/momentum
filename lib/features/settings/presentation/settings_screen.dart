@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
 import '../../../core/services/settings_service.dart';
+import '../../../core/providers/health_connect_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -207,6 +208,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                          SnackBar(content: Text('Notification settings coming soon', style: TextStyle(color: colorScheme.onSurface))),
                        );
                      },
+                   ),
+                   const SizedBox(height: 12),
+                   _buildSettingsTile(
+                     context: context,
+                     icon: Icons.monitor_heart_outlined,
+                     iconColor: Colors.redAccent,
+                     title: 'Health Connect',
+                     subtitle: 'Sync Fit/Samsung Health',
+                     onTap: () => ref.read(healthNotifierProvider.notifier).requestPermissions(),
                    ),
                    const SizedBox(height: 12),
                    // Duplicate "Home Screen Widget" removed from here

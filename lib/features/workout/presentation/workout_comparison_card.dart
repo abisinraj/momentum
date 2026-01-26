@@ -9,11 +9,14 @@ import '../../home/presentation/widgets/themed_card.dart';
 class WorkoutComparisonCard extends ConsumerWidget {
   final int workoutId;
   final VoidCallback onStart;
+  final bool isCompleted;
 
   const WorkoutComparisonCard({
     super.key,
     required this.workoutId,
+    required this.workoutId,
     required this.onStart,
+    this.isCompleted = false,
   });
 
   @override
@@ -134,19 +137,22 @@ class WorkoutComparisonCard extends ConsumerWidget {
                 
                 const SizedBox(height: 32),
                 
-                // 4. Start Button
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: onStart,
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('START SESSION'),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.0),
+                // 4. Start Button or Completed State
+                if (isCompleted)
+                  _buildCompletedState(context)
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: onStart,
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('START SESSION'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.0),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -251,6 +257,35 @@ class WorkoutComparisonCard extends ConsumerWidget {
           ],
         )
       ],
+    );
+  }
+  }
+  
+  Widget _buildCompletedState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.check_circle, color: colorScheme.primary, size: 28),
+          const SizedBox(width: 12),
+          Text(
+            'Session Completed',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

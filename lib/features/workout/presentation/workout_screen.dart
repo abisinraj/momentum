@@ -262,6 +262,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
              // Single Focus Mode
              WorkoutComparisonCard(
                workoutId: todaysWorkouts.first.id,
+               isCompleted: todayCompleted.contains(todaysWorkouts.first.id),
                onStart: () => _startWorkout(context, ref, todaysWorkouts.first),
              ),
            ],
