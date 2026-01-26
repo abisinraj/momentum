@@ -333,8 +333,14 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   }
 
   
+  bool _isCompleting = false;
+
   Future<void> _completeWorkout(int intensity) async {
-    _timer?.cancel();
+    if (_isCompleting) return;
+    setState(() => _isCompleting = true);
+
+    try {
+      _timer?.cancel();
     _workTimer?.cancel();
     
     // Gather exercise data
@@ -388,6 +394,15 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
 
     if (mounted) {
       Navigator.pop(context);
+    }
+    } catch (e) {
+      debugPrint('Workout Completion Error: $e');
+      if (mounted) {
+        setState(() => _isCompleting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error finishing workout: $e')),
+        );
+      }
     }
   }
   
@@ -970,14 +985,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
             width: 160,
             height: 56,
             child: FilledButton.icon(
-              onPressed: _confirmAndCompleteWorkout,
+              onPressed: _isCompleting ? null : _confirmAndCompleteWorkout,
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
-              icon: const Icon(Icons.check),
-              label: const Text('FINISH', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              icon: _isCompleting 
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Icon(Icons.check),
+              label: Text(_isCompleting ? 'SAVING...' : 'FINISH', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
         ],

@@ -18,8 +18,8 @@ class ProgressionService {
       if (_shouldProgress(se, exercise)) {
         final nextTarget = _calculateNextTarget(exercise);
         
-        await db.updateExercise(ExercisesCompanion(
-          id: Value(exercise.id),
+        await (db.update(db.exercises)..where((e) => e.id.equals(exercise.id)))
+            .write(ExercisesCompanion(
           targetWeight: Value(nextTarget.weight),
           reps: Value(nextTarget.reps),
         ));

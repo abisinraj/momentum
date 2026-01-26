@@ -62,3 +62,67 @@ final workoutInsightProvider = FutureProvider.family<Map<String, dynamic>, int>(
     ...progressData,
   };
 });
+// Daily Nutrition Summary (Today)
+final dailyNutritionProvider = StreamProvider<Map<String, double>>((ref) async* {
+  final db = ref.watch(appDatabaseProvider);
+  // Yield initial value
+  yield await db.getDailyNutritionSummary(DateTime.now());
+  
+  // Poll every time database updates (or manually invalidated). 
+  // For now, since getDailyNutritionSummary isn't a stream in DB, we'll just yield once.
+  // Ideally, add a stream variant in DB or invalidate this provider when adding food.
+});
+
+// Daily Food Logs List
+final dailyFoodLogsProvider = FutureProvider<List<dynamic>>((ref) async { // List<FoodLog> but dynamic to avoid import if not needed
+  final db = ref.watch(appDatabaseProvider);
+  return db.getFoodLogsForDate(DateTime.now());
+});
+
+// Net Calories (Food - Workout)
+// Combining analytics summary (which gives average daily calories burned over 30 days... 
+// WAIT, analytics is 30 days avg. We need TODAY'S burn for Net Calories.)
+// Let's rely on a new provider for Today's Burn specifically.
+final dailyBurnProvider = FutureProvider<int>((ref) async {
+  final db = ref.watch(appDatabaseProvider);
+  // Quick estimation from completed sessions today:
+  final todaySessions = await db.getSessionsForDate(DateTime.now());
+  final completed = todaySessions.where((s) => s.completedAt != null);
+  
+  int totalMinutes = 0;
+  double totalIntensity = 0;
+  int count = 0;
+  
+  for (final s in completed) {
+    totalMinutes += (s.durationSeconds ?? 0) ~/ 60;
+    if (s.intensity != null) {
+      totalIntensity += s.intensity!;
+      count++;
+    }
+  }
+  
+  final avgIntensity = count > 0 ? totalIntensity / count : 5.0; // Default moderate
+  final weight = (await db.getUser())?.weightKg ?? 70.0;
+  
+  // MET Formula: MET * Weight * Hours
+  // Resistance Training ~ 5-7 METs
+  // Adjusted by intensity (1-10) -> (Intensity/5) * 6.0 METs base?
+  final met = 6.0 * (avgIntensity / 5.0);
+  final hours = totalMinutes / 60.0;
+  
+  return (met * weight * hours).round();
+});
+
+final netCaloriesProvider = FutureProvider<Map<String, int>>((ref) async {
+  final foodAsync = await ref.watch(dailyNutritionProvider.future);
+  final burnAsync = await ref.watch(dailyBurnProvider.future);
+  
+  final eaten = foodAsync['calories']?.toInt() ?? 0;
+  final burned = burnAsync;
+  
+  return {
+    'eaten': eaten,
+    'burned': burned,
+    'net': eaten - burned,
+  };
+});

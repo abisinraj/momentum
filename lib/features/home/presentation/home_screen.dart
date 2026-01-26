@@ -11,6 +11,7 @@ import '../../health/presentation/health_insights_card.dart';
 import '../../home/presentation/widgets/ai_insights_card.dart';
 import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/analytics_card.dart';
+import '../../home/presentation/widgets/nutrition_card.dart';
 import '../../../core/providers/dashboard_providers.dart';
 
 
@@ -122,6 +123,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               // AI Insights Card (New)
               const AIInsightsCard(),
+
+              const SizedBox(height: 16),
+              
+              // Nutrition / Net Calories Card (New)
+              const NutritionCard(),
 
               const SizedBox(height: 16),
               // Health Insights Card (from Health Connect)

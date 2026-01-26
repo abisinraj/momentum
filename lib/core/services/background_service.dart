@@ -137,7 +137,7 @@ Future<void> _updateNotification(
       android: AndroidNotificationDetails(
         'momentum_workout_channel',
         'Workout Controls',
-        icon: 'launcher_icon',
+        icon: '@mipmap/ic_launcher',
         ongoing: true,
 
         showWhen: false, // Hide timestamp

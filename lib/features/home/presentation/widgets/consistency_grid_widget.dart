@@ -8,16 +8,18 @@ class ConsistencyGridWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Generate last ~182 days (26 weeks)
+    // Generate last 26 weeks
     final now = DateTime.now();
     final todayMidnight = DateTime(now.year, now.month, now.day);
     
-    // We want to show 26 full columns (weeks)
-    // To align correctly, we start from the current week's Sunday (end) back to 26 weeks ago Monday (start)
-    final daysSinceMonday = todayMidnight.weekday - 1;
-    final thisMonday = todayMidnight.subtract(Duration(days: daysSinceMonday));
-    final alignedStartDate = thisMonday.subtract(const Duration(days: (26 - 1) * 7));
-
+    // Align to the start of the current week (e.g., Monday)
+    // If today is Wednesday, this week starts Monday.
+    final currentWeekStart = todayMidnight.subtract(Duration(days: todayMidnight.weekday - 1));
+    
+    // We want 26 blocks, ending with the current week
+    // Block 0 = 25 weeks ago
+    // Block 25 = Current Week
+    
     final colorScheme = Theme.of(context).colorScheme;
 
     return ThemedCard(
@@ -27,13 +29,13 @@ class ConsistencyGridWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_month_rounded, color: colorScheme.primary, size: 20),
+              Icon(Icons.calendar_view_week_rounded, color: colorScheme.primary, size: 20),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'CONSISTENCY',
+                    'WEEKLY MOMENTUM',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -42,13 +44,12 @@ class ConsistencyGridWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Last 6 Months',
+                    'Sessions per Week (Last 6 Months)',
                     style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
                   ),
                 ],
               ),
               const Spacer(),
-              // Legend
               _buildLegend(context),
             ],
           ),
@@ -56,35 +57,26 @@ class ConsistencyGridWidget extends StatelessWidget {
           
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            reverse: true, // Latest week on the right
+            reverse: false, // Start from the start (Left)
             child: Row(
-              children: List.generate(26, (weekIndex) {
-                 final weekStart = alignedStartDate.add(Duration(days: weekIndex * 7));
-                 return Padding(
-                   padding: const EdgeInsets.only(right: 5.0),
-                   child: Column(
-                     children: List.generate(7, (dayIndex) {
-                       final date = weekStart.add(Duration(days: dayIndex));
-                       
-                       // Check if date is in future
-                       if (date.isAfter(todayMidnight)) {
-                         return _buildCell(context, -1); // Future (transparent)
-                       }
-                       
-                       // Score: Workouts in the 7-day window ending on 'date'
-                       int score = 0;
-                       for (int i = 0; i < 7; i++) {
-                         final checkDate = date.subtract(Duration(days: i));
-                         final key = DateTime(checkDate.year, checkDate.month, checkDate.day);
-                         if (activityData.containsKey(key)) {
-                           score++;
-                         }
-                       }
-                       
-                       return _buildCell(context, score);
-                     }),
-                   ),
-                 );
+              children: List.generate(26, (index) {
+                // Calculate week range
+                // Index 0 = Current Week
+                // Index 1 = Last Week
+                final weeksAgo = index;
+                final weekStart = currentWeekStart.subtract(Duration(days: weeksAgo * 7));
+                final weekEnd = weekStart.add(const Duration(days: 6));
+                
+                // Calculate Score (0-7)
+                int daysActive = 0;
+                for (int i = 0; i < 7; i++) {
+                  final date = weekStart.add(Duration(days: i));
+                  if (activityData.containsKey(date)) {
+                    daysActive++;
+                  }
+                }
+                
+                return _buildWeekBlock(context, daysActive, weekStart, weekEnd, index == 0);
               }),
             ),
           ),
@@ -97,53 +89,68 @@ class ConsistencyGridWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Text('Cold', style: TextStyle(fontSize: 8, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
+        Text('0', style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
         const SizedBox(width: 4),
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: colorScheme.onSurface.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(2))),
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: _getColor(0), borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 2),
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(2))),
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: _getColor(7), borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 4),
-        Text('Peak', style: TextStyle(fontSize: 8, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
+        Text('7 days', style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
       ],
     );
   }
 
-  Widget _buildCell(BuildContext context, int score) {
-    Color color;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    if (score == -1) {
-      color = Colors.transparent; // Future
-    } else if (score == 0) {
-      color = colorScheme.onSurface.withValues(alpha: 0.1);
-    } else {
-      // 1-7 Scale: Build Momentum
-      // 1 = Starting (Orange/Red)
-      // 7 = Peak (Vibrant Green)
-      // Transitioning through HSL: Hue 15 (Orange) to Hue 130 (Green)
-      final double t = (score - 1) / 6.0;
-      final double hue = 15 + (t * 115); // 15 to 130
-      final double saturation = 0.7 + (t * 0.3); // 0.7 to 1.0
-      final double lightness = 0.5 + (t * 0.1); // 0.5 to 0.6
-      
-      color = HSLColor.fromAHSL(1.0, hue, saturation, lightness).toColor();
-    }
-
+  Widget _buildWeekBlock(BuildContext context, int count, DateTime start, DateTime end, bool isCurrentWeek) {
+    final color = _getColor(context, count);
+    
+    // Tooltip logic could go here, for now just the visual block
+    
     return Container(
-      margin: const EdgeInsets.only(bottom: 5),
-      width: 10,
-      height: 10,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(2.5),
-        boxShadow: score >= 6 ? [
-          BoxShadow(
-             color: color.withValues(alpha: 0.4),
-             blurRadius: 4,
-             spreadRadius: 1,
-          )
-        ] : null,
+      margin: const EdgeInsets.only(right: 6), // Spacing between weeks
+      child: Column(
+        children: [
+          // The Block
+          Container(
+            width: 12,     // Wider blocks for weeks
+            height: 40,    // Tall bars roughly
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+              border: isCurrentWeek ? Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), width: 1) : null,
+              boxShadow: count > 3 ? [
+                 BoxShadow(
+                   color: color.withValues(alpha: 0.4),
+                   blurRadius: 6,
+                   offset: const Offset(0, 2),
+                 )
+              ] : null,
+            ),
+          ),
+          const SizedBox(height: 6),
+        ],
       ),
     );
+  }
+  
+  Color _getColor(BuildContext context, int count) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    if (count == 0) {
+      return colorScheme.surfaceContainerHighest.withValues(alpha: 0.5); 
+    }
+    
+    // Dynamic intensity based on Primary color
+    // 1 day  -> 0.2
+    // 7 days -> 1.0
+    // Linear step: (0.8 / 6) = ~0.133 per day + base 0.2
+    // Actually simpler: 15% to 100%
+    
+    const minOpacity = 0.2;
+    const maxOpacity = 1.0;
+    
+    final t = (count - 1) / 6.0; // 0.0 to 1.0 derived from count 1..7
+    final opacity = minOpacity + (maxOpacity - minOpacity) * t;
+    
+    return colorScheme.primary.withValues(alpha: opacity.clamp(0.0, 1.0));
   }
 }

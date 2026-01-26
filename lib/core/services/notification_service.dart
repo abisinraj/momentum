@@ -20,7 +20,7 @@ class NotificationService {
         ?.createNotificationChannel(androidChannel);
         
     const initializationSettings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/launcher_icon'),
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
     );
     
     await _plugin.initialize(initializationSettings);
@@ -37,7 +37,7 @@ class NotificationService {
       'Momentum Alerts',
       importance: Importance.max,
       priority: Priority.high,
-      icon: 'launcher_icon',
+      icon: '@mipmap/ic_launcher',
     );
 
     const details = NotificationDetails(android: androidDetails);

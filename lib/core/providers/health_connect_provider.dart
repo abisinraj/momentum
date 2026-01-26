@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health/health.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../services/health_connect_service.dart';
+import 'database_providers.dart';
 
 part 'health_connect_provider.g.dart';
 
@@ -79,9 +80,19 @@ class HealthNotifier extends _$HealthNotifier {
     
     if (isAvailable) {
       final hasPerms = await _service.hasPermissions();
+      double? weight;
+      if (hasPerms) {
+        // ... handled in syncData
+      } else {
+         // Fallback immediately for manual weight
+         final profile = await ref.read(appDatabaseProvider).getUser();
+         weight = profile?.weightKg;
+      }
+      
       state = state.copyWith(
         isAvailable: isAvailable,
         hasPermissions: hasPerms,
+        latestWeight: weight,
       );
     } else {
       state = state.copyWith(isAvailable: false);
@@ -136,6 +147,12 @@ class HealthNotifier extends _$HealthNotifier {
         if (numericValue is NumericHealthValue) {
           latestWeight = numericValue.numericValue.toDouble();
         }
+      }
+
+      // Fallback to manual weight from profile if no health data
+      if (latestWeight == null) {
+        final profile = await ref.read(appDatabaseProvider).getUser();
+        latestWeight = profile?.weightKg;
       }
       
       
