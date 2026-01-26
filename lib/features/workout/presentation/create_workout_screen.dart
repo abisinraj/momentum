@@ -517,13 +517,25 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Choose a vibe',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            ),
+Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Choose a vibe',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() => _selectedThumbnail = null);
+                  _nextStep();
+                },
+                child: const Text('Skip'),
+              ),
+            ],
           ),
 
           const SizedBox(height: 16),
