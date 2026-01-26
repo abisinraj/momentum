@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/user_providers.dart';
-import '../../../core/providers/workout_providers.dart';
+import '../../../core/providers/user_providers.dart';
 
 /// Screen to select number of days in the split OR use a pre-made split
 class SplitSetupScreen extends ConsumerStatefulWidget {
@@ -307,7 +307,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
       Future<void> createDay({
         required String name,
         required String shortCode,
-        required String thumbnail,
+        required String thumbnailUrl,
         required int dayIndex,
         required ClockType clockType,
         required bool isRestDay,
@@ -317,7 +317,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
           WorkoutsCompanion(
             name: drift.Value(name),
             shortCode: drift.Value(shortCode),
-            thumbnailUrl: drift.Value(thumbnail),
+            thumbnailUrl: drift.Value(thumbnailUrl),
             orderIndex: drift.Value(dayIndex),
             clockType: drift.Value(clockType),
             isRestDay: drift.Value(isRestDay),

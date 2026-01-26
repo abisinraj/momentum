@@ -16,7 +16,7 @@ class ProgressScreen extends ConsumerWidget {
     final insightAsync = ref.watch(weeklyInsightProvider);
     
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+
 
     return Scaffold(
       backgroundColor: colorScheme.surface,

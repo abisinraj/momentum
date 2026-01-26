@@ -879,15 +879,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
   
-  Widget _buildBodyHeatmap(WidgetRef ref) {
-    final heatmapAsync = ref.watch(muscleHeatmapProvider);
-    
-    return heatmapAsync.when(
-      data: (heatmap) => BodyModelViewer(heatmap: heatmap),
-      loading: () => const SkeletonLoader(width: double.infinity, height: 400, borderRadius: 16),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
 
   Widget _buildStatsRow(BuildContext context, WidgetRef ref) {
 
