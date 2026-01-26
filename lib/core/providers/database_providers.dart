@@ -28,6 +28,13 @@ Future<User?> currentUser(Ref ref) async {
   return db.getUser();
 }
 
+/// Provider for watching the current user
+@riverpod
+Stream<User?> userStream(Ref ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return db.watchUser();
+}
+
 /// Provider for all workouts (reactive stream)
 @riverpod
 Stream<List<Workout>> workoutsStream(Ref ref) {

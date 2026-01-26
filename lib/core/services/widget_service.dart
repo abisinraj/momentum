@@ -36,22 +36,21 @@ final widgetServiceProvider = Provider<WidgetService>((ref) {
   return WidgetService();
 });
 
-/// Provider to sync data to widget
 final widgetSyncProvider = FutureProvider<void>((ref) async {
   final db = ref.watch(appDatabaseProvider);
   final widgetService = ref.watch(widgetServiceProvider);
 
-  // WATCH streams to trigger rebuilds on data change
-  // 1. Watch user for cycle progress
-  final user = await ref.watch(StreamProvider((ref) => ref.watch(appDatabaseProvider).watchUser()).future);
+  // REACTIVE WATCHES: This provider will re-run whenever these streams emit new values
+  final userAsync = ref.watch(userStreamProvider);
+  final workoutsAsync = ref.watch(workoutsStreamProvider);
+  final gridAsync = ref.watch(activityGridProvider(1)); // Watch recent activity to catch session completions
+
+  // Wait for data to be available (skip loading states if possible, or just proceed)
+  // We utilize .when to unwrap safely, or default to null/empty if loading
+  final user = userAsync.valueOrNull;
+  final workouts = workoutsAsync.valueOrNull; // Just to trigger dependency
   
-  // 2. Watch grid for streak (just watch last 1 day to trigger on session changes, but calc full streak)
-  // Actually watching activity grid is good, or watching sessions table.
-  // Let's watch specific query: recent sessions.
-  await ref.watch(StreamProvider((ref) => ref.watch(appDatabaseProvider).watchActivityGrid(1)).future);
-  
-  // 3. Watch workouts for next workout definition changes
-  await ref.watch(StreamProvider((ref) => ref.watch(appDatabaseProvider).watchAllWorkouts()).future);
+  debugPrint('[WidgetSync] Triggered. User: ${user?.name}, Workouts: ${workouts?.length}');
 
   try {
     // 1. Calculate Streak
@@ -75,7 +74,7 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     // 2. Get Next Workout
     final nextWorkout = await db.getNextWorkout();
     String title = 'No Active Plan';
-    String desc = 'Create a workout to start';
+    String desc = 'Create an active split to start';
     
     if (nextWorkout != null) {
       title = nextWorkout.name;
@@ -90,6 +89,11 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
         final exercises = await db.getExercisesForWorkout(nextWorkout.id);
         desc = '${exercises.length} Exercises • Tap to Start';
       }
+    } else {
+       // Check if setup is needed
+       if (workouts?.isEmpty ?? true) {
+         desc = 'Create your first workout!';
+       }
     }
     
     // 3. Calculate Cycle Progress
@@ -98,8 +102,10 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     if (user != null && user.splitDays != null && user.splitDays! > 0) {
       final current = user.currentSplitIndex + 1;
       final total = user.splitDays!;
-      cycleProgress = 'Day $current/$total';
+      cycleProgress = '$current/$total';
     }
+
+    debugPrint('[WidgetSync] Updating Widget -> Streak: $streak, Title: $title, Progress: $cycleProgress');
 
     // 4. Update Widget
     await widgetService.updateWidget(
@@ -107,9 +113,9 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
       title: title,
       desc: desc,
       cycleProgress: cycleProgress,
-      nextWorkoutName: nextWorkout?.name ?? 'Split Setup', 
+      nextWorkoutName: nextWorkout?.name ?? 'Momentum', 
     );
   } catch (e) {
-    debugPrint('Widget Sync Error: $e');
+    debugPrint('[WidgetSync] Error: $e');
   }
 });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import '../core/services/settings_service.dart';
+import '../core/services/widget_service.dart';
 
 import 'theme/app_theme.dart';
 import 'router.dart';
@@ -13,6 +14,9 @@ class MomentumApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    // Keep widget sync active globally
+    // ignore: unused_result
+    ref.watch(widgetSyncProvider);
     final themeModeAsync = ref.watch(appThemeModeProvider);
     final themeKey = themeModeAsync.valueOrNull ?? 'teal';
     
