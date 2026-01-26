@@ -21,7 +21,6 @@ class ThemedCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeAsync = ref.watch(widgetThemeProvider);
     final theme = themeAsync.valueOrNull ?? 'classic';
-    debugPrint('ThemedCard: $theme');
 
     if (theme == 'liquid_glass') {
       return _buildLiquidGlass(context);

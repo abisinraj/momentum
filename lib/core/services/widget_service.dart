@@ -102,7 +102,6 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     }
 
     // 4. Update Widget
-    debugPrint('Syncing Widget: Streak=$streak, Title=$title');
     await widgetService.updateWidget(
       streak: streak,
       title: title,

@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/services/background_service.dart';
 import 'core/services/notification_service.dart';
 
 import 'app/app.dart';
@@ -12,7 +11,7 @@ import 'app/app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await BackgroundService().initialize();
+    // BackgroundService removed for stability
     await NotificationService().initialize();
   } catch (e) {
     debugPrint('Initialization Failed: $e');

@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../database/app_database.dart';
 import '../services/widget_service.dart';
-import '../services/background_service.dart';
+// import '../services/background_service.dart';
 import 'database_providers.dart';
 
 import 'dashboard_providers.dart';
@@ -92,10 +92,7 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
           startedAt: session.startedAt,
         );
         
-        // Restore background service
-        final service = BackgroundService();
-        await service.startService(workout.name);
-        service.setStartTime(session.startedAt);
+
       }
     }
   }
@@ -122,10 +119,7 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
       startedAt: DateTime.now(),
     );
     
-    // Start background service
-    final service = BackgroundService();
-    await service.startService(workout.name);
-    service.setStartTime(DateTime.now());
+
 
   }
   
@@ -153,8 +147,7 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
     // Apply Progressive Overload Logic
     await ProgressionService(db).applyProgression(state!.sessionId);
     
-    // Stop background service
-    await BackgroundService().stopService();
+
 
     
     // Invalidate providers that depend on session data
@@ -193,7 +186,7 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
   
   /// Cancel the current workout (don't save completion)
   void cancelWorkout() {
-    BackgroundService().stopService();
+    // BackgroundService().stopService();
     state = null;
   }
 
