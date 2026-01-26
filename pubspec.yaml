@@ -43,7 +43,7 @@ dependencies:
   # Health Connect
   health: ^11.0.0
   permission_handler: ^11.3.1
-  google_generative_ai: ^0.4.5
+  google_generative_ai: ^0.4.7
   shimmer: ^3.0.0
   camera: ^0.10.6
   percent_indicator: ^4.2.3
