@@ -20,6 +20,7 @@
         android:label="Momentum"
         android:name="${applicationName}"
         android:usesCleartextTraffic="true"
+        android:largeHeap="true"
         android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"

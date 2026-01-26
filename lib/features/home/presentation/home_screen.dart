@@ -151,12 +151,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // 4. Consistency Grid
               _buildConsistencyGrid(ref),
               
-              const SizedBox(height: 16),
-              
-              // 5. 3D Body Heatmap
-              _buildBodyHeatmap(ref),
-              
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               
               // Bottom stats row (Existing - maybe redundant now? Let's keep for day-specific stats)

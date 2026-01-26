@@ -67,29 +67,37 @@ class WorkoutCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Thumbnail skeleton
-          SkeletonLoader(width: double.infinity, height: 140, borderRadius: 12),
-          SizedBox(height: 16),
-          // Title skeleton
-          SkeletonLoader(width: 150, height: 24, borderRadius: 4),
-          SizedBox(height: 8),
-          // Subtitle skeleton
-          SkeletonLoader(width: 200, height: 16, borderRadius: 4),
-          SizedBox(height: 16),
-          // Button skeleton
-          SkeletonLoader(width: double.infinity, height: 48, borderRadius: 12),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenHeight = MediaQuery.of(context).size.height;
+        final responsiveMinHeight = (screenHeight * 0.55).clamp(350.0, 550.0);
+        
+        return Container(
+          padding: const EdgeInsets.all(20),
+          constraints: BoxConstraints(minHeight: responsiveMinHeight),
+          decoration: BoxDecoration(
+            color: AppTheme.darkSurfaceContainer,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.darkBorder.withValues(alpha: 0.3)),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Thumbnail skeleton
+              SkeletonLoader(width: double.infinity, height: 180, borderRadius: 12),
+              SizedBox(height: 16),
+              // Title skeleton
+              SkeletonLoader(width: 200, height: 40, borderRadius: 4),
+              SizedBox(height: 12),
+              // Subtitle skeleton
+              SkeletonLoader(width: 150, height: 16, borderRadius: 4),
+              Spacer(),
+              // Button skeleton
+              SkeletonLoader(width: double.infinity, height: 56, borderRadius: 12),
+            ],
+          ),
+        );
+      },
     );
   }
 }

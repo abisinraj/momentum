@@ -67,7 +67,11 @@ class ThemedCard extends ConsumerWidget {
                      ),
                    ],
                  ),
-                 child: child,
+                 child: AnimatedSize(
+                   duration: const Duration(milliseconds: 300),
+                   curve: Curves.easeInOut,
+                   child: child,
+                 ),
                ),
              ),
           ),
@@ -85,7 +89,11 @@ class ThemedCard extends ConsumerWidget {
         onTap: onTap,
         child: Padding(
           padding: padding ?? EdgeInsets.zero,
-          child: child,
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: child,
+          ),
         ),
       ),
     );
