@@ -1,0 +1,6 @@
+Analyzing momentum...                                           
+
+   info • Use 'const' with the constructor to improve performance • lib/features/workout/presentation/workout_comparison_card.dart:244:9 • prefer_const_constructors
+warning • Unused import: '../../../core/database/app_database.dart' • lib/features/workout/providers/comparison_provider.dart:2:8 • unused_import
+
+2 issues found. (ran in 20.3s)

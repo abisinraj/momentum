@@ -8,6 +8,7 @@ import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import 'active_workout_screen.dart';
 import 'edit_workout_screen.dart';
+import 'workout_comparison_card.dart';
 
 /// Workout screen - shows list of workouts with completion states
 /// Design: Date header, focus subtitle, workout cards with status badges
@@ -138,32 +139,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               ),
             ),
             
-            // Workout list
+            // Workout Content
             Expanded(
               child: switch (workoutsAsync) {
-                AsyncData(:final value) => () {
-                  // Filter to current split day's workout if not showing all
-                  final filtered = _showAllWorkouts 
-                      ? value 
-                      : value.where((w) => w.orderIndex == currentSplitIndex).toList();
-                  
-                  if (filtered.isEmpty) {
-                    return _buildEmptyState(_showAllWorkouts 
-                        ? 'No workouts yet' 
-                        : 'No workout for current split day');
-                  }
-                  return _buildWorkoutList(context, ref, filtered, todayCompletedAsync, value.length, currentSplitIndex);
-                }(),
-                AsyncError(:final error) => Center(
-                    child: Text(
-                      'Error: $error',
-                      style: TextStyle(color: colorScheme.error),
-                    ),
-                  ),
-
-                _ => Center(
-                    child: CircularProgressIndicator(color: colorScheme.primary),
-                  ),
+                AsyncData(:final value) => _buildSplitView(context, ref, value, todayCompletedAsync, currentSplitIndex),
+                AsyncError(:final error) => Center(child: Text('Error: $error', style: TextStyle(color: colorScheme.error))),
+                _ => Center(child: CircularProgressIndicator(color: colorScheme.primary)),
               },
             ),
           ],
@@ -224,6 +205,85 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     );
   }
   
+  Widget _buildSplitView(
+    BuildContext context,
+    WidgetRef ref,
+    List<Workout> workouts,
+    AsyncValue<List<int>> todayCompletedAsync,
+    int currentSplitIndex,
+  ) {
+    if (workouts.isEmpty) return _buildEmptyState('No workouts yet');
+
+    final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
+    
+    // 1. Identify "Today's Target" (Current Split Index)
+    final todaysWorkouts = workouts.where((w) => w.orderIndex == currentSplitIndex).toList();
+    final otherWorkouts = workouts.where((w) => w.orderIndex != currentSplitIndex).toList();
+    
+    // If user toggled "Show All", just show the old list style, or maybe mix them?
+    // User request: "let it show today's split name ... scrollable"
+    // Let's make "Show All" toggle between the Dashboard View (Comparison) and the List View (Management).
+    
+    if (_showAllWorkouts) {
+      return _buildWorkoutList(context, ref, workouts, todayCompletedAsync, workouts.length, currentSplitIndex);
+    }
+    
+    if (todaysWorkouts.isEmpty) {
+       return _buildEmptyState('Rest Day or Empty Split');
+    }
+    
+    // Primary View: Scrollable Dashboard
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+           // Main Comparison Card(s) for Today
+           ...todaysWorkouts.map((workout) => Padding(
+             padding: const EdgeInsets.only(bottom: 24.0),
+             child: WorkoutComparisonCard(
+               workoutId: workout.id,
+               onStart: () => _startWorkout(context, ref, workout),
+             ),
+           )),
+           
+           if (otherWorkouts.isNotEmpty) ...[
+             const SizedBox(height: 16),
+             Text(
+               "OTHER WORKOUTS",
+               style: TextStyle(
+                 fontSize: 12,
+                 fontWeight: FontWeight.bold,
+                 color: Theme.of(context).colorScheme.onSurfaceVariant,
+                 letterSpacing: 1.2,
+               ),
+             ),
+             const SizedBox(height: 12),
+             // Compact list for others
+             ...otherWorkouts.map((w) => _WorkoutCard(
+               workout: w,
+               isCompleted: todayCompleted.contains(w.id),
+               isActive: false, // Dashboard handles active separately usually
+               isLocked: true, // Locked/Dimmed to emphasize focus
+               index: w.orderIndex,
+               total: workouts.length,
+               onDelete: () {}, // Disable delete from here for safety
+               onTap: null, // Lock interaction in focus mode
+             )),
+             
+             Center(
+               child: TextButton(
+                 onPressed: () => setState(() => _showAllWorkouts = true),
+                 child: const Text("Manage All Workouts"),
+               ),
+             ),
+             const SizedBox(height: 40), // Bottom padding
+           ]
+        ],
+      ),
+    );
+  }
+
   Widget _buildWorkoutList(
     BuildContext context,
     WidgetRef ref,
@@ -232,6 +292,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     int totalCount,
     int currentSplitIndex,
   ) {
+    // Legacy List View (Management Mode)
     final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
     final activeSession = ref.watch(activeWorkoutSessionProvider);
     
@@ -249,18 +310,16 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         final workout = workouts[index];
         final isCompleted = todayCompleted.contains(workout.id);
         final isActive = activeSession?.workoutId == workout.id;
-        // Lock workouts that don't match current split index (when viewing all)
-        final isLocked = _showAllWorkouts && workout.orderIndex != currentSplitIndex;
         
         return _WorkoutCard(
           key: ValueKey(workout.id),
           workout: workout,
           isCompleted: isCompleted,
           isActive: isActive,
-          isLocked: isLocked,
-          index: workout.orderIndex, // Use actual order index for display
+          isLocked: false,
+          index: workout.orderIndex, 
           total: totalCount,
-          onTap: isLocked ? null : () => _startWorkout(context, ref, workout),
+          onTap: () => _startWorkout(context, ref, workout),
           onDelete: () => _confirmDelete(context, ref, workout),
         );
       },
