@@ -4,6 +4,7 @@ import 'package:health/health.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:drift/drift.dart' show Value;
 import '../services/health_connect_service.dart';
+import '../database/app_database.dart';
 import 'database_providers.dart';
 
 part 'health_connect_provider.g.dart';
