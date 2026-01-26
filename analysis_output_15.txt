@@ -1,0 +1,6 @@
+Analyzing momentum...                                           
+
+  error • The field 'workoutId' can't be initialized by multiple parameters in the same constructor • lib/features/workout/presentation/workout_comparison_card.dart:17:19 • duplicate_field_formal_parameter
+  error • Expected a method, getter, setter or operator declaration • lib/features/workout/presentation/workout_comparison_card.dart:291:1 • expected_executable
+
+2 issues found. (ran in 19.4s)

@@ -14,7 +14,6 @@ class WorkoutComparisonCard extends ConsumerWidget {
   const WorkoutComparisonCard({
     super.key,
     required this.workoutId,
-    required this.workoutId,
     required this.onStart,
     this.isCompleted = false,
   });
@@ -259,7 +258,6 @@ class WorkoutComparisonCard extends ConsumerWidget {
       ],
     );
   }
-  }
   
   Widget _buildCompletedState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -277,7 +275,7 @@ class WorkoutComparisonCard extends ConsumerWidget {
           Icon(Icons.check_circle, color: colorScheme.primary, size: 28),
           const SizedBox(width: 12),
           Text(
-            'Session Completed',
+            'Done for today. See ya tomorrow!',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
