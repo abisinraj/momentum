@@ -34,32 +34,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       builder: (context) => Consumer(
         builder: (context, ref, _) {
-           final currentThemeAsync = ref.watch(widgetThemeProvider);
-           final colorScheme = Theme.of(context).colorScheme;
+           final currentThemeAsync = ref.read(widgetThemeProvider); // Read once for init
+           final initialTheme = currentThemeAsync.valueOrNull ?? 'classic';
            
-           return Container(
-             padding: const EdgeInsets.all(24),
-             child: Column(
-               mainAxisSize: MainAxisSize.min,
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 Text('Widget Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: colorScheme.onSurface)),
-                 const SizedBox(height: 16),
-                 currentThemeAsync.when(
-                   data: (current) => Column(
-                     children: [
-                       _buildThemeOption(context, ref, 'Classic', 'classic', current),
-                       const SizedBox(height: 12),
-                       _buildThemeOption(context, ref, 'Liquid Glass', 'liquid_glass', current),
-                     ],
-                   ),
-                   loading: () => const Center(child: CircularProgressIndicator()),
-                   error: (_, _) => Text('Error loading settings', style: TextStyle(color: colorScheme.error)),
-                 ),
-                 const SizedBox(height: 16),
-               ],
-             ),
-           );
+           return _WidgetThemeSelectorDialog(initialTheme: initialTheme);
         },
       ),
     );
@@ -304,5 +282,111 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
   
 
+}
+
+class _WidgetThemeSelectorDialog extends StatefulWidget {
+  final String initialTheme;
+ 
+  const _WidgetThemeSelectorDialog({required this.initialTheme});
+
+  @override
+  State<_WidgetThemeSelectorDialog> createState() => _WidgetThemeSelectorDialogState();
+}
+
+class _WidgetThemeSelectorDialogState extends State<_WidgetThemeSelectorDialog> {
+  late String _selectedTheme;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTheme = widget.initialTheme;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Widget Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: colorScheme.onSurface)),
+          const SizedBox(height: 16),
+          _buildOption('Classic', 'classic'),
+          const SizedBox(height: 12),
+          _buildOption('Liquid Glass', 'liquid_glass'),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: Consumer(
+              builder: (context, ref, _) {
+                return ElevatedButton(
+                  onPressed: () async {
+                    await ref.read(widgetThemeProvider.notifier).setTheme(_selectedTheme);
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                );
+              }
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOption(String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSelected = value == _selectedTheme;
+    
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedTheme = value;
+        });
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary : Colors.transparent, 
+            width: 2
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              value == 'liquid_glass' ? Icons.water_drop_outlined : Icons.dashboard_outlined,
+              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+              ),
+            ),
+            const Spacer(),
+            if (isSelected) 
+              Icon(Icons.check_circle, color: colorScheme.primary),
+          ],
+        ),
+      ),
+    );
+  }
 }
 

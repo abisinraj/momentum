@@ -156,7 +156,6 @@ class WidgetTheme extends _$WidgetTheme {
   }
 
   Future<void> setTheme(String theme) async {
-    state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(settingsServiceProvider).setWidgetTheme(theme);
       return theme;

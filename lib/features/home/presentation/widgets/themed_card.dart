@@ -21,6 +21,7 @@ class ThemedCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeAsync = ref.watch(widgetThemeProvider);
     final theme = themeAsync.valueOrNull ?? 'classic';
+    debugPrint('ThemedCard: $theme');
 
     if (theme == 'liquid_glass') {
       return _buildLiquidGlass(context);
@@ -50,19 +51,34 @@ class ThemedCard extends ConsumerWidget {
                  begin: Alignment.topLeft,
                  end: Alignment.bottomRight,
                  colors: [
-                   colorScheme.surfaceContainer.withValues(alpha: 0.85),
-                   colorScheme.surfaceContainer.withValues(alpha: 0.45),
+                   colorScheme.surfaceContainer.withValues(alpha: 0.60), // More transparent
+                   colorScheme.surfaceContainer.withValues(alpha: 0.30),
                  ],
                ),
                boxShadow: [
                  BoxShadow(
-                   color: colorScheme.primary.withValues(alpha: 0.05),
-                   blurRadius: 20,
-                   offset: const Offset(0, 8),
+                   color: colorScheme.shadow.withValues(alpha: 0.1),
+                   blurRadius: 15,
+                   offset: const Offset(0, 5),
                  ),
+                 // Inner highlight simulation via border and gradient
                ],
              ),
-             child: child,
+             child: Container(
+               decoration: BoxDecoration(
+                 borderRadius: BorderRadius.circular(24),
+                 gradient: LinearGradient(
+                   begin: Alignment.topCenter,
+                   end: Alignment.bottomCenter,
+                   colors: [
+                     Colors.white.withValues(alpha: 0.05), // Top reflection
+                     Colors.transparent,
+                   ],
+                   stops: const [0.0, 0.4],
+                 ),
+               ),
+               child: child,
+             ),
            ),
          ),
       ),
