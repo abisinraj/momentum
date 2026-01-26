@@ -178,11 +178,8 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
     ref.invalidate(volumeLoadProvider);
     ref.invalidate(dailyInsightProvider); // Re-generate AI insight based on new completion
     
-    // Activity Grid (Try to invalidate common usages if possible, or leave it be if complex)
-    // Actually, `activityGridProvider` is used in ConsistencyGridWidget with days=90 usually. 
-    // Since we can't guess, we might skip explicit invalidation and hope for auto-refresh, 
-    // or if `ConsistencyGridWidget` watches `workoutsStreamProvider` too? No.
-    // Actually, `widget_service.dart` usually triggers updates.
+    // Activity Grid - Explicitly invalidate the one used by Home Screen (150 days)
+    ref.invalidate(activityGridProvider(150));
     
     // Sync widget data
     final _ = ref.refresh(widgetSyncProvider);

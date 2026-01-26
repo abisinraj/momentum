@@ -367,7 +367,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
          sessionId: widget.session.sessionId,
          exerciseId: id,
          completedSets: Value(_completedSets[id] ?? 0),
-         completedReps: Value(0), 
+         completedReps: const Value(0), 
          notes: Value(_exerciseNotes[id]),
          durationSeconds: Value(totalSeconds),
        ));

@@ -77,8 +77,9 @@ class AnalyticsCard extends ConsumerWidget {
 
   Widget _buildTopRow(BuildContext context, WidgetRef ref, HealthState healthState) {
     final colorScheme = Theme.of(context).colorScheme;
-    final sleepDuration = healthState.lastNightSleep ?? const Duration(hours: 0);
-    final sleepHours = sleepDuration.inHours;
+    final sleepDuration = healthState.lastNightSleep;
+    final hasSleepData = sleepDuration != null;
+    final sleepHours = sleepDuration?.inHours ?? 7; // Default to neutral 7h if missing
     
     // Recovery Score Calculation
     double score = 100;
@@ -128,7 +129,9 @@ class AnalyticsCard extends ConsumerWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                "Based on $sleepHours\u1D34 sleep stats.",
+                hasSleepData 
+                  ? "Based on ${sleepHours}h sleep stats."
+                  : "Connect Health for accuracy.",
                 style: TextStyle(
                   fontSize: 12,
                   color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
