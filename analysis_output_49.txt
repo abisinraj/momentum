@@ -1,5 +1,0 @@
-Analyzing momentum...                                           
-
-  error • Undefined name 'widgetSyncProvider' • lib/features/home/presentation/home_screen.dart:62:25 • undefined_identifier
-
-1 issue found. (ran in 61.9s)

@@ -1,7 +1,0 @@
-Analyzing momentum...                                           
-
-warning • Unused import: 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart' • lib/features/home/presentation/widgets/body_model_viewer.dart:6:8 • unused_import
-  error • The method 'setAllowFileAccessFromFileURLs' isn't defined for the type 'AndroidWebViewController' • lib/features/home/presentation/widgets/body_model_viewer.dart:48:25 • undefined_method
-  error • The method 'setAllowUniversalAccessFromFileURLs' isn't defined for the type 'AndroidWebViewController' • lib/features/home/presentation/widgets/body_model_viewer.dart:49:25 • undefined_method
-
-3 issues found. (ran in 19.2s)

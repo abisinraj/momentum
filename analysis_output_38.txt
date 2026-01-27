@@ -1,8 +1,0 @@
-Analyzing momentum...                                           
-
-  error • The method 'Value' isn't defined for the type '_NutritionCardState' • lib/features/home/presentation/widgets/nutrition_card.dart:40:18 • undefined_method
-  error • The method 'Value' isn't defined for the type '_NutritionCardState' • lib/features/home/presentation/widgets/nutrition_card.dart:41:16 • undefined_method
-  error • The method 'Value' isn't defined for the type '_NutritionCardState' • lib/features/home/presentation/widgets/nutrition_card.dart:42:15 • undefined_method
-  error • The method 'Value' isn't defined for the type '_NutritionCardState' • lib/features/home/presentation/widgets/nutrition_card.dart:43:15 • undefined_method
-
-4 issues found. (ran in 13.2s)

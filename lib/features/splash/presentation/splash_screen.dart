@@ -105,7 +105,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               right: 0,
               child: Center(
                 child: Text(
-                  'DIGITAL ATHLETIC JOURNAL',
+                  '  ',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,

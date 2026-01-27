@@ -1,6 +1,0 @@
-Analyzing momentum...                                           
-
-  error • Undefined name 'appDatabaseProvider' • lib/core/providers/health_connect_provider.dart:87:41 • undefined_identifier
-  error • Undefined name 'appDatabaseProvider' • lib/core/providers/health_connect_provider.dart:153:40 • undefined_identifier
-
-2 issues found. (ran in 16.2s)

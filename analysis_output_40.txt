@@ -1,8 +1,0 @@
-Analyzing momentum...                                           
-
-  error • The argument type 'int' can't be assigned to the parameter type 'BuildContext'.  • lib/features/home/presentation/widgets/consistency_grid_widget.dart:94:83 • argument_type_not_assignable
-  error • 2 positional arguments expected by '_getColor', but 1 found • lib/features/home/presentation/widgets/consistency_grid_widget.dart:94:84 • not_enough_positional_arguments
-  error • The argument type 'int' can't be assigned to the parameter type 'BuildContext'.  • lib/features/home/presentation/widgets/consistency_grid_widget.dart:96:83 • argument_type_not_assignable
-  error • 2 positional arguments expected by '_getColor', but 1 found • lib/features/home/presentation/widgets/consistency_grid_widget.dart:96:84 • not_enough_positional_arguments
-
-4 issues found. (ran in 2.8s)

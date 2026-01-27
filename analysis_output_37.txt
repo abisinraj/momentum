@@ -1,9 +1,0 @@
-Analyzing momentum...                                           
-
-warning • The value of the local variable 'stats' isn't used • lib/core/providers/dashboard_providers.dart:88:9 • unused_local_variable
-  error • The argument type 'double' can't be assigned to the parameter type 'Value<double>'.  • lib/features/home/presentation/widgets/nutrition_card.dart:40:18 • argument_type_not_assignable
-  error • The argument type 'double' can't be assigned to the parameter type 'Value<double>'.  • lib/features/home/presentation/widgets/nutrition_card.dart:41:16 • argument_type_not_assignable
-  error • The argument type 'double' can't be assigned to the parameter type 'Value<double>'.  • lib/features/home/presentation/widgets/nutrition_card.dart:42:15 • argument_type_not_assignable
-  error • The argument type 'DateTime' can't be assigned to the parameter type 'Value<DateTime>'.  • lib/features/home/presentation/widgets/nutrition_card.dart:43:15 • argument_type_not_assignable
-
-5 issues found. (ran in 13.2s)

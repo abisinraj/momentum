@@ -1,6 +1,0 @@
-Analyzing momentum...                                           
-
-warning • The value of the local variable 'totalSetDuration' isn't used • lib/core/database/app_database.dart:592:9 • unused_local_variable
-   info • Use 'const' with the constructor to improve performance • lib/features/workout/presentation/active_workout_screen.dart:346:25 • prefer_const_constructors
-
-2 issues found. (ran in 12.4s)
