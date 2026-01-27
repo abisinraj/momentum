@@ -3,6 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter/foundation.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:momentum/core/services/background_sync_service.dart';
+
 import 'core/services/notification_service.dart';
 
 import 'app/app.dart';
@@ -13,6 +17,24 @@ Future<void> main() async {
   try {
     // BackgroundService removed for stability
     await NotificationService().initialize();
+    
+    // Initialize Workmanager
+    Workmanager().initialize(
+      callbackDispatcher, // The top level function, aka callbackDispatcher
+      isInDebugMode: kDebugMode, // If enabled it will post a notification whenever the task is running
+    );
+    
+    // Register Periodic Task (Every 4 hours)
+    Workmanager().registerPeriodicTask(
+      "momentum-health-sync", 
+      kBackgroundSyncTask,
+      frequency: const Duration(hours: 4),
+      constraints: Constraints(
+        networkType: NetworkType.connected, 
+        requiresBatteryNotLow: true,
+      ),
+      initialDelay: const Duration(minutes: 15),
+    );
   } catch (e) {
     debugPrint('Initialization Failed: $e');
   }

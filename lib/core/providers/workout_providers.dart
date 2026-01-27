@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../database/app_database.dart';
 import '../services/widget_service.dart';
+import '../services/settings_service.dart';
 // import '../services/background_service.dart';
 import 'database_providers.dart';
 
