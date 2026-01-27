@@ -49,6 +49,7 @@ android {
 dependencies {
     implementation("com.google.android.play:core:1.10.3")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 }
 
 flutter {

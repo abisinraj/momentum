@@ -7,6 +7,9 @@ import '../providers/database_providers.dart';
 /// Service to sync data to Android Home Screen Widget
 class WidgetService {
   static const String _androidName = 'com.silo.momentum.MomentumWidgetProvider';
+  
+  // Define a consistent group ID (used as prefs file name on Android)
+  static const String _groupId = 'com.silo.momentum.widget';
 
   Future<void> updateWidget({
     required int streak,
@@ -16,6 +19,8 @@ class WidgetService {
     String? nextWorkoutName,
   }) async {
     try {
+      // Set the group ID (important for Android SharedPreferences name consistency)
+      await HomeWidget.setAppGroupId(_groupId);
       await HomeWidget.saveWidgetData('widget_streak', streak.toString());
       await HomeWidget.saveWidgetData('widget_title', title);
       final time = '${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')}';

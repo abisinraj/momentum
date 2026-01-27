@@ -15,20 +15,20 @@ import android.content.SharedPreferences
  */
 class MomentumWidgetProvider : AppWidgetProvider() {
 
-    override fun onReceive(context: Context, intent: android.content.Intent) {
-        android.util.Log.d("MomentumWidget", "onReceive: ${intent.action}")
-        super.onReceive(context, intent)
-    }
-
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        android.util.Log.d("MomentumWidget", "onUpdate called for ${appWidgetIds.size} widgets")
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
+    }
+    
+    // onReceive not strictly needed if we just use standard update flow, 
+    // but handy for debugging. We can remove it for production cleanliness.
+    override fun onReceive(context: Context, intent: android.content.Intent) {
+        super.onReceive(context, intent)
     }
 
     override fun onEnabled(context: Context) {
@@ -44,7 +44,7 @@ class MomentumWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
-        private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val PREFS_NAME = "com.silo.momentum.widget"
 
         internal fun updateAppWidget(
             context: Context,
@@ -65,36 +65,58 @@ class MomentumWidgetProvider : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.widget_workout_name, pendingIntent)
             
             // Get data from SharedPreferences
-            // home_widget specific: The file name is "FlutterSharedPreferences"
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            // Try specific FlutterSharedPreferences first, then default
+            var prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             
-            var streak = 0
-            try {
-                // Try reading as straight String first (new way)
-                val streakStr = prefs.getString("flutter.widget_streak", null)
-                android.util.Log.d("MomentumWidget", "Raw streak string: $streakStr")
-                
-                if (streakStr != null) {
-                    streak = streakStr.toIntOrNull() ?: 0
-                } else {
-                    // Fallback to Int (old way) - standard SharedPreferences might store as Int
-                    // BUT Flutter's SharedPreferences implementation prefixes keys with "flutter." !!!
-                    // AND it often stores everything as String if not typed strictly.
-                    // Let's try getting it as int with the prefix
-                    streak = prefs.getInt("flutter.widget_streak", 0)
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MomentumWidget", "Error reading streak: ${e.message}")
+            // Debug Log: Check if file exists/contains data
+            val allMap = prefs.all
+            android.util.Log.d("MomentumWidget", "SHARED PREFS CONTENTS (${allMap.size} items): $allMap")
+
+            // Fallback: If empty, try default shared preferences (sometimes used by plugins)
+            if (allMap.isEmpty()) {
+                 val defaultPrefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+                 val defaultMap = defaultPrefs.all
+                 android.util.Log.d("MomentumWidget", "DEFAULT PREFS CONTENTS (${defaultMap.size} items): $defaultMap")
+                 if (defaultMap.isNotEmpty()) {
+                     prefs = defaultPrefs
+                 }
             }
 
-            // Note: Keys in Flutter SharedPreferences are prefixed with "flutter."
-            // We need to use "flutter.widget_title" instead of "widget_title"
-            val title = prefs.getString("flutter.widget_title", "No Workout") ?: "No Workout"
-            val desc = prefs.getString("flutter.widget_desc", "Tap to view") ?: "Tap to view"
-            val nextWorkout = prefs.getString("flutter.widget_next_workout", "") ?: ""
-            val weeklyProgress = prefs.getString("flutter.widget_cycle_progress", "--/--") ?: "--/--"
+            // Helper to get string with fallback keys
+            fun getString(key: String, default: String): String {
+                val val1 = prefs.getString(key, null)
+                val val2 = prefs.getString("flutter.$key", null)
+                android.util.Log.d("MomentumWidget", "Getting '$key': val1='$val1', val2='$val2'")
+                return val1 ?: val2 ?: default
+            }
+
+            var streak = 0
+            try {
+                // Try reading streak (could be int or string, could have prefix or not)
+                val key1 = "widget_streak"
+                val key2 = "flutter.widget_streak"
+                
+                // Try reading as int first (most likely for direct native write if integer)
+                if (prefs.contains(key1)) {
+                    streak = prefs.getInt(key1, 0)
+                } else if (prefs.contains(key2)) {
+                    streak = prefs.getInt(key2, 0)
+                } else {
+                     // Try as string
+                     val s1 = prefs.getString(key1, null)
+                     val s2 = prefs.getString(key2, null)
+                     streak = (s1 ?: s2)?.toIntOrNull() ?: 0
+                }
+            } catch (e: Exception) {
+               android.util.Log.e("MomentumWidget", "Error reading streak: ${e.message}")
+            }
+
+            val title = getString("widget_title", "No Workout")
+            val desc = getString("widget_desc", "Tap to view")
+            val nextWorkout = getString("widget_next_workout", "")
+            val weeklyProgress = getString("widget_cycle_progress", "--/--")
             
-            android.util.Log.d("MomentumWidget", "Loaded: Streak=$streak, Title='$title', Desc='$desc', Progress='$weeklyProgress'")
+            android.util.Log.d("MomentumWidget", "Final Loaded Data: Streak=$streak, Title='$title'")
 
             // Update views
             views.setTextViewText(R.id.widget_streak, "\uD83D\uDD25 $streak") // Fire emoji
@@ -109,7 +131,6 @@ class MomentumWidgetProvider : AppWidgetProvider() {
                 views.setViewVisibility(R.id.widget_next_workout, android.view.View.VISIBLE)
                 views.setTextViewText(R.id.widget_next_workout, "Next: $nextWorkout")
             } else {
-                // If no next workout, we can hide it or show something else
                 views.setViewVisibility(R.id.widget_next_workout, android.view.View.GONE)
             }
 
