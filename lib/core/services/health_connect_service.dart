@@ -10,6 +10,7 @@ class HealthConnectService {
     HealthDataType.STEPS,
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_AWAKE,
+    HealthDataType.SLEEP_SESSION,
     HealthDataType.WEIGHT,
     HealthDataType.WORKOUT,
   ];
@@ -64,7 +65,11 @@ class HealthConnectService {
   Future<List<HealthDataPoint>> fetchSleep(DateTime start, DateTime end) async {
     try {
       return await _health.getHealthDataFromTypes(
-        types: [HealthDataType.SLEEP_ASLEEP, HealthDataType.SLEEP_AWAKE],
+        types: [
+          HealthDataType.SLEEP_ASLEEP, 
+          HealthDataType.SLEEP_AWAKE,
+          HealthDataType.SLEEP_SESSION,
+        ],
         startTime: start,
         endTime: end,
       );

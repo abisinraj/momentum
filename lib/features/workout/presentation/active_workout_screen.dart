@@ -2,6 +2,7 @@ import 'dart:async'; // For FontFeature
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/workout_providers.dart';
@@ -31,15 +32,18 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   Duration _elapsed = Duration.zero;
   Duration _remaining = Duration.zero;
   
+  late final Ticker _tick;
+  
   // Rest Timer State
-  late AnimationController _restController;
+  DateTime? _restStartTime;
   int? _restingExerciseId;
-  String _restTimeDisplay = '';
+  int _restRemaining = 0;
+  int _totalRestSeconds = 60;
 
   // Cooldown Timer State
-  late AnimationController _cooldownController;
+  DateTime? _cooldownStartTime;
   int? _cooldownExerciseId;
-  String _cooldownTimeDisplay = '';
+  int _cooldownRemaining = 0;
 
   bool _isRunning = true;
   bool _timerCompleted = false;
@@ -69,42 +73,49 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     super.initState();
     _pageController = PageController(initialPage: 0);
     
-    _restController = AnimationController(vsync: this);
-    _restController.addListener(() {
-      if (mounted) {
-        setState(() {
-          // Update display text based on controller value
-           final totalSeconds = _restController.duration?.inSeconds ?? 60;
-           final remaining = (_restController.value * totalSeconds).ceil();
-           _restTimeDisplay = '$remaining';
-        });
-      }
-    });
-    _restController.addStatusListener((status) {
-      if (status == AnimationStatus.dismissed) {
-        // Timer complete
-        HapticFeedback.mediumImpact();
-        setState(() => _restingExerciseId = null);
-        // Auto-resume work timer happens in _workTimer tick
-      }
-    });
-    
-    // Cooldown setup...
-    _cooldownController = AnimationController(vsync: this, duration: const Duration(minutes: 5));
-    _cooldownController.addListener(() {
-       if (mounted) {
-         setState(() {
-            final totalSeconds = _cooldownController.duration?.inSeconds ?? 300;
-            final remaining = (_cooldownController.value * totalSeconds).ceil();
-            final mins = remaining ~/ 60;
-            final secs = (remaining % 60).toString().padLeft(2, '0');
-            _cooldownTimeDisplay = '$mins:$secs';
-         });
-       }
-    });
+    _tick = createTicker(_onTick);
     
     _initializeClock();
     _startWorkTimer();
+  }
+  
+  void _onTick(Duration elapsed) {
+    setState(() {
+       // Update Rest
+       if (_restingExerciseId != null && _restStartTime != null) {
+          final diff = DateTime.now().difference(_restStartTime!);
+          final totalMs = _totalRestSeconds * 1000;
+          final remainingMs = totalMs - diff.inMilliseconds;
+          
+          if (remainingMs <= 0) {
+             _restRemaining = 0;
+             _restingExerciseId = null;
+             HapticFeedback.mediumImpact();
+             // Auto-stop tick handled below if no active timers
+          } else {
+             _restRemaining = (remainingMs / 1000).ceil();
+          }
+       }
+       
+       // Update Cooldown
+       if (_cooldownExerciseId != null && _cooldownStartTime != null) {
+          final diff = DateTime.now().difference(_cooldownStartTime!);
+          const totalMs = 300 * 1000; // 5 mins fixed
+          final remainingMs = totalMs - diff.inMilliseconds;
+          
+           if (remainingMs <= 0) {
+             _cooldownRemaining = 0;
+             _cooldownExerciseId = null;
+          } else {
+             _cooldownRemaining = (remainingMs / 1000).ceil();
+          }
+       }
+       
+       // Stop Ticker if idle
+       if (_restingExerciseId == null && _cooldownExerciseId == null) {
+          _tick.stop();
+       }
+    });
   }
   
   void _initializeClock() {
@@ -212,7 +223,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                   
     if (newIsFullyDone) {
        _startCooldown(exerciseId);
-       _restController.stop(); 
+       _startCooldown(exerciseId);
+       // _restTimer cancellation implicit by overwrite
        setState(() => _restingExerciseId = null);
        
        // Check all done
@@ -232,7 +244,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     } else if (next > current) {
        // Only start rest if we haven't just finished the last set
        _startRestTimer(exerciseId);
-       _cooldownController.stop();
+       // _cooldownTimer cancellation implicit
        setState(() => _cooldownExerciseId = null);
     }
   }
@@ -439,8 +451,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   void dispose() {
     _timer?.cancel();
     _workTimer?.cancel();
-    _restController.dispose();
-    _cooldownController.dispose();
+    _tick.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -572,13 +583,16 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   Future<void> _startRestTimer(int exerciseId) async {
     final service = ref.read(settingsServiceProvider);
     final restSeconds = await service.getRestTimer();
+    
     if (mounted) {
       setState(() {
         _restingExerciseId = exerciseId;
-        _restController.duration = Duration(seconds: restSeconds);
-        _restController.value = 1.0;
-        _restController.reverse();
+        _totalRestSeconds = restSeconds > 0 ? restSeconds : 1;
+        _restRemaining = _totalRestSeconds;
+        _restStartTime = DateTime.now(); // Mark start time
       });
+      
+      if (!_tick.isActive) _tick.start();
     }
   }
 
@@ -586,9 +600,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
     if (mounted) {
       setState(() {
         _cooldownExerciseId = exerciseId;
-        _cooldownController.value = 1.0;
-        _cooldownController.reverse();
+        _cooldownRemaining = 300; // 5 minutes
+        _cooldownStartTime = DateTime.now();
       });
+      
+      if (!_tick.isActive) _tick.start();
     }
   }
 
@@ -771,7 +787,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                                     if (isResting) ...[
                                       const Spacer(),
                                       Text(
-                                        'Rest: $_restTimeDisplay s',
+                                        'Rest: $_restRemaining s',
                                         style: TextStyle(
                                           color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.bold,
@@ -780,13 +796,19 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                                       ),
                                     ],
                                     if (isCoolingDown)
-                                      Text(
-                                        'Cooldown: $_cooldownTimeDisplay',
-                                        style: const TextStyle(
-                                          color: Colors.cyanAccent,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
+                                      Builder(
+                                        builder: (context) {
+                                          final mins = _cooldownRemaining ~/ 60;
+                                          final secs = (_cooldownRemaining % 60).toString().padLeft(2, '0');
+                                          return Text(
+                                            'Cooldown: $mins:$secs',
+                                            style: const TextStyle(
+                                              color: Colors.cyanAccent,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          );
+                                        }
                                       ),
                                   ],
                                 ),
@@ -814,33 +836,35 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
                         ],
                       ),
                     ),
-                    // Rest Timer Progress Bar (Clipped to rounded corners)
-                    if (isResting)
-                      AnimatedBuilder(
-                        animation: _restController,
-                        builder: (context, child) {
-                          return LinearProgressIndicator(
-                            value: _restController.value,
+                    // Rest Timer Progress Bar (Smooth)
+                    if (isResting && _restStartTime != null)
+                      Builder(builder: (context) {
+                         final elapsedMs = DateTime.now().difference(_restStartTime!).inMilliseconds;
+                         final totalMs = _totalRestSeconds * 1000;
+                         final progress = 1.0 - (elapsedMs / totalMs).clamp(0.0, 1.0);
+                         
+                         return LinearProgressIndicator(
+                            value: progress,
                             backgroundColor: Colors.transparent,
-                            color: Color.lerp(Colors.red, Colors.green, _restController.value),
+                            color: Color.lerp(Colors.red, Colors.green, progress),
                             minHeight: 6,
-                          );
-                        },
-                      ),
+                         );
+                      }),
                       
-                    // Cooldown Timer Progress Bar (Clipped to rounded corners)
-                    if (isCoolingDown)
-                      AnimatedBuilder(
-                        animation: _cooldownController,
-                        builder: (context, child) {
-                          return LinearProgressIndicator(
-                            value: _cooldownController.value,
+                    // Cooldown Timer Progress Bar (Smooth)
+                    if (isCoolingDown && _cooldownStartTime != null)
+                      Builder(builder: (context) {
+                         final elapsedMs = DateTime.now().difference(_cooldownStartTime!).inMilliseconds;
+                         const totalMs = 300 * 1000;
+                         final progress = 1.0 - (elapsedMs / totalMs).clamp(0.0, 1.0);
+
+                         return LinearProgressIndicator(
+                            value: progress,
                             backgroundColor: Colors.transparent,
-                            color: Color.lerp(Colors.blue, Colors.cyanAccent, _cooldownController.value),
+                            color: Color.lerp(Colors.blue, Colors.cyanAccent, progress),
                             minHeight: 6,
-                          );
-                        },
-                      ),
+                         );
+                      }),
                   ],
                 ),
               ),

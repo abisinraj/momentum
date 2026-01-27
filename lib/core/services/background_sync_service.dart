@@ -33,7 +33,6 @@ void callbackDispatcher() {
         final end = now;
         
         // 4. Fetch Sleep Data
-        final healthData = await healthService.fetchAllData(start, end);
         // Note: fetchAllData includes steps, weight, and SLEEP. 
         // We specifically want to process sleep here, but extracting it from generic data points 
         // requires mapping logic similar to HealthNotifier.
