@@ -6,7 +6,7 @@ import '../providers/database_providers.dart';
 
 /// Service to sync data to Android Home Screen Widget
 class WidgetService {
-  static const String _androidName = 'MomentumWidgetProvider';
+  static const String _androidName = 'com.silo.momentum.MomentumWidgetProvider';
 
   Future<void> updateWidget({
     required int streak,
@@ -16,9 +16,10 @@ class WidgetService {
     String? nextWorkoutName,
   }) async {
     try {
-      await HomeWidget.saveWidgetData('widget_streak', streak);
+      await HomeWidget.saveWidgetData('widget_streak', streak.toString());
       await HomeWidget.saveWidgetData('widget_title', title);
-      await HomeWidget.saveWidgetData('widget_desc', desc);
+      final time = '${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')}';
+      await HomeWidget.saveWidgetData('widget_desc', '$desc • $time');
       await HomeWidget.saveWidgetData('widget_cycle_progress', cycleProgress);
       await HomeWidget.saveWidgetData('widget_next_workout', nextWorkoutName ?? '');
       

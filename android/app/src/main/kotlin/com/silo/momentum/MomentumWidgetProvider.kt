@@ -60,7 +60,25 @@ class MomentumWidgetProvider : AppWidgetProvider() {
             
             // Get data from SharedPreferences
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val streak = prefs.getInt("widget_streak", 0)
+            
+            var streak = 0
+            try {
+                // Try reading as straight String first (new way)
+                val streakStr = prefs.getString("widget_streak", null)
+                if (streakStr != null) {
+                    streak = streakStr.toIntOrNull() ?: 0
+                } else {
+                    // Fallback to Int (old way)
+                    streak = prefs.getInt("widget_streak", 0)
+                }
+            } catch (e: Exception) {
+                // If cast fails (e.g. explicitly stored as Long?), try Long
+                try {
+                   streak = prefs.getLong("widget_streak", 0L).toInt()
+                } catch (e2: Exception) {
+                   streak = 0
+                }
+            }
             val title = prefs.getString("widget_title", "No Workout") ?: "No Workout"
             val desc = prefs.getString("widget_desc", "Tap to view") ?: "Tap to view"
             val nextWorkout = prefs.getString("widget_next_workout", "") ?: ""

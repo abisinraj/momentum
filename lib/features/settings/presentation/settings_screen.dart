@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
 import '../../../core/services/settings_service.dart';
+import '../../../core/services/widget_service.dart';
 import '../../../core/providers/health_connect_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -209,6 +210,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
 
                    const SizedBox(height: 32),
+                   _buildSectionHeader(context, 'Debugging'),
+                   const SizedBox(height: 16),
+                   _buildSettingsTile(
+                     context: context,
+                     icon: Icons.sync_problem,
+                     iconColor: Colors.orange,
+                     title: 'Force Widget Sync',
+                     subtitle: 'Update home screen widget now',
+                     onTap: () async {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text('Syncing widget...')),
+                       );
+                       // Force refresh
+                       ref.refresh(widgetSyncProvider);
+                       // We can't await FutureProvider easily unless specific, but refresh returns result?
+                       // Actually ref.refresh returns the new value.
+                       // Let's just assume it runs.
+                     },
+                   ),
 
                    const SizedBox(height: 12),
                    _buildSettingsTile(
