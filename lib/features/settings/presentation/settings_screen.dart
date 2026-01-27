@@ -223,7 +223,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                          const SnackBar(content: Text('Syncing widget...')),
                        );
                        // Force refresh
-                       ref.refresh(widgetSyncProvider);
+                        ref.invalidate(widgetSyncProvider);
                        // We can't await FutureProvider easily unless specific, but refresh returns result?
                        // Actually ref.refresh returns the new value.
                        // Let's just assume it runs.

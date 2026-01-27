@@ -23,10 +23,15 @@ class WidgetService {
       await HomeWidget.saveWidgetData('widget_cycle_progress', cycleProgress);
       await HomeWidget.saveWidgetData('widget_next_workout', nextWorkoutName ?? '');
       
+      await HomeWidget.saveWidgetData('widget_next_workout', nextWorkoutName ?? '');
+      
+      debugPrint('[WidgetService] Data saved. Updating widget now...');
       await HomeWidget.updateWidget(
         name: _androidName,
         androidName: _androidName,
+        qualifiedAndroidName: _androidName,
       );
+      debugPrint('[WidgetService] updateWidget called for name: $_androidName');
     } catch (e) {
       debugPrint('Error updating widget: $e');
     }
@@ -108,6 +113,8 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
 
     debugPrint('[WidgetSync] Updating Widget -> Streak: $streak, Title: $title, Progress: $cycleProgress');
 
+    debugPrint('[WidgetSync] Calling widgetService.updateWidget with: Streak=$streak, Title=$title');
+    
     // 4. Update Widget
     await widgetService.updateWidget(
       streak: streak,
