@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Add riverpod import
 import 'package:momentum/core/providers/ai_providers.dart';
 import 'package:momentum/features/home/presentation/widgets/themed_card.dart';
+import 'package:momentum/features/home/presentation/ai_chat_screen.dart';
 import 'package:shimmer/shimmer.dart';
 
 class AIInsightsCard extends ConsumerWidget {
@@ -11,8 +12,17 @@ class AIInsightsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final insightAsync = ref.watch(dailyInsightProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    
+    // Add import manually at top if not auto-added, but for now assuming context works
+    // Actually, I should add the import line first separately or here if included in range?
+    // Let's modify the build method to wrap content.
 
     return ThemedCard(
+      onTap: () {
+         Navigator.of(context).push(
+           MaterialPageRoute(builder: (context) => const AIChatScreen()),
+         ); 
+      },
       child: Stack(
         children: [
           // Content
@@ -101,6 +111,33 @@ class AIInsightsCard extends ConsumerWidget {
                     return const SizedBox.shrink();
                   }
                 ),
+                
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: () {
+                     Navigator.of(context).push(
+                       MaterialPageRoute(builder: (context) => const AIChatScreen()),
+                     ); 
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                       mainAxisAlignment: MainAxisAlignment.end,
+                       children: [
+                          Text(
+                            'Tap to Chat & Analyze Photos',
+                            style: TextStyle(
+                               fontSize: 10, 
+                               color: colorScheme.primary,
+                               fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.arrow_forward, size: 12, color: colorScheme.primary),
+                       ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -113,7 +150,7 @@ class AIInsightsCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Shimmer.fromColors(
       baseColor: colorScheme.surfaceContainer,
-      highlightColor: colorScheme.surfaceContainer.withValues(alpha: 0.5), // Lighter highlight
+      highlightColor: colorScheme.surfaceContainer.withValues(alpha: 0.5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

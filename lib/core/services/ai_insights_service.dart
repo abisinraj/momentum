@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:momentum/core/database/app_database.dart';
 
@@ -168,5 +169,34 @@ class AIInsightsService {
     Example:
     350
     ''';
+  }
+  Future<String> analyzeMessage({
+    required String text,
+    List<int>? imageBytes,
+    required String? apiKey,
+  }) async {
+    try {
+      if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
+        return "Please configure your API Key in settings first.";
+      }
+
+      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+      
+      final List<Part> parts = [];
+      if (text.isNotEmpty) {
+        parts.add(TextPart(text));
+      }
+      
+      if (imageBytes != null) {
+        parts.add(DataPart('image/jpeg', Uint8List.fromList(imageBytes)));
+      }
+
+      final content = [Content.multi(parts)];
+      final response = await model.generateContent(content);
+
+      return response.text?.trim() ?? "I couldn't understand that context.";
+    } catch (e) {
+      return "Error: ${e.toString()}";
+    }
   }
 }

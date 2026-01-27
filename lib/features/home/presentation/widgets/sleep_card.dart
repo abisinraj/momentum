@@ -13,8 +13,8 @@ class SleepCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final sleepLogsAsync = ref.watch(sleepLogsProvider(days: 7));
     final healthState = ref.watch(healthNotifierProvider);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+
+
 
     return ThemedCard(
       padding: const EdgeInsets.all(24),
@@ -23,9 +23,9 @@ class SleepCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.nights_stay_rounded, color: Colors.indigoAccent, size: 22),
+              const Icon(Icons.nights_stay_rounded, color: Colors.indigoAccent, size: 22),
               const SizedBox(width: 12),
-              Text(
+              const Text(
                 'SLEEP TRACKER',
                 style: TextStyle(
                   fontSize: 13,
@@ -42,7 +42,7 @@ class SleepCard extends ConsumerWidget {
           sleepLogsAsync.when(
             data: (logs) => _buildSleepContent(context, ref, logs),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Text('Error loading sleep data'),
+            error: (err, _) => const Text('Error loading sleep data'),
           ),
         ],
       ),
@@ -67,7 +67,6 @@ class SleepCard extends ConsumerWidget {
   }
 
   Widget _buildSleepContent(BuildContext context, WidgetRef ref, List<SleepLog> logs) {
-    final colorScheme = Theme.of(context).colorScheme;
     final lastNight = logs.isNotEmpty ? logs.first : null;
     
     // Calculate average
@@ -90,7 +89,7 @@ class SleepCard extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -105,7 +104,7 @@ class SleepCard extends ConsumerWidget {
                     const SizedBox(width: 4),
                     Text(
                       "hrs",
-                      style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
                     ),
                   ],
                 ),
@@ -134,7 +133,7 @@ class SleepCard extends ConsumerWidget {
   }
 
   Widget _buildStatBox(BuildContext context, String label, String value, IconData icon, Color color) {
-    final colorScheme = Theme.of(context).colorScheme;
+    // Removed unused colorScheme
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(

@@ -1,4 +1,4 @@
-import 'dart:ui';
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,7 +21,7 @@ Future<void> main() async {
     // Initialize Workmanager
     Workmanager().initialize(
       callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode: kDebugMode, // If enabled it will post a notification whenever the task is running
+      // isInDebugMode: kDebugMode, // Deprecated and removed
     );
     
     // Register Periodic Task (Every 4 hours)
