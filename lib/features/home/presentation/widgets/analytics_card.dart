@@ -175,9 +175,9 @@ class AnalyticsCard extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildMetric(context, 'INTENSITY', avgIntensity.toStringAsFixed(1), 'RPE', Icons.bolt, colorScheme.primary),
-            _buildMetric(context, 'CALORIES', calories.toString(), 'kcal', Icons.local_fire_department, Colors.orangeAccent),
-            _buildMetric(context, 'ACTIVE TIME', totalMinutes.toString(), 'min', Icons.timer, colorScheme.secondary),
+            Expanded(child: _buildMetric(context, 'INTENSITY', avgIntensity.toStringAsFixed(1), 'RPE', Icons.bolt, colorScheme.primary)),
+            Expanded(child: _buildMetric(context, 'CALORIES', calories.toString(), 'kcal', Icons.local_fire_department, Colors.orangeAccent)),
+            Expanded(child: _buildMetric(context, 'ACTIVE TIME', totalMinutes.toString(), 'min', Icons.timer, colorScheme.secondary)),
           ],
         ),
         const SizedBox(height: 24),
