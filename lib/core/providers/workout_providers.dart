@@ -310,4 +310,51 @@ class WorkoutManager extends _$WorkoutManager {
     final _ = ref.refresh(widgetSyncProvider);
   }
 
+  /// Move a workout day to a new position in the split
+  Future<void> moveWorkoutDay(int fromIndex, int toIndex) async {
+    final db = ref.read(appDatabaseProvider);
+    final allWorkouts = await db.getAllWorkouts();
+    
+    // Convert to list for manipulation
+    final workoutsList = allWorkouts.toList();
+    
+    if (fromIndex < 0 || fromIndex >= workoutsList.length || toIndex < 0 || toIndex >= workoutsList.length) {
+      return; 
+    }
+    
+    final movedWorkout = workoutsList.removeAt(fromIndex);
+    workoutsList.insert(toIndex, movedWorkout);
+    
+    // Update all indices
+    for (int i = 0; i < workoutsList.length; i++) {
+       await db.updateWorkoutOrder(workoutsList[i].id, i);
+    }
+    
+    ref.invalidate(workoutsStreamProvider);
+    ref.invalidate(nextWorkoutProvider);
+    // ignore: unused_result
+    ref.refresh(widgetSyncProvider);
+  }
+
+  /// Calculate the projected date for a specific workout based on current cycle
+  Future<DateTime> getProjectedDate(int targetOrderIndex) async {
+    final db = ref.read(appDatabaseProvider);
+    final user = await db.getUser();
+    if (user == null) return DateTime.now();
+    
+    final currentIndex = user.currentSplitIndex;
+    final splitDays = user.splitDays ?? 7;
+    
+    int daysAhead;
+    if (targetOrderIndex >= currentIndex) {
+      daysAhead = targetOrderIndex - currentIndex;
+    } else {
+      // It's in the next cycle (wrap around)
+      daysAhead = (splitDays - currentIndex) + targetOrderIndex;
+    }
+    
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day).add(Duration(days: daysAhead));
+  }
+
 }

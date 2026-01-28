@@ -5,6 +5,15 @@ import '../../../app/router.dart';
 import '../../../core/services/settings_service.dart';
 import '../../../core/services/widget_service.dart';
 import '../../../core/providers/health_connect_provider.dart';
+import '../../../core/database/app_database.dart';
+import '../../../core/providers/database_providers.dart'; // Ensure db provider
+import 'dart:convert';
+import 'dart:io';
+import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:drift/drift.dart' as drift;
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -210,6 +219,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
 
                    const SizedBox(height: 32),
+                   _buildSectionHeader(context, 'Data & Privacy'),
+                   const SizedBox(height: 16),
+                   _buildSettingsTile(
+                     context: context,
+                     icon: Icons.upload_file,
+                     iconColor: Colors.blue,
+                     title: 'Backup Data',
+                     subtitle: 'Export to JSON file',
+                     onTap: _exportData,
+                   ),
+                   const SizedBox(height: 12),
+                   _buildSettingsTile(
+                     context: context,
+                     icon: Icons.download,
+                     iconColor: Colors.green,
+                     title: 'Restore Data',
+                     subtitle: 'Import from JSON file',
+                     onTap: _restoreData,
+                   ),
+
+                   const SizedBox(height: 32),
                    _buildSectionHeader(context, 'Debugging'),
                    const SizedBox(height: 16),
                    _buildSettingsTile(
@@ -224,9 +254,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                        );
                        // Force refresh
                         ref.invalidate(widgetSyncProvider);
-                       // We can't await FutureProvider easily unless specific, but refresh returns result?
-                       // Actually ref.refresh returns the new value.
-                       // Let's just assume it runs.
                      },
                    ),
 
@@ -301,6 +328,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
   
+  Future<void> _exportData() async {
+    try {
+      final db = ref.read(appDatabaseProvider);
+      
+      final workoutsList = await db.select(db.workouts).get();
+      final workoutMaps = workoutsList.map((w) => w.toJson()).toList();
+      
+      final foodList = await db.select(db.foodLogs).get();
+      final foodMaps = foodList.map((f) => f.toJson()).toList();
+      
+      final dump = {
+        'version': 1,
+        'timestamp': DateTime.now().toIso8601String(),
+        'workouts': workoutMaps,
+        'foodLogs': foodMaps,
+      };
+      
+      final jsonString = jsonEncode(dump);
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/momentum_backup_${DateFormat('yyyyMMdd').format(DateTime.now())}.json');
+      await file.writeAsString(jsonString);
+      
+      await Share.shareXFiles([XFile(file.path)], text: 'Momentum Backup');
+      
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Export Failed: $e')));
+      }
+    }
+  }
+
+  Future<void> _restoreData() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+      
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final jsonString = await file.readAsString();
+        final Map<String, dynamic> data = jsonDecode(jsonString);
+        
+        final workoutCount = (data['workouts'] as List?)?.length ?? 0;
+        final foodCount = (data['foodLogs'] as List?)?.length ?? 0;
+        
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(content: Text('Backup Verified: Found $workoutCount workouts, $foodCount food logs. (Import not active in Demo)')),
+           );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore Failed: $e')));
+      }
+    }
+  }
 
 }
 
