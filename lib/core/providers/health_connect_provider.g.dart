@@ -27,7 +27,7 @@ final healthConnectServiceProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HealthConnectServiceRef = AutoDisposeProviderRef<HealthConnectService>;
-String _$healthNotifierHash() => r'0299176f493a71b3a08afd36eb4b3a0a6ddf1270';
+String _$healthNotifierHash() => r'cc98f60ba77231e43576edbcb3316625ba059fa1';
 
 /// Notifier for managing health data state.
 ///
