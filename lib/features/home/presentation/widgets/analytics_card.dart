@@ -7,6 +7,7 @@ import 'package:momentum/core/providers/health_connect_provider.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'themed_card.dart';
 import 'trend_chart.dart';
+import 'muscle_heatmap_widget.dart';
 
 class AnalyticsCard extends ConsumerWidget {
   const AnalyticsCard({super.key});
@@ -14,8 +15,9 @@ class AnalyticsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final analyticsAsync = ref.watch(analyticsSummaryProvider);
-    final healthState = ref.watch(healthNotifierProvider);
     final userAsync = ref.watch(currentUserProvider);
+    final healthState = ref.watch(healthNotifierProvider);
+    final muscleWorkloadAsync = ref.watch(muscleWorkloadProvider); // New provider
     
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -76,14 +78,111 @@ class AnalyticsCard extends ConsumerWidget {
           const Divider(height: 1),
           const SizedBox(height: 20),
           
-          // 3. Muscle Focus
-          _buildMuscleFocusSection(context, analyticsAsync),
+          // 4. Muscle Recovery (New Heatmap Logic)
+          _buildMuscleRecoverySection(context, muscleWorkloadAsync),
         ],
       ),
     );
   }
 
-  Widget _buildTopRow(BuildContext context, WidgetRef ref, HealthState healthState) {
+  // ... (previous helper methods) ...
+
+  Widget _buildMuscleRecoverySection(BuildContext context, AsyncValue<Map<String, int>> workloadAsync) {
+    return workloadAsync.when(
+      data: (workload) {
+        // Embed the widget but without the card container since we are already inside a card
+        // Actually MuscleHeatmapWidget IS a ThemedCard. We shouldn't nest cards.
+        // Let's modify MuscleHeatmapWidget usage or reimplement the core UI here.
+        // Wait, MuscleHeatmapWidget returns a ThemedCard.
+        // Nesting cards looks bad (Card inside Card).
+        // I should call `_buildPowerBars` directly or extract the logic.
+        // Since I cannot change MuscleHeatmapWidget interface easily right now without checking it,
+        // I will just reimplement the "Power Bar" logic here for "Analytics Card Integration".
+        // It's cleaner than modifying the widget to have a "noCard" mode right now.
+        
+        return Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'MUSCLE RECOVERY STATUS',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                ),
+                 Text(
+                   'LAST 5 DAYS',
+                   style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
+                 ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildRecoveryBar(context, "CHEST", workload['Chest'] ?? 0),
+            const SizedBox(height: 8),
+            _buildRecoveryBar(context, "BACK", workload['Back'] ?? 0),
+            const SizedBox(height: 8),
+            _buildRecoveryBar(context, "LEGS", workload['Legs'] ?? 0),
+            const SizedBox(height: 8),
+            _buildRecoveryBar(context, "ARMS", workload['Arms'] ?? 0),
+            const SizedBox(height: 8),
+            _buildRecoveryBar(context, "CORE", workload['Core'] ?? 0),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Text('Unable to load recovery data'),
+    );
+  }
+
+  Widget _buildRecoveryBar(BuildContext context, String label, int intensity) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final Color barColor;
+    final String status;
+    
+    if (intensity == 0) {
+      barColor = Colors.green; // Recovered
+      status = "Ready";
+    } else if (intensity < 3) {
+      barColor = Colors.orangeAccent;
+      status = "Recovering";
+    } else {
+      barColor = colorScheme.error;
+      status = "Sore";
+    }
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 50,
+          child: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (intensity / 10).clamp(0.1, 1.0),
+              minHeight: 8,
+              backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 60,
+          child: Text(
+            status,
+            textAlign: TextAlign.end,
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: barColor),
+          ),
+        ),
+      ],
+    );
+  }
     final colorScheme = Theme.of(context).colorScheme;
     final sleepDuration = healthState.lastNightSleep;
     final hasSleepData = sleepDuration != null;

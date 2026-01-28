@@ -5,6 +5,7 @@ import 'package:momentum/core/providers/database_providers.dart';
 import 'package:momentum/core/providers/health_connect_provider.dart';
 import 'package:drift/drift.dart' as drift;
 import 'themed_card.dart';
+import '../../../../core/services/correlation_service.dart';
 
 class SleepCard extends ConsumerWidget {
   const SleepCard({super.key});
@@ -115,7 +116,9 @@ class SleepCard extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         _buildQualityBar(context, lastNight?.quality ?? 0),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        _buildCorrelationInsight(context, ref),
+        const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -129,6 +132,43 @@ class SleepCard extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCorrelationInsight(BuildContext context, WidgetRef ref) {
+    final insightAsync = ref.watch(correlationInsightProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return insightAsync.when(
+      data: (text) {
+        if (text.isEmpty) return const SizedBox.shrink();
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colorScheme.tertiary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colorScheme.tertiary.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+               Icon(Icons.auto_awesome, size: 16, color: colorScheme.tertiary),
+               const SizedBox(width: 12),
+               Expanded(
+                 child: Text(
+                   text,
+                   style: TextStyle(
+                     fontSize: 12, 
+                     color: colorScheme.onSurface,
+                     fontStyle: FontStyle.italic,
+                   ),
+                 ),
+               ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
