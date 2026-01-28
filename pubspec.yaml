@@ -40,6 +40,13 @@ dependencies:
   connectivity_plus: ^6.0.5
   image_picker: ^1.2.1
   
+  # Charts & Visuals
+  fl_chart: ^0.68.0
+  
+  # Export & Backup
+  share_plus: ^10.0.0
+  file_picker: ^8.0.0
+  
   # Health Connect
   health: ^11.0.0
   permission_handler: ^11.3.1

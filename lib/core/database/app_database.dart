@@ -84,6 +84,10 @@ class FoodLogs extends Table {
   RealColumn get protein => real().withDefault(const Constant(0.0))();
   RealColumn get carbs => real().withDefault(const Constant(0.0))();
   RealColumn get fats => real().withDefault(const Constant(0.0))();
+  RealColumn get fiber => real().withDefault(const Constant(0.0))();
+  RealColumn get sugar => real().withDefault(const Constant(0.0))();
+  RealColumn get sodium => real().withDefault(const Constant(0.0))(); // mg
+  IntColumn get waterMl => integer().withDefault(const Constant(0))();
   TextColumn get imageUrl => text().nullable()(); // Local path
 }
 
@@ -96,6 +100,7 @@ class SleepLogs extends Table {
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   IntColumn get deepSleepMinutes => integer().nullable()();
   IntColumn get remSleepMinutes => integer().nullable()();
+  IntColumn get recoveryScore => integer().nullable()(); // 0-100 calculated score
 }
 
 /// The main application database
@@ -104,7 +109,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration {
