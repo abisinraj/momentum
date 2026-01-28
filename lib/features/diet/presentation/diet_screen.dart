@@ -134,28 +134,119 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
   }
   
   void _showLogConfirmationDialog(Map<String, dynamic> data) {
+    // Controllers for editing
+    final descCtrl = TextEditingController(text: data['description']);
+    final calCtrl = TextEditingController(text: data['calories'].toString());
+    final pCtrl = TextEditingController(text: data['protein'].toString());
+    final cCtrl = TextEditingController(text: data['carbs'].toString());
+    final fCtrl = TextEditingController(text: data['fats'].toString());
+    
+    // Micros
+    final fibCtrl = TextEditingController(text: (data['fiber'] ?? 0.0).toString());
+    final sugCtrl = TextEditingController(text: (data['sugar'] ?? 0.0).toString());
+    final sodCtrl = TextEditingController(text: (data['sodium'] ?? 0.0).toString());
+    
+    // Water
+    final waterCtrl = TextEditingController(text: "0"); // Default 0 for meal, or auto if 'water' detected? 
+    if (data['description'].toString().toLowerCase().contains('water')) {
+       // Estimation if water is main item
+       waterCtrl.text = "250"; 
+    }
+
+    bool showMicros = false;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Log Meal?'),
-        content: Text(
-          "${data['description']}\n"
-          "${data['calories']} kcal\n"
-          "Protein: ${data['protein']}g\n"
-          "Carbs: ${data['carbs']}g\n"
-          "Fats: ${data['fats']}g"
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () {
-              _logToDatabase(data);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Meal logged!')));
-            },
-            child: const Text('Log Meal'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Edit & Log Meal'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: descCtrl,
+                    decoration: const InputDecoration(labelText: 'Description'),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(child: _buildNumField(calCtrl, 'Calories', 'kcal')),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildNumField(waterCtrl, 'Water', 'ml')),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('Macros', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(child: _buildNumField(pCtrl, 'Protein', 'g')),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildNumField(cCtrl, 'Carbs', 'g')),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildNumField(fCtrl, 'Fats', 'g')),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () => setState(() => showMicros = !showMicros),
+                    child: Row(
+                      children: [
+                        Icon(showMicros ? Icons.expand_less : Icons.expand_more),
+                        const Text('Micronutrients (Optional)', style: TextStyle(color: Colors.blue)),
+                      ],
+                    ),
+                  ),
+                   if (showMicros) ...[
+                      const SizedBox(height: 8),
+                      _buildNumField(fibCtrl, 'Fiber', 'g'),
+                      _buildNumField(sugCtrl, 'Sugar', 'g'),
+                      _buildNumField(sodCtrl, 'Sodium', 'mg'),
+                   ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+              FilledButton(
+                onPressed: () {
+                  final updatedData = {
+                    'description': descCtrl.text,
+                    'calories': int.tryParse(calCtrl.text) ?? 0,
+                    'protein': double.tryParse(pCtrl.text) ?? 0.0,
+                    'carbs': double.tryParse(cCtrl.text) ?? 0.0,
+                    'fats': double.tryParse(fCtrl.text) ?? 0.0,
+                    'fiber': double.tryParse(fibCtrl.text) ?? 0.0,
+                    'sugar': double.tryParse(sugCtrl.text) ?? 0.0,
+                    'sodium': double.tryParse(sodCtrl.text) ?? 0.0,
+                    'waterMl': int.tryParse(waterCtrl.text) ?? 0,
+                    'imageUrl': data['imageUrl'], // Keep original if any
+                  };
+                  
+                  _logToDatabase(updatedData);
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(this.context).showSnackBar(const SnackBar(content: Text('Meal logged!')));
+                },
+                child: const Text('Save Log'),
+              ),
+            ],
+          );
+        }
+      ),
+    );
+  }
+  
+  Widget _buildNumField(TextEditingController ctrl, String label, String suffix) {
+    return TextField(
+      controller: ctrl,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        labelText: label,
+        suffixText: suffix,
+        isDense: true,
       ),
     );
   }
@@ -168,6 +259,10 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
       protein: drift.Value(double.tryParse(data['protein'].toString()) ?? 0.0),
       carbs: drift.Value(double.tryParse(data['carbs'].toString()) ?? 0.0),
       fats: drift.Value(double.tryParse(data['fats'].toString()) ?? 0.0),
+      fiber: drift.Value(double.tryParse(data['fiber'].toString()) ?? 0.0),
+      sugar: drift.Value(double.tryParse(data['sugar'].toString()) ?? 0.0),
+      sodium: drift.Value(double.tryParse(data['sodium'].toString()) ?? 0.0),
+      waterMl: drift.Value(int.tryParse(data['waterMl'].toString()) ?? 0),
       imageUrl: drift.Value(data['imageUrl']),
       date: drift.Value(DateTime.now()),
     ));

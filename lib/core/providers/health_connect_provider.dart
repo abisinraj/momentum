@@ -183,11 +183,17 @@ class HealthNotifier extends _$HealthNotifier {
         
         // PERSIST: Save to database
         if (totalMinutes > 0) {
+          // Simple Recovery Score Calculation
+          // Target: 8 hours (480 mins) => 100%
+          int score = ((totalMinutes / 480) * 100).round();
+          if (score > 100) score = 100;
+          
           await ref.read(appDatabaseProvider).addSleepLog(SleepLogsCompanion(
                 date: Value(todayStart),
                 durationMinutes: Value(totalMinutes),
                 deepSleepMinutes: Value(deepSleep),
                 remSleepMinutes: Value(remSleep),
+                recoveryScore: Value(score),
                 isSynced: const Value(true),
               ));
         }
