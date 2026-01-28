@@ -772,24 +772,33 @@ class AppDatabase extends _$AppDatabase {
     return result.length;
   }
   
-  /// Advance to next split day if 2+ workouts completed for current day
-  /// Returns true if advanced, false otherwise
-  Future<bool> advanceSplit() async {
+  /// Advance to next split day if all workouts for current cycle day are completed today
+  Future<bool> checkAndAdvanceSplit() async {
     final user = await getUser();
     if (user == null) return false;
     
     final currentIndex = user.currentSplitIndex;
     final splitDays = user.splitDays ?? 7;
     
-    final completedCount = await getCompletedCountForSplitDay(currentIndex);
+    // Get workouts for this split index
+    final dayWorkouts = await (select(workouts)..where((w) => w.orderIndex.equals(currentIndex))).get();
     
-    if (completedCount >= 2) {
-      // Advance to next day (with wrap-around)
+    if (dayWorkouts.isEmpty) {
+      // If no workouts defined for this day, we can't 'complete' them.
+      return false;
+    }
+    
+    // Get today's completed workout IDs
+    final completedIds = await getTodayCompletedWorkoutIds();
+    
+    // Check if ALL workouts for this split day are in completedIds
+    // This allows for identifying if the user has finished the day's requirements
+    final allCompleted = dayWorkouts.every((w) => completedIds.contains(w.id));
+    
+    if (allCompleted) {
       final nextIndex = (currentIndex + 1) % splitDays;
-      
       await (update(users)..where((u) => u.id.equals(user.id)))
           .write(UsersCompanion(currentSplitIndex: Value(nextIndex)));
-      
       return true;
     }
     

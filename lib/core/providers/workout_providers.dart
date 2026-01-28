@@ -179,6 +179,9 @@ class ActiveWorkoutSession extends _$ActiveWorkoutSession {
     // Apply Progressive Overload Logic
     await ProgressionService(db).applyProgression(state!.sessionId);
     
+    // Check & Advance Workout Cycle
+    await db.checkAndAdvanceSplit();
+    
 
 
     
@@ -291,6 +294,7 @@ class WorkoutManager extends _$WorkoutManager {
     // Start and immediately complete
     final sessionId = await db.startSession(workout.id);
     await db.completeSession(sessionId, 0); // 0 duration for rest days
+    await db.checkAndAdvanceSplit();
     
     // Trigger standard invalidations
     ref.invalidate(todayCompletedWorkoutIdsProvider);
