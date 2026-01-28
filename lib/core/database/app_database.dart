@@ -188,6 +188,11 @@ class AppDatabase extends _$AppDatabase {
           // Add caloriesBurned to sessions
           await m.addColumn(sessions, sessions.caloriesBurned);
         }
+        if (from < 15) {
+          // Schema v15 changes:
+          // Add recoveryScore to sleepLogs
+          await m.addColumn(sleepLogs, sleepLogs.recoveryScore);
+        }
       },
     );
   }
