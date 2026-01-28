@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../features/home/presentation/home_screen.dart';
+import '../features/home/presentation/recovery_3d_screen.dart';
 import '../features/workout/presentation/workout_screen.dart';
 import '../features/workout/presentation/create_workout_screen.dart';
 import '../features/progress/presentation/progress_screen.dart';
@@ -38,7 +39,8 @@ enum AppRoute {
   workoutPreferences('/workout-preferences'),
   healthDetail('/health'),
   apiSettings('/api-settings'),
-  privacyPolicy('/privacy');
+  privacyPolicy('/privacy'),
+  recovery3d('/recovery-3d');
 
 
   const AppRoute(this.path);
@@ -205,6 +207,11 @@ GoRouter router(Ref ref) {
         path: AppRoute.privacyPolicy.path,
         name: AppRoute.privacyPolicy.name,
         builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.recovery3d.path,
+        name: AppRoute.recovery3d.name,
+        builder: (context, state) => const Recovery3DScreen(),
       ),
 
       
