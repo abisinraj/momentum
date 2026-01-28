@@ -164,9 +164,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   _buildSectionHeader(context, 'General'),
+                   _buildSectionHeader(context, 'Preferences'),
                    const SizedBox(height: 16),
-                   
                    _buildSettingsTile(
                      context: context,
                      icon: Icons.tune,
@@ -174,15 +173,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      title: 'Workout Settings',
                      subtitle: 'Timer, units, and preferences',
                      onTap: () => context.push(AppRoute.workoutPreferences.path),
-                   ),
-                   const SizedBox(height: 12),
-                   _buildSettingsTile(
-                     context: context,
-                     icon: Icons.widgets_outlined,
-                     iconColor: colorScheme.tertiary,
-                     title: 'Widget Theme',
-                     subtitle: 'Liquid Glass & More',
-                     onTap: () => _showWidgetThemeSelector(context),
                    ),
                    const SizedBox(height: 12),
                    _buildSettingsTile(
@@ -197,7 +187,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                        );
                      },
                    ),
-                   const SizedBox(height: 12),
+                   
+                   const SizedBox(height: 32),
+                   _buildSectionHeader(context, 'Appearance'),
+                   const SizedBox(height: 16),
+                    _buildSettingsTile(
+                       context: context,
+                       icon: Icons.palette_outlined,
+                       iconColor: Colors.purpleAccent,
+                       title: 'App Theme',
+                       subtitle: 'Colors & Dark Mode',
+                       onTap: () => _showAppThemeSelector(context),
+                     ),
+                    const SizedBox(height: 12),
+                   _buildSettingsTile(
+                     context: context,
+                     icon: Icons.widgets_outlined,
+                     iconColor: colorScheme.tertiary,
+                     title: 'Widget Theme',
+                     subtitle: 'Liquid Glass & More',
+                     onTap: () => _showWidgetThemeSelector(context),
+                   ),
+
+                   const SizedBox(height: 32),
+                   _buildSectionHeader(context, 'Integrations'),
+                   const SizedBox(height: 16),
                    _buildSettingsTile(
                      context: context,
                      icon: Icons.monitor_heart_outlined,
@@ -207,16 +221,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      onTap: () => ref.read(healthNotifierProvider.notifier).requestPermissions(),
                    ),
                    const SizedBox(height: 12),
-                   // Duplicate "Home Screen Widget" removed from here
-                   const SizedBox(height: 12),
-                    _buildSettingsTile(
-                      context: context,
-                      icon: Icons.palette_outlined,
-                      iconColor: colorScheme.primary,
-                      title: 'Appearance',
-                      subtitle: 'App Theme',
-                      onTap: () => _showAppThemeSelector(context),
-                    ),
+                   _buildSettingsTile(
+                     context: context,
+                     icon: Icons.api_rounded,
+                     iconColor: Colors.indigoAccent,
+                     title: 'API Settings',
+                     subtitle: 'Gemini, Pexels, OpenAI',
+                     onTap: () => context.push(AppRoute.apiSettings.path),
+                   ),
 
                    const SizedBox(height: 32),
                    _buildSectionHeader(context, 'Data & Privacy'),
@@ -240,7 +252,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    ),
 
                    const SizedBox(height: 32),
-                   _buildSectionHeader(context, 'Debugging'),
+                   _buildSectionHeader(context, 'Advanced'),
                    const SizedBox(height: 16),
                    _buildSettingsTile(
                      context: context,
@@ -252,19 +264,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                        ScaffoldMessenger.of(context).showSnackBar(
                          const SnackBar(content: Text('Syncing widget...')),
                        );
-                       // Force refresh
                         ref.invalidate(widgetSyncProvider);
                      },
-                   ),
-
-                   const SizedBox(height: 12),
-                   _buildSettingsTile(
-                     context: context,
-                     icon: Icons.api_rounded,
-                     iconColor: colorScheme.error,
-                     title: 'API Settings',
-                     subtitle: 'Gemini, Pexels, OpenAI',
-                     onTap: () => context.push(AppRoute.apiSettings.path),
                    ),
                 ],
               ),

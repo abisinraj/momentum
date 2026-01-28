@@ -6,6 +6,7 @@ import 'package:momentum/core/providers/database_providers.dart';
 import 'package:momentum/core/providers/health_connect_provider.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'themed_card.dart';
+import 'trend_chart.dart';
 
 class AnalyticsCard extends ConsumerWidget {
   const AnalyticsCard({super.key});
@@ -65,6 +66,13 @@ class AnalyticsCard extends ConsumerWidget {
           ),
           
           const SizedBox(height: 24),
+          const Divider(height: 1),
+          const SizedBox(height: 20),
+          
+          // 3. Trend Chart (New)
+          const TrendChart(),
+          
+           const SizedBox(height: 24),
           const Divider(height: 1),
           const SizedBox(height: 20),
           
