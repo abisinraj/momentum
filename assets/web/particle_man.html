@@ -17,7 +17,6 @@
             height: 100vh;
         }
 
-        /* HUD Overlay */
         #hud {
             position: absolute;
             top: 20px;
@@ -40,7 +39,6 @@
             margin-top: 5px;
         }
 
-        /* Tooltip / Info Card */
         #info-card {
             position: absolute;
             bottom: 40px;
@@ -53,11 +51,9 @@
             padding: 24px;
             color: white;
             display: none;
-            /* Hidden by default */
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s, transform 0.3s;
         }
 
         #info-card.visible {
@@ -68,7 +64,6 @@
 
         .card-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
             margin-bottom: 16px;
         }
@@ -76,7 +71,6 @@
         .muscle-title {
             font-size: 1.2rem;
             font-weight: 700;
-            color: #fff;
         }
 
         .status-badge {
@@ -116,26 +110,6 @@
             color: #888;
         }
 
-        .stat-value {
-            font-weight: 600;
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            margin-top: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #00ff80;
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        /* Loader */
         #loader {
             position: absolute;
             top: 50%;
@@ -145,29 +119,12 @@
             font-size: 0.8rem;
             letter-spacing: 1px;
         }
-
-        /* Interaction Hint */
-        #hint {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #444;
-            font-size: 0.8rem;
-            pointer-events: none;
-            opacity: 0.6;
-        }
     </style>
-    <!-- Import Maps Polyfill -->
-    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
+
+    <!-- Load Three.js Global Scripts (No Modules) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
 </head>
 
 <body>
@@ -176,8 +133,7 @@
         <h1>Anatomy of Momentum</h1>
         <div class="subtitle">Interactive Recovery Visualization</div>
     </div>
-    <div id="loader">INITIALIZING NEURAL LINK...</div>
-    <div id="hint">Click to Interact • Drag to Rotate • Scroll to Zoom</div>
+    <div id="loader">INITIALIZING ANATOMICAL RIG...</div>
 
     <div id="info-card">
         <div class="card-header">
@@ -188,44 +144,35 @@
             <span class="stat-label">Recovery Score</span>
             <span class="stat-value" id="card-score">92%</span>
         </div>
-        <div class="progress-bar">
-            <div class="progress-fill" id="card-bar"></div>
-        </div>
-        <br>
-        <div class="stat-row">
-            <span class="stat-label">Last Worked</span>
-            <span class="stat-value" id="card-last">3 days ago</span>
-        </div>
-        <div class="stat-row">
-            <span class="stat-label">Volume Load</span>
-            <span class="stat-value" id="card-vol">12,400 kg</span>
-        </div>
     </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { TWEEN } from 'three/addons/libs/tween.module.min.js';
-
-        // --- Configuration ---
-        // --- Configuration ---
-        const PARTICLE_COUNT = 15000; // Increased density
-        const PARTICLE_SIZE = 0.025;  // Finer particles
+    <script>
+        // Main Logic
+        // Strict Proportional Humanoid Generator
+        const PARTICLE_COUNT = 20000;
+        const PARTICLE_SIZE = 0.02;
         const COLORS = {
             FRESH: new THREE.Color(0x00ff80),
             RECOVERING: new THREE.Color(0xffaa00),
             SORE: new THREE.Color(0xff3232),
-            NEUTRAL: new THREE.Color(0xaaaaaa)
+            NEUTRAL: new THREE.Color(0x8888aa)
         };
 
-        // --- State ---
-        let scene, camera, renderer, controls, raycaster;
-        let particles, geometry, material;
-        let selectedMuscle = null;
-        let clock = new THREE.Clock();
-        const mouse = new THREE.Vector2();
+        // Global State
+        var scene, camera, renderer, controls, raycaster;
+        var particles, geometry, material;
+        var selectedMuscle = null;
+        var clock = new THREE.Clock();
+        var mouse = new THREE.Vector2();
 
-        // Muscle Data (Logic for colors/stats)
+        var particlePositions = [];
+        var particleColors = [];
+        var particleSizes = [];
+        var particleAttributes = {
+            muscleName: [],
+            originalPos: []
+        };
+
         const MUSCLE_DATA = {
             'Chest': { recovery: 95 },
             'Back': { recovery: 85 },
@@ -236,31 +183,28 @@
             'Quads': { recovery: 100 },
             'Hamstrings': { recovery: 100 },
             'Calves': { recovery: 100 },
-            'Head': { recovery: 100 } // Just for visual
+            'Glutes': { recovery: 90 },
+            'Traps': { recovery: 70 },
+            'Forearms': { recovery: 80 },
+            'Head': { recovery: 100 }
         };
-
-        const particleAttributes = {
-            muscleName: [],
-            originalPos: []
-        };
-        const muscleNames = Object.keys(MUSCLE_DATA);
 
         init();
         animate();
 
         function init() {
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x050505, 0.15);
+            scene.fog = new THREE.FogExp2(0x050505, 0.10);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, 1.2, 4.0);
+            camera.position.set(0, 1.1, 3.5);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            controls = new OrbitControls(camera, renderer.domElement);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
             controls.maxDistance = 6;
@@ -268,12 +212,12 @@
             controls.target.set(0, 1.0, 0);
 
             raycaster = new THREE.Raycaster();
-            raycaster.params.Points.threshold = 0.1;
+            raycaster.params.Points.threshold = 0.08;
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
-            generateBody();
+            generateFitBody();
 
             window.addEventListener('resize', onWindowResize);
             window.addEventListener('mousemove', onMouseMove);
@@ -282,19 +226,21 @@
             document.getElementById('loader').style.display = 'none';
         }
 
-        // --- Organic shape generators ---
+        // --- Generators ---
+        function getPointInSphere(r) {
+            const u = Math.random(), v = Math.random();
+            const theta = 2 * Math.PI * u, phi = Math.acos(2 * v - 1);
+            const rad = Math.cbrt(Math.random()) * r;
+            return { x: rad * Math.sin(phi) * Math.cos(theta), y: rad * Math.sin(phi) * Math.sin(theta), z: rad * Math.cos(phi) };
+        }
 
-        function getPointInSphere(radius) {
-            const u = Math.random();
-            const v = Math.random();
-            const theta = 2 * Math.PI * u;
-            const phi = Math.acos(2 * v - 1);
-            const r = Math.cbrt(Math.random()) * radius; // Uniform distribution
-            return {
-                x: r * Math.sin(phi) * Math.cos(theta),
-                y: r * Math.sin(phi) * Math.sin(theta),
-                z: r * Math.cos(phi)
-            };
+        function getPointInFrustum(rTop, rBottom, height) {
+            const y = (Math.random() - 0.5) * height;
+            const t = (y + height / 2) / height;
+            const r = rBottom + (rTop - rBottom) * t;
+            const angle = Math.random() * 2 * Math.PI;
+            const dist = Math.sqrt(Math.random()) * r;
+            return { x: dist * Math.cos(angle), y: y, z: dist * Math.sin(angle) };
         }
 
         function getPointInEllipsoid(rx, ry, rz) {
@@ -302,47 +248,33 @@
             return { x: p.x * rx, y: p.y * ry, z: p.z * rz };
         }
 
-        function getPointInCylinder(radiusTop, radiusBottom, height) {
-            // Simplified: interpolation between two circles
-            const y = (Math.random() - 0.5) * height; // Centered at 0
-            const t = (y + height / 2) / height; // 0 to 1
-            const r = radiusBottom + (radiusTop - radiusBottom) * t;
-
-            // Random point in circle at height y
-            const angle = Math.random() * 2 * Math.PI;
-            const dist = Math.sqrt(Math.random()) * r;
-
-            return {
-                x: dist * Math.cos(angle),
-                y: y,
-                z: dist * Math.sin(angle)
-            };
-        }
-
-        function addMuscleShape(name, count, generatorFn, positionOffset, rotation = { x: 0, y: 0, z: 0 }) {
+        function addVolume(name, count, generator, pos, rot = { x: 0, y: 0, z: 0 }) {
             const muscle = MUSCLE_DATA[name] || { recovery: 100 };
-
             let baseColor;
             if (muscle.recovery >= 90) baseColor = COLORS.FRESH;
             else if (muscle.recovery >= 60) baseColor = COLORS.RECOVERING;
             else baseColor = COLORS.SORE;
 
             for (let i = 0; i < count; i++) {
-                let p = generatorFn();
+                let p = generator();
 
-                // Rotate
-                // Simple Euler rotation logic needed?
-                // Minimal rotation needed for T pose mostly.
-                if (rotation.z !== 0) {
-                    const x_new = p.x * Math.cos(rotation.z) - p.y * Math.sin(rotation.z);
-                    const y_new = p.x * Math.sin(rotation.z) + p.y * Math.cos(rotation.z);
-                    p.x = x_new; p.y = y_new;
+                if (rot.z) {
+                    const x = p.x * Math.cos(rot.z) - p.y * Math.sin(rot.z);
+                    const y = p.x * Math.sin(rot.z) + p.y * Math.cos(rot.z);
+                    p.x = x; p.y = y;
+                }
+                if (rot.x) {
+                    const y = p.y * Math.cos(rot.x) - p.z * Math.sin(rot.x);
+                    const z = p.y * Math.sin(rot.x) + p.z * Math.cos(rot.x);
+                    p.y = y; p.z = z;
+                }
+                if (rot.y) {
+                    const x = p.x * Math.cos(rot.y) - p.z * Math.sin(rot.y);
+                    const z = p.x * Math.sin(rot.y) + p.z * Math.cos(rot.y);
+                    p.x = x; p.z = z;
                 }
 
-                // Translate
-                p.x += positionOffset.x;
-                p.y += positionOffset.y;
-                p.z += positionOffset.z;
+                p.x += pos.x; p.y += pos.y; p.z += pos.z;
 
                 particlePositions.push(p.x, p.y, p.z);
                 particleColors.push(baseColor.r, baseColor.g, baseColor.b);
@@ -353,60 +285,84 @@
             }
         }
 
-        let particlePositions = [];
-        let particleColors = [];
-        let particleSizes = [];
+        function generateFitBody() {
+            // Reset
+            particlePositions = []; particleColors = []; particleSizes = [];
+            particleAttributes.muscleName = []; particleAttributes.originalPos = [];
 
-        function generateBody() {
-            particlePositions = [];
-            particleColors = [];
-            particleSizes = [];
-            particleAttributes.muscleName = [];
-            particleAttributes.originalPos = [];
+            // ANATOMY CONFIGURATION (8 Heads Rule)
+            // 1 Head Unit = 0.22 meters (approx)
+            const H = 0.22;
 
-            // 1. HEAD (Sphere)
-            addMuscleShape('Head', 800, () => getPointInSphere(0.14), { x: 0, y: 1.75, z: 0 });
+            // --- 1. HEAD & NECK ---
+            // Head (Ovoid)
+            addVolume('Head', 1000, () => getPointInEllipsoid(H * 0.65, H * 0.8, H * 0.75), { x: 0, y: 1.76, z: 0 });
+            // Neck (Cylinder)
+            addVolume('Traps', 300, () => getPointInFrustum(H * 0.3, H * 0.35, H * 0.6), { x: 0, y: 1.6, z: 0 });
+            // Traps Slopes
+            addVolume('Traps', 400, () => getPointInFrustum(0.04, 0.08, 0.25), { x: -H * 0.5, y: 1.58, z: 0 }, { z: -0.6 });
+            addVolume('Traps', 400, () => getPointInFrustum(0.04, 0.08, 0.25), { x: H * 0.5, y: 1.58, z: 0 }, { z: 0.6 });
 
-            // 2. NECK (Small Cylinder)
-            addMuscleShape('Back', 200, () => getPointInCylinder(0.06, 0.07, 0.15), { x: 0, y: 1.6, z: 0 });
+            // --- 2. TORSO (V-Taper) ---
+            // Shoulders (Deltoids)
+            addVolume('Shoulders', 700, () => getPointInSphere(H * 0.65), { x: -H * 1.1, y: 1.52, z: 0 });
+            addVolume('Shoulders', 700, () => getPointInSphere(H * 0.65), { x: H * 1.1, y: 1.52, z: 0 });
 
-            // 3. CHEST (Two Ellipsoids for Pecs)
-            // Left Pec
-            addMuscleShape('Chest', 600, () => getPointInEllipsoid(0.18, 0.14, 0.08), { x: -0.2, y: 1.45, z: 0.08 }, { z: 0.1 });
-            // Right Pec
-            addMuscleShape('Chest', 600, () => getPointInEllipsoid(0.18, 0.14, 0.08), { x: 0.2, y: 1.45, z: 0.08 }, { z: -0.1 });
+            // Chest (Pecs)
+            addVolume('Chest', 1000, () => getPointInEllipsoid(H * 0.9, H * 0.7, H * 0.3), { x: -H * 0.5, y: 1.42, z: H * 0.3 }, { z: 0.1, y: 0.2 });
+            addVolume('Chest', 1000, () => getPointInEllipsoid(H * 0.9, H * 0.7, H * 0.3), { x: H * 0.5, y: 1.42, z: H * 0.3 }, { z: -0.1, y: -0.2 });
 
-            // 4. ABS (Vertical Cylinder stack)
-            addMuscleShape('Abs', 800, () => getPointInCylinder(0.18, 0.16, 0.45), { x: 0, y: 1.1, z: 0.05 });
+            // Upper Back (Lats Wings)
+            addVolume('Back', 1200, () => getPointInFrustum(H * 1.3, H * 0.7, H * 2.0), { x: 0, y: 1.3, z: -H * 0.2 });
 
-            // 5. SHOULDERS (Spheres)
-            addMuscleShape('Shoulders', 500, () => getPointInSphere(0.13), { x: -0.5, y: 1.55, z: 0 });
-            addMuscleShape('Shoulders', 500, () => getPointInSphere(0.13), { x: 0.5, y: 1.55, z: 0 });
+            // Abs (6-pack Segmented)
+            addVolume('Abs', 400, () => getPointInEllipsoid(H * 0.5, H * 0.25, H * 0.2), { x: 0, y: 1.25, z: H * 0.4 });
+            addVolume('Abs', 400, () => getPointInEllipsoid(H * 0.48, H * 0.25, H * 0.2), { x: 0, y: 1.12, z: H * 0.4 });
+            addVolume('Abs', 400, () => getPointInEllipsoid(H * 0.45, H * 0.3, H * 0.2), { x: 0, y: 0.98, z: H * 0.45 });
 
-            // 6. ARMS (Tapered Cylinders)
-            // Biceps (Upper Arm)
-            addMuscleShape('Biceps', 500, () => getPointInCylinder(0.11, 0.09, 0.35), { x: -0.6, y: 1.3, z: 0 }, { z: 0.2 });
-            addMuscleShape('Biceps', 500, () => getPointInCylinder(0.11, 0.09, 0.35), { x: 0.6, y: 1.3, z: 0 }, { z: -0.2 });
+            // Obliques
+            addVolume('Abs', 500, () => getPointInFrustum(H * 0.3, H * 0.4, H * 1.5), { x: -H * 0.7, y: 1.1, z: H * 0.3 });
+            addVolume('Abs', 500, () => getPointInFrustum(H * 0.3, H * 0.4, H * 1.5), { x: H * 0.7, y: 1.1, z: H * 0.3 });
 
+            // --- 3. ARMS ---
+            // Biceps (Upper Arm Front)
+            addVolume('Biceps', 500, () => getPointInEllipsoid(H * 0.35, H * 0.7, H * 0.35), { x: -H * 1.3, y: 1.25, z: H * 0.1 });
+            addVolume('Biceps', 500, () => getPointInEllipsoid(H * 0.35, H * 0.7, H * 0.35), { x: H * 1.3, y: 1.25, z: H * 0.1 });
+            // Triceps (Upper Arm Back)
+            addVolume('Triceps', 500, () => getPointInEllipsoid(H * 0.3, H * 0.65, H * 0.3), { x: -H * 1.3, y: 1.28, z: -H * 0.15 });
+            addVolume('Triceps', 500, () => getPointInEllipsoid(H * 0.3, H * 0.65, H * 0.3), { x: H * 1.3, y: 1.28, z: -H * 0.15 });
+            // Elbows
+            addVolume('Forearms', 200, () => getPointInSphere(H * 0.25), { x: -H * 1.4, y: 1.0, z: 0 });
+            addVolume('Forearms', 200, () => getPointInSphere(H * 0.25), { x: H * 1.4, y: 1.0, z: 0 });
             // Forearms
-            addMuscleShape('Biceps', 400, () => getPointInCylinder(0.08, 0.06, 0.35), { x: -0.7, y: 0.95, z: 0 }, { z: 0.2 });
-            addMuscleShape('Biceps', 400, () => getPointInCylinder(0.08, 0.06, 0.35), { x: 0.7, y: 0.95, z: 0 }, { z: -0.2 });
+            addVolume('Forearms', 600, () => getPointInFrustum(H * 0.32, H * 0.2, H * 1.2), { x: -H * 1.5, y: 0.7, z: 0 }, { z: 0.1 });
+            addVolume('Forearms', 600, () => getPointInFrustum(H * 0.32, H * 0.2, H * 1.2), { x: H * 1.5, y: 0.7, z: 0 }, { z: -0.1 });
 
-            // 7. BACK (Broad Ellipsoid flattened)
-            addMuscleShape('Back', 1200, () => getPointInEllipsoid(0.35, 0.4, 0.1), { x: 0, y: 1.4, z: -0.1 });
+            // --- 4. LOWER BODY ---
+            // Hips/Glutes
+            addVolume('Glutes', 800, () => getPointInEllipsoid(H * 0.8, H * 0.5, H * 0.6), { x: 0, y: 0.9, z: 0 }); // Center
+            addVolume('Glutes', 600, () => getPointInSphere(H * 0.6), { x: -H * 0.4, y: 0.85, z: -H * 0.3 }); // Left Cheek
+            addVolume('Glutes', 600, () => getPointInSphere(H * 0.6), { x: H * 0.4, y: 0.85, z: -H * 0.3 }); // Right Cheek
 
-            // 8. LEGS
-            // Quads (Thighs) - Large cylinders
-            addMuscleShape('Quads', 800, () => getPointInCylinder(0.14, 0.11, 0.5), { x: -0.2, y: 0.6, z: 0.05 });
-            addMuscleShape('Quads', 800, () => getPointInCylinder(0.14, 0.11, 0.5), { x: 0.2, y: 0.6, z: 0.05 });
+            // Thighs (Quads/Hams)
+            addVolume('Quads', 800, () => getPointInFrustum(H * 0.6, H * 0.4, H * 1.8), { x: -H * 0.6, y: 0.55, z: H * 0.1 }, { z: -0.05 });
+            addVolume('Quads', 800, () => getPointInFrustum(H * 0.6, H * 0.4, H * 1.8), { x: H * 0.6, y: 0.55, z: H * 0.1 }, { z: 0.05 });
+            addVolume('Hamstrings', 600, () => getPointInFrustum(H * 0.55, H * 0.35, H * 1.8), { x: -H * 0.6, y: 0.55, z: -H * 0.2 }, { z: -0.05 });
+            addVolume('Hamstrings', 600, () => getPointInFrustum(H * 0.55, H * 0.35, H * 1.8), { x: H * 0.6, y: 0.55, z: -H * 0.2 }, { z: 0.05 });
 
-            // Hamstrings (Back of Thighs)
-            addMuscleShape('Hamstrings', 600, () => getPointInCylinder(0.13, 0.11, 0.5), { x: -0.2, y: 0.6, z: -0.05 });
-            addMuscleShape('Hamstrings', 600, () => getPointInCylinder(0.13, 0.11, 0.5), { x: 0.2, y: 0.6, z: -0.05 });
+            // Knees
+            addVolume('Quads', 300, () => getPointInSphere(H * 0.35), { x: -H * 0.65, y: 0.15, z: 0.05 });
+            addVolume('Quads', 300, () => getPointInSphere(H * 0.35), { x: H * 0.65, y: 0.15, z: 0.05 });
 
-            // Calves (Lower Leg)
-            addMuscleShape('Calves', 600, () => getPointInCylinder(0.10, 0.06, 0.45), { x: -0.22, y: 0.1, z: 0 });
-            addMuscleShape('Calves', 600, () => getPointInCylinder(0.10, 0.06, 0.45), { x: 0.22, y: 0.1, z: 0 });
+            // Calves
+            addVolume('Calves', 700, () => getPointInEllipsoid(H * 0.35, H * 0.6, H * 0.35), { x: -H * 0.7, y: -0.2, z: -0.05 }); // Muscle
+            addVolume('Calves', 400, () => getPointInFrustum(H * 0.25, H * 0.15, H * 1.5), { x: -H * 0.7, y: -0.3, z: 0 }); // Shin
+            addVolume('Calves', 700, () => getPointInEllipsoid(H * 0.35, H * 0.6, H * 0.35), { x: H * 0.7, y: -0.2, z: -0.05 });
+            addVolume('Calves', 400, () => getPointInFrustum(H * 0.25, H * 0.15, H * 1.5), { x: H * 0.7, y: -0.3, z: 0 });
+
+            // Feet
+            addVolume('Calves', 300, () => getPointInEllipsoid(H * 0.3, H * 0.15, H * 0.6), { x: -H * 0.8, y: -0.75, z: H * 0.3 });
+            addVolume('Calves', 300, () => getPointInEllipsoid(H * 0.3, H * 0.15, H * 0.6), { x: H * 0.8, y: -0.75, z: H * 0.3 });
 
             geometry = new THREE.BufferGeometry();
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(particlePositions, 3));
@@ -414,78 +370,65 @@
             geometry.setAttribute('size', new THREE.Float32BufferAttribute(particleSizes, 1));
 
             material = new THREE.PointsMaterial({
-                size: PARTICLE_SIZE,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.85,
-                sizeAttenuation: true,
-                blending: THREE.AdditiveBlending
+                size: PARTICLE_SIZE, vertexColors: true, transparent: true, opacity: 0.9,
+                sizeAttenuation: true, blending: THREE.AdditiveBlending
             });
-
             particles = new THREE.Points(geometry, material);
             scene.add(particles);
+
+            const planeGeo = new THREE.PlaneGeometry(3, 3);
+            const planeMat = new THREE.MeshBasicMaterial({ color: 0x222222, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
+            const plane = new THREE.Mesh(planeGeo, planeMat);
+            plane.rotation.x = Math.PI / 2;
+            plane.position.y = -0.8;
+            scene.add(plane);
         }
 
-        // --- Interaction ---
-
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
         function onMouseMove(event) {
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }
-
         function onMouseClick(event) {
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObject(particles);
-
             if (intersects.length > 0) {
-                const index = intersects[0].index;
-                const name = particleAttributes.muscleName[index];
-                if (name && MUSCLE_DATA[name]) {
-                    selectMuscle(name);
-                }
-            } else {
-                resetView();
-            }
+                const name = particleAttributes.muscleName[intersects[0].index];
+                if (name) selectMuscle(name);
+            } else resetView();
         }
 
         function selectMuscle(name) {
             if (selectedMuscle === name) return;
             selectedMuscle = name;
 
-            // Highlight logic
             const colors = geometry.attributes.color.array;
             for (let i = 0; i < particleAttributes.muscleName.length; i++) {
                 const mName = particleAttributes.muscleName[i];
-                const muscle = MUSCLE_DATA[mName];
-
-                // Recalculate base color
-                let baseColor;
-                if (muscle.recovery >= 90) baseColor = COLORS.FRESH;
-                else if (muscle.recovery >= 60) baseColor = COLORS.RECOVERING;
-                else baseColor = COLORS.SORE;
+                const muscle = MUSCLE_DATA[mName] || { recovery: 100 };
+                let baseColor = (muscle.recovery >= 90) ? COLORS.FRESH : (muscle.recovery >= 60 ? COLORS.RECOVERING : COLORS.SORE);
 
                 if (mName === name) {
-                    // Bright
-                    colors[i * 3] = baseColor.r * 1.5;
-                    colors[i * 3 + 1] = baseColor.g * 1.5;
-                    colors[i * 3 + 2] = baseColor.b * 1.5;
+                    colors[i * 3] = baseColor.r * 1.5; colors[i * 3 + 1] = baseColor.g * 1.5; colors[i * 3 + 2] = baseColor.b * 1.5;
                 } else {
-                    // Dim
-                    colors[i * 3] = baseColor.r * 0.1;
-                    colors[i * 3 + 1] = baseColor.g * 0.1;
-                    colors[i * 3 + 2] = baseColor.b * 0.1;
+                    colors[i * 3] = baseColor.r * 0.1; colors[i * 3 + 1] = baseColor.g * 0.1; colors[i * 3 + 2] = baseColor.b * 0.1;
                 }
             }
             geometry.attributes.color.needsUpdate = true;
 
-            // Updated Card logic
-            // ... (keep similar logic or simplified) ...
-            updateInfoCard(name, MUSCLE_DATA[name]);
+            const card = document.getElementById('info-card');
+            const data = MUSCLE_DATA[name];
+            document.getElementById('card-title').innerText = name;
+            document.getElementById('card-score').innerText = data.recovery + "%";
+            const badge = document.getElementById('card-status');
+            badge.innerText = data.recovery >= 90 ? "Fresh" : (data.recovery >= 60 ? "Recovering" : "Sore");
+            badge.className = "status-badge " + (data.recovery >= 90 ? "status-fresh" : (data.recovery >= 60 ? "status-recovering" : "status-sore"));
+            card.className = "visible";
 
-            // Camera Zoom would need center of mass calculation for general case
-            // or hardcoded targets. Let's reset to neutral logic for now to avoid errors.
-            // But user wants CLICK TO ZOOM. 
-            // We can approximate center of selected points!
             let sumX = 0, sumY = 0, sumZ = 0, count = 0;
             for (let i = 0; i < particleAttributes.muscleName.length; i++) {
                 if (particleAttributes.muscleName[i] === name) {
@@ -495,132 +438,36 @@
                     count++;
                 }
             }
-            if (count > 0) {
-                const centerX = sumX / count;
-                const centerY = sumY / count;
-                const centerZ = sumZ / count;
-
-                new TWEEN.Tween(camera.position)
-                    .to({ x: centerX, y: centerY, z: centerZ + 1.2 }, 1000)
-                    .easing(TWEEN.Easing.Cubic.Out)
-                    .start();
-
-                new TWEEN.Tween(controls.target)
-                    .to({ x: centerX, y: centerY, z: centerZ }, 1000)
-                    .easing(TWEEN.Easing.Cubic.Out)
-                    .start();
+            if (count) {
+                const t = { x: sumX / count, y: sumY / count, z: sumZ / count };
+                new TWEEN.Tween(camera.position).to({ x: t.x, y: t.y, z: t.z + 1.2 }, 1000).easing(TWEEN.Easing.Cubic.Out).start();
+                new TWEEN.Tween(controls.target).to(t, 1000).easing(TWEEN.Easing.Cubic.Out).start();
             }
         }
 
         function resetView() {
             selectedMuscle = null;
-            resetParticles();
-            hideInfoCard();
-
-            new TWEEN.Tween(camera.position)
-                .to({ x: 0, y: 1.2, z: 4.0 }, 1000)
-                .easing(TWEEN.Easing.Cubic.Out)
-                .start();
-            new TWEEN.Tween(controls.target)
-                .to({ x: 0, y: 1.0, z: 0 }, 1000)
-                .easing(TWEEN.Easing.Cubic.Out)
-                .start();
-        }
-
-        function resetParticles() {
+            document.getElementById('info-card').className = "";
             const colors = geometry.attributes.color.array;
-            // Reset to base
             for (let i = 0; i < particleAttributes.muscleName.length; i++) {
-                const name = particleAttributes.muscleName[i];
-                const muscle = MUSCLE_DATA[name];
-                let baseColor;
-                if (muscle.recovery >= 90) baseColor = COLORS.FRESH;
-                else if (muscle.recovery >= 60) baseColor = COLORS.RECOVERING;
-                else baseColor = COLORS.SORE;
-
-                colors[i * 3] = baseColor.r;
-                colors[i * 3 + 1] = baseColor.g;
-                colors[i * 3 + 2] = baseColor.b;
+                const mName = particleAttributes.muscleName[i];
+                const muscle = MUSCLE_DATA[mName] || { recovery: 100 };
+                let baseColor = (muscle.recovery >= 90) ? COLORS.FRESH : (muscle.recovery >= 60 ? COLORS.RECOVERING : COLORS.SORE);
+                colors[i * 3] = baseColor.r; colors[i * 3 + 1] = baseColor.g; colors[i * 3 + 2] = baseColor.b;
             }
             geometry.attributes.color.needsUpdate = true;
+
+            new TWEEN.Tween(camera.position).to({ x: 0, y: 1.1, z: 3.5 }, 1000).easing(TWEEN.Easing.Cubic.Out).start();
+            new TWEEN.Tween(controls.target).to({ x: 0, y: 1, z: 0 }, 1000).easing(TWEEN.Easing.Cubic.Out).start();
         }
-
-        // --- UI Updates ---
-
-        function updateInfoCard(name, muscle) {
-            const card = document.getElementById('info-card');
-
-            document.getElementById('card-title').innerText = name;
-
-            const statusBadge = document.getElementById('card-status');
-            const scoreVal = document.getElementById('card-score');
-            const barFill = document.getElementById('card-bar');
-
-            // Logic
-            let statusText = "Fresh";
-            let statusClass = "status-fresh";
-            let barColor = "#00ff80";
-
-            if (muscle.recovery < 60) {
-                statusText = "Sore";
-                statusClass = "status-sore";
-                barColor = "#ff3232";
-            } else if (muscle.recovery < 90) {
-                statusText = "Recovering";
-                statusClass = "status-recovering";
-                barColor = "#ffaa00";
-            }
-
-            statusBadge.innerText = statusText;
-            statusBadge.className = `status-badge ${statusClass}`; // Reset class
-
-            scoreVal.innerText = `${muscle.recovery}%`;
-            barFill.style.width = `${muscle.recovery}%`;
-            barFill.style.backgroundColor = barColor; // Override css
-
-            // Fake Data randomness for "Last Worked"
-            const daysAgo = Math.floor(Math.random() * 5) + 1;
-            document.getElementById('card-last').innerText = `${daysAgo} days ago`;
-            document.getElementById('card-vol').innerText = `${Math.floor(Math.random() * 5000 + 1000)} kg`;
-
-            card.classList.add('visible');
-        }
-
-        function hideInfoCard() {
-            document.getElementById('info-card').classList.remove('visible');
-        }
-
-        // --- Loop ---
 
         function animate() {
             requestAnimationFrame(animate);
-
             const time = clock.getElapsedTime();
-            TWEEN.update();
+            if (TWEEN) TWEEN.update();
             controls.update();
-
-            // Breathing / Idle Animation
-            // Expand/Contract Chest particles slightly
-            // We can just oscillate the geometry vertices? No, expensive.
-            // Move object? 
-            // Simple: Rotate the whole group slowly
-            if (!selectedMuscle) {
-                particles.rotation.y = Math.sin(time * 0.1) * 0.1; // Gentle sway
-            }
-
-            // Pulse Sore Muscles (Red)
-            // Advanced: Write custom shader for pulse. 
-            // Simple JS Pulse:
-            // Find "Sore" muscles and modulate their color intensity
-            // Omitted for performance in simple version, but "Breathing" sway is added.
-
+            particles.rotation.y = Math.sin(time * 0.1) * 0.1;
             renderer.render(scene, camera);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
         }
     </script>
 </body>
