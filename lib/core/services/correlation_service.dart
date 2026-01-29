@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/database_providers.dart';
+import 'package:drift/drift.dart';
 import 'dart:math';
 
 /// Service to analyze correlations between metrics (e.g. Sleep vs Strength)
@@ -20,7 +21,7 @@ class CorrelationService {
     // We need to join sleep logs with sessions.
     // For simplicity, let's get all data and correlate in Dart.
     final sleepLogs = await (db.select(db.sleepLogs)
-      ..where((tbl) => tbl.date.isBiggerThanValue(thirtyDaysAgo)))
+      ..where((tbl) => tbl.date.isBiggerThan(Variable(thirtyDaysAgo))))
       .get();
       
     final sessions = await (db.select(db.sessions)
@@ -61,10 +62,12 @@ class CorrelationService {
         // A better metric would be "RPE" if we had it averaged.
         // Let's just use Duration for the prototype logic.
         
+        final duration = (session.durationSeconds ?? 0).toDouble();
+        
         if (sleep.durationMinutes >= 420) {
-          goodSleepVolumes.add(session.durationSeconds.toDouble());
+          goodSleepVolumes.add(duration);
         } else {
-          badSleepVolumes.add(session.durationSeconds.toDouble());
+          badSleepVolumes.add(duration);
         }
       } catch (e) {
         // No sleep log for this day

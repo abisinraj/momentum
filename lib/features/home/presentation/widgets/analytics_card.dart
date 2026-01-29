@@ -212,6 +212,7 @@ class AnalyticsCard extends ConsumerWidget {
       ],
     );
   }
+  Widget _buildTopRow(BuildContext context, WidgetRef ref, dynamic healthState) {
     final colorScheme = Theme.of(context).colorScheme;
     final sleepDuration = healthState.lastNightSleep;
     final hasSleepData = sleepDuration != null;

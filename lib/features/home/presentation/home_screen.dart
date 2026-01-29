@@ -380,8 +380,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
-          ],
-        ),
         IconButton(
           onPressed: () {
             Navigator.of(context).push(
