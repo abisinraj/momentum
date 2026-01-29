@@ -201,10 +201,16 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                     ),
                   ),
                    if (showMicros) ...[
-                      const SizedBox(height: 8),
-                      _buildNumField(fibCtrl, 'Fiber', 'g'),
-                      _buildNumField(sugCtrl, 'Sugar', 'g'),
-                      _buildNumField(sodCtrl, 'Sodium', 'mg'),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(child: _buildNumField(fibCtrl, 'Fiber', 'g')),
+                          const SizedBox(width: 8),
+                          Expanded(child: _buildNumField(sugCtrl, 'Sugar', 'g')),
+                          const SizedBox(width: 8),
+                          Expanded(child: _buildNumField(sodCtrl, 'Sodium', 'mg')),
+                        ],
+                      ),
                    ],
                 ],
               ),
@@ -247,6 +253,8 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
         labelText: label,
         suffixText: suffix,
         isDense: true,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
     );
   }

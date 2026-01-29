@@ -48,33 +48,95 @@ enum AppRoute {
 }
 
 /// Root navigation shell with bottom navigation bar
-class NavigationShell extends StatelessWidget {
+class NavigationShell extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
   
   const NavigationShell({
     super.key,
     required this.navigationShell,
   });
-  
+
+  @override
+  State<NavigationShell> createState() => _NavigationShellState();
+}
+
+class _NavigationShellState extends State<NavigationShell> {
+  // Navigation history stack to allow back button to rewind tabs
+  final List<int> _visitHistory = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with current index (usually 0)
+    _visitHistory.add(widget.navigationShell.currentIndex);
+  }
+
+  void _goBranch(int index) {
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
+  }
+
+  void _handleBackPress() {
+    if (_visitHistory.length > 1) {
+      // Pop current tab
+      _visitHistory.removeLast();
+      // Go to previous tab
+      final previousIndex = _visitHistory.last;
+      debugPrint('[NavigationShell] Back pressed. Rewinding to index: $previousIndex (History: $_visitHistory)');
+      _goBranch(previousIndex);
+    } else {
+      // If history is empty or only 1 item
+      final currentIndex = widget.navigationShell.currentIndex;
+      
+      if (currentIndex != 0) {
+        // Fallback: If for some reason we are deep but history failed (unlikely), go Home
+        debugPrint('[NavigationShell] History empty but not at Home. Going Home.');
+        _goBranch(0);
+        _visitHistory.clear();
+        _visitHistory.add(0);
+      } else {
+        // At Home with empty history -> Exit
+        debugPrint('[NavigationShell] At Home with empty history. Exiting.');
+        SystemNavigator.pop();
+      }
+    }
+  }
+
+  void _onTabSelected(int index) {
+    // If tapping the same tab, just reset it (default behavior)
+    // Don't duplicate in history
+    if (index == widget.navigationShell.currentIndex) {
+      widget.navigationShell.goBranch(index, initialLocation: true);
+      return;
+    }
+    
+    // Add to history
+    // Optional: If we want to allow going back A -> B -> A, we push A again.
+    // If we want to move A to top (reorder), we remove then add. 
+    // User requested "history of browsing", implying A -> B -> A should back to B, then Back to A.
+    // So simple push is correct.
+    _visitHistory.add(index);
+    debugPrint('[NavigationShell] Tab selected: $index. History: $_visitHistory');
+    
+    HapticFeedback.selectionClick();
+    _goBranch(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: navigationShell.currentIndex == 0,
+      canPop: false, // Always intercept
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        navigationShell.goBranch(0);
+        _handleBackPress();
       },
       child: Scaffold(
-        body: navigationShell,
+        body: widget.navigationShell,
         bottomNavigationBar: NavigationBar(
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: (index) {
-            HapticFeedback.selectionClick();
-            navigationShell.goBranch(
-              index,
-              initialLocation: index == navigationShell.currentIndex,
-            );
-          },
+          selectedIndex: widget.navigationShell.currentIndex,
+          onDestinationSelected: _onTabSelected,
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),

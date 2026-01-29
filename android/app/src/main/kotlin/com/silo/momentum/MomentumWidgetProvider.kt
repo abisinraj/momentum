@@ -105,17 +105,34 @@ class MomentumWidgetProvider : AppWidgetProvider() {
                 val key1 = "widget_streak"
                 val key2 = "flutter.widget_streak"
                 
-                // Try reading as int first (most likely for direct native write if integer)
-                if (prefs.contains(key1)) {
-                    streak = prefs.getInt(key1, 0)
-                } else if (prefs.contains(key2)) {
-                    streak = prefs.getInt(key2, 0)
-                } else {
-                     // Try as string
-                     val s1 = prefs.getString(key1, null)
-                     val s2 = prefs.getString(key2, null)
-                     streak = (s1 ?: s2)?.toIntOrNull() ?: 0
+                // Safely read streak (Flutter may write Integer as Long on Android)
+                // We attempt to get the object and check type manually or try multiple getters.
+                
+                fun getIntSafe(k: String): Int {
+                    if (!prefs.contains(k)) return -1 // Not found signal
+                    
+                    try {
+                        return prefs.getInt(k, 0)
+                    } catch (e: ClassCastException) {
+                        try {
+                            return prefs.getLong(k, 0L).toInt()
+                        } catch (e2: Exception) {
+                            try {
+                                return prefs.getString(k, "0")?.toIntOrNull() ?: 0
+                            } catch (e3: Exception) {
+                                return 0
+                            }
+                        }
+                    }
                 }
+
+                val v1 = getIntSafe(key1)
+                val v2 = getIntSafe(key2)
+                
+                if (v1 != -1) streak = v1
+                else if (v2 != -1) streak = v2
+                else streak = 0
+
             } catch (e: Exception) {
                android.util.Log.e("MomentumWidget", "Error reading streak: ${e.message}")
             }

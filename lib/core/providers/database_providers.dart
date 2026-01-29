@@ -54,8 +54,41 @@ Future<List<int>> todayCompletedWorkoutIds(Ref ref) async {
 Future<Workout?> nextWorkout(Ref ref) async {
   final db = ref.watch(appDatabaseProvider);
   try {
-    final workout = await db.getNextWorkout();
-    return workout;
+    // Standard logic: Get the workout for the CURRENT split index
+    // This is what we normally should do.
+    final currentWorkout = await db.getNextWorkout();
+    
+    // BUT, check if we have ALREADY completed the *previous* workout today.
+    // If so, we should stay "stuck" on that previous one so the dashboard shows "Done!",
+    // instead of immediately advancing to the next day's workout.
+    
+    final user = await db.getUser();
+    if (user != null && user.splitDays != null && currentWorkout != null) {
+       final splitDays = user.splitDays!;
+       final currentIndex = user.currentSplitIndex;
+       
+       // Calculate index of the workout we presumably just finished
+       final previousIndex = (currentIndex - 1 + splitDays) % splitDays;
+       
+       // Get that previous workout
+       final allWorkouts = await db.getAllWorkouts();
+       final previousWorkout = allWorkouts.cast<Workout?>().firstWhere(
+         (w) => w?.orderIndex == previousIndex, 
+         orElse: () => null,
+       );
+       
+       if (previousWorkout != null) {
+         final todayCompletedIds = await db.getTodayCompletedWorkoutIds();
+         
+         // If we finished the previous one TODAY, return IT instead of the new one.
+         // This forces the Home Screen to show the green "Completed" card.
+         if (todayCompletedIds.contains(previousWorkout.id)) {
+           return previousWorkout;
+         }
+       }
+    }
+
+    return currentWorkout;
   } catch (e, st) {
     debugPrint('[DEBUG] nextWorkoutProvider ERROR: $e\n$st');
     rethrow;

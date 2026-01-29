@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/database_providers.dart';
 
@@ -8,8 +9,7 @@ import '../providers/database_providers.dart';
 class WidgetService {
   static const String _androidName = 'com.silo.momentum.MomentumWidgetProvider';
   
-  // Define a consistent group ID (used as prefs file name on Android)
-  static const String _groupId = 'com.silo.momentum.widget';
+
 
   Future<void> updateWidget({
     required int streak,
@@ -19,18 +19,23 @@ class WidgetService {
     String? nextWorkoutName,
   }) async {
     try {
-      // Set the group ID (important for Android SharedPreferences name consistency)
-      await HomeWidget.setAppGroupId(_groupId);
-      await HomeWidget.saveWidgetData('widget_streak', streak.toString());
-      await HomeWidget.saveWidgetData('widget_title', title);
+      // Use standard SharedPreferences to save data.
+      // This is more reliable as HomeWidget's group ID saving can be flaky on some Android setups.
+      // Native code (MomentumWidgetProvider) is configured to fallback to reading identifiers
+      // from FlutterSharedPreferences (prefixed with 'flutter.') if the main group file is empty.
+      final prefs = await SharedPreferences.getInstance();
+      
+      await prefs.setInt('widget_streak', streak);
+      await prefs.setString('widget_title', title);
+      
       final time = '${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')}';
-      await HomeWidget.saveWidgetData('widget_desc', '$desc • $time');
-      await HomeWidget.saveWidgetData('widget_cycle_progress', cycleProgress);
-      await HomeWidget.saveWidgetData('widget_next_workout', nextWorkoutName ?? '');
+      await prefs.setString('widget_desc', '$desc • $time');
+      await prefs.setString('widget_cycle_progress', cycleProgress);
+      await prefs.setString('widget_next_workout', nextWorkoutName ?? '');
+
+      debugPrint('[WidgetService] Data saved to SharedPreferences (FlutterSharedPreferences). Updating widget now...');
       
-      await HomeWidget.saveWidgetData('widget_next_workout', nextWorkoutName ?? '');
-      
-      debugPrint('[WidgetService] Data saved. Updating widget now...');
+      // Trigger the update intent
       await HomeWidget.updateWidget(
         name: _androidName,
         androidName: _androidName,
