@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router.dart';
 import 'themed_card.dart';
 import 'trend_chart.dart';
-import 'muscle_heatmap_widget.dart';
+
 
 class AnalyticsCard extends ConsumerWidget {
   const AnalyticsCard({super.key});
@@ -442,72 +442,8 @@ class AnalyticsCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildMuscleFocusSection(BuildContext context, AsyncValue<Map<String, dynamic>> analyticsAsync) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return analyticsAsync.maybeWhen(
-      data: (data) {
-        final muscleFocus = data['muscleFocus'] as List<MapEntry<String, double>>;
-        if (muscleFocus.isEmpty) return const SizedBox.shrink();
-        
-        return Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'MUSCLE FOCUS',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
-                ),
-                Text(
-                  'TOP 3',
-                  style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...muscleFocus.map((e) => _buildMuscleRow(context, e.key, e.value)),
-          ],
-        );
-      },
-      orElse: () => const SizedBox.shrink(),
-    );
-  }
 
-  Widget _buildMuscleRow(BuildContext context, String muscle, double percentage) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(muscle, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-              Text(
-                '${(percentage * 100).round()}%',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.primary),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: LinearProgressIndicator(
-              value: percentage,
-              minHeight: 4,
-              backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary.withValues(alpha: 0.8)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   String _formatValue(num val) {
     if (val >= 1000) return '${(val / 1000).toStringAsFixed(1)}k';

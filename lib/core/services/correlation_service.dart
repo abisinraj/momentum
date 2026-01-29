@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/app_database.dart';
 import '../../core/providers/database_providers.dart';
 import 'package:drift/drift.dart';
-import 'dart:math';
+
 
 /// Service to analyze correlations between metrics (e.g. Sleep vs Strength)
 class CorrelationService {

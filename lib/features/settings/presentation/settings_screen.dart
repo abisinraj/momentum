@@ -5,15 +5,15 @@ import '../../../app/router.dart';
 import '../../../core/services/settings_service.dart';
 import '../../../core/services/widget_service.dart';
 import '../../../core/providers/health_connect_provider.dart';
-import '../../../core/database/app_database.dart';
-import '../../../core/providers/database_providers.dart'; // Ensure db provider
+import '../../../core/providers/database_providers.dart';
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:drift/drift.dart' as drift;
+
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
