@@ -55,7 +55,8 @@ class ConsistencyGridWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           
-          RepaintBoundary(
+          SizedBox(
+            height: 60,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               reverse: false, // Start from the start (Left)

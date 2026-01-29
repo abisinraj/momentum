@@ -74,11 +74,20 @@ class MomentumWidgetProvider : AppWidgetProvider() {
 
             // Fallback: If empty, try default shared preferences (sometimes used by plugins)
             if (allMap.isEmpty()) {
-                 val defaultPrefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
-                 val defaultMap = defaultPrefs.all
-                 android.util.Log.d("MomentumWidget", "DEFAULT PREFS CONTENTS (${defaultMap.size} items): $defaultMap")
-                 if (defaultMap.isNotEmpty()) {
-                     prefs = defaultPrefs
+                 // Try FlutterSharedPreferences (default for Flutter plugins)
+                 val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                 val flutterMap = flutterPrefs.all
+                 android.util.Log.d("MomentumWidget", "FLUTTER PREFS CONTENTS (${flutterMap.size} items): $flutterMap")
+                 
+                 if (flutterMap.isNotEmpty()) {
+                     prefs = flutterPrefs
+                 } else {
+                     val defaultPrefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+                     val defaultMap = defaultPrefs.all
+                     android.util.Log.d("MomentumWidget", "DEFAULT PREFS CONTENTS (${defaultMap.size} items): $defaultMap")
+                     if (defaultMap.isNotEmpty()) {
+                         prefs = defaultPrefs
+                     }
                  }
             }
 

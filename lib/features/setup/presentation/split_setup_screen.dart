@@ -371,7 +371,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
       // DAY 3: Lower Body
       await createDay(
         name: 'Lower Body', shortCode: 'L',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1434608519344-49d77a699ded?auto=format&fit=crop&q=80',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1574680096141-1cddd32e0340?auto=format&fit=crop&q=80',
         dayIndex: 2, clockType: ClockType.stopwatch, isRestDay: false,
         exercises: [
           (name: 'Bodyweight squats', sets: 3, reps: 15),
