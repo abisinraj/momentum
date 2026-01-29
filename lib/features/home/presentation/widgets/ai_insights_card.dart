@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Add riverpod import
 import 'package:momentum/core/providers/ai_providers.dart';
-import 'package:momentum/features/home/presentation/widgets/themed_card.dart';
 import 'package:momentum/features/home/presentation/ai_chat_screen.dart';
 import 'package:momentum/core/services/settings_service.dart';
 import 'package:go_router/go_router.dart';

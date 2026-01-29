@@ -16,21 +16,30 @@ class AIInsightsService {
 
 
 
-      // Use the latest 'gemini-3-flash-preview' model (Preview 2026)
-      final model = GenerativeModel(model: 'gemini-3-flash-preview', apiKey: apiKey);
+      // Use 'gemini-3-flash-preview' as requested
+      const modelName = 'gemini-3-flash-preview';
+      var model = GenerativeModel(model: modelName, apiKey: apiKey);
 
       final prompt = _constructDetailedPrompt(user, recentSessions);
       final content = [Content.text(prompt)];
       
-      final response = await model.generateContent(content);
-
-      return response.text?.trim() ?? "Consistency is key. Keep pushing forward!";
+      try {
+        final response = await model.generateContent(content);
+        return response.text?.trim() ?? "Consistency is key. Keep pushing forward!";
+      } catch (e) {
+        // Fallback to gemini-1.5-flash if 3.0 preview not found
+        if (e.toString().contains('not found') || e.toString().contains('404')) {
+          model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
+          final response = await model.generateContent(content);
+          return response.text?.trim() ?? "Keep focused on your goals!";
+        }
+        rethrow;
+      }
     } catch (e) {
       final errorStr = e.toString();
       if (errorStr.contains('API_KEY_INVALID')) {
          return "Invalid API Key. Please check your settings.";
       } else if (errorStr.contains('not found') || errorStr.contains('404')) {
-         // Fallback if model is somehow still wrong
          return "AI Model unavailable. Focus on your ${user.goal ?? 'goals'} today!";
       } else if (errorStr.contains('User location is not supported')) {
          return "AI features are not supported in your region yet.";
@@ -111,12 +120,26 @@ class AIInsightsService {
         return (7.0 * weight * hours * intensityFactor).round();
       }
 
-      final model = GenerativeModel(model: 'gemini-3-flash-preview', apiKey: apiKey);
+      // Try Gemini 3 with fallback
+      GenerativeModel model;
+      try {
+        model = GenerativeModel(model: 'gemini-3-flash-preview', apiKey: apiKey);
+      } catch (_) {
+         model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
+      }
       
       final prompt = _constructCaloriePrompt(user, workout, exercises, durationSeconds, intensity, exerciseDefinitions);
       final content = [Content.text(prompt)];
       
-      final response = await model.generateContent(content);
+      GenerateContentResponse response;
+      try {
+         response = await model.generateContent(content);
+      } catch (e) {
+         // Fallback inside generation call if model init didn't fail but call did
+         model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
+         response = await model.generateContent(content);
+      }
+
       final text = response.text?.trim() ?? "";
       
       // Extract number from AI response
@@ -180,7 +203,13 @@ class AIInsightsService {
         return "Please configure your API Key in settings first.";
       }
 
-      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+      // Consistent usage: Gemini 3 -> Fallback 1.5 Preview
+      GenerativeModel model;
+      try {
+        model = GenerativeModel(model: 'gemini-3-flash-preview', apiKey: apiKey);
+      } catch (_) {
+        model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
+      }
       
       final List<Part> parts = [];
       if (text.isNotEmpty) {
@@ -192,7 +221,15 @@ class AIInsightsService {
       }
 
       final content = [Content.multi(parts)];
-      final response = await model.generateContent(content);
+      
+      GenerateContentResponse response;
+      try {
+        response = await model.generateContent(content);
+      } catch (e) {
+         // Force fallback on error
+         model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
+         response = await model.generateContent(content);
+      }
 
       return response.text?.trim() ?? "I couldn't understand that context.";
     } catch (e) {
