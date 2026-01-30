@@ -16,23 +16,14 @@ class AIInsightsService {
 
 
 
-      // Use 'gemini-3-flash-preview' as requested
-      const modelName = 'gemini-3-flash-preview';
-      var model = GenerativeModel(model: modelName, apiKey: apiKey);
-
+      // Use robust fallback generation
       final prompt = _constructDetailedPrompt(user, recentSessions);
       final content = [Content.text(prompt)];
       
       try {
-        final response = await model.generateContent(content);
+        final response = await _generateWithFallback(content, apiKey);
         return response.text?.trim() ?? "Consistency is key. Keep pushing forward!";
       } catch (e) {
-        // Fallback to gemini-1.5-flash if 3.0 preview not found
-        if (e.toString().contains('not found') || e.toString().contains('404')) {
-          model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
-          final response = await model.generateContent(content);
-          return response.text?.trim() ?? "Keep focused on your goals!";
-        }
         rethrow;
       }
     } catch (e) {
@@ -71,12 +62,27 @@ class AIInsightsService {
         analysis.writeln("Status: User is consistent and active. Needs positive reinforcement or challenge.");
       }
       
-      // List recent history for context
       analysis.writeln("Recent History:");
       for (var s in sessions.take(3)) {
          final name = s['workoutName'] ?? 'Workout';
          final date = s['completedAt'] as DateTime?;
          analysis.writeln("- $name (${date?.day}/${date?.month})");
+         
+         // EXPAND DETAILS FOR LATEST WORKOUT
+         if (s == sessions.first && s.containsKey('exercises')) {
+           final exercises = s['exercises'] as List<Map<String, dynamic>>?;
+           if (exercises != null && exercises.isNotEmpty) {
+             analysis.writeln("  > Details from this session:");
+             for (var ex in exercises) {
+               final eName = ex['exerciseName'] ?? 'Exercise';
+               final totalReps = ex['actualReps'] ?? 0;
+               final sets = ex['completedSets'] ?? 0;
+               // Note: 'weight' might be missing in history view unless specifically queried, 
+               // but 'actualReps' and 'completedSets' gives volume context.
+               analysis.writeln("    * $eName: $sets sets, ~$totalReps total reps");
+             }
+           }
+         }
       }
     }
 
@@ -120,24 +126,15 @@ class AIInsightsService {
         return (7.0 * weight * hours * intensityFactor).round();
       }
 
-      // Try Gemini 3 with fallback
-      GenerativeModel model;
-      try {
-        model = GenerativeModel(model: 'gemini-3-flash-preview', apiKey: apiKey);
-      } catch (_) {
-         model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
-      }
-      
+      // Use robust fallback logic
       final prompt = _constructCaloriePrompt(user, workout, exercises, durationSeconds, intensity, exerciseDefinitions);
       final content = [Content.text(prompt)];
       
       GenerateContentResponse response;
       try {
-         response = await model.generateContent(content);
+         response = await _generateWithFallback(content, apiKey);
       } catch (e) {
-         // Fallback inside generation call if model init didn't fail but call did
-         model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
-         response = await model.generateContent(content);
+         return null;
       }
 
       final text = response.text?.trim() ?? "";
@@ -193,6 +190,7 @@ class AIInsightsService {
     350
     ''';
   }
+
   Future<String> analyzeMessage({
     required String text,
     List<int>? imageBytes,
@@ -203,14 +201,7 @@ class AIInsightsService {
         return "Please configure your API Key in settings first.";
       }
 
-      // Consistent usage: Gemini 3 -> Fallback 1.5 Preview
-      GenerativeModel model;
-      try {
-        model = GenerativeModel(model: 'gemini-3-flash-preview', apiKey: apiKey);
-      } catch (_) {
-        model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
-      }
-      
+      // Use robust fallback
       final List<Part> parts = [];
       if (text.isNotEmpty) {
         parts.add(TextPart(text));
@@ -224,16 +215,40 @@ class AIInsightsService {
       
       GenerateContentResponse response;
       try {
-        response = await model.generateContent(content);
+        response = await _generateWithFallback(content, apiKey);
       } catch (e) {
-         // Force fallback on error
-         model = GenerativeModel(model: 'gemini-1.5-flash-preview', apiKey: apiKey);
-         response = await model.generateContent(content);
+         return "I couldn't reach the AI service right now. Please try again.";
       }
 
       return response.text?.trim() ?? "I couldn't understand that context.";
     } catch (e) {
       return "Error: ${e.toString()}";
     }
+  }
+  Future<GenerateContentResponse> _generateWithFallback(
+    List<Content> content,
+    String apiKey,
+  ) async {
+    // List of models to try in order of preference
+    // Uses standard stable identifiers to avoid "not found" errors
+    const modelsToTry = [
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
+      'gemini-pro',
+    ];
+
+    Object? lastError;
+
+    for (final modelName in modelsToTry) {
+      try {
+        final model = GenerativeModel(model: modelName, apiKey: apiKey);
+        return await model.generateContent(content);
+      } catch (e) {
+        lastError = e;
+        continue;
+      }
+    }
+    
+    throw lastError ?? Exception('Failed to generate content with all models');
   }
 }

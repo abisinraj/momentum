@@ -1,45 +1,24 @@
-
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'widgets/three_d_man_widget.dart';
 
-class Recovery3DScreen extends StatefulWidget {
+class Recovery3DScreen extends StatelessWidget {
   const Recovery3DScreen({super.key});
 
   @override
-  State<Recovery3DScreen> createState() => _Recovery3DScreenState();
-}
-
-class _Recovery3DScreenState extends State<Recovery3DScreen> {
-  late final WebViewController _controller;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFF050505)) // Match HTML background
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (String url) {
-            setState(() {
-              _isLoading = false;
-            });
-          },
-        ),
-      )
-      ..loadFlutterAsset('assets/web/particle_man.html');
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF050505),
+      backgroundColor: colorScheme.surface,
       body: Stack(
         children: [
           SafeArea(
-            child: WebViewWidget(controller: _controller),
+            child: Center(
+              child: ThreeDManWidget(
+                height: MediaQuery.of(context).size.height * 0.8,
+              ),
+            ),
           ),
           
           // Custom Back Button Overlay
@@ -52,34 +31,45 @@ class _Recovery3DScreenState extends State<Recovery3DScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white24),
+                    border: Border.all(color: colorScheme.outlineVariant),
                   ),
-                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                  child: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 24),
                 ),
               ),
             ),
           ),
           
-          if (_isLoading)
-            const Center(
+          // Header Overlay
+          Positioned(
+            top: 50,
+            right: 24,
+            child: SafeArea(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  CircularProgressIndicator(color: Color(0xFF00FF80)),
-                  SizedBox(height: 16),
                   Text(
-                    'LOADING NEURAL LINK...',
+                    'MUSCLE STATUS',
                     style: TextStyle(
-                      color: Color(0xFF00FF80),
-                      letterSpacing: 2,
                       fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  Text(
+                    'LIVE HEATMAP',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ],
               ),
             ),
+          ),
         ],
       ),
     );

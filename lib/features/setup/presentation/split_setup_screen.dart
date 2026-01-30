@@ -311,7 +311,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
         required int dayIndex,
         required ClockType clockType,
         required bool isRestDay,
-        List<({String name, int sets, int reps})> exercises = const [],
+        List<({String name, int sets, int reps, String muscle})> exercises = const [],
       }) async {
         final workoutId = await db.addWorkout(
           WorkoutsCompanion(
@@ -333,6 +333,7 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
                 name: drift.Value(ex.name),
                 sets: drift.Value(ex.sets),
                 reps: drift.Value(ex.reps),
+                primaryMuscleGroup: drift.Value(ex.muscle),
                 orderIndex: drift.Value(i),
               ),
             );
@@ -348,10 +349,10 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
         thumbnailUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80',
         dayIndex: 0, clockType: ClockType.stopwatch, isRestDay: false,
         exercises: [
-          (name: 'Push-ups', sets: 3, reps: 12),
-          (name: 'Pike push-ups', sets: 3, reps: 10),
-          (name: 'Tricep dips', sets: 3, reps: 12),
-          (name: 'Plank hold (sec)', sets: 3, reps: 45),
+          (name: 'Push-ups', sets: 3, reps: 12, muscle: 'Chest'),
+          (name: 'Pike push-ups', sets: 3, reps: 10, muscle: 'Shoulders'),
+          (name: 'Tricep dips', sets: 3, reps: 12, muscle: 'Arms'),
+          (name: 'Plank hold (sec)', sets: 3, reps: 45, muscle: 'Abs'),
         ],
       );
 
@@ -361,10 +362,10 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
         thumbnailUrl: 'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?auto=format&fit=crop&q=80',
         dayIndex: 1, clockType: ClockType.stopwatch, isRestDay: false,
         exercises: [
-          (name: 'Jump rope (sec)', sets: 3, reps: 120),
-          (name: 'Shadow boxing (sec)', sets: 3, reps: 180),
-          (name: 'Stance/Footwork (sec)', sets: 1, reps: 600),
-          (name: 'Combo practice (sec)', sets: 3, reps: 120),
+          (name: 'Jump rope (sec)', sets: 3, reps: 120, muscle: 'Cardio'),
+          (name: 'Shadow boxing (sec)', sets: 3, reps: 180, muscle: 'Cardio'),
+          (name: 'Stance/Footwork (sec)', sets: 1, reps: 600, muscle: 'Legs'),
+          (name: 'Combo practice (sec)', sets: 3, reps: 120, muscle: 'Cardio'),
         ],
       );
 
@@ -374,10 +375,10 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
         thumbnailUrl: 'https://images.unsplash.com/photo-1574680096141-1cddd32e0340?auto=format&fit=crop&q=80',
         dayIndex: 2, clockType: ClockType.stopwatch, isRestDay: false,
         exercises: [
-          (name: 'Bodyweight squats', sets: 3, reps: 15),
-          (name: 'Lunges (per leg)', sets: 3, reps: 10),
-          (name: 'Glute bridges', sets: 3, reps: 15),
-          (name: 'Calf raises', sets: 3, reps: 20),
+          (name: 'Bodyweight squats', sets: 3, reps: 15, muscle: 'Legs'),
+          (name: 'Lunges (per leg)', sets: 3, reps: 10, muscle: 'Legs'),
+          (name: 'Glute bridges', sets: 3, reps: 15, muscle: 'Legs'),
+          (name: 'Calf raises', sets: 3, reps: 20, muscle: 'Legs'),
         ],
       );
 
@@ -387,10 +388,10 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
         thumbnailUrl: 'https://images.unsplash.com/photo-1598971639058-211a73287750?auto=format&fit=crop&q=80',
         dayIndex: 3, clockType: ClockType.stopwatch, isRestDay: false,
         exercises: [
-          (name: 'Australian pull-ups', sets: 3, reps: 12),
-          (name: 'Inverted rows', sets: 3, reps: 10),
-          (name: 'Superman holds (sec)', sets: 3, reps: 30),
-          (name: 'Dead hangs (sec)', sets: 3, reps: 30),
+          (name: 'Australian pull-ups', sets: 3, reps: 12, muscle: 'Back'),
+          (name: 'Inverted rows', sets: 3, reps: 10, muscle: 'Back'),
+          (name: 'Superman holds (sec)', sets: 3, reps: 30, muscle: 'Back'),
+          (name: 'Dead hangs (sec)', sets: 3, reps: 30, muscle: 'Arms'),
         ],
       );
 
@@ -400,11 +401,11 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
         thumbnailUrl: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&q=80',
         dayIndex: 4, clockType: ClockType.stopwatch, isRestDay: false,
         exercises: [
-          (name: 'Jump rope (sec)', sets: 3, reps: 120),
-          (name: 'Heavy bag/Shadow (sec)', sets: 4, reps: 180),
-          (name: 'Slip/Roll drills (sec)', sets: 1, reps: 600),
-          (name: 'Sit-ups', sets: 3, reps: 20),
-          (name: 'Russian twists', sets: 3, reps: 20),
+          (name: 'Jump rope (sec)', sets: 3, reps: 120, muscle: 'Cardio'),
+          (name: 'Heavy bag/Shadow (sec)', sets: 4, reps: 180, muscle: 'Cardio'),
+          (name: 'Slip/Roll drills (sec)', sets: 1, reps: 600, muscle: 'Cardio'), // Changed to Cardio as it's full body movement
+          (name: 'Sit-ups', sets: 3, reps: 20, muscle: 'Abs'),
+          (name: 'Russian twists', sets: 3, reps: 20, muscle: 'Abs'),
         ],
       );
 
@@ -414,11 +415,11 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
         thumbnailUrl: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80',
         dayIndex: 5, clockType: ClockType.stopwatch, isRestDay: false,
         exercises: [
-          (name: 'Burpees', sets: 3, reps: 10),
-          (name: 'Mountain climbers', sets: 3, reps: 20),
-          (name: 'Bodyweight squats', sets: 3, reps: 12),
-          (name: 'Push-ups', sets: 3, reps: 10),
-          (name: 'Plank (sec)', sets: 3, reps: 45),
+          (name: 'Burpees', sets: 3, reps: 10, muscle: 'Full Body'),
+          (name: 'Mountain climbers', sets: 3, reps: 20, muscle: 'Cardio'),
+          (name: 'Bodyweight squats', sets: 3, reps: 12, muscle: 'Legs'),
+          (name: 'Push-ups', sets: 3, reps: 10, muscle: 'Chest'),
+          (name: 'Plank (sec)', sets: 3, reps: 45, muscle: 'Abs'),
         ],
       );
 
@@ -428,13 +429,13 @@ class _SplitSetupScreenState extends ConsumerState<SplitSetupScreen> {
         thumbnailUrl: 'https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?auto=format&fit=crop&q=80',
         dayIndex: 6, clockType: ClockType.stopwatch, isRestDay: false,
         exercises: [
-          (name: 'Jump rope (sec)', sets: 4, reps: 180),
-          (name: 'Burpees', sets: 3, reps: 12),
-          (name: 'Mountain climbers (sec)', sets: 3, reps: 30),
-          (name: 'Plank to Down Dog', sets: 3, reps: 10),
-          (name: 'Bicycle crunches', sets: 3, reps: 20),
-          (name: 'Leg raises', sets: 3, reps: 12),
-          (name: 'Flutter kicks (sec)', sets: 3, reps: 30),
+          (name: 'Jump rope (sec)', sets: 4, reps: 180, muscle: 'Cardio'),
+          (name: 'Burpees', sets: 3, reps: 12, muscle: 'Full Body'),
+          (name: 'Mountain climbers (sec)', sets: 3, reps: 30, muscle: 'Cardio'),
+          (name: 'Plank to Down Dog', sets: 3, reps: 10, muscle: 'Shoulders'),
+          (name: 'Bicycle crunches', sets: 3, reps: 20, muscle: 'Abs'),
+          (name: 'Leg raises', sets: 3, reps: 12, muscle: 'Abs'),
+          (name: 'Flutter kicks (sec)', sets: 3, reps: 30, muscle: 'Abs'),
         ],
       );
 

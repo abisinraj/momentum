@@ -41,7 +41,22 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   bool _isSaving = false;
   bool _isLoading = false; // To show loading spinner during exercise fetch
   bool _isRestDay = false; // New toggle
-  final List<({String name, int sets, int reps})> _exercises = [];
+  final List<({String name, int sets, int reps, String muscle})> _exercises = [];
+  // Muscle Categories Map
+  final Map<String, List<String>> _muscleGroups = {
+    'Chest': ['Chest', 'Upper Chest', 'Lower Chest'],
+    'Back': ['Back', 'Lats', 'Upper Back', 'Lower Back'],
+    'Legs': ['Legs', 'Quads', 'Hamstrings', 'Glutes', 'Calves'],
+    'Shoulders': ['Shoulders', 'Front Delts', 'Side Delts', 'Rear Delts'],
+    'Arms': ['Arms', 'Biceps', 'Triceps', 'Forearms'],
+    'Abs': ['Abs', 'Upper Abs', 'Lower Abs', 'Obliques'],
+    'Cardio': ['Cardio'],
+    'Full Body': ['Full Body'],
+    'Other': ['Other'],
+  };
+  
+  String _selectedCategory = 'Other';
+  String _selectedMuscle = 'Other';
 
   
   // Exercise inputs
@@ -76,7 +91,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
       if (mounted) {
         setState(() {
           for (var e in exercises) {
-            _exercises.add((name: e.name, sets: e.sets, reps: e.reps));
+            _exercises.add((name: e.name, sets: e.sets, reps: e.reps, muscle: e.primaryMuscleGroup ?? 'Other'));
           }
           _isLoading = false;
         });
@@ -325,6 +340,8 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
             name: drift.Value(ex.name),
             sets: drift.Value(ex.sets),
             reps: drift.Value(ex.reps),
+
+            primaryMuscleGroup: drift.Value(ex.muscle),
             orderIndex: drift.Value(i),
           ),
         );
@@ -362,6 +379,8 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
             name: drift.Value(ex.name),
             sets: drift.Value(ex.sets),
             reps: drift.Value(ex.reps),
+
+            primaryMuscleGroup: drift.Value(ex.muscle),
             orderIndex: drift.Value(i),
           ),
         );
@@ -637,7 +656,10 @@ Row(
     );
   }
 
-  // STEP 3: Exercises
+
+
+  // ... (inside build method or extracting widget)
+  
   // STEP 3: Exercises
   Widget _buildExercisesStep() {
     final colorScheme = Theme.of(context).colorScheme;
@@ -690,6 +712,28 @@ Row(
                   ],
                 ),
                 const SizedBox(height: 12),
+                
+                // Muscle Selector
+                DropdownButtonFormField<String>(
+                  value: _selectedMuscle,
+                  isExpanded: true, // Ensure it takes full width
+                  decoration: InputDecoration(
+                    labelText: 'Target Muscle',
+                    filled: true,
+                    fillColor: colorScheme.surface,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16), // Standard padding
+                  ),
+                  dropdownColor: colorScheme.surfaceContainerHighest,
+                  style: TextStyle(color: colorScheme.onSurface),
+                  items: _muscleOptions.map((m) => DropdownMenuItem(
+                    value: m, 
+                    child: Text(m),
+                  )).toList(),
+                  onChanged: (val) => setState(() => _selectedMuscle = val ?? 'Other'),
+                ),
+                
+                const SizedBox(height: 12),
+                
                 Row(
                   children: [
                     Expanded(
@@ -744,7 +788,7 @@ Row(
           tileColor: colorScheme.surfaceContainer,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           title: Text(ex.name, style: TextStyle(color: colorScheme.onSurface)),
-          subtitle: Text('${ex.sets} sets x ${ex.reps} reps',
+          subtitle: Text('${ex.muscle} • ${ex.sets} sets x ${ex.reps} reps',
               style: TextStyle(color: colorScheme.onSurfaceVariant)),
           trailing: IconButton(
             icon: Icon(Icons.remove_circle_outline, color: colorScheme.error),
@@ -777,9 +821,9 @@ Row(
     }
 
     setState(() {
-      _exercises.add((name: name, sets: sets, reps: reps));
+      _exercises.add((name: name, sets: sets, reps: reps, muscle: _selectedMuscle));
       _exNameController.clear();
-      // Keep sets/reps as is for quick entry of similar exercises
+      // Keep sets/reps and muscle as is for convenience
     });
   }
 

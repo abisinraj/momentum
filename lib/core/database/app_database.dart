@@ -176,7 +176,9 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(sessionExercises, sessionExercises.durationSeconds);
         }
         if (from < 12) {
-          await m.addColumn(exercises, exercises.targetWeight);
+          // ignore: avoid_print
+          print('Migration v12 note: intentionally skipped addColumn for targetWeight to fix duplicate column error');
+          // await m.addColumn(exercises, exercises.targetWeight);
         }
         if (from < 13) {
           // Schema v13 changes:
@@ -186,12 +188,16 @@ class AppDatabase extends _$AppDatabase {
         if (from < 14) {
           // Schema v14 changes:
           // Add caloriesBurned to sessions
-          await m.addColumn(sessions, sessions.caloriesBurned);
+            // ignore: avoid_print
+            print('Migration v14 note: intentionally skipped addColumn for caloriesBurned to fix duplicate column error');
+            // await m.addColumn(sessions, sessions.caloriesBurned);
         }
         if (from < 15) {
           // Schema v15 changes:
           // Add recoveryScore to sleepLogs
-          await m.addColumn(sleepLogs, sleepLogs.recoveryScore);
+            // ignore: avoid_print
+            print('Migration v15 note: intentionally skipped addColumn for recoveryScore to fix duplicate column error');
+            // await m.addColumn(sleepLogs, sleepLogs.recoveryScore);
         }
       },
     );
@@ -510,12 +516,34 @@ class AppDatabase extends _$AppDatabase {
     for (final row in result) {
       final exercise = row.readTable(exercises);
       final sessionExercise = row.readTable(sessionExercises);
+      final session = row.readTable(sessions); // Need session for timestamp
       final muscle = exercise.primaryMuscleGroup;
       
       if (muscle != null && muscle.isNotEmpty) {
-        // Simple scoring: 1 point per set
+        // Time-Decay Algorithm
+        // 1. Calculate hours elapsed
+        final hoursAgo = now.difference(session.completedAt ?? session.startedAt).inHours;
+        
+        // 2. Determine weight factor
+        double decayFactor = 0.0;
+        if (hoursAgo < 24) {
+          decayFactor = 1.0; // 100% impact (Fresh damage)
+        } else if (hoursAgo < 48) {
+          decayFactor = 0.6; // 60% impact (DOMS peaking)
+        } else if (hoursAgo < 72) {
+          decayFactor = 0.25; // 25% impact (Fading)
+        } else {
+          decayFactor = 0.0; // Recovered
+        }
+
+        // 3. Accumulate Weighted "Fatigue Points"
+        // 1 Set = 1 Point * Decay
         final sets = sessionExercise.completedSets;
-        workload[muscle] = (workload[muscle] ?? 0) + sets;
+        final fatiguePoints = sets * decayFactor;
+        
+        // Use ceil to ensure even small volume registers as at least 1 if recent
+        int points = fatiguePoints.ceil();
+        workload[muscle] = (workload[muscle] ?? 0) + points;
       }
     }
     
@@ -712,8 +740,8 @@ class AppDatabase extends _$AppDatabase {
       final ex = row.readTable(exercises);
       final muscle = ex.primaryMuscleGroup ?? 'Other';
       
-      // We use "Volumetric weight" (reps) as a proxy for focus if weight is null
-      final volume = se.completedReps.toDouble(); 
+      // We use "Sets" as a proxy for focus (better than reps which skews to abs/calves)
+      final volume = se.completedSets.toDouble(); 
       muscleStats[muscle] = (muscleStats[muscle] ?? 0) + volume;
       totalMuscleVolume += volume;
     }
@@ -726,12 +754,20 @@ class AppDatabase extends _$AppDatabase {
       MapEntry(e.key, totalMuscleVolume > 0 ? (e.value / totalMuscleVolume) : 0.0)
     ).toList();
 
+    // 3. Count workouts in the last 3 days for Recovery Score
+    final threeDaysAgo = now.subtract(const Duration(days: 3));
+    final workoutsLast3Days = sessionRows
+        .where((s) => s.startedAt.isAfter(threeDaysAgo))
+        .length;
+
     return {
       'avgIntensity': avgIntensity,
       'totalMinutes': totalMinutes,
+      'activeMinutes': totalSetDuration > 0 ? (totalSetDuration ~/ 60) : 0,
       'calories': calories,
       'muscleFocus': musclePercentages.take(3).toList(),
       'sessionCount': sessionRows.length,
+      'workoutsLast3Days': workoutsLast3Days,
     };
   }
 
@@ -932,6 +968,21 @@ class AppDatabase extends _$AppDatabase {
       final completedSets = sessionExercisesList.fold<int>(
         0, (sum, ex) => sum + ex.completedSets);
       
+      // Calculate total volume (Kg)
+      final user = await getUser();
+      final bodyWeight = user?.weightKg ?? 70.0;
+      double totalVolume = 0;
+      
+      for (final se in sessionExercisesList) {
+        // If weight tracked, use it. Else assume bodyweight * 0.8? 
+        // Or if weight is null, maybe just count Reps?
+        // Let's stick to "Volume Load" concept: Weight * Reps.
+        // If weight is null (Bodyweight exercise with no added weight), use bodyWeight.
+        // Actually, schema usually has weightKg as null for bodyweight.
+        final weight = se.weightKg ?? bodyWeight;
+        totalVolume += weight * se.completedReps;
+      }
+      
       results.add({
         'session': session,
         'workout': workout,
@@ -941,6 +992,7 @@ class AppDatabase extends _$AppDatabase {
         'durationSeconds': session.durationSeconds ?? 0,
         'exerciseCount': sessionExercisesList.length,
         'completedSets': completedSets,
+        'totalVolume': totalVolume,
       });
     }
     

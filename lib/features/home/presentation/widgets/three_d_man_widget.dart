@@ -70,9 +70,9 @@ class _ThreeDManWidgetState extends ConsumerState<ThreeDManWidget> {
       if (maxScore == 0) return;
       
       final normalized = <String, double>{};
+      
+      // Pass raw data to JS. The 3D model (v2) now handles hierarchy and aggregation.
       data.forEach((k, v) {
-        // Map simplified muscle names if needed
-        // Assuming database uses standard names "Chest", "Back", "Legs"
         normalized[k] = v / maxScore; 
       });
       

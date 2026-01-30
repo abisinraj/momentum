@@ -26,7 +26,6 @@
         let group, particles, linesMesh;
 
         // Data for heatmap interaction
-        // Stores which particle index belongs to which muscle group
         let currentColorsAttribute;
         let particleMap = {}; // 'chest': [0, 1, 2...]
         let originalColors = null;
@@ -34,56 +33,81 @@
 
         // Configuration
         const CONNECTIVITY_DISTANCE = 16;
-        const COLOR_PRIMARY = new THREE.Color(0x00D9B8); // Teal
+        // v2: Silver/White Theme
+        const COLOR_PRIMARY = new THREE.Color(0xCCCCCC); // Silver
         const COLOR_SECONDARY = new THREE.Color(0xFFFFFF); // White
         const COLOR_HOT = new THREE.Color(0xFF5500); // Orange/Red for heat
+
+        // v2: Muscle Hierarchy
+        const MUSCLE_HIERARCHY = {
+            'Arms': ['Biceps', 'Triceps', 'Forearms'],
+            'Legs': ['Quads', 'Hamstrings', 'Calves', 'Glutes'],
+            'Shoulders': ['Front Delts', 'Side Delts', 'Rear Delts'],
+            'Chest': ['Upper Chest', 'Lower Chest'],
+            'Back': ['Lats', 'Upper Back', 'Lower Back'],
+            'Abs': ['Upper Abs', 'Lower Abs', 'Obliques']
+        };
 
         init();
         animate();
 
         // Expose function to Flutter/JS
         window.setMuscleHeatmap = function (data) {
-            // data format: { 'Chest': 0.8, 'Legs': 0.2 } (0.0 to 1.0 intensity)
+            // data format: { 'Biceps': 0.8, 'Legs': 0.2 } 
             if (!particles || !currentColorsAttribute) return;
 
+            // Reset to clean state first (efficient reset)
+            if (originalColors) {
+                currentColorsAttribute.array.set(originalColors);
+            }
+
             const colors = currentColorsAttribute.array;
-            const targetColor = new THREE.Color();
 
-            // Iterate over defined groups
-            for (const groupName in data) {
-                // Find visible particles belonging to this group
-                // Note: We need to know which indices map to which group.
-                // Refactor: We will regenerate the color buffer based on 'data'.
-
-                const intensity = Math.max(0, Math.min(1, data[groupName]));
+            // Process Data
+            for (const key in data) {
+                const intensity = Math.max(0, Math.min(1, data[key]));
                 if (intensity <= 0) continue;
 
-                // Find indices for this group
-                const groupIndices = particleMap[groupName.toLowerCase()];
-                if (!groupIndices) continue;
+                const groupName = key; // e.g. "Biceps" or "Arms"
 
-                for (const i of groupIndices) {
-                    // Mix primary with HOT color based on intensity
-                    // Base: Random mix of Teal/White. 
-                    // Heat: Lerp towards Orange.
+                // 1. Direct Match? (e.g. data has "Biceps")
+                applyColorToGroup(groupName, intensity, colors);
 
-                    // Re-calculate base (randomized statics aren't saved per particle easily without extra memory, 
-                    // effectively we just push them towards HOT)
-
-                    const baseR = colors[i * 3];
-                    const baseG = colors[i * 3 + 1];
-                    const baseB = colors[i * 3 + 2];
-
-                    const baseColor = new THREE.Color(baseR, baseG, baseB);
-                    const finalColor = baseColor.lerp(COLOR_HOT, intensity * 0.8);
-
-                    colors[i * 3] = finalColor.r;
-                    colors[i * 3 + 1] = finalColor.g;
-                    colors[i * 3 + 2] = finalColor.b;
+                // 2. Is it a Parent Category? (e.g. data has "Arms")
+                // Apply to children too
+                if (MUSCLE_HIERARCHY[groupName]) {
+                    MUSCLE_HIERARCHY[groupName].forEach(child => {
+                        applyColorToGroup(child, intensity, colors);
+                    });
                 }
             }
+
             currentColorsAttribute.needsUpdate = true;
         };
+
+        function applyColorToGroup(groupName, intensity, colorArray) {
+            const key = groupName.toLowerCase();
+            const indices = particleMap[key];
+            if (!indices) return;
+
+            for (const i of indices) {
+                // Current color (likely reset to base)
+                // We want to mix HOT logic
+                // Since we reset every frame, we just lerp base -> hot
+
+                // Get Original Base (to avoid compounding lerps over frames)
+                const rBase = originalColors[i * 3];
+                const gBase = originalColors[i * 3 + 1];
+                const bBase = originalColors[i * 3 + 2];
+
+                const baseColor = new THREE.Color(rBase, gBase, bBase);
+                const finalColor = baseColor.lerp(COLOR_HOT, intensity * 0.9); // 90% towards hot at max
+
+                colorArray[i * 3] = finalColor.r;
+                colorArray[i * 3 + 1] = finalColor.g;
+                colorArray[i * 3 + 2] = finalColor.b;
+            }
+        }
 
         // Reset heatmap
         window.resetHeatmap = function () {
@@ -144,11 +168,7 @@
                 }
             }
 
-            // --- SKELETON & MUSCLES (REALISTIC PROPORTIONS) ---
-            // Unit scale approx 1 unit = 1 cm
-            // Total Height ~ 175cm
-
-            // Center Y is roughly at hip or feet? Let's keep feet at 0.
+            // --- SKELETON & MUSCLES (v2 GRANULAR) ---
 
             // Major Landmarks
             const yHeadTop = 175;
@@ -162,16 +182,17 @@
             const yFoot = 0;
 
             // Widths (Total Width / 2)
-            const xShoulder = 23; // 46cm spread
-            const xHip = 15; // 30cm spread
-            const xKnee = 12; // Slight stance
-            const xFoot = 15; // Stance width
+            const xShoulder = 23;
+            const xHip = 15;
+            const xKnee = 12;
+            const xFoot = 15;
 
             // Z Depths
             const zSpine = -5;
+            const zPec = 10;
 
             // Points
-            const head = new THREE.Vector3(0, 168, 0); // Center of head
+            const head = new THREE.Vector3(0, 168, 0);
             const neck = new THREE.Vector3(0, yNeckBase, 0);
 
             const shoulderL = new THREE.Vector3(-xShoulder, yShoulder, 0);
@@ -189,77 +210,76 @@
             const footL = new THREE.Vector3(-xFoot, yFoot, 15);
             const footR = new THREE.Vector3(xFoot, yFoot, 15);
 
-            // Arms (Realistic Length & Volume)
-            const yArmEnd = 78; // Reaches mid-thigh
+            // Arms
+            const yArmEnd = 78;
             const yElbow = 118;
-
             const elbowL = new THREE.Vector3(-30, yElbow, 5);
             const elbowR = new THREE.Vector3(30, yElbow, 5);
             const handL = new THREE.Vector3(-32, yArmEnd, 10);
             const handR = new THREE.Vector3(32, yArmEnd, 10);
 
-
-            // --- MUSCLE CREATION ---
-
-            // --- MUSCLE CREATION ---
+            // --- MUSCLE BUILD ---
 
             // Head & Neck
             createMuscle(new THREE.Vector3(0, yHeadTop - 10, 0), new THREE.Vector3(0, yHeadTop, 0), 100, 12, 0.4, 'Head');
-            createMuscle(neck, new THREE.Vector3(0, yHeadTop - 5, 0), 80, 12, 0.4, 'Traps'); // Thicker neck
+            createMuscle(neck, new THREE.Vector3(0, yHeadTop - 5, 0), 80, 12, 0.4, 'Traps');
 
             // Torso
-            // Spine/Center
-            createMuscle(new THREE.Vector3(0, yNeckBase, zSpine), new THREE.Vector3(0, yHip, zSpine), 150, 16, 1.0, 'Back'); // Broader core
+            createMuscle(new THREE.Vector3(0, yNeckBase, zSpine), new THREE.Vector3(0, yHip, zSpine), 150, 16, 1.0, 'Back'); // General Spine
 
-            // Traps/Shoulders upper
-            createMuscle(neck, shoulderL, 50, 12, 0.7, 'Traps'); // Bigger traps
+            // Traps
+            createMuscle(neck, shoulderL, 50, 12, 0.7, 'Traps');
             createMuscle(neck, shoulderR, 50, 12, 0.7, 'Traps');
 
-            // Deltoids (Shoulders) - Significant increase
+            // Shoulders (Deltoids)
             createMuscle(shoulderL, new THREE.Vector3(-xShoulder, yShoulder - 12, 0), 80, 16, 1.8, 'Shoulders');
             createMuscle(shoulderR, new THREE.Vector3(xShoulder, yShoulder - 12, 0), 80, 16, 1.8, 'Shoulders');
 
-            // Chest (Pectorals) - Broader and fuller
-            createMuscle(new THREE.Vector3(-5, yChest, 10), new THREE.Vector3(-xShoulder + 10, yShoulder - 5, 8), 100, 18, 1.4, 'Chest');
-            createMuscle(new THREE.Vector3(5, yChest, 10), new THREE.Vector3(xShoulder - 10, yShoulder - 5, 8), 100, 18, 1.4, 'Chest');
+            // Chest
+            createMuscle(new THREE.Vector3(-5, yChest, zPec), new THREE.Vector3(-xShoulder + 10, yShoulder - 5, 8), 100, 18, 1.4, 'Chest');
+            createMuscle(new THREE.Vector3(5, yChest, zPec), new THREE.Vector3(xShoulder - 10, yShoulder - 5, 8), 100, 18, 1.4, 'Chest');
 
-            // Abs (Rectus Abdominis) - Defined
+            // Abs
             createMuscle(new THREE.Vector3(-4, yChest - 10, 12), new THREE.Vector3(-4, yWaist, 11), 70, 11, 0.4, 'Abs');
             createMuscle(new THREE.Vector3(4, yChest - 10, 12), new THREE.Vector3(4, yWaist, 11), 70, 11, 0.4, 'Abs');
 
-            // Lats (Wings) - Standard V-taper
+            // Lats
             createMuscle(new THREE.Vector3(-xShoulder + 5, yShoulder - 15, -5), new THREE.Vector3(-xHip + 5, yWaist + 10, -5), 100, 15, 1.6, 'Back');
             createMuscle(new THREE.Vector3(xShoulder - 5, yShoulder - 15, -5), new THREE.Vector3(xHip - 5, yWaist + 10, -5), 100, 15, 1.6, 'Back');
 
-            // Arms (Full Volume)
-            // L Upper Arm (Bicep + Tricep)
-            createMuscle(shoulderL, elbowL, 70, 11, 1.6, 'Arms'); // Bicep peak
-            createMuscle(new THREE.Vector3(-xShoulder, yShoulder, -3), new THREE.Vector3(-28, yElbow, -2), 70, 12, 1.8, 'Arms'); // Tricep horseshoe
+            // --- ARMS (Granular) ---
+            // Biceps (Front of Upper Arm)
+            createMuscle(shoulderL, elbowL, 40, 9, 1.6, 'Biceps');
+            createMuscle(shoulderR, elbowR, 40, 9, 1.6, 'Biceps');
 
-            // R Upper Arm
-            createMuscle(shoulderR, elbowR, 70, 11, 1.6, 'Arms');
-            createMuscle(new THREE.Vector3(xShoulder, yShoulder, -3), new THREE.Vector3(28, yElbow, -2), 70, 12, 1.8, 'Arms');
+            // Triceps (Back of Upper Arm)
+            createMuscle(new THREE.Vector3(-xShoulder, yShoulder, -3), new THREE.Vector3(-28, yElbow, -4), 50, 10, 1.8, 'Triceps');
+            createMuscle(new THREE.Vector3(xShoulder, yShoulder, -3), new THREE.Vector3(28, yElbow, -4), 50, 10, 1.8, 'Triceps');
 
             // Forearms
-            createMuscle(elbowL, handL, 60, 9, 1.3, 'Arms');
-            createMuscle(elbowR, handR, 60, 9, 1.3, 'Arms');
-            // Back of forearms
-            createMuscle(new THREE.Vector3(-28, yElbow, 2), new THREE.Vector3(-30, yArmEnd, 4), 50, 8, 1.2, 'Arms');
-            createMuscle(new THREE.Vector3(28, yElbow, 2), new THREE.Vector3(30, yArmEnd, 4), 50, 8, 1.2, 'Arms');
+            createMuscle(elbowL, handL, 60, 9, 1.3, 'Forearms');
+            createMuscle(elbowR, handR, 60, 9, 1.3, 'Forearms');
 
+            // --- LEGS (Granular) ---
+            // Quads (Front Thigh)
+            createMuscle(hipL, kneeL, 80, 18, 1.8, 'Quads');
+            createMuscle(hipR, kneeR, 80, 18, 1.8, 'Quads');
 
-            // Legs
-            // Quads/Hams (Upper Leg) - Athletic base
-            createMuscle(hipL, kneeL, 120, 18, 1.8, 'Legs');
-            createMuscle(hipR, kneeR, 120, 18, 1.8, 'Legs');
+            // Hamstrings (Back Thigh) - Offset Z backwards
+            createMuscle(new THREE.Vector3(-xHip, yHip, -4), new THREE.Vector3(-xKnee, yKnee, -4), 60, 16, 1.6, 'Hamstrings');
+            createMuscle(new THREE.Vector3(xHip, yHip, -4), new THREE.Vector3(xKnee, yKnee, -4), 60, 16, 1.6, 'Hamstrings');
 
-            // Calves (Lower Leg) - Diamond calves
+            // Glutes
+            createMuscle(new THREE.Vector3(-5, yHip, -5), new THREE.Vector3(-xHip, yHip - 10, -6), 50, 14, 1.5, 'Glutes');
+            createMuscle(new THREE.Vector3(5, yHip, -5), new THREE.Vector3(xHip, yHip - 10, -6), 50, 14, 1.5, 'Glutes');
+
+            // Calves
             createMuscle(kneeL, ankleL, 90, 11, 1.7, 'Calves');
             createMuscle(kneeR, ankleR, 90, 11, 1.7, 'Calves');
 
             // Feet
-            createMuscle(ankleL, footL, 50, 8, 1.0, 'Legs');
-            createMuscle(ankleR, footR, 50, 8, 1.0, 'Legs');
+            createMuscle(ankleL, footL, 50, 8, 1.0, 'Calves'); // Map feet to calves for simplicity or New 'Feet'
+            createMuscle(ankleR, footR, 50, 8, 1.0, 'Calves');
 
 
             // Build Geometry

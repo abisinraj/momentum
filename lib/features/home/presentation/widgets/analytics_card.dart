@@ -56,7 +56,8 @@ class AnalyticsCard extends ConsumerWidget {
           const SizedBox(height: 24),
           
           // 1. Recovery & Quick Stats Row
-          _buildTopRow(context, ref, healthState),
+          // Pass the analytics data so we can access 'workoutsLast3Days'
+          _buildTopRow(context, ref, healthState, analyticsAsync.valueOrNull),
           
           const SizedBox(height: 24),
           const Divider(height: 1),
@@ -102,6 +103,26 @@ class AnalyticsCard extends ConsumerWidget {
         // I will just reimplement the "Power Bar" logic here for "Analytics Card Integration".
         // It's cleaner than modifying the widget to have a "noCard" mode right now.
         
+// Helper to aggregate sub-muscles (e.g. Biceps -> Arms)
+        int getVolume(String category) {
+           // Define mappings
+           const map = {
+             'Chest': ['Chest', 'Upper Chest', 'Lower Chest'],
+             'Back': ['Back', 'Lats', 'Upper Back', 'Lower Back'],
+             'Legs': ['Legs', 'Quads', 'Hamstrings', 'Glutes', 'Calves'],
+             'Arms': ['Arms', 'Biceps', 'Triceps', 'Forearms'],
+             'Shoulders': ['Shoulders', 'Front Delts', 'Side Delts', 'Rear Delts'], // Core usually Abs
+             'Core': ['Abs', 'Upper Abs', 'Lower Abs', 'Obliques'],
+           };
+           
+           int total = 0;
+           final subs = map[category] ?? [category];
+           for (final sub in subs) {
+             total += (workload[sub] ?? 0);
+           }
+           return total;
+        }
+
         return Column(
           children: [
             Row(
@@ -149,15 +170,15 @@ class AnalyticsCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
-            _buildRecoveryBar(context, "CHEST", workload['Chest'] ?? 0),
+            _buildRecoveryBar(context, "CHEST", getVolume('Chest')),
             const SizedBox(height: 8),
-            _buildRecoveryBar(context, "BACK", workload['Back'] ?? 0),
+            _buildRecoveryBar(context, "BACK", getVolume('Back')),
             const SizedBox(height: 8),
-            _buildRecoveryBar(context, "LEGS", workload['Legs'] ?? 0),
+            _buildRecoveryBar(context, "LEGS", getVolume('Legs')),
             const SizedBox(height: 8),
-            _buildRecoveryBar(context, "ARMS", workload['Arms'] ?? 0),
+            _buildRecoveryBar(context, "ARMS", getVolume('Arms')),
             const SizedBox(height: 8),
-            _buildRecoveryBar(context, "CORE", workload['Core'] ?? 0),
+            _buildRecoveryBar(context, "CORE", getVolume('Core')), // Abs maps to Core here
           ],
         );
       },
@@ -171,14 +192,14 @@ class AnalyticsCard extends ConsumerWidget {
     final Color barColor;
     final String status;
     
-    if (intensity == 0) {
-      barColor = Colors.green; // Recovered
+    if (intensity < 2) {
+      barColor = Colors.green; // Recovered (Score 0-1)
       status = "Ready";
-    } else if (intensity < 3) {
-      barColor = Colors.orangeAccent;
+    } else if (intensity <= 5) {
+      barColor = Colors.orangeAccent; // Recovering (Score 2-5)
       status = "Recovering";
     } else {
-      barColor = colorScheme.error;
+      barColor = colorScheme.error; // Sore (Score > 5)
       status = "Sore";
     }
 
@@ -212,7 +233,7 @@ class AnalyticsCard extends ConsumerWidget {
       ],
     );
   }
-  Widget _buildTopRow(BuildContext context, WidgetRef ref, dynamic healthState) {
+  Widget _buildTopRow(BuildContext context, WidgetRef ref, dynamic healthState, Map<String, dynamic>? analyticsData) {
     final colorScheme = Theme.of(context).colorScheme;
     final sleepDuration = healthState.lastNightSleep;
     final hasSleepData = sleepDuration != null;
@@ -221,8 +242,12 @@ class AnalyticsCard extends ConsumerWidget {
     // Recovery Score Calculation
     double score = 100;
     if (sleepHours < 7) score -= (7 - sleepHours) * 10;
-    // Note: workoutsLast3Days is hardcoded for now until query is optimized
-    const workoutsLast3Days = 1; 
+    
+    // Use actual workout history from analytics
+    final workoutsLast3Days = (analyticsData != null && analyticsData.containsKey('workoutsLast3Days'))
+        ? (analyticsData['workoutsLast3Days'] as int)
+        : 0;
+
     if (workoutsLast3Days >= 3) score -= 20;
     score = score.clamp(0, 100);
     
@@ -285,7 +310,9 @@ class AnalyticsCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final avgIntensity = data['avgIntensity'] as double;
     final calories = data['calories'] as int;
+
     final totalMinutes = data['totalMinutes'] as int;
+    final activeMinutes = (data['activeMinutes'] as int?) ?? 0; // New metric
     
     // Progression Data
     final isBodyweight = user?.splitDays == 8;
@@ -314,7 +341,14 @@ class AnalyticsCard extends ConsumerWidget {
           children: [
             Expanded(child: _buildMetric(context, 'INTENSITY', avgIntensity.toStringAsFixed(1), 'RPE', Icons.bolt, colorScheme.primary)),
             Expanded(child: _buildMetric(context, 'CALORIES', calories.toString(), 'kcal', Icons.local_fire_department, Colors.orangeAccent)),
-            Expanded(child: _buildMetric(context, 'ACTIVE TIME', totalMinutes.toString(), 'min', Icons.timer, colorScheme.secondary)),
+            Expanded(child: _buildMetric(
+              context, 
+              (activeMinutes > 0) ? 'LIFT TIME' : 'WORKOUT TIME', 
+              (activeMinutes > 0) ? activeMinutes.toString() : totalMinutes.toString(), 
+              'min', 
+              Icons.timer, 
+              colorScheme.secondary
+            )),
           ],
         ),
         const SizedBox(height: 24),

@@ -32,6 +32,14 @@ final dailyInsightProvider = FutureProvider.autoDispose<String>((ref) async {
   // Get recent 5 sessions for context
   final history = await db.getRecentSessionsWithDetails(limit: 5);
   
+  // Enrich the LATEST session with specific exercise details so AI knows what was lifted
+  if (history.isNotEmpty) {
+    final latestSession = history.first;
+    final sessionId = (latestSession['session'] as dynamic).id;
+    final exerciseDetails = await db.getSessionExerciseDetails(sessionId);
+    latestSession['exercises'] = exerciseDetails; // Inject into the map
+  }
+  
   // Get API Key
   final apiKey = ref.watch(geminiApiKeyProvider).valueOrNull;
 

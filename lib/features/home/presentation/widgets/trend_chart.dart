@@ -62,8 +62,11 @@ class TrendChart extends ConsumerWidget {
                 List<FlSpot> spots = [];
                 for (int i = 0; i < recent.length; i++) {
                    final s = recent[i];
-                   final durationMins = (s['durationSeconds'] as int) / 60.0;
-                   spots.add(FlSpot(i.toDouble(), durationMins));
+                   // Use totalVolume if available, else 0.
+                   // Divide by 1000 for "k" scale if volume is huge? 
+                   // Let's keep it raw for now and format axis titles.
+                   final volume = (s['totalVolume'] as double?) ?? 0.0;
+                   spots.add(FlSpot(i.toDouble(), volume));
                 }
 
                 return Padding(
@@ -88,8 +91,14 @@ class TrendChart extends ConsumerWidget {
                             showTitles: true,
                             reservedSize: 30,
                             getTitlesWidget: (value, meta) {
+                              String text;
+                              if (value >= 1000) {
+                                text = '${(value / 1000).toStringAsFixed(1)}k';
+                              } else {
+                                text = value.toInt().toString();
+                              }
                               return Text(
-                                value.toInt().toString(),
+                                text,
                                 style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
                               );
                             },
