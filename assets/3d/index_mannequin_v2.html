@@ -30,26 +30,23 @@
 
         // --- MUSCLE DEFINITIONS (For Shader) ---
         const muscleDefs = [
-            { name: 'Biceps', start: 'RightArm', end: 'RightForeArm', radius: 0.12, offset: [0, 0, 0.05] },
-            { name: 'Biceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.12, offset: [0, 0, 0.05] },
-            { name: 'Triceps', start: 'RightArm', end: 'RightForeArm', radius: 0.12, offset: [0, 0, -0.05] },
-            { name: 'Triceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.12, offset: [0, 0, -0.05] },
-            { name: 'Forearms', start: 'RightForeArm', end: 'RightHand', radius: 0.08 },
+            { name: 'Biceps', start: 'RightArm', end: 'RightForeArm', radius: 0.12 },
+            { name: 'Biceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.12 },
+            { name: 'Triceps', start: 'RightArm', end: 'RightForeArm', radius: 0.12 },
+            { name: 'Forearms', start: 'RightForeArm', end: 'RightHand', radius: 0.08 }, // Fixed copy/paste error in main
             { name: 'Forearms', start: 'LeftForeArm', end: 'LeftHand', radius: 0.08 },
-            { name: 'Quads', start: 'RightUpLeg', end: 'RightLeg', radius: 0.15, offset: [0, 0, 0.05] },
-            { name: 'Quads', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.15, offset: [0, 0, 0.05] },
-            { name: 'Hamstrings', start: 'RightUpLeg', end: 'RightLeg', radius: 0.15, offset: [0, 0, -0.05] },
-            { name: 'Hamstrings', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.15, offset: [0, 0, -0.05] },
+            { name: 'Quads', start: 'RightUpLeg', end: 'RightLeg', radius: 0.15 },
+            { name: 'Quads', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.15 },
+            { name: 'Hamstrings', start: 'RightUpLeg', end: 'RightLeg', radius: 0.15 },
+            { name: 'Hamstrings', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.15 },
             { name: 'Calves', start: 'RightLeg', end: 'RightFoot', radius: 0.10 },
             { name: 'Calves', start: 'LeftLeg', end: 'LeftFoot', radius: 0.10 },
             { name: 'Chest', bone: 'Spine2', radius: 0.18, offset: [0, 0.15, 0.1] },
-            // Abs mapped to Spine (lower torso)
             { name: 'Abs', bone: 'Spine', radius: 0.18, offset: [0, 0.1, 0.1] },
             { name: 'Lats', bone: 'Spine1', radius: 0.22, offset: [0, 0.15, -0.05] },
             { name: 'Upper Back', bone: 'Spine2', radius: 0.20, offset: [0, 0.2, -0.05] },
-            // Shoulders mapped to Arm bone with upward offset
-            { name: 'Shoulders', bone: 'RightArm', radius: 0.14, offset: [0, 0.15, 0] },
-            { name: 'Shoulders', bone: 'LeftArm', radius: 0.14, offset: [0, 0.15, 0] }
+            { name: 'Shoulders', bone: 'RightShoulder', radius: 0.12 }, // Simple
+            { name: 'Shoulders', bone: 'LeftShoulder', radius: 0.12 }
         ];
 
         // Shader Uniforms
@@ -67,8 +64,8 @@
 
         const activeHeatmap = {};
 
-        // init(); // Moved to bottom
-        // animate(); // Moved to bottom
+        init();
+        animate();
 
         function init() {
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -89,51 +86,47 @@
             scene.add(dirLight);
 
             const loader = new GLTFLoader();
-            loader.load('model.glb?t=' + new Date().getTime(), function (gltf) {
+            loader.load('model.glb', function (gltf) {
                 model = gltf.scene;
                 window.model = model;
                 scene.add(model);
 
-                // Scale & Center (Order corrected)
-                let box = new THREE.Box3().setFromObject(model);
-                let size = box.getSize(new THREE.Vector3());
-                let maxDim = Math.max(size.x, size.y, size.z);
-                if (maxDim > 0) model.scale.setScalar(1.8 / maxDim);
-
-                // Re-calculate box after scaling
-                box.setFromObject(model);
+                // Scale & Center
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
                 const center = box.getCenter(new THREE.Vector3());
                 model.position.sub(center);
-
-                console.log("Model Scaled & Centered", { size, maxDim, center: model.position });
+                const maxDim = Math.max(size.x, size.y, size.z);
+                if (maxDim > 0) model.scale.setScalar(1.8 / maxDim);
 
                 // --- MANNEQUIN & SHADER SETUP ---
                 model.traverse(child => {
                     if (child.isMesh) {
-                        // 1. Hiding (Exempting hair and look)
+                        // 1. Hiding
                         const name = child.name.toLowerCase();
-                        if (// name.includes('hair') || // NOW VISIBLE
+                        if (name.includes('hair') ||
                             name.includes('glasses') ||
                             name.includes('shoes') ||
-                            // name.includes('look') || // EXEMPTED: Contains clothes
+                            name.includes('look') || // Face details
                             name.includes('mouth') ||
                             name.includes('teeth')) {
                             child.visible = false;
                         }
-                        // 2. Apply Custom Shader (Re-enabled)
+                        // 2. Body Material Override
                         else {
+                            // Force White Material
+                            child.material = new THREE.MeshStandardMaterial({
+                                color: 0xFFFFFF,
+                                roughness: 0.6,
+                                metalness: 0.1, // Slight sheen
+                                map: null // Remove existing textures (removes shirt print etc)
+                            });
+
+                            // Apply Heatmap Shader
                             applyMannequinShader(child);
                         }
                     }
                 });
-
-                // --- ANIMATIONS ---
-                if (gltf.animations && gltf.animations.length > 0) {
-                    window.mixer = new THREE.AnimationMixer(model);
-                    gltf.animations.forEach(clip => {
-                        window.mixer.clipAction(clip).play();
-                    });
-                }
 
                 // Test Shorts & Heat
                 activeHeatmap['Quads'] = 0.5;
@@ -150,70 +143,93 @@
         }
 
         function applyMannequinShader(mesh) {
-            const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            mesh.material.onBeforeCompile = (shader) => {
+                shader.uniforms.u_zone_starts = uniformData.u_zone_starts;
+                shader.uniforms.u_zone_ends = uniformData.u_zone_ends;
+                shader.uniforms.u_zone_radii = uniformData.u_zone_radii;
+                shader.uniforms.u_zone_intensities = uniformData.u_zone_intensities;
+                shader.uniforms.u_zone_count = uniformData.u_zone_count;
+                shader.uniforms.u_shorts_starts = uniformData.u_shorts_starts;
+                shader.uniforms.u_shorts_ends = uniformData.u_shorts_ends;
 
-            materials.forEach(mat => {
-                mat.onBeforeCompile = (shader) => {
-                    shader.uniforms.u_zone_starts = uniformData.u_zone_starts;
-                    shader.uniforms.u_zone_ends = uniformData.u_zone_ends;
-                    shader.uniforms.u_zone_radii = uniformData.u_zone_radii;
-                    shader.uniforms.u_zone_intensities = uniformData.u_zone_intensities;
-                    shader.uniforms.u_zone_count = uniformData.u_zone_count;
+                shader.vertexShader = `
+                    varying vec3 vWorldPosition;
+                    ${shader.vertexShader}
+                `.replace(
+                    '#include <worldpos_vertex>',
+                    `
+                    #include <worldpos_vertex>
+                    vWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
+                    `
+                );
 
-                    shader.vertexShader = `
-                        varying vec3 vWorldPosition;
-                        ${shader.vertexShader}
-                    `.replace(
-                        '#include <worldpos_vertex>',
-                        `
-                        #include <worldpos_vertex>
-                        vWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
-                        `
-                    );
+                shader.fragmentShader = `
+                    uniform vec3 u_zone_starts[${MAX_ZONES}];
+                    uniform vec3 u_zone_ends[${MAX_ZONES}];
+                    uniform float u_zone_radii[${MAX_ZONES}];
+                    uniform float u_zone_intensities[${MAX_ZONES}];
+                    uniform int u_zone_count;
+                    
+                    uniform vec3 u_shorts_starts[2];
+                    uniform vec3 u_shorts_ends[2];
+                    
+                    varying vec3 vWorldPosition;
+                    
+                    float distSqToSegment(vec3 p, vec3 a, vec3 b) {
+                        vec3 pa = p - a;
+                        vec3 ba = b - a;
+                        float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+                        return length(pa - ba * h);
+                    }
 
-                    shader.fragmentShader = `
-                        uniform vec3 u_zone_starts[${MAX_ZONES}];
-                        uniform vec3 u_zone_ends[${MAX_ZONES}];
-                        uniform float u_zone_radii[${MAX_ZONES}];
-                        uniform float u_zone_intensities[${MAX_ZONES}];
-                        uniform int u_zone_count;
-                        varying vec3 vWorldPosition;
-                        
-                        float distSqToSegment(vec3 p, vec3 a, vec3 b) {
-                            vec3 pa = p - a;
-                            vec3 ba = b - a;
-                            float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-                            return length(pa - ba * h);
+                    ${shader.fragmentShader}
+                `.replace(
+                    '#include <dithering_fragment>',
+                    `
+                    #include <dithering_fragment>
+                    
+                    // --- 1. SHORTS PROCEDURAL ---
+                    float shortsDist = 999.0;
+                    // Right Leg
+                    shortsDist = min(shortsDist, distSqToSegment(vWorldPosition, u_shorts_starts[0], u_shorts_ends[0]));
+                    // Left Leg
+                    shortsDist = min(shortsDist, distSqToSegment(vWorldPosition, u_shorts_starts[1], u_shorts_ends[1]));
+                    
+                    vec3 finalColor = gl_FragColor.rgb;
+
+                    // Shorts Params
+                    float shortsRadius = 0.16; // Slightly wider than leg
+                    if (shortsDist < shortsRadius) {
+                        // Smooth Edge
+                        float edge = smoothstep(shortsRadius, shortsRadius * 0.95, shortsDist);
+                        vec3 shortsColor = vec3(0.1, 0.1, 0.15); // Dark Navy/Black
+                        finalColor = mix(finalColor, shortsColor, edge);
+                    }
+
+                    // --- 2. HEATMAP ---
+                    float totalHeat = 0.0;
+                    for(int i = 0; i < ${MAX_ZONES}; i++) {
+                        if(i >= u_zone_count) break;
+                        float dist = distSqToSegment(vWorldPosition, u_zone_starts[i], u_zone_ends[i]);
+                        float radius = u_zone_radii[i];
+                        if(dist < radius) {
+                            float intensity = u_zone_intensities[i];
+                            float falloff = smoothstep(radius, radius * 0.5, dist);
+                            totalHeat += falloff * intensity;
                         }
-                        ${shader.fragmentShader}
-                    `.replace(
-                        '#include <dithering_fragment>',
-                        `
-                        #include <dithering_fragment>
-                        vec3 heatmapColor = gl_FragColor.rgb;
-                        float totalHeat = 0.0;
-                        for(int i = 0; i < ${MAX_ZONES}; i++) {
-                            if(i >= u_zone_count) break;
-                            float dist = distSqToSegment(vWorldPosition, u_zone_starts[i], u_zone_ends[i]);
-                            float radius = u_zone_radii[i];
-                            if(dist < radius) {
-                                // Smoother falloff for premium look
-                                float falloff = smoothstep(radius, radius * 0.3, dist);
-                                totalHeat += falloff * u_zone_intensities[i];
-                            }
-                        }
-                        totalHeat = clamp(totalHeat, 0.0, 1.0);
-                        if(totalHeat > 0.0) {
-                            vec3 glow = vec3(1.0, 0.2, 0.0);
-                            heatmapColor = mix(heatmapColor, glow, totalHeat * 0.7); 
-                        }
-                        gl_FragColor.rgb = heatmapColor;
-                        `
-                    );
-                };
-                mat.customProgramCacheKey = () => "heatmap_v6_integrated";
-                mat.needsUpdate = true;
-            });
+                    }
+                    totalHeat = clamp(totalHeat, 0.0, 1.0);
+                    
+                    if(totalHeat > 0.0) {
+                        vec3 glow = vec3(1.0, 0.2, 0.0);
+                        finalColor = mix(finalColor, glow, totalHeat * 0.6); 
+                    }
+                    
+                    gl_FragColor.rgb = finalColor;
+                    `
+                );
+            };
+            mesh.material.needsUpdate = true;
         }
 
         // --- UPDATE LOOP ---
@@ -237,12 +253,7 @@
                         const b = findBone(def.bone);
                         if (b) {
                             b.getWorldPosition(startPos);
-                            if (def.offset) {
-                                // Apply offset in world space but simple vector add for now
-                                startPos.x += def.offset[0];
-                                startPos.y += def.offset[1];
-                                startPos.z += def.offset[2];
-                            }
+                            if (def.offset) startPos.add(new THREE.Vector3(...def.offset));
                             endPos.copy(startPos);
                             endPos.y -= 0.01;
                         }
@@ -252,14 +263,6 @@
                         if (s && e) {
                             s.getWorldPosition(startPos);
                             e.getWorldPosition(endPos);
-                            if (def.offset) {
-                                startPos.x += def.offset[0];
-                                startPos.y += def.offset[1];
-                                startPos.z += def.offset[2];
-                                endPos.x += def.offset[0];
-                                endPos.y += def.offset[1];
-                                endPos.z += def.offset[2];
-                            }
                         }
                     }
                     starts[count * 3] = startPos.x;
@@ -337,37 +340,12 @@
             return name.includes('hair') || name.includes('glasses') || name.includes('shoes') || name.includes('look');
         }
 
-        // --- TEST HELPER ---
-        window.testHeatmapRotation = async function () {
-            const muscles = ['Biceps', 'Triceps', 'Shoulders', 'Chest', 'Abs', 'Lats', 'Upper Back', 'Quads', 'Hamstrings'];
-            for (const m of muscles) {
-                console.log(`Testing Heatmap: ${m}`);
-                window.setMuscleHeatmap({ [m]: 1.0 });
-                // Rotate to back for back muscles
-                if (['Lats', 'Upper Back', 'Triceps', 'Hamstrings'].includes(m)) {
-                    controls.autoRotate = false;
-                    camera.position.set(0, 1.2, -2.5);
-                } else {
-                    camera.position.set(0, 1.2, 2.5);
-                }
-                controls.update();
-                await new Promise(r => setTimeout(r, 2000));
-            }
-            window.setMuscleHeatmap({}); // Clear
-        };
-
-        const clock = new THREE.Clock(); // Defined before animate
         function animate() {
             requestAnimationFrame(animate);
-            const delta = clock.getDelta();
-            if (window.mixer) window.mixer.update(delta);
             updateUniforms();
             if (controls) controls.update();
             renderer.render(scene, camera);
         }
-
-        init();
-        animate();
     </script>
 </body>
 

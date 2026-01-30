@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mannequin Prototype</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #EEE;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="module">
+        import * as THREE from './three.module.js';
+        import { GLTFLoader } from './GLTFLoader.js';
+        import { OrbitControls } from './OrbitControls.js';
+        import { RoomEnvironment } from './RoomEnvironment.js';
+
+        let camera, scene, renderer, model, controls;
+
+        const whiteMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFFFFF,
+            roughness: 0.5,
+            metalness: 0.1
+        });
+
+        init();
+        animate();
+
+        function init() {
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.setClearColor(0x333333); // Darker BG to see white model
+            document.body.appendChild(renderer.domElement);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 1.2, 2.5);
+
+            scene = new THREE.Scene();
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight.position.set(2, 5, 5);
+            scene.add(dirLight);
+
+            const loader = new GLTFLoader();
+            loader.load('model.glb', function (gltf) {
+                model = gltf.scene;
+                scene.add(model);
+
+                // Scale & Center
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.sub(center);
+                const maxDim = Math.max(size.x, size.y, size.z);
+                if (maxDim > 0) model.scale.setScalar(1.8 / maxDim);
+
+                // --- MANNEQUIN TRANSFORMATION ---
+                model.traverse(child => {
+                    if (child.isMesh) {
+                        console.log('Mesh:', child.name);
+
+                        // Hide accessories
+                        if (child.name.includes('hair') ||
+                            child.name.includes('glasses') ||
+                            child.name.includes('shoes') ||
+                            child.name.includes('look')) { // 'look' usually has eyes/lashes
+                            child.visible = false;
+                        }
+
+                        // Override Body Material
+                        if (child.name.includes('body')) {
+                            // Keep geometry, change material
+                            child.material = whiteMaterial;
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    }
+                });
+
+            }, undefined, function (error) { console.error(error); });
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>

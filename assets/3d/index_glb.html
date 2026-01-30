@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaturn Debug Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #333;
+            overflow: hidden;
+            font-family: monospace;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #debug {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            padding: 10px;
+            pointer-events: none;
+            white-space: pre-wrap;
+            z-index: 100;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="debug">Initializing...</div>
+    <script type="module">
+        import * as THREE from './three.module.js';
+        import { GLTFLoader } from './GLTFLoader.js';
+        import { OrbitControls } from './OrbitControls.js';
+        import { RoomEnvironment } from './RoomEnvironment.js';
+
+        let camera, scene, renderer, model, controls;
+        const debugEl = document.getElementById('debug');
+
+        function log(msg) {
+            debugEl.textContent += '\n' + msg;
+            console.log(msg);
+        }
+
+        window.THREE = THREE;
+
+        init();
+        animate();
+
+        function init() {
+            log('Starting Init...');
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            document.body.appendChild(renderer.domElement);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 1.5, 3);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x333333);
+            window.scene = scene;
+
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
+            const ambient = new THREE.AmbientLight(0xffffff, 1);
+            scene.add(ambient);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+            dirLight.position.set(2, 5, 5);
+            scene.add(dirLight);
+
+            const loader = new GLTFLoader();
+            log('Loading model.glb...');
+
+            loader.load('model.glb', function (gltf) {
+                log('GLTF Loaded!');
+                model = gltf.scene;
+                window.model = model;
+                scene.add(model);
+
+                // Analyze & Fit
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+
+                model.position.x += (model.position.x - center.x);
+                model.position.y += (model.position.y - center.y); // Center vertically?
+                // Actually for avatars, usually feet at 0 is better.
+                // But let's stick to centering for view.
+                model.position.z += (model.position.z - center.z);
+
+                const maxDim = Math.max(size.x, size.y, size.z);
+                if (maxDim > 0) {
+                    const scale = 2 / maxDim;
+                    model.scale.setScalar(scale);
+                }
+
+                // --- BONE SEARCH & HIGHLIGHT ---
+                log('--- BONES ---');
+                let armBone = null;
+                model.traverse(child => {
+                    if (child.isBone) {
+                        // log('Bone: ' + child.name);
+                        // Guess logic: Standard naming is RightArm / LeftArm (Humerus)
+                        if (child.name.includes('RightArm') || child.name.includes('RightArm')) {
+                            armBone = child;
+                            log('FOUND ARM BONE: ' + child.name);
+                            highlightBone(child, 0xff0000, 'Right Bicep');
+                        }
+                        if (child.name.includes('LeftArm')) {
+                            highlightBone(child, 0xff0000, 'Left Bicep');
+                        }
+                    }
+                });
+
+                if (!armBone) {
+                    log('No "Arm" bone found. Dumping all bones (limited):');
+                    let count = 0;
+                    model.traverse(child => {
+                        if (child.isBone && count < 10) {
+                            log(child.name);
+                            count++;
+                        }
+                    });
+                }
+
+            }, undefined, function (error) {
+                log('ERROR: ' + error);
+            });
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function highlightBone(bone, colorHex, label) {
+            // Add a mesh attached effectively to the bone
+            // Note: Attaching directly to bone in Three.js puts it in bone local space.
+            // Bones are length 0 usually in structure, but they define a transform.
+            // RightArm usually points down or out.
+
+            const geometry = new THREE.SphereGeometry(0.08, 16, 16); // Guess size
+            const material = new THREE.MeshBasicMaterial({
+                color: colorHex,
+                transparent: true,
+                opacity: 0.6,
+                depthTest: false // Always show on top to find it
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+
+            // Offset usually needed. Humerus length is roughly 0.3m? 
+            // In local space, Y is often the axis.
+            mesh.position.y = 0.15;
+
+            bone.add(mesh);
+            log(`Added highlight to ${label}`);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>

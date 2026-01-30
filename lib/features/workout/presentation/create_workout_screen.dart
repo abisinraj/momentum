@@ -713,23 +713,61 @@ Row(
                 ),
                 const SizedBox(height: 12),
                 
-                // Muscle Selector
-                DropdownButtonFormField<String>(
-                  value: _selectedMuscle,
-                  isExpanded: true, // Ensure it takes full width
-                  decoration: InputDecoration(
-                    labelText: 'Target Muscle',
-                    filled: true,
-                    fillColor: colorScheme.surface,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16), // Standard padding
-                  ),
-                  dropdownColor: colorScheme.surfaceContainerHighest,
-                  style: TextStyle(color: colorScheme.onSurface),
-                  items: _muscleOptions.map((m) => DropdownMenuItem(
-                    value: m, 
-                    child: Text(m),
-                  )).toList(),
-                  onChanged: (val) => setState(() => _selectedMuscle = val ?? 'Other'),
+                // Muscle Selector (Grouped)
+                Row(
+                  children: [
+                    // Category
+                    Expanded(
+                      flex: 4,
+                      child: DropdownButtonFormField<String>(
+                        value: _selectedCategory,
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: 'Muscle Group',
+                          filled: true,
+                          fillColor: colorScheme.surface,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        ),
+                        dropdownColor: colorScheme.surfaceContainerHighest,
+                        style: TextStyle(color: colorScheme.onSurface),
+                        items: _muscleGroups.keys.map((c) => DropdownMenuItem(
+                          value: c, 
+                          child: Text(c, overflow: TextOverflow.ellipsis),
+                        )).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _selectedCategory = val;
+                              // Default to general category name when switching
+                              _selectedMuscle = _muscleGroups[val]!.first; 
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Specific
+                    Expanded(
+                      flex: 5, // Slightly wider for specific names
+                      child: DropdownButtonFormField<String>(
+                        value: _selectedMuscle,
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: 'Target',
+                          filled: true,
+                          fillColor: colorScheme.surface,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        ),
+                        dropdownColor: colorScheme.surfaceContainerHighest,
+                        style: TextStyle(color: colorScheme.onSurface),
+                        items: (_muscleGroups[_selectedCategory] ?? ['Other']).map((m) => DropdownMenuItem(
+                          value: m, 
+                          child: Text(m, overflow: TextOverflow.ellipsis),
+                        )).toList(),
+                        onChanged: (val) => setState(() => _selectedMuscle = val ?? 'Other'),
+                      ),
+                    ),
+                  ],
                 ),
                 
                 const SizedBox(height: 12),

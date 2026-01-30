@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Muscle Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #EEE;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="module">
+        import * as THREE from './three.module.js';
+        import { GLTFLoader } from './GLTFLoader.js';
+        import { OrbitControls } from './OrbitControls.js';
+        import { RoomEnvironment } from './RoomEnvironment.js';
+
+        let camera, scene, renderer, model, controls;
+        window.muscleMeshes = {}; // Store references
+
+        // --- PROCEDURAL DEFINITIONS ---
+        // Define muscles by Start Bone -> End Bone + Radius
+        const muscleDefinitions = [
+            // ARMS
+            { name: 'Biceps', start: 'RightArm', end: 'RightForeArm', radius: 0.09, color: 0xff0000, offset: [0, 0, 0.04] }, // Front bump
+            { name: 'Biceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.09, color: 0xff0000, offset: [0, 0, 0.04] },
+
+            { name: 'Triceps', start: 'RightArm', end: 'RightForeArm', radius: 0.08, color: 0x0000ff, offset: [0, 0, -0.04] }, // Back bump
+            { name: 'Triceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.08, color: 0x0000ff, offset: [0, 0, -0.04] },
+
+            { name: 'Forearms', start: 'RightForeArm', end: 'RightHand', radius: 0.07, color: 0x00ff00 },
+            { name: 'Forearms', start: 'LeftForeArm', end: 'LeftHand', radius: 0.07, color: 0x00ff00 },
+
+            // LEGS
+            { name: 'Quads', start: 'RightUpLeg', end: 'RightLeg', radius: 0.11, color: 0xffaa00, offset: [0, 0, 0.05] },
+            { name: 'Quads', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.11, color: 0xffaa00, offset: [0, 0, 0.05] },
+
+            { name: 'Hamstrings', start: 'RightUpLeg', end: 'RightLeg', radius: 0.10, color: 0xaa00ff, offset: [0, 0, -0.05] },
+            { name: 'Hamstrings', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.10, color: 0xaa00ff, offset: [0, 0, -0.05] },
+
+            { name: 'Calves', start: 'RightLeg', end: 'RightFoot', radius: 0.08, color: 0x00aaff, offset: [0, 0, -0.03] },
+            { name: 'Calves', start: 'LeftLeg', end: 'LeftFoot', radius: 0.08, color: 0x00aaff, offset: [0, 0, -0.03] },
+        ];
+
+        // For Torso/Abs, bones are close, might need Manual offsets or multiple segments
+        const torsoDefinitions = [
+            { name: 'Chest', bone: 'Spine2', scale: [0.28, 0.2, 0.15], offset: [0, 0.15, 0.1] },
+            { name: 'Abs', bone: 'Spine', scale: [0.22, 0.3, 0.12], offset: [0, 0.1, 0.1] },
+            { name: 'Lats', bone: 'Spine1', scale: [0.35, 0.35, 0.1], offset: [0, 0.15, -0.05] }
+        ];
+
+        init();
+        animate();
+
+        function init() {
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.setClearColor(0xEEEEEE);
+            document.body.appendChild(renderer.domElement);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 1.2, 2.8);
+
+            scene = new THREE.Scene();
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
+            const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambient);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight.position.set(2, 5, 5);
+            scene.add(dirLight);
+
+            const loader = new GLTFLoader();
+            loader.load('model.glb', function (gltf) {
+                model = gltf.scene;
+                window.model = model;
+                scene.add(model);
+
+                // --- AUTO SCALE ---
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.sub(center); // Center
+                const maxDim = Math.max(size.x, size.y, size.z);
+                if (maxDim > 0) model.scale.setScalar(1.8 / maxDim);
+
+                // --- GENERATE MUSCLES ---
+                // 1. Procedural Limb Muscles
+                muscleDefinitions.forEach(def => {
+                    createProceduralMuscle(def);
+                });
+
+                // 2. Static Torso Muscles
+                torsoDefinitions.forEach(def => {
+                    const bone = findBone(def.bone);
+                    if (bone) {
+                        createStaticHighlight(bone, def);
+                    }
+                });
+
+            });
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            controls.enableDamping = true;
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function findBone(name) {
+            let res = null;
+            model.traverse(child => {
+                if (child.isBone && child.name.includes(name)) res = child;
+            });
+            return res;
+        }
+
+        function createProceduralMuscle(def) {
+            const startBone = findBone(def.start);
+            const endBone = findBone(def.end);
+
+            if (!startBone || !endBone) {
+                console.warn(`Could not find bones for ${def.name}: ${def.start} -> ${def.end}`);
+                return;
+            }
+
+            // Create mesh attached to Start Bone
+            // It points towards End Bone
+
+            // Calculate length in local space?? No, bones have scale.
+            // Safer to work in World Space but attach to Bone? 
+            // Actually, if we attach to StartBone, (0,0,0) is Start.
+            // We need the local position of EndBone relative to StartBone.
+            // Usually EndBone is a child of StartBone.
+
+            let targetPos = new THREE.Vector3();
+
+            if (endBone.parent === startBone) {
+                // Easy case: EndBone position is local to StartBone
+                targetPos.copy(endBone.position);
+            } else {
+                // Harder case: Calculate relative position
+                // For now assuming standard hierarchy where End is child of Start
+                console.warn(`Complex hierarchy for ${def.name}. Fallback logic used.`);
+                targetPos.set(0, -0.3, 0); // Default down
+            }
+
+            const length = targetPos.length();
+
+            // Geometry: Cylinder
+            // We want pivot at top? or center? Cylinder pivot is center.
+            const geometry = new THREE.CylinderGeometry(def.radius, def.radius * 0.7, length, 16);
+            const material = new THREE.MeshBasicMaterial({
+                color: def.color || 0xff0000,
+                transparent: true,
+                opacity: 0.5,
+                depthTest: false
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+
+            // Align Cylinder to Vector (Start -> End)
+            // Default Cylinder is logic along Y axis.
+            // We need to rotate it to point to targetPos.
+            // And move it to midpoint.
+
+            const midPoint = targetPos.clone().multiplyScalar(0.5);
+
+            // Quaternion to rotate UP (0,1,0) to TargetDirection
+            const up = new THREE.Vector3(0, 1, 0);
+            const dir = targetPos.clone().normalize();
+            const quaternion = new THREE.Quaternion().setFromUnitVectors(up, dir);
+
+            mesh.setRotationFromQuaternion(quaternion);
+            mesh.position.copy(midPoint);
+
+            // Apply Manual Offset (Local to the aligned mesh axes)
+            if (def.offset) {
+                mesh.position.add(new THREE.Vector3(def.offset[0], def.offset[1], def.offset[2]));
+            }
+
+            startBone.add(mesh);
+            registerMuscle(def.name, mesh);
+        }
+
+        function createStaticHighlight(bone, config) {
+            const geometry = new THREE.SphereGeometry(1, 16, 16);
+            const material = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.5, depthTest: false });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.scale.set(config.scale[0], config.scale[1], config.scale[2]);
+            mesh.position.set(config.offset[0], config.offset[1], config.offset[2]);
+            bone.add(mesh);
+            registerMuscle(config.name, mesh);
+        }
+
+        function registerMuscle(name, mesh) {
+            if (!window.muscleMeshes[name]) window.muscleMeshes[name] = [];
+            window.muscleMeshes[name].push(mesh);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- API ---
+        window.setMuscleHeatmap = function (heatmap) {
+            Object.values(window.muscleMeshes).flat().forEach(m => m.material.visible = false);
+            for (let k in heatmap) {
+                if (window.muscleMeshes[k]) {
+                    window.muscleMeshes[k].forEach(m => {
+                        m.material.visible = true;
+                        m.material.opacity = 0.6 * heatmap[k];
+                    });
+                }
+            }
+        };
+
+    </script>
+</body>
+
+</html>

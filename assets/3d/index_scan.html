@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muscle Scan Verification</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #EEE;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 40px;
+            font-weight: bold;
+            color: #333;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        #subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="overlay">
+        <div id="label">Initializing...</div>
+        <div id="subtitle">Muscle Scan Verification</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from './three.module.js';
+        import { GLTFLoader } from './GLTFLoader.js';
+        import { OrbitControls } from './OrbitControls.js';
+        import { RoomEnvironment } from './RoomEnvironment.js';
+
+        let camera, scene, renderer, model, controls;
+        window.muscleMeshes = {};
+
+        // Scan Sequence
+        const SCAN_SEQUENCE = [
+            'Shoulders',
+            'Biceps',
+            'Triceps',
+            'Forearms',
+            'Chest',
+            'Abs',
+            'Lats',
+            'Upper Back',
+            'Glutes',
+            'Quads',
+            'Hamstrings',
+            'Calves'
+        ];
+
+        let currentIndex = -1;
+        const scanDuration = 1500; // ms per muscle
+        let lastSwitchTime = 0;
+
+        // --- DEFINITIONS (COPIED FROM INDEX.HTML) ---
+        const limbDefinitions = [
+            { name: 'Biceps', start: 'RightArm', end: 'RightForeArm', radius: 0.08, offset: [0, 0, 0.03] },
+            { name: 'Biceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.08, offset: [0, 0, 0.03] },
+            { name: 'Triceps', start: 'RightArm', end: 'RightForeArm', radius: 0.07, offset: [0, 0, -0.03] },
+            { name: 'Triceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.07, offset: [0, 0, -0.03] },
+            { name: 'Forearms', start: 'RightForeArm', end: 'RightHand', radius: 0.06 },
+            { name: 'Forearms', start: 'LeftForeArm', end: 'LeftHand', radius: 0.06 },
+            { name: 'Quads', start: 'RightUpLeg', end: 'RightLeg', radius: 0.10, offset: [0, 0, 0.04] },
+            { name: 'Quads', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.10, offset: [0, 0, 0.04] },
+            { name: 'Hamstrings', start: 'RightUpLeg', end: 'RightLeg', radius: 0.09, offset: [0, 0, -0.04] },
+            { name: 'Hamstrings', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.09, offset: [0, 0, -0.04] },
+            { name: 'Calves', start: 'RightLeg', end: 'RightFoot', radius: 0.07, offset: [0, 0, -0.02] },
+            { name: 'Calves', start: 'LeftLeg', end: 'LeftFoot', radius: 0.07, offset: [0, 0, -0.02] },
+        ];
+        const torsoDefinitions = [
+            { name: 'Chest', bone: 'Spine2', scale: [0.28, 0.22, 0.15], offset: [0, 0.15, 0.1] },
+            { name: 'Abs', bone: 'Spine', scale: [0.20, 0.28, 0.12], offset: [0, 0.1, 0.1] },
+            { name: 'Upper Back', bone: 'Spine2', scale: [0.30, 0.25, 0.08], offset: [0, 0.2, -0.05] },
+            { name: 'Lats', bone: 'Spine1', scale: [0.35, 0.35, 0.08], offset: [0, 0.15, -0.05] },
+            { name: 'Shoulders', bone: 'RightShoulder', scale: [0.13, 0.13, 0.13], offset: [0, 0, 0] },
+            { name: 'Shoulders', bone: 'LeftShoulder', scale: [0.13, 0.13, 0.13], offset: [0, 0, 0] },
+            // Fallbacks
+            { name: 'Shoulders', bone: 'RightArm', scale: [0.14, 0.14, 0.14], offset: [0, 0.05, 0] },
+            { name: 'Shoulders', bone: 'LeftArm', scale: [0.14, 0.14, 0.14], offset: [0, 0.05, 0] },
+            { name: 'Glutes', bone: 'Hips', scale: [0.16, 0.16, 0.12], offset: [0.09, 0.05, -0.08] },
+            { name: 'Glutes', bone: 'Hips', scale: [0.16, 0.16, 0.12], offset: [-0.09, 0.05, -0.08] },
+        ];
+
+        init();
+        animate();
+
+        function init() {
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.setClearColor(0xEEEEEE);
+            document.body.appendChild(renderer.domElement);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 1.2, 3.0);
+
+            scene = new THREE.Scene();
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+
+            const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambient);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight.position.set(2, 5, 5);
+            scene.add(dirLight);
+
+            const loader = new GLTFLoader();
+            loader.load('model.glb', function (gltf) {
+                model = gltf.scene;
+                window.model = model;
+                scene.add(model);
+
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.sub(center);
+                const maxDim = Math.max(size.x, size.y, size.z);
+                if (maxDim > 0) model.scale.setScalar(1.8 / maxDim);
+
+                limbDefinitions.forEach(def => createProceduralMuscle(def));
+                torsoDefinitions.forEach(def => {
+                    const bone = findBone(def.bone);
+                    if (bone) createStaticHighlight(bone, def);
+                });
+
+                // START SCAN
+                currentIndex = 0;
+                updateScan(Date.now());
+
+            }, undefined, function (error) { console.error(error); });
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function updateScan(time) {
+            if (!model) return;
+
+            if (time - lastSwitchTime > scanDuration) {
+                currentIndex = (currentIndex + 1) % SCAN_SEQUENCE.length;
+                lastSwitchTime = time;
+
+                const muscle = SCAN_SEQUENCE[currentIndex];
+                document.getElementById('label').textContent = muscle;
+
+                // Highlight logic
+                Object.values(window.muscleMeshes).flat().forEach(m => m.material.opacity = 0.1); // Dim others
+
+                if (window.muscleMeshes[muscle]) {
+                    window.muscleMeshes[muscle].forEach(m => {
+                        m.material.opacity = 0.8;
+                        m.material.color.setHex(0xff0000);
+                    });
+
+                    // Optional Camera movement? 
+                    // Keeps verification simple if static, but maybe rotate model?
+                }
+            }
+
+            // Gentle rotation
+            model.rotation.y = Math.sin(time * 0.0005) * 0.3;
+        }
+
+        function findBone(name) {
+            let res = null;
+            if (!model) return null;
+            model.traverse(child => {
+                if (child.isBone && child.name.includes(name)) res = child;
+            });
+            return res;
+        }
+
+        function createProceduralMuscle(def) {
+            const startBone = findBone(def.start);
+            const endBone = findBone(def.end);
+            if (!startBone || !endBone) return;
+
+            let targetPos = new THREE.Vector3();
+            if (endBone.parent === startBone) {
+                targetPos.copy(endBone.position);
+            } else {
+                targetPos.set(0, -0.3, 0);
+            }
+
+            const length = targetPos.length();
+            const geometry = new THREE.CylinderGeometry(def.radius, def.radius * 0.7, length, 16);
+            const material = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.1, depthTest: false });
+            const mesh = new THREE.Mesh(geometry, material);
+
+            const midPoint = targetPos.clone().multiplyScalar(0.5);
+            const up = new THREE.Vector3(0, 1, 0); // Cylinder axis
+            const dir = targetPos.clone().normalize();
+            const quaternion = new THREE.Quaternion().setFromUnitVectors(up, dir);
+
+            mesh.setRotationFromQuaternion(quaternion);
+            mesh.position.copy(midPoint);
+            if (def.offset) mesh.position.add(new THREE.Vector3(...def.offset));
+            startBone.add(mesh);
+            registerMuscle(def.name, mesh);
+        }
+
+        function createStaticHighlight(bone, config) {
+            const geometry = new THREE.SphereGeometry(1, 16, 16);
+            const material = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.1, depthTest: false });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.scale.set(...config.scale);
+            mesh.position.set(...config.offset);
+            bone.add(mesh);
+            registerMuscle(config.name, mesh);
+        }
+
+        function registerMuscle(name, mesh) {
+            if (!window.muscleMeshes[name]) window.muscleMeshes[name] = [];
+            window.muscleMeshes[name].push(mesh);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updateScan(Date.now());
+            if (controls) controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>
