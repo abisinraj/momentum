@@ -1363,3 +1363,4 @@ function mergeBufferAttributes( attributes ) {
 	toCreasedNormals
 };
 THREE.BufferGeometryUtils = { computeMikkTSpaceTangents, mergeGeometries, mergeBufferGeometries, mergeAttributes, mergeBufferAttributes, interleaveAttributes, estimateBytesUsed, mergeVertices, toTrianglesDrawMode, computeMorphedAttributes, mergeGroups, toCreasedNormals };
+window.THREE.BufferGeometryUtils = { computeMikkTSpaceTangents, mergeGeometries, mergeAttributes, deepCloneAttribute, interleaveAttributes, deinterleaveAttribute, deinterleaveGeometry, estimateBytesUsed, mergeVertices, toTrianglesDrawMode };

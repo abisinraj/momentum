@@ -1,4 +1,7 @@
 const { BackSide, BoxGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial, PointLight, Scene } = THREE;
+
+class RoomEnvironment extends Scene {
+
 	constructor( renderer = null ) {
 
 		super();
@@ -130,4 +133,5 @@ function createAreaLightMaterial( intensity ) {
 
 }
 
-;
+window.RoomEnvironment = RoomEnvironment;
+window.RoomEnvironment = RoomEnvironment;

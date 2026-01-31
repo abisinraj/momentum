@@ -1403,4 +1403,5 @@ class OrbitControls extends EventDispatcher {
 
 }
 
-;
+window.OrbitControls = OrbitControls;
+window.OrbitControls = OrbitControls;

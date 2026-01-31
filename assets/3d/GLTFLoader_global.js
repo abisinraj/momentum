@@ -1,5 +1,5 @@
 const { AnimationClip, Bone, Box3, BufferAttribute, BufferGeometry, ClampToEdgeWrapping, Color, ColorManagement, DirectionalLight, DoubleSide, FileLoader, FrontSide, Group, ImageBitmapLoader, InstancedMesh, InterleavedBuffer, InterleavedBufferAttribute, Interpolant, InterpolateDiscrete, InterpolateLinear, Line, LineBasicMaterial, LineLoop, LineSegments, LinearFilter, LinearMipmapLinearFilter, LinearMipmapNearestFilter, LinearSRGBColorSpace, Loader, LoaderUtils, Material, MathUtils, Matrix4, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, MirroredRepeatWrapping, NearestFilter, NearestMipmapLinearFilter, NearestMipmapNearestFilter, NumberKeyframeTrack, Object3D, OrthographicCamera, PerspectiveCamera, PointLight, Points, PointsMaterial, PropertyBinding, Quaternion, QuaternionKeyframeTrack, RepeatWrapping, Skeleton, SkinnedMesh, Sphere, SpotLight, Texture, TextureLoader, TriangleFanDrawMode, TriangleStripDrawMode, Vector2, Vector3, VectorKeyframeTrack, SRGBColorSpace, InstancedBufferAttribute } = THREE;
-
+const toTrianglesDrawMode = THREE.BufferGeometryUtils.toTrianglesDrawMode;
 
 class GLTFLoader extends Loader {
 
@@ -65,7 +65,7 @@ class GLTFLoader extends Loader {
 
 			return new GLTFMaterialsEmissiveStrengthExtension( parser );
 
-const toTrianglesDrawMode = THREE.BufferGeometryUtils.toTrianglesDrawMode;
+		} );
 
 		this.register( function ( parser ) {
 
@@ -4594,4 +4594,5 @@ function addPrimitiveAttributes( geometry, primitiveDef, parser ) {
 
 }
 
-;
+window.GLTFLoader = GLTFLoader;
+window.GLTFLoader = GLTFLoader;
