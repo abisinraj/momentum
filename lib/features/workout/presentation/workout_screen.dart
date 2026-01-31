@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../../core/providers/database_providers.dart';
 
+import '../../../core/providers/workout_progression_provider.dart';
+import '../../../core/models/workout_progression.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import 'active_workout_screen.dart';
@@ -219,89 +221,92 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   ) {
     if (workouts.isEmpty) return _buildEmptyState('No workouts yet');
 
-    final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
+    final progressionAsync = ref.watch(workoutProgressionProvider);
     
-    // 1. Identify "Today's Target" (Current Split Index)
-    final todaysWorkouts = workouts.where((w) => w.orderIndex == currentSplitIndex).toList();
-    
-    // 2. Identify "Tomorrow's Target"
-    final nextSplitIndex = totalSplitDays > 0 ? (currentSplitIndex + 1) % totalSplitDays : -1;
-    final tomorrowsWorkouts = nextSplitIndex != -1 
-        ? workouts.where((w) => w.orderIndex == nextSplitIndex).toList()
-        : <Workout>[];
+    return progressionAsync.when(
+      data: (progression) {
+        final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
+        
+        // 1. Unified Targets from provider
+        final todaysWorkouts = progression.todayWorkouts;
+        final tomorrowsWorkouts = progression.tomorrowWorkouts;
 
-    // If user toggled "Show All", show standard list view
-    if (_showAllWorkouts) {
-      return _buildWorkoutList(context, ref, workouts, todayCompletedAsync, workouts.length, currentSplitIndex);
-    }
-    
-    if (todaysWorkouts.isEmpty) {
-       return _buildEmptyState('Rest Day or Empty Split');
-    }
-    
-    // Primary View: Scrollable Dashboard
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-           Text(
-             "TODAY'S WORKOUTS",
-             style: TextStyle(
-               fontSize: 12,
-               fontWeight: FontWeight.bold,
-               color: Theme.of(context).colorScheme.primary,
-               letterSpacing: 1.2,
-             ),
-           ),
-           const SizedBox(height: 16),
-           ...todaysWorkouts.map((workout) => _WorkoutCard(
-             workout: workout,
-             isCompleted: todayCompleted.contains(workout.id),
-             isActive: false, 
-             isLocked: false,
-             index: workout.orderIndex,
-             total: workouts.length,
-             onTap: () => _startWorkout(context, ref, workout),
-             onDelete: () => _confirmDelete(context, ref, workout),
-           )),
-           
-           if (tomorrowsWorkouts.isNotEmpty) ...[
-             const SizedBox(height: 32),
-             Text(
-               "TOMORROW'S SPLIT",
-               style: TextStyle(
-                 fontSize: 12,
-                 fontWeight: FontWeight.bold,
-                 color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                 letterSpacing: 1.2,
+        // If user toggled "Show All", show standard list view
+        if (_showAllWorkouts) {
+          return _buildWorkoutList(context, ref, workouts, todayCompletedAsync, workouts.length, progression);
+        }
+        
+        if (todaysWorkouts.isEmpty) {
+           return _buildEmptyState('Rest Day or Empty Split');
+        }
+        
+        // Primary View: Scrollable Dashboard
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+               Text(
+                 "TODAY'S WORKOUTS",
+                 style: TextStyle(
+                   fontSize: 12,
+                   fontWeight: FontWeight.bold,
+                   color: Theme.of(context).colorScheme.primary,
+                   letterSpacing: 1.2,
+                 ),
                ),
-             ),
-             const SizedBox(height: 16),
-             ...tomorrowsWorkouts.map((workout) => _WorkoutCard(
-               workout: workout,
-               isCompleted: false,
-               isActive: false, 
-               isLocked: true, // Dimmed to show it's for tomorrow
-               index: workout.orderIndex,
-               total: workouts.length,
-               onTap: null, // Disable start for tomorrow's workouts
-               onDelete: () => _confirmDelete(context, ref, workout),
-             )),
-           ],
+               const SizedBox(height: 16),
+               ...todaysWorkouts.map((workout) => _WorkoutCard(
+                 workout: workout,
+                 isCompleted: todayCompleted.contains(workout.id),
+                 isActive: false, 
+                 isLocked: false,
+                 index: workout.orderIndex,
+                 total: workouts.length,
+                 onTap: () => _startWorkout(context, ref, workout, progression),
+                 onDelete: () => _confirmDelete(context, ref, workout),
+               )),
+               
+               if (tomorrowsWorkouts.isNotEmpty) ...[
+                 const SizedBox(height: 32),
+                 Text(
+                   "TOMORROW'S SPLIT",
+                   style: TextStyle(
+                     fontSize: 12,
+                     fontWeight: FontWeight.bold,
+                     color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                     letterSpacing: 1.2,
+                   ),
+                 ),
+                 const SizedBox(height: 16),
+                 ...tomorrowsWorkouts.map((workout) => _WorkoutCard(
+                   workout: workout,
+                   isCompleted: false,
+                   isActive: false, 
+                   isLocked: true, // Dimmed to show it's for tomorrow
+                   index: workout.orderIndex,
+                   total: workouts.length,
+                   onTap: null, // Disable start for tomorrow's workouts
+                   onDelete: () => _confirmDelete(context, ref, workout),
+                 )),
+               ],
 
-           const SizedBox(height: 32),
-           
-           // "Manage All" button
-           Center(
-             child: TextButton(
-               onPressed: () => setState(() => _showAllWorkouts = true),
-               child: const Text("Manage All Workouts"),
-             ),
-           ),
-           const SizedBox(height: 40), 
-        ],
-      ),
+               const SizedBox(height: 32),
+               
+               // "Manage All" button
+               Center(
+                 child: TextButton(
+                   onPressed: () => setState(() => _showAllWorkouts = true),
+                   child: const Text("Manage All Workouts"),
+                 ),
+               ),
+               const SizedBox(height: 40), 
+            ],
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
     );
   }
 
@@ -311,7 +316,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     List<Workout> workouts,
     AsyncValue<List<int>> todayCompletedAsync,
     int totalCount,
-    int currentSplitIndex,
+    WorkoutProgression progression,
   ) {
     // Legacy List View (Management Mode)
     final todayCompleted = todayCompletedAsync.valueOrNull ?? [];
@@ -332,7 +337,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         final isCompleted = todayCompleted.contains(workout.id);
         final isActive = activeSession?.workoutId == workout.id;
         
-        final isToday = workout.orderIndex == currentSplitIndex;
+        final isToday = workout.orderIndex == progression.splitIndex;
         
         return _WorkoutCard(
           key: ValueKey(workout.id),
@@ -342,14 +347,39 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           isLocked: !isToday, // Lock visual if not today
           index: workout.orderIndex, 
           total: totalCount,
-          onTap: isToday ? () => _startWorkout(context, ref, workout) : null,
+          onTap: isToday ? () => _startWorkout(context, ref, workout, progression) : null,
           onDelete: () => _confirmDelete(context, ref, workout),
         );
       },
     );
   }
   
-  Future<void> _startWorkout(BuildContext context, WidgetRef ref, Workout workout) async {
+  Future<void> _startWorkout(BuildContext context, WidgetRef ref, Workout workout, WorkoutProgression progression) async {
+    // 1. Unified Locking Check
+    if (workout.orderIndex != progression.splitIndex) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text("Stick to the plan! You can't jump ahead to future workouts."),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+      return;
+    }
+    
+    // 2. Extra Safety: Block if day already completed
+    if (progression.isCompletedToday) {
+       if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("You've crushed your goal for today! Rest and recover for tomorrow."),
+          ),
+        );
+      }
+      return;
+    }
+
     // Rest Day Logic
     if (workout.isRestDay) {
        final colorScheme = Theme.of(context).colorScheme;

@@ -12,6 +12,7 @@ import 'database_providers.dart';
 import 'dashboard_providers.dart';
 import 'ai_providers.dart';
 import '../services/progression_service.dart';
+import 'workout_progression_provider.dart';
 import '../../features/workout/providers/comparison_provider.dart';
 
 part 'workout_providers.g.dart';
@@ -296,17 +297,37 @@ class WorkoutManager extends _$WorkoutManager {
     await db.completeSession(sessionId, 0); // 0 duration for rest days
     await db.checkAndAdvanceSplit();
     
-    // Trigger standard invalidations
+    _invalidateProgression();
+  }
+
+  /// Skip the current workout day
+  Future<void> skipWorkoutDay() async {
+    final db = ref.read(appDatabaseProvider);
+    final user = await db.getUser();
+    if (user == null) return;
+    
+    final splitDays = user.splitDays ?? 7;
+    final nextIndex = (user.currentSplitIndex + 1) % splitDays;
+    
+    await db.setSplitIndex(nextIndex);
+    _invalidateProgression();
+  }
+
+  /// Reset progression to the start of the split
+  Future<void> resetProgression() async {
+    final db = ref.read(appDatabaseProvider);
+    await db.setSplitIndex(0);
+    _invalidateProgression();
+  }
+
+  void _invalidateProgression() {
     ref.invalidate(todayCompletedWorkoutIdsProvider);
     ref.invalidate(nextWorkoutProvider);
+    ref.invalidate(workoutProgressionProvider);
     ref.invalidate(weeklyStatsProvider);
     ref.invalidate(weeklyInsightProvider);
     ref.invalidate(sessionHistoryProvider);
-    
-    // Dashboard & AI
     ref.invalidate(dailyInsightProvider); 
-    
-    // Sync widgets
     final _ = ref.refresh(widgetSyncProvider);
   }
 

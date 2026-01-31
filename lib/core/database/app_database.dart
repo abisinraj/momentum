@@ -549,6 +549,61 @@ class AppDatabase extends _$AppDatabase {
     
     return workload;
   }
+
+  /// Get the last session where a specific muscle was the primary target
+  /// Returns {date, volume, sets}
+  Future<Map<String, dynamic>?> getLastSessionForMuscle(String muscleName) async {
+    // Join Sessions -> SessionExercises -> Exercises
+    final query = select(sessions)
+        .join([
+          innerJoin(sessionExercises, sessionExercises.sessionId.equalsExp(sessions.id)),
+          innerJoin(exercises, exercises.id.equalsExp(sessionExercises.exerciseId)),
+        ])
+        ..where(exercises.primaryMuscleGroup.equals(muscleName) & 
+                sessions.completedAt.isNotNull())
+        ..orderBy([OrderingTerm.desc(sessions.completedAt)])
+        ..limit(1);
+
+    final row = await query.getSingleOrNull();
+    if (row == null) return null;
+
+    final session = row.readTable(sessions);
+    // final se = row.readTable(sessionExercises); // Unused
+    
+    // We need to aggregate stats for that session + muscle
+    // One session might have multiple exercises for the same muscle
+    // So getting just one row might be partial data.
+    // Better approach: Get the session ID, then aggregate.
+    final sessionId = session.id;
+    
+    // Aggregate volume for this muscle in this session
+    final volumeQuery = select(sessionExercises)
+        .join([
+          innerJoin(exercises, exercises.id.equalsExp(sessionExercises.exerciseId)),
+        ])
+        ..where(sessionExercises.sessionId.equals(sessionId) & exercises.primaryMuscleGroup.equals(muscleName));
+        
+    final results = await volumeQuery.get();
+    
+    double totalVolume = 0;
+    int totalSets = 0;
+    
+    final user = await getUser();
+    final userWeight = user?.weightKg ?? 70.0;
+
+    for (final r in results) {
+      final sExec = r.readTable(sessionExercises);
+      final weight = sExec.weightKg ?? (userWeight * 0.8);
+      totalVolume += weight * sExec.completedReps;
+      totalSets += sExec.completedSets;
+    }
+
+    return {
+      'date': session.completedAt,
+      'volume': totalVolume,
+      'sets': totalSets,
+    };
+  }
   
   /// Get volume load for a specific period
   /// Returns total volume (kg * reps * sets)

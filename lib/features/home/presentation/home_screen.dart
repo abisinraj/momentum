@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/database_providers.dart';
+import '../../../core/providers/workout_progression_provider.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../workout/presentation/active_workout_screen.dart';
@@ -56,10 +57,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final nextWorkoutAsync = ref.watch(nextWorkoutProvider);
     final userAsync = ref.watch(currentUserProvider);
     final activeSession = ref.watch(activeWorkoutSessionProvider);
-    final todayCompletedAsync = ref.watch(todayCompletedWorkoutIdsProvider);
     final suggestionsAsync = ref.watch(smartSuggestionsProvider);
     // Keep widget sync alive and reactive
     final _ = ref.watch(widgetSyncProvider);
@@ -67,29 +66,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final colorScheme = theme.colorScheme;
     
-    // If there's an active session, navigate to it
-    // REMOVED: User prefers manual control
-    /*
-    if (activeSession != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => ActiveWorkoutScreen(session: activeSession),
-          ),
-        );
-      });
-    }
-    */
-    
     final userName = switch (userAsync) {
       AsyncData(:final value) => value?.name ?? 'Athlete',
       _ => 'Athlete',
-    };
-    
-    // Get today's completed workout IDs
-    final todayCompleted = switch (todayCompletedAsync) {
-      AsyncData(:final value) => value,
-      _ => <int>[],
     };
     
     return Scaffold(
@@ -112,11 +91,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               
               // Main workout content
-              switch (nextWorkoutAsync) {
-                AsyncData(:final value) => _buildWorkoutContent(context, ref, value, activeSession, todayCompleted),
-                AsyncError(:final error) => _buildErrorState(context, error.toString()),
-                _ => const WorkoutCardSkeleton(),
-              },
+              ref.watch(workoutProgressionProvider).when(
+                data: (progression) => _buildWorkoutContent(
+                  context, 
+                  ref, 
+                  progression.todayWorkouts.isNotEmpty ? progression.todayWorkouts.first : null, 
+                  activeSession, 
+                  progression.isCompletedToday,
+                ),
+                error: (e, _) => _buildErrorState(context, e.toString()),
+                loading: () => const WorkoutCardSkeleton(),
+              ),
               
               const SizedBox(height: 16),
               
@@ -399,16 +384,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
   
-  Widget _buildWorkoutContent(BuildContext context, WidgetRef ref, Workout? workout, ActiveSession? activeSession, List<int> todayCompleted) {
+  Widget _buildWorkoutContent(BuildContext context, WidgetRef ref, Workout? workout, ActiveSession? activeSession, bool isCompletedToday) {
     if (workout == null) {
       return _buildEmptyState(context);
     }
     
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
-    // Check if this workout was completed today
-    final isCompletedToday = todayCompleted.contains(workout.id);
     
     // Determine image provider
     ImageProvider? imageProvider;

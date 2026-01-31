@@ -8,18 +8,36 @@
     <style>
         body {
             margin: 0;
-            background-color: #EEE;
+            background-color: transparent;
             overflow: hidden;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #eee;
         }
 
         canvas {
             display: block;
         }
+
+        #loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            font-weight: 500;
+            color: #888;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        #loader.hidden {
+            opacity: 0;
+        }
     </style>
 </head>
 
 <body>
+    <div id="loader">Loading Model...</div>
     <script src="three_global.js"></script>
     <script src="BufferGeometryUtils_global.js"></script>
     <script src="GLTFLoader_global.js"></script>
@@ -27,22 +45,37 @@
     <script src="RoomEnvironment_global.js"></script>
 
     <script>
+        // Explicitly alias globals to ensure access
+        const THREE = window.THREE;
+        const GLTFLoader = window.GLTFLoader;
+        const OrbitControls = window.OrbitControls;
+        const RoomEnvironment = window.RoomEnvironment;
+
         // Use global variables
         var camera, scene, renderer, model, controls;
+
+        // --- Camera Zoom Logic State (Hoisted to avoid TDZ) ---
+        let isZooming = false;
+        const targetCameraPos = new THREE.Vector3();
+        const targetControlsTarget = new THREE.Vector3();
+        const zoomDuration = 1000; // ms
+        let zoomStartTime = 0;
+        const startCameraPos = new THREE.Vector3();
+        const startControlsTarget = new THREE.Vector3();
 
         // --- MUSCLE DEFINITIONS (For Shader) ---
         const muscleDefs = [
             // UPPER BODY
-            { name: 'Neck', bone: 'Neck', radius: 0.12 },
+            { name: 'Neck', bone: 'Neck', radius: 0.10 },
             { name: 'Traps', bone: 'Spine2', radius: 0.18, offset: [0, 0.2, -0.1] },
-            { name: 'Chest', bone: 'Spine2', radius: 0.18, offset: [0, 0.15, 0.12] },
+            { name: 'Chest', bone: 'Spine2', radius: 0.20, offset: [0, -0.05, 0.15] },
             { name: 'Upper Back', bone: 'Spine2', radius: 0.20, offset: [0, 0.1, -0.1] },
             { name: 'Lats', bone: 'Spine1', radius: 0.22, offset: [0, 0.15, -0.1] },
             { name: 'Lower Back', bone: 'Spine', radius: 0.20, offset: [0, 0.05, -0.12] },
 
             // SHOULDERS (Sub-divided)
-            { name: 'Front Shoulders', bone: 'RightArm', radius: 0.12, offset: [0, 0.05, 0.08] },
-            { name: 'Front Shoulders', bone: 'LeftArm', radius: 0.12, offset: [0, 0.05, 0.08] },
+            { name: 'Front Shoulders', bone: 'RightArm', radius: 0.14, offset: [0, 0.05, 0.12] },
+            { name: 'Front Shoulders', bone: 'LeftArm', radius: 0.14, offset: [0, 0.05, 0.12] },
             { name: 'Side Shoulders', bone: 'RightArm', radius: 0.12, offset: [0.08, 0.05, 0] },
             { name: 'Side Shoulders', bone: 'LeftArm', radius: 0.12, offset: [-0.08, 0.05, 0] },
             { name: 'Rear Shoulders', bone: 'RightArm', radius: 0.12, offset: [0, 0.05, -0.08] },
@@ -57,10 +90,10 @@
             { name: 'Forearms', start: 'LeftForeArm', end: 'LeftHand', radius: 0.10 },
 
             // CORE
-            { name: 'Upper Abs', bone: 'Spine2', radius: 0.18, offset: [0, 0, 0.12] },
-            { name: 'Lower Abs', bone: 'Spine1', radius: 0.18, offset: [0, 0, 0.12] },
-            { name: 'Obliques', bone: 'Spine', radius: 0.18, offset: [0.15, 0, 0.05] },
-            { name: 'Obliques', bone: 'Spine', radius: 0.18, offset: [-0.15, 0, 0.05] },
+            { name: 'Upper Abs', bone: 'Spine2', radius: 0.16, offset: [0, -0.15, 0.14] },
+            { name: 'Lower Abs', bone: 'Spine1', radius: 0.16, offset: [0, -0.05, 0.14] },
+            { name: 'Obliques', bone: 'Spine1', radius: 0.14, offset: [0.12, -0.05, 0.08] },
+            { name: 'Obliques', bone: 'Spine1', radius: 0.14, offset: [-0.12, -0.05, 0.08] },
 
             // LOWER BODY
             { name: 'Glutes', bone: 'Hips', radius: 0.22, offset: [0, -0.05, -0.15] },
@@ -68,8 +101,8 @@
             { name: 'Quads', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.16, offset: [0, 0, 0.08] },
             { name: 'Hamstrings', start: 'RightUpLeg', end: 'RightLeg', radius: 0.16, offset: [0, 0, -0.08] },
             { name: 'Hamstrings', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.16, offset: [0, 0, -0.08] },
-            { name: 'Inner Thighs', start: 'RightUpLeg', end: 'RightLeg', radius: 0.14, offset: [-0.08, 0, 0] },
-            { name: 'Inner Thighs', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.14, offset: [0.08, 0, 0] },
+            { name: 'Inner Thighs', start: 'RightUpLeg', end: 'RightLeg', radius: 0.16, offset: [-0.06, 0.05, 0] },
+            { name: 'Inner Thighs', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.16, offset: [0.06, 0.05, 0] },
             { name: 'Outer Thighs', start: 'RightUpLeg', end: 'RightLeg', radius: 0.14, offset: [0.08, 0, 0] },
             { name: 'Outer Thighs', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.14, offset: [-0.08, 0, 0] },
             { name: 'Calves', start: 'RightLeg', end: 'RightFoot', radius: 0.10, offset: [0, 0, -0.06] },
@@ -90,18 +123,65 @@
 
         const activeHeatmap = {};
 
-        init();
-        animate();
+        // Efficient dependency gatekeeper
+        function checkDependencies() {
+            const startTime = Date.now();
+            const TIMEOUT_MS = 5000;
+
+            function check() {
+                const missing = [];
+                if (typeof window.THREE === 'undefined') missing.push('THREE.js');
+                else {
+                    if (typeof window.THREE.BufferGeometryUtils === 'undefined') missing.push('BufferGeometryUtils');
+                    if (typeof window.GLTFLoader === 'undefined') missing.push('GLTFLoader');
+                    if (typeof window.OrbitControls === 'undefined') missing.push('OrbitControls');
+                    if (typeof window.RoomEnvironment === 'undefined') missing.push('RoomEnvironment');
+                }
+
+                if (missing.length === 0) {
+                    console.log('✓ 3D Viewer initialized successfully');
+                    document.getElementById('loader').classList.add('hidden');
+                    init();
+                    animate();
+                    return;
+                }
+
+                if (Date.now() - startTime > TIMEOUT_MS) {
+                    console.error('❌ 3D Viewer startup failed: Missing dependencies:', missing.join(', '));
+                    const loader = document.getElementById('loader');
+                    loader.style.color = '#ff4444';
+                    loader.innerHTML = 'Error: Missing ' + missing.join(', ');
+                    return;
+                }
+
+                // Log status only every 500ms to avoid flooding
+                if ((Date.now() - startTime) % 500 < 50) {
+                    console.log('Waiting for:', missing.join(', '));
+                }
+
+                requestAnimationFrame(check);
+            }
+
+            check();
+        }
+
+        // Run dependency check
+        checkDependencies();
 
         function init() {
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio); // SUPPORT HDPI SCREENS
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.outputColorSpace = THREE.SRGBColorSpace;
-            renderer.setClearColor(0x000000, 0); // Transparent background
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setClearColor(0x000000, 0);
             document.body.appendChild(renderer.domElement);
 
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, 1.2, 3); // Slightly further back
+            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 1.2, 3.5);
 
             scene = new THREE.Scene();
 
@@ -110,19 +190,31 @@
             const pmremGenerator = new THREE.PMREMGenerator(renderer);
             scene.environment = pmremGenerator.fromScene(environment).texture;
 
-            const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 3.0);
             dirLight.position.set(5, 10, 7.5);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 20;
             scene.add(dirLight);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
 
             const loader = new GLTFLoader();
-            // Cache-busting model load
-            const timestamp = Date.now();
-            loader.load('model.glb?t=' + timestamp, function (gltf) {
+
+            // Function to handle the GLTF content once loaded
+            function onModelLoaded(gltf) {
                 model = gltf.scene;
                 window.model = model;
+
+                // Auto-center model on X and Z axes for better rotation (profile views)
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.x = -center.x;
+                model.position.z = -center.z;
+
                 scene.add(model);
 
                 // Animations
@@ -136,31 +228,61 @@
                 model.traverse(child => {
                     if (child.isMesh) {
                         const name = child.name.toLowerCase();
+                        child.castShadow = true;
+                        child.receiveShadow = true;
 
                         // Visibility Logic
                         if (name.includes('glasses') || name.includes('shoes')) {
                             child.visible = false;
                         } else {
+                            // Premium "Statue" Material
+                            child.material = new THREE.MeshStandardMaterial({
+                                color: 0xe0e0e0,
+                                roughness: 0.3,
+                                metalness: 0.15,
+                                envMapIntensity: 1.0,
+                                side: THREE.DoubleSide
+                            });
+
                             // Heatmap Shader override
                             applyHeatmapShader(child);
                         }
                     }
                 });
 
-                // Trigger initial update from Flutter if data was cached
+                // Trigger initial update
                 if (window.pendingHeatmap) {
                     window.setMuscleHeatmap(window.pendingHeatmap);
                     window.pendingHeatmap = null;
                 }
+            }
 
-            }, undefined, function (error) {
-                console.error('Error loading model:', error);
+            // Expose Loader for Base64 (Flutter Injection)
+            window.loadGLTFFromBase64 = function (base64Data) {
+                console.log("Received Base64 Model Data");
+                try {
+                    const dataUri = 'data:model/gltf-binary;base64,' + base64Data;
+                    loader.load(dataUri, onModelLoaded, undefined, function (error) {
+                        console.error('Error loading Base64 model:', error);
+                    });
+                } catch (e) {
+                    console.error("Exception loading Base64 model", e);
+                }
+            };
+
+            // Attempt default load
+            const timestamp = Date.now();
+            loader.load('model.glb?t=' + timestamp, onModelLoaded, undefined, function (error) {
+                console.warn('Default model load failed. Waiting for Base64 injection.', error);
             });
 
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.target.set(0, 1.0, 0); // Focus on upper body
+            controls.maxPolarAngle = Math.PI * 0.6; // Prevent looking under model too much
+            controls.minDistance = 1.5;
+            controls.maxDistance = 6;
+            controls.target.set(0, 1.0, 0);
 
             window.addEventListener('resize', onWindowResize);
             window.addEventListener('pointerdown', onPointerDown);
@@ -170,6 +292,9 @@
         const mouse = new THREE.Vector2();
 
         function onPointerDown(event) {
+            // Prevent interaction if model isn't ready
+            if (!model) return;
+
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -316,6 +441,7 @@
             requestAnimationFrame(animate);
             if (window.mixer) window.mixer.update(0.016);
             if (controls) controls.update();
+            updateZoom();
             updateUniforms();
             renderer.render(scene, camera);
         }
@@ -392,6 +518,78 @@
         }
 
         // --- PUBLIC API ---
+
+        window.zoomToMuscle = function (muscleName) {
+            const def = muscleDefs.find(m => m.name === muscleName);
+            if (!def) return;
+
+            // Calculate target position (center of muscle)
+            let center = new THREE.Vector3();
+            if (def.bone) {
+                const bone = findBone(def.bone);
+                if (bone) {
+                    bone.getWorldPosition(center);
+                    if (def.offset) {
+                        const off = new THREE.Vector3(...def.offset);
+                        const q = new THREE.Quaternion();
+                        bone.getWorldQuaternion(q);
+                        center.add(off.applyQuaternion(q));
+                    }
+                }
+            } else if (def.start && def.end) {
+                const sBone = findBone(def.start);
+                const eBone = findBone(def.end);
+                if (sBone && eBone) {
+                    const sPos = new THREE.Vector3();
+                    const ePos = new THREE.Vector3();
+                    sBone.getWorldPosition(sPos);
+                    eBone.getWorldPosition(ePos);
+                    center.addVectors(sPos, ePos).multiplyScalar(0.5);
+
+                    if (def.offset) {
+                        // Apply offset relative to start bone rotation for stability
+                        const off = new THREE.Vector3(...def.offset);
+                        const q = new THREE.Quaternion();
+                        sBone.getWorldQuaternion(q);
+                        center.add(off.applyQuaternion(q));
+                    }
+                }
+            }
+
+            // Set controls target to muscle center
+            targetControlsTarget.copy(center);
+
+            // Calculate optimal camera position
+            // Determine viewing angle based on muscle position (front/back)
+            // Ideally, we maintain current azimuth but adjust height and distance.
+            // Simple heuristic to verify:
+            // For now, let's keep the camera at a nice fixed distance relative to the muscle
+            const offsetDir = new THREE.Vector3().subVectors(camera.position, controls.target).normalize();
+            // Force a slight "up" angle if looking too flat
+            if (Math.abs(offsetDir.y) < 0.2) offsetDir.y = 0.2;
+            offsetDir.normalize();
+
+            const distance = 1.0; // Zoom distance (tweak as needed)
+            targetCameraPos.copy(center).add(offsetDir.multiplyScalar(distance));
+
+            // Start Animation
+            startCameraPos.copy(camera.position);
+            startControlsTarget.copy(controls.target);
+            zoomStartTime = Date.now();
+            isZooming = true;
+        };
+
+        window.resetCamera = function () {
+            // Reset to initial state
+            targetControlsTarget.set(0, 1.0, 0);
+            targetCameraPos.set(0, 1.2, 3);
+
+            startCameraPos.copy(camera.position);
+            startControlsTarget.copy(controls.target);
+            zoomStartTime = Date.now();
+            isZooming = true;
+        };
+
         window.setMuscleHeatmap = function (heatmap) {
             if (!model) {
                 window.pendingHeatmap = heatmap;
@@ -408,7 +606,7 @@
                 'Lower Back': 'Lower Back',
                 'Adductors': 'Inner Thighs',
                 'Abductors': 'Outer Thighs',
-                'Hip flexors': ['Quads', 'Upper Abs'] // Composite logical hit
+                'Hip flexors': ['Quads', 'Upper Abs']
             };
             const groups = {
                 'Arms': ['Biceps', 'Triceps', 'Forearms'],
@@ -423,7 +621,7 @@
 
                 let targets = [key];
 
-                // Add aliases if they exist in muscleDefs or are arrays
+                // Add aliases
                 if (aliases[key]) {
                     if (Array.isArray(aliases[key])) targets = targets.concat(aliases[key]);
                     else targets.push(aliases[key]);
@@ -442,13 +640,63 @@
                     }
                 });
             }
+
         };
 
         window.resetHeatmap = function () {
             for (const key in activeHeatmap) activeHeatmap[key] = 0;
         };
 
+        window.setBackgroundColor = function (color) {
+            // Support hex or css color strings
+            document.body.style.backgroundColor = color;
+            // Also update renderer if it's not transparent anymore, but we'll stick to CSS for ease
+        };
+
+        window.setProfileView = function (side) {
+            // side: 'front', 'back', 'left', 'right'
+            const positions = {
+                'front': { x: 0, z: 3.5 },
+                'back': { x: 0, z: -3.5 },
+                'left': { x: -3.5, z: 0 },
+                'right': { x: 3.5, z: 0 }
+            };
+            const pos = positions[side] || positions['front'];
+
+            targetCameraPos.set(pos.x, 1.2, pos.z);
+            targetControlsTarget.set(0, 1.0, 0);
+
+            startCameraPos.copy(camera.position);
+            startControlsTarget.copy(controls.target);
+            zoomStartTime = Date.now();
+            isZooming = true;
+        };
+
+        function updateZoom() {
+            if (!isZooming) return;
+
+            const now = Date.now();
+            const progress = Math.min((now - zoomStartTime) / zoomDuration, 1.0);
+
+            // Ease out cubic
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            camera.position.lerpVectors(startCameraPos, targetCameraPos, ease);
+            controls.target.lerpVectors(startControlsTarget, targetControlsTarget, ease);
+
+            if (progress >= 1.0) {
+                isZooming = false;
+            }
+        }
+
         console.log("3D Viewer initialized (Global Mode)");
+
+        // Showcase trigger
+        if (new URLSearchParams(window.location.search).get('showcase') === '1') {
+            const script = document.createElement('script');
+            script.src = 'showcase.js';
+            document.body.appendChild(script);
+        }
     </script>
 </body>
 

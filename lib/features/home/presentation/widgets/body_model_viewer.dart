@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:momentum/app/theme/app_theme.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class BodyModelViewer extends StatefulWidget {
@@ -63,13 +62,16 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Container(
       height: 400,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer.withValues(alpha: 0.3),
+        color: theme.scaffoldBackgroundColor.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.darkBorder),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Stack(
         children: [
@@ -86,10 +88,10 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'MUSCLE FATIGUE',
                   style: TextStyle(
-                    color: AppTheme.tealPrimary,
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
                     fontSize: 12,
@@ -98,13 +100,34 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Container(width: 12, height: 12, color: Colors.white),
+                    Container(
+                      width: 12, 
+                      height: 12, 
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withValues(alpha: 0.1),
+                        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                     const SizedBox(width: 4),
-                    const Text('Fresh', style: TextStyle(color: Colors.white, fontSize: 10)),
+                    Text(
+                      'Fresh', 
+                      style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
+                    ),
                     const SizedBox(width: 12),
-                    Container(width: 12, height: 12, color: Colors.red),
+                    Container(
+                      width: 12, 
+                      height: 12, 
+                      decoration: BoxDecoration(
+                        color: colorScheme.error.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                     const SizedBox(width: 4),
-                    const Text('Fatigued', style: TextStyle(color: Colors.white, fontSize: 10)),
+                    Text(
+                      'Fatigued', 
+                      style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
+                    ),
                   ],
                 ),
               ],
@@ -112,8 +135,8 @@ class _BodyModelViewerState extends State<BodyModelViewer> {
           ),
           
           if (!_isLoaded)
-            const Center(
-              child: CircularProgressIndicator(color: AppTheme.tealPrimary),
+            Center(
+              child: CircularProgressIndicator(color: colorScheme.primary),
             ),
         ],
       ),

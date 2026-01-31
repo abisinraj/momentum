@@ -231,14 +231,120 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    ),
 
                    const SizedBox(height: 32),
-                   _buildSectionHeader(context, 'Data & Privacy'),
+                   _buildSectionHeader(context, 'Data Management'),
+                   const SizedBox(height: 16),
+                   
+                   // Google Drive Sync card (Moved from Profile)
+                   Container(
+                     padding: const EdgeInsets.all(16),
+                     decoration: BoxDecoration(
+                       color: colorScheme.surfaceContainer,
+                       borderRadius: BorderRadius.circular(16),
+                       border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
+                     ),
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         Row(
+                           children: [
+                             Container(
+                               width: 44,
+                               height: 44,
+                               decoration: BoxDecoration(
+                                 color: colorScheme.tertiary.withValues(alpha: 0.1),
+                                 borderRadius: BorderRadius.circular(12),
+                               ),
+                               child: Image.network(
+                                 'https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png',
+                                 width: 24,
+                                 height: 24,
+                                 errorBuilder: (_, _, _) => Icon(
+                                   Icons.cloud_outlined,
+                                   color: colorScheme.tertiary,
+                                 ),
+                               ),
+                             ),
+                             const SizedBox(width: 16),
+                             Expanded(
+                               child: Column(
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: [
+                                   Text(
+                                     'Google Drive Sync',
+                                     style: TextStyle(
+                                       fontSize: 16,
+                                       fontWeight: FontWeight.w600,
+                                       color: colorScheme.onSurface,
+                                     ),
+                                   ),
+                                   Row(
+                                     children: [
+                                       Container(
+                                         width: 6,
+                                         height: 6,
+                                         decoration: const BoxDecoration(
+                                           color: Colors.green,
+                                           shape: BoxShape.circle,
+                                         ),
+                                       ),
+                                       const SizedBox(width: 4),
+                                       const Text(
+                                         'Data secure',
+                                         style: TextStyle(
+                                           fontSize: 12,
+                                           color: Colors.green,
+                                         ),
+                                       ),
+                                     ],
+                                   ),
+                                 ],
+                               ),
+                             ),
+                           ],
+                         ),
+                         const SizedBox(height: 12),
+                         Text(
+                           'Last backup: Today, 08:00 AM',
+                           style: TextStyle(
+                             fontSize: 12,
+                             color: colorScheme.onSurfaceVariant,
+                           ),
+                         ),
+                         const SizedBox(height: 12),
+                         SizedBox(
+                           width: double.infinity,
+                           child: OutlinedButton.icon(
+                             onPressed: () {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 SnackBar(
+                                   content: const Text('Google Drive backup coming soon!'),
+                                   backgroundColor: colorScheme.surfaceContainerHighest,
+                                 ),
+                               );
+                             },
+                             icon: const Icon(Icons.cloud_upload_outlined, size: 18),
+                             label: const Text('Manual Backup Now'),
+                             style: OutlinedButton.styleFrom(
+                               foregroundColor: colorScheme.primary,
+                               side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.5)),
+                               padding: const EdgeInsets.symmetric(vertical: 12),
+                               shape: RoundedRectangleBorder(
+                                 borderRadius: BorderRadius.circular(12),
+                               ),
+                             ),
+                           ),
+                         ),
+                       ],
+                     ),
+                   ),
+                   
                    const SizedBox(height: 16),
                    _buildSettingsTile(
                      context: context,
                      icon: Icons.upload_file,
                      iconColor: Colors.blue,
-                     title: 'Backup Data',
-                     subtitle: 'Export to JSON file',
+                     title: 'Export to JSON',
+                     subtitle: 'Local backup file',
                      onTap: _exportData,
                    ),
                    const SizedBox(height: 12),
@@ -246,8 +352,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      context: context,
                      icon: Icons.download,
                      iconColor: Colors.green,
-                     title: 'Restore Data',
-                     subtitle: 'Import from JSON file',
+                     title: 'Restore from JSON',
+                     subtitle: 'Import backup file',
                      onTap: _restoreData,
                    ),
 
