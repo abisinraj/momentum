@@ -720,7 +720,7 @@ Row(
                     Expanded(
                       flex: 4,
                       child: DropdownButtonFormField<String>(
-                        value: _selectedCategory,
+                        initialValue: _selectedCategory,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Muscle Group',
@@ -750,7 +750,7 @@ Row(
                     Expanded(
                       flex: 5, // Slightly wider for specific names
                       child: DropdownButtonFormField<String>(
-                        value: _selectedMuscle,
+                        initialValue: _selectedMuscle,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Target',

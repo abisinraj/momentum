@@ -39,19 +39,35 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
           cache-path: '${{ runner.tool_cache }}/flutter'
           
+      - name: Diagnostic Info
+        run: |
+          echo "==== Flutter Doctor ===="
+          flutter doctor -v
+          echo "==== Java Version ===="
+          java -version
+          echo "==== Environment Variables ===="
+          printenv | grep -E 'JAVA|FLUTTER|DART'
+          
+      - name: Verify Assets
+        run: |
+          echo "==== Listing 3D Assets ===="
+          ls -R assets/3d/
+          
       - name: Get dependencies
-        run: flutter pub get
+        run: flutter pub get -v
         
       - name: Run code generation
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build --delete-conflicting-outputs --verbose
         
       - name: Clean project
         run: flutter clean
 
-      - name: Build APK
+      - name: Build APK (Verbose)
         env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx5120m -XX:MaxMetaspaceSize=1024m"
-        run: flutter build apk --release -v
+        run: |
+          echo "Starting Flutter Build APK..."
+          flutter build apk --release -v --no-pub
         
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
