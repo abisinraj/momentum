@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:momentum/core/database/app_database.dart';
+import 'package:http/http.dart' as http;
 
 class AIInsightResponse {
   final String text;
@@ -321,10 +322,9 @@ Instructions:
   ) async {
     // Updated 2026 Model Priority List
     const modelsToTry = [
-      'gemini-3-flash-preview',
-      'gemini-3-pro-preview',
       'gemini-2.0-flash',
       'gemini-1.5-flash',
+      'gemini-1.5-pro',
     ];
 
     Object? lastError;
@@ -344,5 +344,27 @@ Instructions:
     }
     
     throw lastError ?? Exception('Failed to generate content with all models');
+  }
+
+  Future<List<String>> listAvailableModels(String apiKey) async {
+    try {
+      final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List models = data['models'] ?? [];
+        
+        // Filter models that support generateContent and are clean
+        return models
+            .where((m) => (m['supportedGenerationMethods'] as List).contains('generateContent'))
+            .map((m) => (m['name'] as String).replaceFirst('models/', ''))
+            .toList();
+      } else {
+        throw Exception('Failed to fetch models: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error listing models: $e');
+    }
   }
 }

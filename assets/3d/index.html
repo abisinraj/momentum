@@ -58,58 +58,43 @@
         let isZooming = false;
         const targetCameraPos = new THREE.Vector3();
         const targetControlsTarget = new THREE.Vector3();
-        const zoomDuration = 1000; // ms
+        const zoomDuration = 800; // ms (Faster, smoother)
         let zoomStartTime = 0;
         const startCameraPos = new THREE.Vector3();
         const startControlsTarget = new THREE.Vector3();
+        let lastTapTime = 0;
 
         // --- MUSCLE DEFINITIONS (For Shader) ---
-        const muscleDefs = [
-            // UPPER BODY
-            { name: 'Neck', bone: 'Neck', radius: 0.10 },
-            { name: 'Traps', bone: 'Spine2', radius: 0.18, offset: [0, 0.2, -0.1] },
-            { name: 'Chest', bone: 'Spine2', radius: 0.20, offset: [0, -0.05, 0.15] },
-            { name: 'Upper Back', bone: 'Spine2', radius: 0.20, offset: [0, 0.1, -0.1] },
-            { name: 'Lats', bone: 'Spine1', radius: 0.22, offset: [0, 0.15, -0.1] },
-            { name: 'Lower Back', bone: 'Spine', radius: 0.20, offset: [0, 0.05, -0.12] },
+        // --- MUSCLE DEFINITIONS (Initially Empty - Populated by Flutter) ---
+        let muscleDefs = [];
 
-            // SHOULDERS (Sub-divided)
-            { name: 'Front Shoulders', bone: 'RightArm', radius: 0.14, offset: [0, 0.05, 0.12] },
-            { name: 'Front Shoulders', bone: 'LeftArm', radius: 0.14, offset: [0, 0.05, 0.12] },
-            { name: 'Side Shoulders', bone: 'RightArm', radius: 0.12, offset: [0.08, 0.05, 0] },
-            { name: 'Side Shoulders', bone: 'LeftArm', radius: 0.12, offset: [-0.08, 0.05, 0] },
-            { name: 'Rear Shoulders', bone: 'RightArm', radius: 0.12, offset: [0, 0.05, -0.08] },
-            { name: 'Rear Shoulders', bone: 'LeftArm', radius: 0.12, offset: [0, 0.05, -0.08] },
+        // Function called by Flutter to set definitions
+        window.updateMuscleDefs = function (defs, mirroredNames) {
+            console.log('Received Muscle Defs from Flutter:', defs.length);
+            muscleDefs = defs;
 
-            // ARMS
-            { name: 'Biceps', start: 'RightArm', end: 'RightForeArm', radius: 0.12, offset: [0, 0, 0.06] },
-            { name: 'Biceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.12, offset: [0, 0, 0.06] },
-            { name: 'Triceps', start: 'RightArm', end: 'RightForeArm', radius: 0.12, offset: [0, 0, -0.06] },
-            { name: 'Triceps', start: 'LeftArm', end: 'LeftForeArm', radius: 0.12, offset: [0, 0, -0.06] },
-            { name: 'Forearms', start: 'RightForeArm', end: 'RightHand', radius: 0.10 },
-            { name: 'Forearms', start: 'LeftForeArm', end: 'LeftHand', radius: 0.10 },
+            // Generate Mirrored Muscles (Left Side) automatically
+            // Flutter passes a list of names that should be mirrored
+            mirroredNames.forEach(name => {
+                const original = muscleDefs.find(m => m.name === name);
+                if (original) {
+                    const mirror = { ...original }; // Shallow copy
 
-            // CORE
-            { name: 'Upper Abs', bone: 'Spine2', radius: 0.16, offset: [0, -0.15, 0.14] },
-            { name: 'Lower Abs', bone: 'Spine1', radius: 0.16, offset: [0, -0.05, 0.14] },
-            { name: 'Obliques', bone: 'Spine1', radius: 0.14, offset: [0.12, -0.05, 0.08] },
-            { name: 'Obliques', bone: 'Spine1', radius: 0.14, offset: [-0.12, -0.05, 0.08] },
+                    // Flip Bone Names
+                    if (mirror.bone) mirror.bone = mirror.bone.replace('Right', 'Left');
+                    if (mirror.start) mirror.start = mirror.start.replace('Right', 'Left');
+                    if (mirror.end) mirror.end = mirror.end.replace('Right', 'Left');
 
-            // LOWER BODY
-            { name: 'Glutes', bone: 'Hips', radius: 0.22, offset: [0, -0.05, -0.15] },
-            { name: 'Quads', start: 'RightUpLeg', end: 'RightLeg', radius: 0.16, offset: [0, 0, 0.08] },
-            { name: 'Quads', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.16, offset: [0, 0, 0.08] },
-            { name: 'Hamstrings', start: 'RightUpLeg', end: 'RightLeg', radius: 0.16, offset: [0, 0, -0.08] },
-            { name: 'Hamstrings', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.16, offset: [0, 0, -0.08] },
-            { name: 'Inner Thighs', start: 'RightUpLeg', end: 'RightLeg', radius: 0.16, offset: [-0.06, 0.05, 0] },
-            { name: 'Inner Thighs', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.16, offset: [0.06, 0.05, 0] },
-            { name: 'Outer Thighs', start: 'RightUpLeg', end: 'RightLeg', radius: 0.14, offset: [0.08, 0, 0] },
-            { name: 'Outer Thighs', start: 'LeftUpLeg', end: 'LeftLeg', radius: 0.14, offset: [-0.08, 0, 0] },
-            { name: 'Calves', start: 'RightLeg', end: 'RightFoot', radius: 0.10, offset: [0, 0, -0.06] },
-            { name: 'Calves', start: 'LeftLeg', end: 'LeftFoot', radius: 0.10, offset: [0, 0, -0.06] },
-            { name: 'Shins', start: 'RightLeg', end: 'RightFoot', radius: 0.08, offset: [0, 0, 0.06] },
-            { name: 'Shins', start: 'LeftLeg', end: 'LeftFoot', radius: 0.08, offset: [0, 0, 0.06] }
-        ];
+                    // Flip X Offset
+                    if (mirror.offset) {
+                        mirror.offset = [-mirror.offset[0], mirror.offset[1], mirror.offset[2]];
+                    }
+
+                    muscleDefs.push(mirror);
+                }
+            });
+            console.log('Total Muscle Zones (with mirrors):', muscleDefs.length);
+        };
 
         // Shader Uniforms
         const MAX_ZONES = 32;
@@ -298,6 +283,17 @@
             // Prevent interaction if model isn't ready
             if (!model) return;
 
+            const currentTime = Date.now();
+            const tapDelay = currentTime - lastTapTime;
+
+            if (tapDelay < 300 && tapDelay > 10) {
+                // Double tap detected -> Zoom Out
+                window.resetCamera();
+                lastTapTime = 0;
+                return;
+            }
+            lastTapTime = currentTime;
+
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -443,8 +439,15 @@
         function animate() {
             requestAnimationFrame(animate);
             if (window.mixer) window.mixer.update(0.016);
+
+            if (isZooming) {
+                updateZoom();
+                if (controls) controls.enabled = false;
+            } else {
+                if (controls) controls.enabled = true;
+            }
+
             if (controls) controls.update();
-            updateZoom();
             updateUniforms();
             renderer.render(scene, camera);
         }
@@ -711,8 +714,8 @@
             const now = Date.now();
             const progress = Math.min((now - zoomStartTime) / zoomDuration, 1.0);
 
-            // Ease out cubic
-            const ease = 1 - Math.pow(1 - progress, 3);
+            // Smooth Quartic Ease Out
+            const ease = 1 - Math.pow(1 - progress, 4);
 
             camera.position.lerpVectors(startCameraPos, targetCameraPos, ease);
             controls.target.lerpVectors(startControlsTarget, targetControlsTarget, ease);

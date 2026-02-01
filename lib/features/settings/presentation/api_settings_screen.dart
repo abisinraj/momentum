@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:momentum/core/services/settings_service.dart';
 import 'package:momentum/core/services/thumbnail_service.dart';
+import 'package:momentum/core/providers/ai_providers.dart';
 
 class APISettingsScreen extends ConsumerStatefulWidget {
   const APISettingsScreen({super.key});
@@ -17,6 +18,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
   final _geminiController = TextEditingController();
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isFetchingModels = false;
 
   @override
   void initState() {
@@ -69,6 +71,62 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     }
   }
 
+  Future<void> _fetchModels() async {
+    final apiKey = _geminiController.text.trim();
+    if (apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter Gemini API Key first')),
+      );
+      return;
+    }
+
+    setState(() => _isFetchingModels = true);
+
+    try {
+      final models = await ref.read(aiInsightsServiceProvider).listAvailableModels(apiKey);
+      if (mounted) {
+        setState(() {
+           _isFetchingModels = false;
+        });
+        _showModelsDialog(models);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isFetchingModels = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
+  void _showModelsDialog(List<String> models) {
+     showDialog(
+       context: context,
+       builder: (context) => AlertDialog(
+         title: const Text('Available Gemini Models'),
+         content: SizedBox(
+           width: double.maxFinite,
+           child: ListView.builder(
+             shrinkWrap: true,
+             itemCount: models.length,
+             itemBuilder: (context, index) => ListTile(
+               leading: const Icon(Icons.model_training, size: 20),
+               title: Text(models[index], style: const TextStyle(fontSize: 14)),
+               dense: true,
+             ),
+           ),
+         ),
+         actions: [
+           TextButton(
+             onPressed: () => Navigator.pop(context),
+             child: const Text('Close'),
+           ),
+         ],
+       ),
+     );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -99,6 +157,17 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                      hint: 'Enables AI Workout Insights',
                      icon: Icons.auto_awesome,
                    ),
+                   const SizedBox(height: 8),
+                   Align(
+                     alignment: Alignment.centerRight,
+                     child: TextButton.icon(
+                       onPressed: _isFetchingModels ? null : _fetchModels,
+                       icon: _isFetchingModels 
+                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.list_alt, size: 18),
+                       label: const Text('Check Available Models', style: TextStyle(fontSize: 12)),
+                     ),
+                   ),
                    const SizedBox(height: 16),
                    
                    _buildTextField(
@@ -115,6 +184,14 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                      label: 'Unsplash Access Key',
                      hint: 'Alternative for images',
                      icon: Icons.camera_alt,
+                   ),
+                   const SizedBox(height: 16),
+
+                   _buildInfo(
+                     context, 
+                     'Pexels provides high-quality stock photos and videos for your workout covers. It is a media provider, not a generative AI model platform.',
+                     icon: Icons.image_search,
+                     color: Colors.teal,
                    ),
                    const SizedBox(height: 16),
 
@@ -144,18 +221,19 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     );
   }
 
-  Widget _buildInfo(BuildContext context, String text) {
+  Widget _buildInfo(BuildContext context, String text, {IconData icon = Icons.lock_outline, Color? color}) {
     final colorScheme = Theme.of(context).colorScheme;
+    final effectiveColor = color ?? colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
+        color: effectiveColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
+        border: Border.all(color: effectiveColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(Icons.lock_outline, color: colorScheme.primary, size: 20),
+          Icon(icon, color: effectiveColor, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

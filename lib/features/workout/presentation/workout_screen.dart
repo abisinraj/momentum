@@ -156,19 +156,22 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-               // Add new workout (default to day 0 or next available, but standalone logic applies)
-               builder: (context) => EditWorkoutScreen(
-                 splitIndex: currentSplitIndex, // Pre-select current day or 0
-               ),
-            ),
-          );
-        },
-        backgroundColor: colorScheme.primary,
-        child: Icon(Icons.add, color: colorScheme.onPrimary),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 110), // Lift above BottomNavigationBar
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                 // Add new workout (default to day 0 or next available, but standalone logic applies)
+                 builder: (context) => EditWorkoutScreen(
+                   splitIndex: currentSplitIndex, // Pre-select current day or 0
+                 ),
+              ),
+            );
+          },
+          backgroundColor: colorScheme.primary,
+          child: Icon(Icons.add, color: colorScheme.onPrimary),
+        ),
       ),
 
     );

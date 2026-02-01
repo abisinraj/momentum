@@ -23,6 +23,11 @@
         android:largeHeap="true"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/launcher_icon">
+        
+        <!-- Default Notification Icon (Monochrome) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

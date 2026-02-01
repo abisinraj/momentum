@@ -1,13 +1,23 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/providers/database_providers.dart';
+import 'package:momentum/core/constants/muscle_data.dart';
 
 // Note: activityGridProvider is in database_providers.dart
 
 // Muscle Workload (Last 5 days to define "soreness")
 final muscleWorkloadProvider = FutureProvider<Map<String, int>>((ref) async {
   final db = ref.watch(appDatabaseProvider);
-  return db.getMuscleWorkload(30);
+  final rawData = await db.getMuscleWorkload(30);
+  
+  // Normalize keys to match 3D model expectations (e.g. "Front Delts" -> "Front Shoulders")
+  final normalized = <String, int>{};
+  rawData.forEach((key, value) {
+     final normKey = MuscleData.normalize(key);
+     normalized[normKey] = (normalized[normKey] ?? 0) + value;
+  });
+  
+  return normalized;
 });
 
 // Calculate Volume Load (Current Week)

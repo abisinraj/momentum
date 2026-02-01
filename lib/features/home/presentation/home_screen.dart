@@ -1,4 +1,4 @@
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -392,10 +392,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Determine image provider
     ImageProvider? imageProvider;
     if (workout.thumbnailUrl != null && workout.thumbnailUrl!.isNotEmpty) {
-      if (workout.thumbnailUrl!.startsWith('http')) {
-        imageProvider = NetworkImage(workout.thumbnailUrl!);
+      final url = workout.thumbnailUrl!;
+      if (url.startsWith('http')) {
+        imageProvider = NetworkImage(url);
+      } else if (url.startsWith('assets/')) {
+        imageProvider = AssetImage(url);
       } else {
-        imageProvider = AssetImage(workout.thumbnailUrl!);
+        imageProvider = FileImage(File(url));
       }
     }
     

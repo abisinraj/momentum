@@ -6,6 +6,7 @@ import '../../../core/services/settings_service.dart';
 import '../../../core/services/widget_service.dart';
 import '../../../core/providers/health_connect_provider.dart';
 import '../../../core/providers/database_providers.dart';
+import '../../../core/providers/ai_providers.dart';
 
 import 'dart:convert';
 import 'dart:io';
@@ -213,6 +214,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: 'Restrict movement',
                       onTap: () => _showModelRotationSelector(context),
                     ),
+
+                   const SizedBox(height: 32),
+                   _buildSectionHeader(context, 'AI'),
+                   const SizedBox(height: 16),
+                   ref.watch(geminiApiKeyProvider).when(
+                     data: (key) {
+                       final hasKey = key != null && key.isNotEmpty && !key.contains('YOUR_API_KEY');
+                       return _buildSettingsTile(
+                         context: context,
+                         icon: Icons.auto_awesome,
+                         iconColor: Colors.tealAccent,
+                         title: 'Available Gemini Models',
+                         subtitle: hasKey ? 'View supported AI models' : 'Connect API key first',
+                         onTap: hasKey ? () => _showModelsDialog(context, ref, key) : () => context.push(AppRoute.apiSettings.path),
+                       );
+                     },
+                     loading: () => const Center(child: LinearProgressIndicator()),
+                     error: (_, __) => const SizedBox.shrink(),
+                   ),
 
                    const SizedBox(height: 32),
                    _buildSectionHeader(context, 'Integrations'),
@@ -581,6 +601,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  void _showModelsDialog(BuildContext context, WidgetRef ref, String apiKey) async {
+    // Show a loading snackbar or similar
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Fetching available models...'), duration: Duration(seconds: 1)),
+    );
+
+    try {
+      final models = await ref.read(aiInsightsServiceProvider).listAvailableModels(apiKey);
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Available Gemini Models'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: models.length,
+                itemBuilder: (context, index) => ListTile(
+                  leading: const Icon(Icons.model_training, size: 20),
+                  title: Text(models[index], style: const TextStyle(fontSize: 14)),
+                  dense: true,
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching models: $e')),
+        );
+      }
+    }
   }
 
 }

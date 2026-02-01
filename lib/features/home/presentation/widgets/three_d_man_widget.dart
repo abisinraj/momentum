@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/dashboard_providers.dart';
 import '../../../../core/services/settings_service.dart';
 import 'dart:convert';
+import '../../../../core/constants/muscle_data.dart';
 
 class ThreeDManWidget extends ConsumerStatefulWidget {
   final double height;
@@ -129,6 +130,12 @@ class _ThreeDManWidgetState extends ConsumerState<ThreeDManWidget> {
   
   Future<void> _injectModel() async {
     try {
+      // 1. Inject Muscle Definitions (Source of Truth)
+      final defsJson = jsonEncode(MuscleData.definitions);
+      final mirrorsJson = jsonEncode(MuscleData.mirroredMuscles);
+      _controller.runJavaScript("if (window.updateMuscleDefs) window.updateMuscleDefs($defsJson, $mirrorsJson);");
+
+      // 2. Load Model
       final bytes = await rootBundle.load('assets/3d/model.glb');
       final base64String = base64Encode(bytes.buffer.asUint8List());
       _controller.runJavaScript("if (window.loadGLTFFromBase64) window.loadGLTFFromBase64('$base64String');");

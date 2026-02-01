@@ -8,6 +8,8 @@ import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/services/thumbnail_service.dart';
+import '../../../core/services/image_storage_service.dart';
+import '../../../core/constants/muscle_data.dart';
 
 /// Screen to create a workout as part of a split
 /// Flow: Name -> Thumbnail -> Exercises -> Clock
@@ -43,20 +45,10 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
   bool _isRestDay = false; // New toggle
   final List<({String name, int sets, int reps, String muscle})> _exercises = [];
   // Muscle Categories Map
-  final Map<String, List<String>> _muscleGroups = {
-    'Chest': ['Chest', 'Upper Chest', 'Lower Chest'],
-    'Back': ['Back', 'Lats', 'Upper Back', 'Lower Back'],
-    'Legs': ['Legs', 'Quads', 'Hamstrings', 'Glutes', 'Calves'],
-    'Shoulders': ['Shoulders', 'Front Delts', 'Side Delts', 'Rear Delts'],
-    'Arms': ['Arms', 'Biceps', 'Triceps', 'Forearms'],
-    'Abs': ['Abs', 'Upper Abs', 'Lower Abs', 'Obliques'],
-    'Cardio': ['Cardio'],
-    'Full Body': ['Full Body'],
-    'Other': ['Other'],
-  };
+  final Map<String, List<String>> _muscleGroups = MuscleData.groups;
   
-  String _selectedCategory = 'Other';
-  String _selectedMuscle = 'Other';
+  String _selectedCategory = 'Chest';
+  String _selectedMuscle = 'Chest';
 
   
   // Exercise inputs
@@ -319,11 +311,17 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
     final db = ref.read(appDatabaseProvider);
     final w = widget.existingWorkout!;
     
+    // Prepare thumbnail path
+    String? thumbPath = _isRestDay ? 'assets/images/rest_day.jpg' : _selectedThumbnail;
+    if (thumbPath != null && thumbPath.startsWith('http')) {
+      thumbPath = await ImageStorageService.saveImageOffline(thumbPath);
+    }
+
     // Update workout details
     await db.updateWorkout(w.toCompanion(true).copyWith(
       name: drift.Value(_nameController.text.trim()),
       shortCode: drift.Value(_isRestDay ? 'R' : _nameController.text.trim()[0].toUpperCase()),
-      thumbnailUrl: drift.Value(_isRestDay ? 'assets/images/rest_day.jpg' : _selectedThumbnail),
+      thumbnailUrl: drift.Value(thumbPath),
       clockType: drift.Value(_isRestDay ? ClockType.none : _selectedClock),
       isRestDay: drift.Value(_isRestDay),
     ));
@@ -357,12 +355,18 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
     // Note: WorkoutManager provides a convenient wrapper but we use db directly for now
     final _ = ref.read(workoutManagerProvider.notifier);
     
+    // Prepare thumbnail path
+    String? thumbPath = _isRestDay ? 'assets/images/rest_day.jpg' : _selectedThumbnail;
+    if (thumbPath != null && thumbPath.startsWith('http')) {
+      thumbPath = await ImageStorageService.saveImageOffline(thumbPath);
+    }
+
     // Create workout
     final workoutId = await db.addWorkout(
       WorkoutsCompanion(
         name: drift.Value(_nameController.text.trim()),
         shortCode: drift.Value(_isRestDay ? 'R' : _nameController.text.trim()[0].toUpperCase()),
-        thumbnailUrl: drift.Value(_isRestDay ? 'assets/images/rest_day.jpg' : _selectedThumbnail),
+        thumbnailUrl: drift.Value(thumbPath),
         orderIndex: drift.Value(_selectedSplitIndex), // Use selected index
         clockType: drift.Value(_isRestDay ? ClockType.none : _selectedClock),
         isRestDay: drift.Value(_isRestDay),

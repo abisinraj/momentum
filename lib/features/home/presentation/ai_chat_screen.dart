@@ -98,6 +98,10 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     
     final db = ref.read(appDatabaseProvider);
 
+    setState(() {
+      _isLoading = true;
+    });
+
     // Save User Message
     await db.addHomeChatMessage(HomeChatMessagesCompanion.insert(
       role: 'user',
@@ -106,7 +110,6 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     ));
 
     setState(() {
-      _isLoading = true;
       _textController.clear();
       _selectedImageBytes = null;
     });
@@ -260,46 +263,47 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
           ),
         ],
       ),
-      body: StreamBuilder<List<HomeChatMessage>>(
-        stream: db.watchHomeChatHistory(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          
-          final messages = snapshot.data ?? [];
-          
-          if (messages.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                    Icon(Icons.smart_toy_outlined, size: 48, color: colorScheme.primary.withValues(alpha: 0.5)),
-                    const SizedBox(height: 16),
-                    Text(
-                      "I'm your Momentum Assistant.\nAsk me about your workouts or diet!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: colorScheme.onSurfaceVariant),
-                    ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 80), // Extra bottom padding for the fixed input area
-            itemCount: messages.length,
-            itemBuilder: (context, index) {
-              final msg = messages[index];
-              return _buildMessageBubble(msg, colorScheme, is24h);
-            },
-          );
-        },
-      ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
+      body: Column(
         children: [
+          Expanded(
+            child: StreamBuilder<List<HomeChatMessage>>(
+              stream: db.watchHomeChatHistory(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                final messages = snapshot.data ?? [];
+                
+                if (messages.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                          Icon(Icons.smart_toy_outlined, size: 48, color: colorScheme.primary.withValues(alpha: 0.5)),
+                          const SizedBox(height: 16),
+                          Text(
+                            "I'm your Momentum Assistant.\nAsk me about your workouts or diet!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
+                          ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = messages[index];
+                    return _buildMessageBubble(msg, colorScheme, is24h);
+                  },
+                );
+              },
+            ),
+          ),
           if (_isLoading)
             const LinearProgressIndicator(),
           _buildInputArea(colorScheme),

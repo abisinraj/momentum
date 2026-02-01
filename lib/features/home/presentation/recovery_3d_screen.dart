@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/providers/database_providers.dart';
 import 'widgets/three_d_man_widget.dart';
+import '../../../core/constants/muscle_data.dart';
 
 class Recovery3DScreen extends ConsumerStatefulWidget {
   const Recovery3DScreen({super.key});
@@ -39,7 +40,8 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
   Future<void> _fetchStats(String muscle) async {
     final db = ref.read(appDatabaseProvider);
     // Simulate slight delay for smooth animation if query is too fast? No, instant is better.
-    final stats = await db.getLastSessionForMuscle(muscle);
+    final aliases = MuscleData.getAliases(muscle);
+    final stats = await db.getLastSessionForMuscle(aliases);
     
     // Only update if selection hasn't changed during fetch
     if (mounted && _selectedMuscle == muscle) {

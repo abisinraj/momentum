@@ -167,7 +167,6 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
           content: 'Error analyzing image: $e',
         ));
         setState(() {
-          _isAnalyzing = true; // Wait, actually false
           _isAnalyzing = false;
         });
         _scrollToBottom();

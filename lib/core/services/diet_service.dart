@@ -72,10 +72,9 @@ class DietService {
   }) async {
     // Updated 2026 Model Priority List
     const modelsToTry = [
-      'gemini-3-flash-preview',
-      'gemini-3-pro-preview',
       'gemini-2.0-flash',
       'gemini-1.5-flash',
+      'gemini-1.5-pro',
     ];
 
     Object? lastError;

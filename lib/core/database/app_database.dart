@@ -602,14 +602,14 @@ class AppDatabase extends _$AppDatabase {
 
   /// Get the last session where a specific muscle was the primary target
   /// Returns {date, volume, sets}
-  Future<Map<String, dynamic>?> getLastSessionForMuscle(String muscleName) async {
+  Future<Map<String, dynamic>?> getLastSessionForMuscle(List<String> muscleNames) async {
     // Join Sessions -> SessionExercises -> Exercises
     final query = select(sessions)
         .join([
           innerJoin(sessionExercises, sessionExercises.sessionId.equalsExp(sessions.id)),
           innerJoin(exercises, exercises.id.equalsExp(sessionExercises.exerciseId)),
         ])
-        ..where(exercises.primaryMuscleGroup.equals(muscleName) & 
+        ..where(exercises.primaryMuscleGroup.isIn(muscleNames) & 
                 sessions.completedAt.isNotNull())
         ..orderBy([OrderingTerm.desc(sessions.completedAt)])
         ..limit(1);
@@ -631,7 +631,7 @@ class AppDatabase extends _$AppDatabase {
         .join([
           innerJoin(exercises, exercises.id.equalsExp(sessionExercises.exerciseId)),
         ])
-        ..where(sessionExercises.sessionId.equals(sessionId) & exercises.primaryMuscleGroup.equals(muscleName));
+        ..where(sessionExercises.sessionId.equals(sessionId) & exercises.primaryMuscleGroup.isIn(muscleNames));
         
     final results = await volumeQuery.get();
     
