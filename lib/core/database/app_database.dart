@@ -112,13 +112,22 @@ class DietChatMessages extends Table {
   BoolColumn get isProcessed => boolean().withDefault(const Constant(true))();
 }
 
+/// HomeChatMessages table - stores AI chat history for home assistant
+class HomeChatMessages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get role => text()(); // "user" or "ai"
+  TextColumn get content => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isProcessed => boolean().withDefault(const Constant(true))();
+}
+
 /// The main application database
-@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises, FoodLogs, SleepLogs, DietChatMessages])
+@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises, FoodLogs, SleepLogs, DietChatMessages, HomeChatMessages])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration {
@@ -212,6 +221,11 @@ class AppDatabase extends _$AppDatabase {
           // Schema v18 changes:
           // Add DietChatMessages table
           await m.createTable(dietChatMessages);
+        }
+        if (from < 19) {
+          // Schema v19 changes:
+          // Add HomeChatMessages table
+          await m.createTable(homeChatMessages);
         }
       },
     );
@@ -454,7 +468,25 @@ class AppDatabase extends _$AppDatabase {
       'durations': durations,
     };
   }
+
+  // ===== Home Chat Operations =====
   
+  /// Watch home chat history
+  Stream<List<HomeChatMessage>> watchHomeChatHistory() =>
+      (select(homeChatMessages)..orderBy([(t) => OrderingTerm.asc(t.createdAt)])).watch();
+      
+  /// Add a message to home chat
+  Future<int> addHomeChatMessage(HomeChatMessagesCompanion message) =>
+      into(homeChatMessages).insert(message);
+      
+  /// Update home chat message
+  Future<bool> updateHomeChatMessage(HomeChatMessagesCompanion message) =>
+      update(homeChatMessages).replace(message);
+      
+  /// Clear home chat history
+  Future<int> clearHomeChatHistory() => delete(homeChatMessages).go();
+  
+
   // ===== Progress/History Operations =====
   
   /// Get activity for contribution grid (last N days)

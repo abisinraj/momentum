@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:workmanager/workmanager.dart';
@@ -24,6 +25,15 @@ Future<void> main() async {
         debugPrint('Failed to set high refresh rate: $e');
       }
     }
+
+    // Enable Edge-to-Edge for modern Android gesture navigation
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
+    ));
 
     // BackgroundService removed for stability
     await NotificationService().initialize();

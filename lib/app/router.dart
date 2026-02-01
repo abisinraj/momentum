@@ -105,6 +105,7 @@ class _NavigationShellState extends State<NavigationShell> {
         _handleBackPress();
       },
       child: Scaffold(
+        extendBody: true, // Allow body to flow behind NavigationBar
         body: widget.navigationShell,
         bottomNavigationBar: NavigationBar(
           selectedIndex: widget.navigationShell.currentIndex,

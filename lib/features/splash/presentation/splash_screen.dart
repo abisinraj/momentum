@@ -6,7 +6,7 @@ import '../../../../core/services/permission_service.dart';
 import '../../../app/widgets/permission_bottom_sheet.dart';
 
 /// Splash screen shown while app initializes
-/// Design: Teal M logo centered with \"Momentum\" text below
+/// Design: Ocean Blue logo centered with "Momentum" text below
 /// Animation: Fade-in with 1.5s minimum display
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});

@@ -78,7 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                      children: [
                        _buildThemeOption(context, ref, 'OLED Black (Default)', 'black', current, isAppTheme: true),
                        const SizedBox(height: 12),
-                       _buildThemeOption(context, ref, 'Teal', 'teal', current, isAppTheme: true),
+                       _buildThemeOption(context, ref, 'Heavenly (White & Gold)', 'heavenly', current, isAppTheme: true),
                      ],
                    ),
                    loading: () => const Center(child: CircularProgressIndicator()),
@@ -201,7 +201,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.widgets_outlined,
                       iconColor: colorScheme.tertiary,
                       title: 'Widget Theme',
-                      subtitle: 'Liquid Glass & More',
+                      subtitle: 'Ghost & More',
                       onTap: () => _showWidgetThemeSelector(context),
                     ),
                     const SizedBox(height: 12),
@@ -617,7 +617,7 @@ class _WidgetThemeSelectorDialogState extends State<_WidgetThemeSelectorDialog> 
           const SizedBox(height: 16),
           _buildOption('Classic', 'classic'),
           const SizedBox(height: 12),
-          _buildOption('Liquid Glass', 'liquid_glass'),
+          _buildOption('Ghost (Transparent)', 'liquid_glass'),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,

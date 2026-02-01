@@ -559,161 +559,164 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     final timeFormatAsync = ref.watch(timeFormatProvider);
     final is24h = timeFormatAsync.valueOrNull == '24h';
     
-    return Column(
-      children: [
-        Expanded(
-          child: StreamBuilder<List<DietChatMessage>>(
-            stream: db.watchDietChatHistory(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              
-              final messages = snapshot.data ?? [];
-              
-              if (messages.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.chat_bubble_outline, size: 48, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No messages yet.\nAsk me about your meals!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                controller: _chatScrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final msg = messages[index];
-                  final isUser = msg.role == 'user';
-                  return Align(
-                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: GestureDetector(
-                      onLongPress: isUser ? () => _editMessage(msg) : null,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isUser ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(16).copyWith(
-                            bottomRight: isUser ? Radius.zero : null,
-                            bottomLeft: !isUser ? Radius.zero : null,
-                          ),
-                          border: _editingMessageId == msg.id 
-                              ? Border.all(color: theme.colorScheme.onPrimary, width: 2)
-                              : null,
+    return SafeArea(
+      bottom: true,
+      child: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<List<DietChatMessage>>(
+              stream: db.watchDietChatHistory(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                final messages = snapshot.data ?? [];
+                
+                if (messages.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_bubble_outline, size: 48, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No messages yet.\nAsk me about your meals!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
                         ),
-                        constraints: const BoxConstraints(maxWidth: 280),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              msg.content,
-                              style: TextStyle(
-                                color: isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                if (isUser && !msg.isProcessed)
-                                  Icon(Icons.access_time, size: 10, color: theme.colorScheme.onPrimary.withValues(alpha: 0.5))
-                                else if (isUser)
-                                  Icon(Icons.done_all, size: 10, color: theme.colorScheme.onPrimary.withValues(alpha: 0.7)),
-                                const SizedBox(width: 4),
-                                Text(
-                                  DateFormat(is24h ? 'HH:mm' : 'h:mm a').format(msg.createdAt),
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: isUser 
-                                        ? theme.colorScheme.onPrimary.withValues(alpha: 0.6)
-                                        : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     ),
                   );
-                },
-              );
-            },
+                }
+
+                return ListView.builder(
+                  controller: _chatScrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = messages[index];
+                    final isUser = msg.role == 'user';
+                    return Align(
+                      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                      child: GestureDetector(
+                        onLongPress: isUser ? () => _editMessage(msg) : null,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isUser ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(16).copyWith(
+                              bottomRight: isUser ? Radius.zero : null,
+                              bottomLeft: !isUser ? Radius.zero : null,
+                            ),
+                            border: _editingMessageId == msg.id 
+                                ? Border.all(color: theme.colorScheme.onPrimary, width: 2)
+                                : null,
+                          ),
+                          constraints: const BoxConstraints(maxWidth: 280),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                msg.content,
+                                style: TextStyle(
+                                  color: isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (isUser && !msg.isProcessed)
+                                    Icon(Icons.access_time, size: 10, color: theme.colorScheme.onPrimary.withValues(alpha: 0.5))
+                                  else if (isUser)
+                                    Icon(Icons.done_all, size: 10, color: theme.colorScheme.onPrimary.withValues(alpha: 0.7)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    DateFormat(is24h ? 'HH:mm' : 'h:mm a').format(msg.createdAt),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isUser 
+                                          ? theme.colorScheme.onPrimary.withValues(alpha: 0.6)
+                                          : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
-        if (_isAnalyzing)
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: LinearProgressIndicator(),
-          ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              IconButton(
-                icon: Icon(_editingMessageId != null ? Icons.cancel : Icons.camera_alt),
-                onPressed: () {
-                  if (_editingMessageId != null) {
-                    setState(() {
-                      _editingMessageId = null;
-                      _textInputController.clear();
-                    });
-                  } else {
-                    _showImageSourceSheet();
-                  }
-                },
-                tooltip: _editingMessageId != null ? 'Cancel Edit' : 'Take Photo',
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _textInputController,
-                  decoration: InputDecoration(
-                    hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
-                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    suffixIcon: _textInputController.text.isNotEmpty && _editingMessageId == null
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () => _textInputController.clear(),
-                          )
-                        : null,
+          if (_isAnalyzing)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: LinearProgressIndicator(),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(_editingMessageId != null ? Icons.cancel : Icons.camera_alt),
+                  onPressed: () {
+                    if (_editingMessageId != null) {
+                      setState(() {
+                        _editingMessageId = null;
+                        _textInputController.clear();
+                      });
+                    } else {
+                      _showImageSourceSheet();
+                    }
+                  },
+                  tooltip: _editingMessageId != null ? 'Cancel Edit' : 'Take Photo',
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _textInputController,
+                    decoration: InputDecoration(
+                      hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
+                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      suffixIcon: _textInputController.text.isNotEmpty && _editingMessageId == null
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () => _textInputController.clear(),
+                            )
+                          : null,
+                    ),
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (val) => _editingMessageId != null ? _saveEditedMessage() : _analyzeText(val),
                   ),
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (val) => _editingMessageId != null ? _saveEditedMessage() : _analyzeText(val),
                 ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                style: IconButton.styleFrom(
-                  backgroundColor: const Color(0xFF1F1F1F), // Dark background always
-                  foregroundColor: Colors.white, // White icon always
+                const SizedBox(width: 8),
+                IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: const Color(0xFF1F1F1F), // Dark background always
+                    foregroundColor: Colors.white, // White icon always
+                  ),
+                  icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
+                  onPressed: () {
+                    if (_editingMessageId != null) {
+                      _saveEditedMessage();
+                    } else {
+                      _analyzeText(_textInputController.text);
+                    }
+                  },
                 ),
-                icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
-                onPressed: () {
-                  if (_editingMessageId != null) {
-                    _saveEditedMessage();
-                  } else {
-                    _analyzeText(_textInputController.text);
-                  }
-                },
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

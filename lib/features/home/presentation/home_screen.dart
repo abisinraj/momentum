@@ -7,7 +7,7 @@ import '../../../core/providers/workout_progression_provider.dart';
 import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../workout/presentation/active_workout_screen.dart';
-import '../../../app/widgets/skeleton_loader.dart';
+// import '../../../app/widgets/skeleton_loader.dart';
 import '../../home/presentation/widgets/ai_insights_card.dart';
 import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/analytics_card.dart';
@@ -73,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // Extra bottom padding for BottomBar
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -98,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   progression.isCompletedToday,
                 ),
                 error: (e, _) => _buildErrorState(context, e.toString()),
-                loading: () => const WorkoutCardSkeleton(),
+                loading: () => const Center(child: CircularProgressIndicator()),
               ),
               
               const SizedBox(height: 16),

@@ -692,7 +692,7 @@ class _WorkoutCard extends StatelessWidget {
       [const Color(0xFF4A00E0), const Color(0xFF8E2DE2)], // Purple
       [const Color(0xFF00B4DB), const Color(0xFF0083B0)], // Blue
       [const Color(0xFFE91E63), const Color(0xFF9C27B0)], // Pink
-      [const Color(0xFF00D9B8), const Color(0xFF00A88A)], // Teal
+      [const Color(0xFF448AFF), const Color(0xFF2979FF)], // Indigo
     ];
     
     if (workout.isRestDay) {

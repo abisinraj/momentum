@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Momentum's Custom Dark Theme
+
+
+
+/// Momentum's Custom Themes
 /// 
-/// Based on Google Stitch designs:
-/// - Dark near-black background
-/// - Teal/cyan primary accent (#00D9B8)
-/// - Yellow accent for active states (#D4E157)
-/// - Outfit font for clean typography
+/// - OLED Black: Minimalist true-black theme
+/// - Heavenly: Premium Gold & White theme
 class AppTheme {
-  // Core brand colors
-  static const Color tealPrimary = Color(0xFF00D9B8);
-  static const Color tealLight = Color(0xFF4DFFDB);
-  static const Color tealDark = Color(0xFF00A88A);
+  // Core brand colors (Monochrome)
+  static const Color pureWhite = Color(0xFFFFFFFF);
+  static const Color darkGrey = Color(0xFF333333);
   
   // Dark theme surface colors
   static const Color darkBackground = Color(0xFF0F1419);
@@ -32,13 +32,13 @@ class AppTheme {
   static const Color warning = Color(0xFFFF9800);
   static const Color error = Color(0xFFEF5350);
   
-  // Contribution grid intensity colors
+  // Contribution grid intensity colors (Grayscale for Black theme)
   static const List<Color> gridIntensity = [
-    Color(0xFF1A2332), // Empty/Rest
-    Color(0xFF1B4D43), // Low
-    Color(0xFF1F7A6A), // Medium
-    Color(0xFF25A693), // High
-    Color(0xFF00D9B8), // Max
+    Color(0xFF111111), // Empty/Rest
+    Color(0xFF222222), // Low
+    Color(0xFF444444), // Medium
+    Color(0xFF888888), // High
+    Color(0xFFFFFFFF), // Max
   ];
   
   // Light theme (kept minimal - app is dark-first)
@@ -48,25 +48,21 @@ class AppTheme {
   }
 
   static ThemeData dark({ColorScheme? dynamicScheme}) {
-    return _buildTheme(
-      primary: tealPrimary,
-      primaryContainer: tealDark,
-      background: darkBackground,
-      surface: darkSurface,
-      surfaceContainer: darkSurfaceContainer,
-      border: darkBorder,
-    );
+    return getTheme(themeBlack);
   }
   
   // Theme Modes
-  // Theme Modes
-  static const String themeTeal = 'teal';
   static const String themeBlack = 'black';
-
-  // Get theme based on key with distinct palettes
+  static const String themeHeavenly = 'heavenly';
+  static const Color heavenlyGold = Color(0xFFD4AF37);
+  static const Color momentumOrange = Color(0xFFFF5722);
+  // Get theme based on key
   static ThemeData getTheme(String themeKey) {
     switch (themeKey) {
-      case themeBlack: // OLED Midnight
+      case themeHeavenly:
+        return _getHeavenlyTheme();
+      case themeBlack:
+      default: // OLED Midnight
         return _buildTheme(
           primary: const Color(0xFFFFFFFF), // White
           primaryContainer: const Color(0xFFCCCCCC),
@@ -75,16 +71,6 @@ class AppTheme {
           surfaceContainer: const Color(0xFF000000), // True Black containers
           border: const Color(0xFF333333), // Visible grey borders
           isMonochrome: true,
-        );
-      case themeTeal:
-      default: // Ocean
-        return _buildTheme(
-          primary: tealPrimary,
-          primaryContainer: tealDark,
-          background: darkBackground,
-          surface: darkSurface,
-          surfaceContainer: darkSurfaceContainer,
-          border: darkBorder,
         );
     }
   }
@@ -108,14 +94,14 @@ class AppTheme {
       onPrimary: isMonochrome ? Colors.black : background,
       primaryContainer: primaryContainer,
       onPrimaryContainer: isMonochrome ? Colors.black : Colors.white,
-      secondary: isMonochrome ? Colors.white : tealLight,
+      secondary: isMonochrome ? Colors.white : Colors.grey,
       onSecondary: background,
-      secondaryContainer: isMonochrome ? const Color(0xFF333333) : tealDark.withValues(alpha: 0.2),
-      onSecondaryContainer: isMonochrome ? Colors.white : tealLight,
-      tertiary: isMonochrome ? Colors.grey : tealLight,
+      secondaryContainer: isMonochrome ? const Color(0xFF333333) : Colors.grey.withValues(alpha: 0.2),
+      onSecondaryContainer: isMonochrome ? Colors.white : Colors.white,
+      tertiary: isMonochrome ? Colors.grey : Colors.grey,
       onTertiary: background,
-      tertiaryContainer: isMonochrome ? Colors.grey.withValues(alpha: 0.3) : tealDark.withValues(alpha: 0.3),
-      onTertiaryContainer: isMonochrome ? Colors.white : tealLight,
+      tertiaryContainer: isMonochrome ? Colors.grey.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.3),
+      onTertiaryContainer: isMonochrome ? Colors.white : Colors.white,
       error: error,
       onError: Colors.white,
       errorContainer: error.withValues(alpha: 0.2),
@@ -146,6 +132,14 @@ class AppTheme {
         foregroundColor: textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarContrastEnforced: false,
+        ),
         titleTextStyle: GoogleFonts.outfit(
           fontSize: 24,
           fontWeight: FontWeight.bold,
@@ -236,8 +230,9 @@ class AppTheme {
       
       // Navigation bar
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: surface,
+        backgroundColor: Colors.transparent, // Fully transparent for true Edge-to-Edge
         indicatorColor: primary.withValues(alpha: 0.2),
+        elevation: 0,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -414,6 +409,82 @@ class AppTheme {
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
         color: textMuted,
+      ),
+    );
+  }
+
+  static ThemeData _getHeavenlyTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      primaryColor: heavenlyGold,
+      scaffoldBackgroundColor: pureWhite,
+      colorScheme: const ColorScheme(
+        brightness: Brightness.light,
+        primary: heavenlyGold,
+        onPrimary: pureWhite,
+        secondary: heavenlyGold,
+        onSecondary: pureWhite,
+        error: Color(0xFFB00020),
+        onError: pureWhite,
+        surface: pureWhite,
+        onSurface: Colors.black87,
+        surfaceContainer: Color(0xFFF5F5F5), // Light gray for cards
+        onSurfaceVariant: Colors.black54,
+        outline: Color(0xFFE0E0E0),
+        tertiary: momentumOrange,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black87,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.transparent,
+        indicatorColor: heavenlyGold.withValues(alpha: 0.2),
+      ),
+      cardTheme: CardThemeData(
+        color: const Color(0xFFF5F5F5),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+      ),
+      fontFamily: 'Instrument Sans',
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        displayMedium: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        displaySmall: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        headlineLarge: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        headlineMedium: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        headlineSmall: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+        titleMedium: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+        titleSmall: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(color: Colors.black87),
+        bodyMedium: TextStyle(color: Colors.black87),
+        bodySmall: TextStyle(color: Colors.black54),
+        labelLarge: TextStyle(color: heavenlyGold, fontWeight: FontWeight.bold),
+      ),
+      iconTheme: const IconThemeData(
+        color: Colors.black87,
+      ),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFFE0E0E0),
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: pureWhite,
+        selectedItemColor: heavenlyGold,
+        unselectedItemColor: Colors.black54,
       ),
     );
   }

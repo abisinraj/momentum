@@ -2,10 +2,10 @@
 <resources>
     <color name="ic_launcher_background">#121212</color>
 
-    <!-- Widget Colors (Base / Fallback) -->
-    <color name="widget_background">#1E1E1E</color>
+    <!-- Widget Colors (Monochrome/OLED) -->
+    <color name="widget_background">#000000</color>
     <color name="widget_text_primary">#FFFFFF</color>
-    <color name="widget_text_secondary">#B0BEC5</color>
-    <color name="widget_accent">#009688</color> <!-- Teal -->
-    <color name="widget_border">#009688</color>
+    <color name="widget_text_secondary">#9E9E9E</color>
+    <color name="widget_accent">#FFFFFF</color>
+    <color name="widget_border">#333333</color>
 </resources>

@@ -4,10 +4,19 @@ import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/database_providers.dart';
+import 'settings_service.dart';
 
 /// Service to sync data to Android Home Screen Widget
 class WidgetService {
   static const String _androidName = 'com.silo.momentum.MomentumWidgetProvider';
+  
+  // Storage Keys
+  static const String keyStreak = 'widget_streak';
+  static const String keyTitle = 'widget_title';
+  static const String keyDesc = 'widget_desc';
+  static const String keyCycleProgress = 'widget_cycle_progress';
+  static const String keyNextWorkout = 'widget_next_workout';
+  static const String keyTheme = 'widget_theme';
   
 
 
@@ -16,6 +25,7 @@ class WidgetService {
     required String title,
     required String desc,
     required String cycleProgress,
+    required String widgetTheme,
     String? nextWorkoutName,
   }) async {
     try {
@@ -25,13 +35,14 @@ class WidgetService {
       // from FlutterSharedPreferences (prefixed with 'flutter.') if the main group file is empty.
       final prefs = await SharedPreferences.getInstance();
       
-      await prefs.setInt('widget_streak', streak);
-      await prefs.setString('widget_title', title);
+      await prefs.setInt(keyStreak, streak);
+      await prefs.setString(keyTitle, title);
       
       final time = '${DateTime.now().hour}:${DateTime.now().minute.toString().padLeft(2, '0')}';
-      await prefs.setString('widget_desc', '$desc • $time');
-      await prefs.setString('widget_cycle_progress', cycleProgress);
-      await prefs.setString('widget_next_workout', nextWorkoutName ?? '');
+      await prefs.setString(keyDesc, '$desc • $time');
+      await prefs.setString(keyCycleProgress, cycleProgress);
+      await prefs.setString(keyNextWorkout, nextWorkoutName ?? '');
+      await prefs.setString(keyTheme, widgetTheme);
 
       debugPrint('[WidgetService] Data saved to SharedPreferences (FlutterSharedPreferences). Updating widget now...');
       
@@ -125,12 +136,16 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
 
     debugPrint('[WidgetSync] Calling widgetService.updateWidget with: Streak=$streak, Title=$title');
     
-    // 4. Update Widget
+    // 4. Get Theme
+    final currentTheme = ref.read(widgetThemeProvider).valueOrNull ?? 'classic';
+
+    // 5. Update Widget
     await widgetService.updateWidget(
       streak: streak,
       title: title,
       desc: desc,
       cycleProgress: cycleProgress,
+      widgetTheme: currentTheme,
       nextWorkoutName: nextWorkout?.name ?? 'Momentum', 
     );
   } catch (e) {

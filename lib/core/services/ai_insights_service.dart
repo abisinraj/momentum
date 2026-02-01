@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:momentum/core/database/app_database.dart';
 
@@ -260,6 +260,7 @@ class AIInsightsService {
     required String text,
     List<int>? imageBytes,
     required String? apiKey,
+    String? extraContext,
   }) async {
     try {
       if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
@@ -269,7 +270,25 @@ class AIInsightsService {
       // Use robust fallback
       final List<Part> parts = [];
       if (text.isNotEmpty) {
-        parts.add(TextPart(text));
+        String finalPrompt = text;
+        if (extraContext != null && extraContext.isNotEmpty) {
+           finalPrompt = '''
+Context for the conversation:
+$extraContext
+
+User Message:
+$text
+
+Instructions:
+- You are an AI fitness and nutrition assistant.
+- Use the context above to answer accurately (includes diet, workouts, or goals).
+- You can provide feedback on their workout progress or diet balance.
+- You CANNOT modify database records directly.
+- If context is missing for a specific question, ask the user for details.
+- Be encouraging, concise, and professional.
+''';
+        }
+        parts.add(TextPart(finalPrompt));
       }
       
       if (imageBytes != null) {
@@ -282,7 +301,13 @@ class AIInsightsService {
       try {
         response = await _generateWithFallback(content, apiKey);
       } catch (e) {
-         return "I couldn't reach the AI service right now. Please try again.";
+         final errorStr = e.toString();
+         if (errorStr.contains('API_KEY_INVALID')) {
+           return "Invalid API Key. Please check your settings.";
+         } else if (errorStr.contains('User location is not supported')) {
+           return "Gemini AI is not supported in your region yet.";
+         }
+         return "AI Error (check logs): $errorStr";
       }
 
       return response.text?.trim() ?? "I couldn't understand that context.";
@@ -294,21 +319,25 @@ class AIInsightsService {
     List<Content> content,
     String apiKey,
   ) async {
-    // List of models to try in order of preference
-    // Uses standard stable identifiers to avoid "not found" errors
+    // Updated 2026 Model Priority List
     const modelsToTry = [
+      'gemini-3-flash-preview',
+      'gemini-3-pro-preview',
+      'gemini-2.0-flash',
       'gemini-1.5-flash',
-      'gemini-1.5-pro',
-      'gemini-pro',
     ];
 
     Object? lastError;
 
     for (final modelName in modelsToTry) {
       try {
+        debugPrint('AI: Trying model $modelName...');
         final model = GenerativeModel(model: modelName, apiKey: apiKey);
-        return await model.generateContent(content);
+        final response = await model.generateContent(content);
+        debugPrint('AI: Success with $modelName');
+        return response;
       } catch (e) {
+        debugPrint('AI: Error with $modelName: $e');
         lastError = e;
         continue;
       }

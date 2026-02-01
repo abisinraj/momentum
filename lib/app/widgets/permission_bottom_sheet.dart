@@ -127,6 +127,7 @@ class _PermissionBottomSheetState extends ConsumerState<PermissionBottomSheet> {
   }
 
   Widget _buildPermissionItem(AppPermission permission, PermissionStatusInfo status) {
+    final theme = Theme.of(context);
     final info = _getPermissionInfo(permission);
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
@@ -142,7 +143,7 @@ class _PermissionBottomSheetState extends ConsumerState<PermissionBottomSheet> {
             ),
             child: Icon(
               info.icon,
-              color: status.isGranted ? AppTheme.success : AppTheme.tealPrimary,
+              color: status.isGranted ? AppTheme.success : theme.colorScheme.primary,
               size: 24,
             ),
           ),

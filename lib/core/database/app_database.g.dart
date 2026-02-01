@@ -4253,6 +4253,360 @@ class DietChatMessagesCompanion extends UpdateCompanion<DietChatMessage> {
   }
 }
 
+class $HomeChatMessagesTable extends HomeChatMessages
+    with TableInfo<$HomeChatMessagesTable, HomeChatMessage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HomeChatMessagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _isProcessedMeta = const VerificationMeta(
+    'isProcessed',
+  );
+  @override
+  late final GeneratedColumn<bool> isProcessed = GeneratedColumn<bool>(
+    'is_processed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_processed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    role,
+    content,
+    createdAt,
+    isProcessed,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'home_chat_messages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HomeChatMessage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('is_processed')) {
+      context.handle(
+        _isProcessedMeta,
+        isProcessed.isAcceptableOrUnknown(
+          data['is_processed']!,
+          _isProcessedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HomeChatMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HomeChatMessage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      isProcessed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_processed'],
+      )!,
+    );
+  }
+
+  @override
+  $HomeChatMessagesTable createAlias(String alias) {
+    return $HomeChatMessagesTable(attachedDatabase, alias);
+  }
+}
+
+class HomeChatMessage extends DataClass implements Insertable<HomeChatMessage> {
+  final int id;
+  final String role;
+  final String content;
+  final DateTime createdAt;
+  final bool isProcessed;
+  const HomeChatMessage({
+    required this.id,
+    required this.role,
+    required this.content,
+    required this.createdAt,
+    required this.isProcessed,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['role'] = Variable<String>(role);
+    map['content'] = Variable<String>(content);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['is_processed'] = Variable<bool>(isProcessed);
+    return map;
+  }
+
+  HomeChatMessagesCompanion toCompanion(bool nullToAbsent) {
+    return HomeChatMessagesCompanion(
+      id: Value(id),
+      role: Value(role),
+      content: Value(content),
+      createdAt: Value(createdAt),
+      isProcessed: Value(isProcessed),
+    );
+  }
+
+  factory HomeChatMessage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HomeChatMessage(
+      id: serializer.fromJson<int>(json['id']),
+      role: serializer.fromJson<String>(json['role']),
+      content: serializer.fromJson<String>(json['content']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      isProcessed: serializer.fromJson<bool>(json['isProcessed']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'role': serializer.toJson<String>(role),
+      'content': serializer.toJson<String>(content),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'isProcessed': serializer.toJson<bool>(isProcessed),
+    };
+  }
+
+  HomeChatMessage copyWith({
+    int? id,
+    String? role,
+    String? content,
+    DateTime? createdAt,
+    bool? isProcessed,
+  }) => HomeChatMessage(
+    id: id ?? this.id,
+    role: role ?? this.role,
+    content: content ?? this.content,
+    createdAt: createdAt ?? this.createdAt,
+    isProcessed: isProcessed ?? this.isProcessed,
+  );
+  HomeChatMessage copyWithCompanion(HomeChatMessagesCompanion data) {
+    return HomeChatMessage(
+      id: data.id.present ? data.id.value : this.id,
+      role: data.role.present ? data.role.value : this.role,
+      content: data.content.present ? data.content.value : this.content,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      isProcessed: data.isProcessed.present
+          ? data.isProcessed.value
+          : this.isProcessed,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HomeChatMessage(')
+          ..write('id: $id, ')
+          ..write('role: $role, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('isProcessed: $isProcessed')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, role, content, createdAt, isProcessed);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HomeChatMessage &&
+          other.id == this.id &&
+          other.role == this.role &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.isProcessed == this.isProcessed);
+}
+
+class HomeChatMessagesCompanion extends UpdateCompanion<HomeChatMessage> {
+  final Value<int> id;
+  final Value<String> role;
+  final Value<String> content;
+  final Value<DateTime> createdAt;
+  final Value<bool> isProcessed;
+  const HomeChatMessagesCompanion({
+    this.id = const Value.absent(),
+    this.role = const Value.absent(),
+    this.content = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.isProcessed = const Value.absent(),
+  });
+  HomeChatMessagesCompanion.insert({
+    this.id = const Value.absent(),
+    required String role,
+    required String content,
+    this.createdAt = const Value.absent(),
+    this.isProcessed = const Value.absent(),
+  }) : role = Value(role),
+       content = Value(content);
+  static Insertable<HomeChatMessage> custom({
+    Expression<int>? id,
+    Expression<String>? role,
+    Expression<String>? content,
+    Expression<DateTime>? createdAt,
+    Expression<bool>? isProcessed,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (role != null) 'role': role,
+      if (content != null) 'content': content,
+      if (createdAt != null) 'created_at': createdAt,
+      if (isProcessed != null) 'is_processed': isProcessed,
+    });
+  }
+
+  HomeChatMessagesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? role,
+    Value<String>? content,
+    Value<DateTime>? createdAt,
+    Value<bool>? isProcessed,
+  }) {
+    return HomeChatMessagesCompanion(
+      id: id ?? this.id,
+      role: role ?? this.role,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      isProcessed: isProcessed ?? this.isProcessed,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (isProcessed.present) {
+      map['is_processed'] = Variable<bool>(isProcessed.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HomeChatMessagesCompanion(')
+          ..write('id: $id, ')
+          ..write('role: $role, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('isProcessed: $isProcessed')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4268,6 +4622,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DietChatMessagesTable dietChatMessages = $DietChatMessagesTable(
     this,
   );
+  late final $HomeChatMessagesTable homeChatMessages = $HomeChatMessagesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4281,6 +4638,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     foodLogs,
     sleepLogs,
     dietChatMessages,
+    homeChatMessages,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -7248,6 +7606,208 @@ typedef $$DietChatMessagesTableProcessedTableManager =
       DietChatMessage,
       PrefetchHooks Function()
     >;
+typedef $$HomeChatMessagesTableCreateCompanionBuilder =
+    HomeChatMessagesCompanion Function({
+      Value<int> id,
+      required String role,
+      required String content,
+      Value<DateTime> createdAt,
+      Value<bool> isProcessed,
+    });
+typedef $$HomeChatMessagesTableUpdateCompanionBuilder =
+    HomeChatMessagesCompanion Function({
+      Value<int> id,
+      Value<String> role,
+      Value<String> content,
+      Value<DateTime> createdAt,
+      Value<bool> isProcessed,
+    });
+
+class $$HomeChatMessagesTableFilterComposer
+    extends Composer<_$AppDatabase, $HomeChatMessagesTable> {
+  $$HomeChatMessagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isProcessed => $composableBuilder(
+    column: $table.isProcessed,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$HomeChatMessagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $HomeChatMessagesTable> {
+  $$HomeChatMessagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isProcessed => $composableBuilder(
+    column: $table.isProcessed,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HomeChatMessagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HomeChatMessagesTable> {
+  $$HomeChatMessagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isProcessed => $composableBuilder(
+    column: $table.isProcessed,
+    builder: (column) => column,
+  );
+}
+
+class $$HomeChatMessagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HomeChatMessagesTable,
+          HomeChatMessage,
+          $$HomeChatMessagesTableFilterComposer,
+          $$HomeChatMessagesTableOrderingComposer,
+          $$HomeChatMessagesTableAnnotationComposer,
+          $$HomeChatMessagesTableCreateCompanionBuilder,
+          $$HomeChatMessagesTableUpdateCompanionBuilder,
+          (
+            HomeChatMessage,
+            BaseReferences<
+              _$AppDatabase,
+              $HomeChatMessagesTable,
+              HomeChatMessage
+            >,
+          ),
+          HomeChatMessage,
+          PrefetchHooks Function()
+        > {
+  $$HomeChatMessagesTableTableManager(
+    _$AppDatabase db,
+    $HomeChatMessagesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HomeChatMessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HomeChatMessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HomeChatMessagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isProcessed = const Value.absent(),
+              }) => HomeChatMessagesCompanion(
+                id: id,
+                role: role,
+                content: content,
+                createdAt: createdAt,
+                isProcessed: isProcessed,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String role,
+                required String content,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isProcessed = const Value.absent(),
+              }) => HomeChatMessagesCompanion.insert(
+                id: id,
+                role: role,
+                content: content,
+                createdAt: createdAt,
+                isProcessed: isProcessed,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$HomeChatMessagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HomeChatMessagesTable,
+      HomeChatMessage,
+      $$HomeChatMessagesTableFilterComposer,
+      $$HomeChatMessagesTableOrderingComposer,
+      $$HomeChatMessagesTableAnnotationComposer,
+      $$HomeChatMessagesTableCreateCompanionBuilder,
+      $$HomeChatMessagesTableUpdateCompanionBuilder,
+      (
+        HomeChatMessage,
+        BaseReferences<_$AppDatabase, $HomeChatMessagesTable, HomeChatMessage>,
+      ),
+      HomeChatMessage,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7268,4 +7828,6 @@ class $AppDatabaseManager {
       $$SleepLogsTableTableManager(_db, _db.sleepLogs);
   $$DietChatMessagesTableTableManager get dietChatMessages =>
       $$DietChatMessagesTableTableManager(_db, _db.dietChatMessages);
+  $$HomeChatMessagesTableTableManager get homeChatMessages =>
+      $$HomeChatMessagesTableTableManager(_db, _db.homeChatMessages);
 }

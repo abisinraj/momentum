@@ -45,6 +45,15 @@ class MomentumWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val PREFS_NAME = "com.silo.momentum.widget"
+        private const val FLUTTER_PREFS_NAME = "FlutterSharedPreferences"
+        
+        // Keys
+        private const val KEY_STREAK = "widget_streak"
+        private const val KEY_TITLE = "widget_title"
+        private const val KEY_DESC = "widget_desc"
+        private const val KEY_CYCLE = "widget_cycle_progress"
+        private const val KEY_NEXT = "widget_next_workout"
+        private const val KEY_THEME = "widget_theme"
 
         internal fun updateAppWidget(
             context: Context,
@@ -75,7 +84,7 @@ class MomentumWidgetProvider : AppWidgetProvider() {
             // Fallback: If empty, try default shared preferences (sometimes used by plugins)
             if (allMap.isEmpty()) {
                  // Try FlutterSharedPreferences (default for Flutter plugins)
-                 val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                 val flutterPrefs = context.getSharedPreferences(FLUTTER_PREFS_NAME, Context.MODE_PRIVATE)
                  val flutterMap = flutterPrefs.all
                  android.util.Log.d("MomentumWidget", "FLUTTER PREFS CONTENTS (${flutterMap.size} items): $flutterMap")
                  
@@ -102,8 +111,8 @@ class MomentumWidgetProvider : AppWidgetProvider() {
             var streak = 0
             try {
                 // Try reading streak (could be int or string, could have prefix or not)
-                val key1 = "widget_streak"
-                val key2 = "flutter.widget_streak"
+                val key1 = KEY_STREAK
+                val key2 = "flutter.$KEY_STREAK"
                 
                 // Safely read streak (Flutter may write Integer as Long on Android)
                 // We attempt to get the object and check type manually or try multiple getters.
@@ -137,12 +146,23 @@ class MomentumWidgetProvider : AppWidgetProvider() {
                android.util.Log.e("MomentumWidget", "Error reading streak: ${e.message}")
             }
 
-            val title = getString("widget_title", "No Workout")
-            val desc = getString("widget_desc", "Tap to view")
-            val nextWorkout = getString("widget_next_workout", "")
-            val weeklyProgress = getString("widget_cycle_progress", "--/--")
+            val title = getString(KEY_TITLE, "No Workout")
+            val desc = getString(KEY_DESC, "Tap to view")
+            val nextWorkout = getString(KEY_NEXT, "")
+            val weeklyProgress = getString(KEY_CYCLE, "--/--")
+            val themeKey = getString(KEY_THEME, "classic")
             
-            android.util.Log.d("MomentumWidget", "Final Loaded Data: Streak=$streak, Title='$title'")
+            android.util.Log.d("MomentumWidget", "Final Loaded Data: Streak=$streak, Title='$title', Theme='$themeKey'")
+
+            // Apply Theme
+            if (themeKey == "liquid_glass") {
+                // Ghost Theme: Remove background
+                views.setInt(R.id.widget_root, "setBackgroundResource", 0)
+                views.setInt(R.id.widget_root, "setBackgroundColor", Color.TRANSPARENT)
+            } else {
+                // Classic Theme: Restore background
+                views.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.widget_background)
+            }
 
             // Update views
             views.setTextViewText(R.id.widget_streak, "\uD83D\uDD25 $streak") // Fire emoji

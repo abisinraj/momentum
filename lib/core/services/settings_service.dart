@@ -13,7 +13,7 @@ class SettingsService {
   static const String _keyRestTimer = 'rest_timer_seconds';
   static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
   static const String _keyWidgetTheme = 'widget_theme'; // 'classic', 'liquid_glass'
-  static const String _keyAppTheme = 'app_theme'; // 'teal', 'black'
+  static const String _keyAppTheme = 'app_theme'; // 'black', 'heavenly'
   static const String _keyTimeFormat = 'time_format'; // '12h', '24h'
   static const String _keyModelRotationMode = 'model_rotation_mode'; // 'horizontal', 'full'
   static const String _keyPermissionsHandled = 'permissions_handled';

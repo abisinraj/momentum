@@ -34,7 +34,7 @@ class ThemedCard extends ConsumerWidget {
     return Container(
       margin: margin,
       child: Material(
-         color: Colors.transparent, // Important for InkWell
+         color: Colors.transparent,
          child: InkWell(
            onTap: onTap,
            borderRadius: BorderRadius.circular(24),
@@ -43,41 +43,12 @@ class ThemedCard extends ConsumerWidget {
              decoration: BoxDecoration(
                borderRadius: BorderRadius.circular(24),
                border: Border.all(
-                 color: colorScheme.onSurface.withValues(alpha: 0.15), 
-                 width: 1.5
+                 color: colorScheme.outline.withValues(alpha: 0.2), 
+                 width: 1.0
                ),
-               gradient: LinearGradient(
-                 begin: Alignment.topLeft,
-                 end: Alignment.bottomRight,
-                 colors: [
-                   colorScheme.surfaceContainer.withValues(alpha: 0.60), // More transparent
-                   colorScheme.surfaceContainer.withValues(alpha: 0.30),
-                 ],
-               ),
-               boxShadow: [
-                 BoxShadow(
-                   color: colorScheme.shadow.withValues(alpha: 0.1),
-                   blurRadius: 15,
-                   offset: const Offset(0, 5),
-                 ),
-                 // Inner highlight simulation via border and gradient
-               ],
+               color: Colors.transparent, // Fully transparent background
              ),
-             child: Container(
-               decoration: BoxDecoration(
-                 borderRadius: BorderRadius.circular(24),
-                 gradient: LinearGradient(
-                   begin: Alignment.topCenter,
-                   end: Alignment.bottomCenter,
-                   colors: [
-                     Colors.white.withValues(alpha: 0.05), // Top reflection
-                     Colors.transparent,
-                   ],
-                   stops: const [0.0, 0.4],
-                 ),
-               ),
-               child: child,
-             ),
+             child: child,
            ),
          ),
       ),

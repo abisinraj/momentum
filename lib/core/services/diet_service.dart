@@ -28,12 +28,6 @@ class DietService {
         return _analyzeOffline(input);
       }
 
-      final model = GenerativeModel(
-        model: 'gemini-3-flash-preview',
-        apiKey: apiKey,
-        generationConfig: GenerationConfig(responseMimeType: 'application/json'),
-      );
-      
       final prompt = '''
       Analyze the following food description and estimate the nutrition facts.
       Return ONLY a JSON object with keys: "description" (short summarized name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double), "fiber" (double), "sugar" (double), "sodium" (double).
@@ -42,21 +36,66 @@ class DietService {
       Input: "$input"
       ''';
 
-      final response = await model.generateContent([Content.text(prompt)]);
+      final response = await _generateWithFallback([Content.text(prompt)], apiKey, useJson: true);
       
-      if (response.text != null) {
-        final Map<String, dynamic> data = jsonDecode(response.text!);
-        if (data.containsKey('error')) {
-           return _analyzeOffline(input);
-        }
-        return data;
-      } else {
-        return _analyzeOffline(input);
+      final Map<String, dynamic> data = jsonDecode(response.text!);
+      if (data.containsKey('error')) {
+         return _analyzeOffline(input);
       }
+      return data;
     } catch (e) {
-      // Fallback to offline mode on any error (network, api key, etc)
+      // debugPrint('DietService Error: $e');
       return _analyzeOffline(input);
     }
+  }
+
+  Future<Map<String, dynamic>> analyzeFoodImage(Uint8List imageBytes) async { 
+    final apiKey = await _getApiKey();
+    if (apiKey == null) throw Exception('API Key not found');
+
+    const prompt = 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with keys: "description", "calories", "protein", "carbs", "fats".';
+    final content = [
+      Content.multi([
+        TextPart(prompt),
+        DataPart('image/jpeg', imageBytes),
+      ])
+    ];
+
+    final response = await _generateWithFallback(content, apiKey, useJson: true);
+    return jsonDecode(response.text!);
+  }
+
+  Future<GenerateContentResponse> _generateWithFallback(
+    List<Content> content,
+    String apiKey, {
+    bool useJson = false,
+  }) async {
+    // Updated 2026 Model Priority List
+    const modelsToTry = [
+      'gemini-3-flash-preview',
+      'gemini-3-pro-preview',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+    ];
+
+    Object? lastError;
+    for (final modelName in modelsToTry) {
+      try {
+        // debugPrint('DietAI: Trying $modelName...');
+        final model = GenerativeModel(
+          model: modelName, 
+          apiKey: apiKey,
+          generationConfig: useJson ? GenerationConfig(responseMimeType: 'application/json') : null,
+        );
+        final response = await model.generateContent(content);
+        // debugPrint('DietAI: Success with $modelName');
+        return response;
+      } catch (e) {
+        // debugPrint('DietAI: Error with $modelName: $e');
+        lastError = e;
+      }
+    }
+    throw lastError ?? Exception('All models failed');
   }
 
   /// Simple offline fallback using keyword matching
@@ -87,39 +126,6 @@ class DietService {
       'sugar': 0.0,
       'sodium': 0.0,
     };
-  }
-  Future<Map<String, dynamic>> analyzeFoodImage(Uint8List imageBytes) async { 
-     final apiKey = await _getApiKey();
-    if (apiKey == null) {
-      throw Exception('Gemini API Key not found');
-    }
-
-    final model = GenerativeModel(
-      model: 'gemini-3-flash-preview',
-      apiKey: apiKey,
-      generationConfig: GenerationConfig(responseMimeType: 'application/json'),
-    );
-    
-    const prompt = 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with keys: "description" (short name), "calories" (int), "protein" (double), "carbs" (double), "fats" (double).';
-    final content = [
-      Content.multi([
-        TextPart(prompt),
-        DataPart('image/jpeg', imageBytes),
-      ])
-    ];
-
-    final response = await model.generateContent(content);
-
-    if (response.text != null) {
-      try {
-         final Map<String, dynamic> data = jsonDecode(response.text!);
-         return data;
-      } catch (e) {
-        throw Exception('Failed to parse Gemini response: ${response.text}');
-      }
-    } else {
-      throw Exception('Empty response from Gemini');
-    }
   }
 }
 
