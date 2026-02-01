@@ -693,6 +693,18 @@
             isZooming = true;
         };
 
+        window.setRotationMode = function (mode) {
+            if (!controls) return;
+            if (mode === 'horizontal') {
+                controls.minPolarAngle = Math.PI * 0.5; // Lock to horizontal (90 deg)
+                controls.maxPolarAngle = Math.PI * 0.5;
+            } else {
+                controls.minPolarAngle = 0; // Full 360 (vertical too)
+                controls.maxPolarAngle = Math.PI;
+            }
+            controls.update();
+        };
+
         function updateZoom() {
             if (!isZooming) return;
 

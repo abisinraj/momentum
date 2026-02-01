@@ -14,8 +14,19 @@ class SettingsService {
   static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
   static const String _keyWidgetTheme = 'widget_theme'; // 'classic', 'liquid_glass'
   static const String _keyAppTheme = 'app_theme'; // 'teal', 'yellow', 'red', 'black'
+  static const String _keyModelRotationMode = 'model_rotation_mode'; // 'horizontal', 'full'
 
   final _storage = const FlutterSecureStorage();
+
+  Future<void> setModelRotationMode(String mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyModelRotationMode, mode);
+  }
+
+  Future<String> getModelRotationMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyModelRotationMode) ?? 'horizontal';
+  }
 
   Future<void> setWidgetTheme(String theme) async {
     final prefs = await SharedPreferences.getInstance();

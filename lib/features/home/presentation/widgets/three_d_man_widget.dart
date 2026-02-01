@@ -201,9 +201,13 @@ class _ThreeDManWidgetState extends ConsumerState<ThreeDManWidget> {
     
     // Sync heatmap with JS state whenever we build and the page is ready
     if (_isPageLoaded) {
+      final rotationModeAsync = ref.watch(modelRotationModeProvider);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _updateHeatmap(workloadAsync);
+          rotationModeAsync.whenData((mode) {
+             _controller.runJavaScript("if (window.setRotationMode) window.setRotationMode('$mode');");
+          });
         }
       });
     }

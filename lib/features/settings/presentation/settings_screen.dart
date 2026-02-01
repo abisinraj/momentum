@@ -191,23 +191,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    const SizedBox(height: 32),
                    _buildSectionHeader(context, 'Appearance'),
                    const SizedBox(height: 16),
+                     _buildSettingsTile(
+                        context: context,
+                        icon: Icons.palette_outlined,
+                        iconColor: Colors.purpleAccent,
+                        title: 'App Theme',
+                        subtitle: 'Colors & Dark Mode',
+                        onTap: () => _showAppThemeSelector(context),
+                      ),
+                     const SizedBox(height: 12),
                     _buildSettingsTile(
-                       context: context,
-                       icon: Icons.palette_outlined,
-                       iconColor: Colors.purpleAccent,
-                       title: 'App Theme',
-                       subtitle: 'Colors & Dark Mode',
-                       onTap: () => _showAppThemeSelector(context),
-                     ),
+                      context: context,
+                      icon: Icons.widgets_outlined,
+                      iconColor: colorScheme.tertiary,
+                      title: 'Widget Theme',
+                      subtitle: 'Liquid Glass & More',
+                      onTap: () => _showWidgetThemeSelector(context),
+                    ),
                     const SizedBox(height: 12),
-                   _buildSettingsTile(
-                     context: context,
-                     icon: Icons.widgets_outlined,
-                     iconColor: colorScheme.tertiary,
-                     title: 'Widget Theme',
-                     subtitle: 'Liquid Glass & More',
-                     onTap: () => _showWidgetThemeSelector(context),
-                   ),
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.view_in_ar_rounded,
+                      iconColor: Colors.blueAccent,
+                      title: '3D Model Rotation',
+                      subtitle: 'Restrict movement',
+                      onTap: () => _showModelRotationSelector(context),
+                    ),
 
                    const SizedBox(height: 32),
                    _buildSectionHeader(context, 'Integrations'),
@@ -492,6 +501,90 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore Failed: $e')));
       }
     }
+  }
+
+  void _showModelRotationSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+           final rotationModeAsync = ref.watch(modelRotationModeProvider);
+           final colorScheme = Theme.of(context).colorScheme;
+           
+           return Container(
+             padding: const EdgeInsets.all(24),
+             child: Column(
+               mainAxisSize: MainAxisSize.min,
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text('3D Model Rotation', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: colorScheme.onSurface)),
+                 const SizedBox(height: 16),
+                 rotationModeAsync.when(
+                   data: (current) => Column(
+                     children: [
+                       _buildRotationOption(context, ref, 'Horizontal Only', 'horizontal', current),
+                       const SizedBox(height: 12),
+                       _buildRotationOption(context, ref, '360 Degree', 'full', current),
+                     ],
+                   ),
+                   loading: () => const Center(child: CircularProgressIndicator()),
+                   error: (_, _) => Text('Error loading mode', style: TextStyle(color: colorScheme.error)),
+                 ),
+                 const SizedBox(height: 16),
+               ],
+             ),
+           );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRotationOption(BuildContext context, WidgetRef ref, String label, String value, String current) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSelected = value == current;
+    
+    return InkWell(
+      onTap: () async {
+        Navigator.pop(context);
+        await ref.read(modelRotationModeProvider.notifier).setMode(value);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary : Colors.transparent, 
+            width: 2
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              value == 'horizontal' ? Icons.sync_alt_rounded : Icons.sync_rounded,
+              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+              ),
+            ),
+            const Spacer(),
+            if (isSelected) 
+              Icon(Icons.check_circle, color: colorScheme.primary),
+          ],
+        ),
+      ),
+    );
   }
 
 }

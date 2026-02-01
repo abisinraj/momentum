@@ -148,15 +148,6 @@ class _InfoScreenState extends ConsumerState<InfoScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              // Joined date only (Badge removed per request)
-              Text(
-                'Joined $joinYear',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
             ],
           ),
         ),
