@@ -7,7 +7,7 @@ import 'package:momentum/core/providers/database_providers.dart';
 // Muscle Workload (Last 5 days to define "soreness")
 final muscleWorkloadProvider = FutureProvider<Map<String, int>>((ref) async {
   final db = ref.watch(appDatabaseProvider);
-  return db.getMuscleWorkload(5);
+  return db.getMuscleWorkload(30);
 });
 
 // Calculate Volume Load (Current Week)

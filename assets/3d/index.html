@@ -124,25 +124,25 @@
         const activeHeatmap = {};
 
         // Efficient dependency gatekeeper
+        window.isReady = false;
+
         function checkDependencies() {
             const startTime = Date.now();
-            const TIMEOUT_MS = 5000;
+            const TIMEOUT_MS = 15000;
 
             function check() {
                 const missing = [];
-                if (typeof window.THREE === 'undefined') missing.push('THREE.js');
-                else {
-                    if (typeof window.THREE.BufferGeometryUtils === 'undefined') missing.push('BufferGeometryUtils');
-                    if (typeof window.GLTFLoader === 'undefined') missing.push('GLTFLoader');
-                    if (typeof window.OrbitControls === 'undefined') missing.push('OrbitControls');
-                    if (typeof window.RoomEnvironment === 'undefined') missing.push('RoomEnvironment');
-                }
+                if (!window.THREE) missing.push('THREE');
+                if (!window.GLTFLoader) missing.push('GLTFLoader');
+                if (!window.OrbitControls) missing.push('OrbitControls');
+                if (!window.RoomEnvironment) missing.push('RoomEnvironment');
 
                 if (missing.length === 0) {
                     console.log('✓ 3D Viewer initialized successfully');
                     document.getElementById('loader').classList.add('hidden');
                     init();
                     animate();
+                    window.isReady = true;
                     return;
                 }
 
@@ -153,20 +153,19 @@
                     loader.innerHTML = 'Error: Missing ' + missing.join(', ');
                     return;
                 }
-
-                // Log status only every 500ms to avoid flooding
-                if ((Date.now() - startTime) % 500 < 50) {
-                    console.log('Waiting for:', missing.join(', '));
-                }
-
                 requestAnimationFrame(check);
             }
-
             check();
         }
 
-        // Run dependency check
         checkDependencies();
+
+        window.addEventListener('resize', () => {
+            if (!camera || !renderer) return;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
 
         function init() {
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -250,6 +249,11 @@
                     }
                 });
 
+                // Notify Flutter that everything is ready
+                if (window.FlutterChannel) {
+                    window.FlutterChannel.postMessage(JSON.stringify({ type: 'model_loaded' }));
+                }
+
                 // Trigger initial update
                 if (window.pendingHeatmap) {
                     window.setMuscleHeatmap(window.pendingHeatmap);
@@ -271,8 +275,7 @@
             };
 
             // Attempt default load
-            const timestamp = Date.now();
-            loader.load('model.glb?t=' + timestamp, onModelLoaded, undefined, function (error) {
+            loader.load('model.glb', onModelLoaded, undefined, function (error) {
                 console.warn('Default model load failed. Waiting for Base64 injection.', error);
             });
 
@@ -645,6 +648,24 @@
 
         window.resetHeatmap = function () {
             for (const key in activeHeatmap) activeHeatmap[key] = 0;
+        };
+
+        window.getCameraState = function () {
+            return JSON.stringify({
+                position: camera.position,
+                target: controls.target
+            });
+        };
+
+        window.setCameraState = function (stateJson) {
+            try {
+                const state = JSON.parse(stateJson);
+                if (state.position) camera.position.set(state.position.x, state.position.y, state.position.z);
+                if (state.target) controls.target.set(state.target.x, state.target.y, state.target.z);
+                if (controls) controls.update();
+            } catch (e) {
+                console.error("Error setting camera state:", e);
+            }
         };
 
         window.setBackgroundColor = function (color) {

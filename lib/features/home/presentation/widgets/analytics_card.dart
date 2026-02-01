@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router.dart';
 import 'themed_card.dart';
 import 'trend_chart.dart';
+import 'three_d_man_widget.dart';
 
 
 class AnalyticsCard extends ConsumerWidget {
@@ -91,99 +92,83 @@ class AnalyticsCard extends ConsumerWidget {
   // ... (previous helper methods) ...
 
   Widget _buildMuscleRecoverySection(BuildContext context, AsyncValue<Map<String, int>> workloadAsync) {
-    return workloadAsync.when(
-      data: (workload) {
-        // Embed the widget but without the card container since we are already inside a card
-        // Actually MuscleHeatmapWidget IS a ThemedCard. We shouldn't nest cards.
-        // Let's modify MuscleHeatmapWidget usage or reimplement the core UI here.
-        // Wait, MuscleHeatmapWidget returns a ThemedCard.
-        // Nesting cards looks bad (Card inside Card).
-        // I should call `_buildPowerBars` directly or extract the logic.
-        // Since I cannot change MuscleHeatmapWidget interface easily right now without checking it,
-        // I will just reimplement the "Power Bar" logic here for "Analytics Card Integration".
-        // It's cleaner than modifying the widget to have a "noCard" mode right now.
-        
-// Helper to aggregate sub-muscles (e.g. Biceps -> Arms)
-        int getVolume(String category) {
-           // Define mappings
-           const map = {
-             'Chest': ['Chest', 'Upper Chest', 'Lower Chest'],
-             'Back': ['Back', 'Lats', 'Upper Back', 'Lower Back'],
-             'Legs': ['Legs', 'Quads', 'Hamstrings', 'Glutes', 'Calves'],
-             'Arms': ['Arms', 'Biceps', 'Triceps', 'Forearms'],
-             'Shoulders': ['Shoulders', 'Front Delts', 'Side Delts', 'Rear Delts'], // Core usually Abs
-             'Core': ['Abs', 'Upper Abs', 'Lower Abs', 'Obliques'],
-           };
-           
-           int total = 0;
-           final subs = map[category] ?? [category];
-           for (final sub in subs) {
-             total += (workload[sub] ?? 0);
-           }
-           return total;
-        }
-
-        return Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'MUSCLE RECOVERY STATUS',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    InkWell(
-                      onTap: () => context.push(AppRoute.recovery3d.path),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.view_in_ar, size: 12, color: Theme.of(context).colorScheme.primary),
-                            const SizedBox(width: 4),
-                            Text(
-                              '3D VIEW',
-                              style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                 Text(
-                   'LAST 5 DAYS',
-                   style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
-                 ),
-              ],
+            Text(
+              'MUSCLE RECOVERY STATUS',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
             ),
-            const SizedBox(height: 12),
-            _buildRecoveryBar(context, "CHEST", getVolume('Chest')),
-            const SizedBox(height: 8),
-            _buildRecoveryBar(context, "BACK", getVolume('Back')),
-            const SizedBox(height: 8),
-            _buildRecoveryBar(context, "LEGS", getVolume('Legs')),
-            const SizedBox(height: 8),
-            _buildRecoveryBar(context, "ARMS", getVolume('Arms')),
-            const SizedBox(height: 8),
-            _buildRecoveryBar(context, "CORE", getVolume('Core')), // Abs maps to Core here
+             Text(
+               'LAST 30 DAYS',
+               style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
+             ),
           ],
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Text('Unable to load recovery data'),
+        ),
+        const SizedBox(height: 16),
+        
+        // 3D Model Preview
+        GestureDetector(
+          onTap: () => context.push(AppRoute.recovery3d.path),
+          child: Container(
+            height: 280, // Height for the preview
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                children: [
+                   ThreeDManWidget(
+                    height: 280,
+                    heroTag: 'muscle-model',
+                    interactive: false, // Don't rotate on home preview to avoid conflict with tap-to-expand
+                  ),
+                  
+                  // Label / Hint
+                  Positioned(
+                    bottom: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.zoom_in_rounded, size: 14, color: Colors.white.withValues(alpha: 0.9)),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'TAP TO EXPAND',
+                            style: TextStyle(
+                              fontSize: 9, 
+                              fontWeight: FontWeight.bold, 
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

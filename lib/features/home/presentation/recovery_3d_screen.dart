@@ -60,12 +60,12 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // 3D Model View - Fill the whole screen
           Positioned.fill(
              child: ThreeDManWidget(
                 height: MediaQuery.of(context).size.height,
                 focusMuscle: _selectedMuscle,
                 onMuscleTap: _handleMuscleTap,
+                heroTag: 'muscle-model',
               ),
           ),
           

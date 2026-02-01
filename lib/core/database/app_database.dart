@@ -527,13 +527,17 @@ class AppDatabase extends _$AppDatabase {
         // 2. Determine weight factor
         double decayFactor = 0.0;
         if (hoursAgo < 24) {
-          decayFactor = 1.0; // 100% impact (Fresh damage)
+          decayFactor = 1.0; // Fresh
         } else if (hoursAgo < 48) {
-          decayFactor = 0.6; // 60% impact (DOMS peaking)
+          decayFactor = 0.8; // High
         } else if (hoursAgo < 72) {
-          decayFactor = 0.25; // 25% impact (Fading)
+          decayFactor = 0.6; // Moderate
+        } else if (hoursAgo < 120) {
+          decayFactor = 0.3; // Fading
+        } else if (hoursAgo < 168) {
+          decayFactor = 0.15; // Recovered/Trace
         } else {
-          decayFactor = 0.0; // Recovered
+          decayFactor = 0.0; // Fully recovered
         }
 
         // 3. Accumulate Weighted "Fatigue Points"

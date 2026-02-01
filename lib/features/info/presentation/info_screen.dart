@@ -10,11 +10,18 @@ import '../../home/presentation/widgets/three_d_man_widget.dart';
 
 /// Info screen - profile, settings, and data management
 /// Design: Profile avatar, stats row, Google Drive backup, preferences
-class InfoScreen extends ConsumerWidget {
+class InfoScreen extends ConsumerStatefulWidget {
   const InfoScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InfoScreen> createState() => _InfoScreenState();
+}
+
+class _InfoScreenState extends ConsumerState<InfoScreen> {
+  String? _focusedMuscle;
+
+  @override
+  Widget build(BuildContext context) {
     final userAsync = ref.watch(currentUserProvider);
     final activityAsync = ref.watch(activityGridProvider(365));
     final theme = Theme.of(context);
@@ -171,13 +178,24 @@ class InfoScreen extends ConsumerWidget {
           ),
         ),
         
-        // 3D Muscle Status (Particle Man) - Fixed Layout
         Expanded(
           child: Consumer(
             builder: (context, ref, child) {
               final workloadAsync = ref.watch(muscleWorkloadProvider);
               return workloadAsync.when(
-                data: (_) => const ThreeDManWidget(),
+                data: (_) => ThreeDManWidget(
+                  heroTag: 'profile-model',
+                  focusMuscle: _focusedMuscle,
+                  onMuscleTap: (muscle) {
+                    setState(() {
+                      if (_focusedMuscle == muscle) {
+                        _focusedMuscle = null;
+                      } else {
+                        _focusedMuscle = muscle;
+                      }
+                    });
+                  },
+                ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, _) => const Center(child: Text("Error loading status")),
               );
