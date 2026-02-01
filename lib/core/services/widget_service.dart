@@ -71,6 +71,9 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
   final userAsync = ref.watch(userStreamProvider);
   final workoutsAsync = ref.watch(workoutsStreamProvider);
   ref.watch(activityGridProvider(1)); // Watch recent activity to catch session completions
+  
+  // Watch theme changes to trigger update
+  ref.watch(widgetThemeProvider);
 
   // Wait for data to be available (skip loading states if possible, or just proceed)
   // We utilize .when to unwrap safely, or default to null/empty if loading
