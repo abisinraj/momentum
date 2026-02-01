@@ -91,7 +91,7 @@ class WorkoutCardSkeleton extends StatelessWidget {
               SizedBox(height: 12),
               // Subtitle skeleton
               SkeletonLoader(width: 150, height: 16, borderRadius: 4),
-              Spacer(),
+              SizedBox(height: 48), // Padding instead of Spacer for unbounded containers
               // Button skeleton
               SkeletonLoader(width: double.infinity, height: 56, borderRadius: 12),
             ],

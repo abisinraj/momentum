@@ -7,7 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:momentum/core/services/background_sync_service.dart';
 
-import 'core/services/notification_service.dart';
+import 'package:momentum/core/services/notification_service.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 
 import 'app/app.dart';
 
@@ -15,6 +16,15 @@ import 'app/app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
+    // Set high refresh rate for smoother UI on supported Android devices
+    if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android)) {
+      try {
+        await FlutterDisplayMode.setHighRefreshRate();
+      } catch (e) {
+        debugPrint('Failed to set high refresh rate: $e');
+      }
+    }
+
     // BackgroundService removed for stability
     await NotificationService().initialize();
     

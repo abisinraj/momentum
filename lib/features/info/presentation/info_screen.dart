@@ -82,13 +82,6 @@ class _InfoScreenState extends ConsumerState<InfoScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     
-    final activeDays = switch (activityAsync) {
-      AsyncData(:final value) => value.length,
-      _ => 0,
-    };
-    
-    final joinDate = user?.createdAt ?? DateTime.now();
-    final joinYear = joinDate.year;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,22 +145,33 @@ class _InfoScreenState extends ConsumerState<InfoScreen> {
           ),
         ),
         
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
         
-        // Stats row
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildStatColumn(context, '$activeDays', 'WORKOUTS'),
-              _buildDivider(context),
-              _buildStatColumn(context, '${(activeDays * 0.75).toInt()}h', 'ACTIVE'),
-              _buildDivider(context),
-              _buildStatColumn(context, '${activeDays * 85}', 'CALORIES'),
-            ],
+        // Analytics Button
+        Center(
+          child: TextButton.icon(
+            onPressed: () => context.push(AppRoute.userAnalytics.path),
+            icon: Icon(Icons.analytics_outlined, size: 20, color: colorScheme.primary),
+            label: Text(
+              'VIEW ANALYTICS',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
+                letterSpacing: 1.0,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ),
+        
+        const SizedBox(height: 24),
         
         Expanded(
           child: Consumer(
@@ -197,37 +201,4 @@ class _InfoScreenState extends ConsumerState<InfoScreen> {
     );
   }
   
-  Widget _buildStatColumn(BuildContext context, String value, String label) {
-    final theme = Theme.of(context);
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: theme.colorScheme.onSurfaceVariant,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDivider(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 40,
-      color: Theme.of(context).colorScheme.outlineVariant,
-    );
-  }
 }

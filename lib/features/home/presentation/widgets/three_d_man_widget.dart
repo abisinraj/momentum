@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/dashboard_providers.dart';
+import '../../../../core/services/settings_service.dart';
 import 'dart:convert';
 
 class ThreeDManWidget extends ConsumerStatefulWidget {

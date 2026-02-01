@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/widget_service.dart';
+import '../../../../core/services/permission_service.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../app/widgets/permission_bottom_sheet.dart';
 
 /// Splash screen shown while app initializes
 /// Design: Teal M logo centered with \"Momentum\" text below
@@ -39,6 +41,50 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     
     // Sync widget data in background
     ref.read(widgetSyncProvider);
+
+    // Check permissions after initial delay
+    _initSequence();
+  }
+
+  Future<void> _initSequence() async {
+    // 1. Minimum logo display time
+    await Future.delayed(const Duration(milliseconds: 1500));
+    
+    // 2. Check permissions
+    if (mounted) {
+      await _checkPermissions();
+    }
+  }
+
+  Future<void> _checkPermissions() async {
+    final service = ref.read(permissionServiceProvider.notifier);
+    final status = await service.checkAllPermissions();
+    
+    // Identify missing permissions
+    final missing = Map.fromEntries(
+      status.entries.where((e) => !e.value.isGranted)
+    );
+
+    if (missing.isNotEmpty && mounted) {
+      // Show elegant bottom sheet
+      final result = await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        enableDrag: false,
+        isDismissible: false,
+        builder: (context) => PermissionBottomSheet(missingPermissions: missing),
+      );
+
+      // Even if they skip/close (limited access), we mark as handled to proceed
+      if (mounted) {
+        ref.read(permissionsHandledProvider.notifier).markAsHandled();
+      }
+    } else {
+      // All good, mark as handled
+      if (mounted) {
+        ref.read(permissionsHandledProvider.notifier).markAsHandled();
+      }
+    }
   }
 
   @override

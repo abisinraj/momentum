@@ -1024,22 +1024,16 @@ class AppDatabase extends _$AppDatabase {
       
       // Get exercise count for this session
       final sessionExercisesList = await getSessionExercises(session.id);
-      final completedSets = sessionExercisesList.fold<int>(
-        0, (sum, ex) => sum + ex.completedSets);
       
-      // Calculate total volume (Kg)
       final user = await getUser();
       final bodyWeight = user?.weightKg ?? 70.0;
       double totalVolume = 0;
+      int totalReps = 0;
       
       for (final se in sessionExercisesList) {
-        // If weight tracked, use it. Else assume bodyweight * 0.8? 
-        // Or if weight is null, maybe just count Reps?
-        // Let's stick to "Volume Load" concept: Weight * Reps.
-        // If weight is null (Bodyweight exercise with no added weight), use bodyWeight.
-        // Actually, schema usually has weightKg as null for bodyweight.
         final weight = se.weightKg ?? bodyWeight;
         totalVolume += weight * se.completedReps;
+        totalReps += se.completedReps;
       }
       
       results.add({
@@ -1050,8 +1044,9 @@ class AppDatabase extends _$AppDatabase {
         'completedAt': session.completedAt,
         'durationSeconds': session.durationSeconds ?? 0,
         'exerciseCount': sessionExercisesList.length,
-        'completedSets': completedSets,
+        'completedSets': sessionExercisesList.fold<int>(0, (sum, ex) => sum + ex.completedSets),
         'totalVolume': totalVolume,
+        'totalReps': totalReps,
       });
     }
     

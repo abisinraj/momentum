@@ -189,3 +189,18 @@ class AppThemeMode extends _$AppThemeMode {
     });
   }
 }
+
+@riverpod
+class ModelRotationMode extends _$ModelRotationMode {
+  @override
+  Future<String> build() async {
+    return ref.read(settingsServiceProvider).getModelRotationMode();
+  }
+
+  Future<void> setMode(String mode) async {
+    state = await AsyncValue.guard(() async {
+      await ref.read(settingsServiceProvider).setModelRotationMode(mode);
+      return mode;
+    });
+  }
+}

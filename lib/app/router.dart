@@ -10,6 +10,7 @@ import '../features/workout/presentation/workout_screen.dart';
 import '../features/workout/presentation/create_workout_screen.dart';
 import '../features/progress/presentation/progress_screen.dart';
 import '../features/info/presentation/info_screen.dart';
+import '../features/info/presentation/user_analytics_screen.dart';
 import '../features/setup/presentation/setup_screen.dart';
 import '../features/setup/presentation/split_setup_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
@@ -21,6 +22,7 @@ import '../features/health/presentation/health_detail_screen.dart';
 import '../features/health/presentation/privacy_policy_screen.dart';
 
 import '../core/providers/database_providers.dart';
+import '../core/services/permission_service.dart';
 
 part 'router.g.dart';
 
@@ -40,7 +42,8 @@ enum AppRoute {
   healthDetail('/health'),
   apiSettings('/api-settings'),
   privacyPolicy('/privacy'),
-  recovery3d('/recovery-3d');
+  recovery3d('/recovery-3d'),
+  userAnalytics('/user-analytics');
 
 
   const AppRoute(this.path);
@@ -199,6 +202,7 @@ String? _handleDataRedirect(BuildContext context, GoRouterState state, bool isCo
 GoRouter router(Ref ref) {
   // Watch the async setup provider
   final isSetupCompleteAsync = ref.watch(isSetupCompleteProvider);
+  final permissionsHandled = ref.watch(permissionsHandledProvider);
   
   return GoRouter(
     initialLocation: AppRoute.splash.path,
@@ -208,7 +212,12 @@ GoRouter router(Ref ref) {
                           path == AppRoute.splitSetup.path ||
                           path.startsWith('/create-workout');
 
-      // Use pattern matching for the async value
+      // 1. If permissions aren't handled, force splash
+      if (!permissionsHandled) {
+         return path == AppRoute.splash.path ? null : AppRoute.splash.path;
+      }
+
+      // 2. Standard setup/complete logic
       return switch (isSetupCompleteAsync) {
         // Only redirect to splash if we are NOT in setup flow
         // This prevents kicking the user out of setup when the provider refreshes (e.g. after saving profile)
@@ -281,6 +290,11 @@ GoRouter router(Ref ref) {
         path: AppRoute.recovery3d.path,
         name: AppRoute.recovery3d.name,
         builder: (context, state) => const Recovery3DScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.userAnalytics.path,
+        name: AppRoute.userAnalytics.name,
+        builder: (context, state) => const UserAnalyticsScreen(),
       ),
 
       
