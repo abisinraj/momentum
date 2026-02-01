@@ -194,8 +194,6 @@ class _ThreeDManWidgetState extends ConsumerState<ThreeDManWidget> {
     });
   }
 
-  String? _focusedMuscle;
-
   @override
   Widget build(BuildContext context) {
     // Watch the provider here to ensure rebuilds when data changes

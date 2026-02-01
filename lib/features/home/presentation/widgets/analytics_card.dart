@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router.dart';
 import 'themed_card.dart';
 import 'trend_chart.dart';
-import 'three_d_man_widget.dart';
 
 
 class AnalyticsCard extends ConsumerWidget {
@@ -92,6 +91,9 @@ class AnalyticsCard extends ConsumerWidget {
   // ... (previous helper methods) ...
 
   Widget _buildMuscleRecoverySection(BuildContext context, AsyncValue<Map<String, int>> workloadAsync) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -103,70 +105,82 @@ class AnalyticsCard extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
-             Text(
-               'LAST 30 DAYS',
-               style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
-             ),
+            // The Button to open 3D View
+            TextButton.icon(
+              onPressed: () => context.push(AppRoute.recovery3d.path),
+              icon: Icon(Icons.view_in_ar_rounded, size: 16, color: colorScheme.primary),
+              label: Text(
+                'VIEW 3D',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
         
-        // 3D Model Preview
-        GestureDetector(
-          onTap: () => context.push(AppRoute.recovery3d.path),
-          child: Container(
-            height: 280, // Height for the preview
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3)),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Stack(
-                children: [
-                   ThreeDManWidget(
-                    height: 280,
-                    heroTag: 'muscle-model',
-                    interactive: false, // Don't rotate on home preview to avoid conflict with tap-to-expand
+        workloadAsync.when(
+          data: (workload) {
+            if (workload.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    "No workout data for recovery tracking",
+                    style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                   ),
-                  
-                  // Label / Hint
-                  Positioned(
-                    bottom: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.zoom_in_rounded, size: 14, color: Colors.white.withValues(alpha: 0.9)),
-                          const SizedBox(width: 4),
-                          const Text(
-                            'TAP TO EXPAND',
-                            style: TextStyle(
-                              fontSize: 9, 
-                              fontWeight: FontWeight.bold, 
-                              color: Colors.white,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
+                ),
+              );
+            }
+            
+            // Show all muscles that have workload > 0, sorted by intensity
+            final activeMuscles = workload.entries
+              .where((e) => e.value > 0)
+              .toList()
+              ..sort((a, b) => b.value.compareTo(a.value));
+            
+            if (activeMuscles.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.1)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    const SizedBox(width: 12),
+                    Text(
+                      "All muscles fully recovered",
+                      style: TextStyle(fontSize: 12, color: Colors.green.withValues(alpha: 0.8), fontWeight: FontWeight.bold),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                  ],
+                ),
+              );
+            }
+
+            return Column(
+              children: activeMuscles.take(6).map((e) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildRecoveryBar(context, e.key.toUpperCase(), e.value),
+              )).toList(),
+            );
+          },
+          loading: () => const Center(child: LinearProgressIndicator()),
+          error: (err, _) => Text('Error loading recovery', style: TextStyle(color: colorScheme.error, fontSize: 12)),
         ),
       ],
     );
