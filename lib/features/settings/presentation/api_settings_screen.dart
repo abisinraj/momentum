@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:momentum/app/theme/app_theme.dart';
 import 'package:momentum/core/services/settings_service.dart';
 import 'package:momentum/core/services/thumbnail_service.dart';
 
@@ -72,8 +71,10 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('API Settings'),
         leading: IconButton(
@@ -88,10 +89,11 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   _buildInfo('Add your API keys to enable dynamic features like AI insights and workout covers.'),
+                   _buildInfo(context, 'Add your API keys to enable dynamic features like AI insights and workout covers.'),
                    const SizedBox(height: 24),
 
                    _buildTextField(
+                     context,
                      controller: _geminiController,
                      label: 'Google Gemini API Key',
                      hint: 'Enables AI Workout Insights',
@@ -100,6 +102,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                    const SizedBox(height: 16),
                    
                    _buildTextField(
+                     context,
                      controller: _pexelsController,
                      label: 'Pexels API Key',
                      hint: 'For workout cover images',
@@ -107,6 +110,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                    ),
                    const SizedBox(height: 16),
                    _buildTextField(
+                     context,
                      controller: _unsplashController,
                      label: 'Unsplash Access Key',
                      hint: 'Alternative for images',
@@ -119,12 +123,19 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                    
                    SizedBox(
                      width: double.infinity,
-                     child: FilledButton.icon(
+                       child: FilledButton.icon(
                        onPressed: _isSaving ? null : _saveKeys,
+                       style: FilledButton.styleFrom(
+                         backgroundColor: colorScheme.primary,
+                         disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.5),
+                       ),
                        icon: _isSaving 
-                           ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: AppTheme.darkBackground, strokeWidth: 2)) 
-                           : const Icon(Icons.save),
-                       label: Text(_isSaving ? 'Saving...' : 'Save API Keys'),
+                           ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: colorScheme.onPrimary, strokeWidth: 2)) 
+                           : Icon(Icons.save, color: colorScheme.onPrimary),
+                       label: Text(
+                         _isSaving ? 'Saving...' : 'Save API Keys',
+                         style: TextStyle(color: colorScheme.onPrimary),
+                       ),
                      ),
                    ),
                 ],
@@ -133,22 +144,23 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     );
   }
 
-  Widget _buildInfo(String text) {
+  Widget _buildInfo(BuildContext context, String text) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.darkSurfaceContainer,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.lock_outline, color: AppTheme.tealPrimary, size: 20),
+          Icon(Icons.lock_outline, color: colorScheme.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
             ),
           ),
         ],
@@ -156,20 +168,21 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextField(BuildContext context, {
     required TextEditingController controller,
     required String label,
     required String hint,
     required IconData icon,
     TextInputType? keyboardType,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: AppTheme.textPrimary,
+          style: TextStyle(
+            color: colorScheme.onSurface,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -178,17 +191,28 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: colorScheme.onSurface),
           obscureText: true, // Secure entry by default for keys
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(icon, color: AppTheme.textSecondary),
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+            filled: true,
+            fillColor: colorScheme.surfaceContainer,
+            prefixIcon: Icon(icon, color: colorScheme.onSurfaceVariant),
             suffixIcon: IconButton(
-              icon: const Icon(Icons.paste, color: AppTheme.textMuted),
+              icon: Icon(Icons.paste, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
               onPressed: () async {
                 // TODO: Paste logic if needed, or simple Paste via long press
               },
             ), 
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: colorScheme.primary),
+            ),
           ),
         ),
       ],

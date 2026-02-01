@@ -14,9 +14,6 @@ class AppTheme {
   static const Color tealLight = Color(0xFF4DFFDB);
   static const Color tealDark = Color(0xFF00A88A);
   
-  static const Color yellowAccent = Color(0xFFD4E157);
-  static const Color yellowDark = Color(0xFFC0CA33);
-  
   // Dark theme surface colors
   static const Color darkBackground = Color(0xFF0F1419);
   static const Color darkSurface = Color(0xFF1A1F25);
@@ -62,33 +59,13 @@ class AppTheme {
   }
   
   // Theme Modes
+  // Theme Modes
   static const String themeTeal = 'teal';
-  static const String themeYellow = 'yellow';
-  static const String themeRed = 'red';
   static const String themeBlack = 'black';
 
   // Get theme based on key with distinct palettes
   static ThemeData getTheme(String themeKey) {
     switch (themeKey) {
-      case themeYellow: // Cyber / High Voltage
-        return _buildTheme(
-          primary: const Color(0xFFD4E157), // Acid Yellow
-          primaryContainer: const Color(0xFFC0CA33),
-          background: const Color(0xFF050505), // Near Black
-          surface: const Color(0xFF141414),
-          surfaceContainer: const Color(0xFF1E1E1E),
-          border: const Color(0xFF333333),
-        );
-      case themeRed: // Adrenaline
-        return _buildTheme(
-          primary: const Color(0xFFE53935), // Crimson
-          primaryContainer: const Color(0xFFA50000), // Darker Red for container
-          // Background tinted with very deep red
-          background: const Color(0xFF120505), 
-          surface: const Color(0xFF1F0A0A), // Dark Red-Brown surface
-          surfaceContainer: const Color(0xFF2D0E0E),
-          border: const Color(0xFF4A1A1A),
-        );
       case themeBlack: // OLED Midnight
         return _buildTheme(
           primary: const Color(0xFFFFFFFF), // White
@@ -100,7 +77,7 @@ class AppTheme {
           isMonochrome: true,
         );
       case themeTeal:
-      default: // Ocean / Default
+      default: // Ocean
         return _buildTheme(
           primary: tealPrimary,
           primaryContainer: tealDark,
@@ -131,10 +108,10 @@ class AppTheme {
       onPrimary: isMonochrome ? Colors.black : background,
       primaryContainer: primaryContainer,
       onPrimaryContainer: isMonochrome ? Colors.black : Colors.white,
-      secondary: isMonochrome ? Colors.white : yellowAccent,
+      secondary: isMonochrome ? Colors.white : tealLight,
       onSecondary: background,
-      secondaryContainer: isMonochrome ? const Color(0xFF333333) : yellowDark.withValues(alpha: 0.2),
-      onSecondaryContainer: isMonochrome ? Colors.white : yellowAccent,
+      secondaryContainer: isMonochrome ? const Color(0xFF333333) : tealDark.withValues(alpha: 0.2),
+      onSecondaryContainer: isMonochrome ? Colors.white : tealLight,
       tertiary: isMonochrome ? Colors.grey : tealLight,
       onTertiary: background,
       tertiaryContainer: isMonochrome ? Colors.grey.withValues(alpha: 0.3) : tealDark.withValues(alpha: 0.3),

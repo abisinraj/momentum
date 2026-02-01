@@ -569,54 +569,52 @@ class _WorkoutCard extends StatelessWidget {
 
                         ),
                       ),
-                      // Edit/Delete Menu (Only if not locked)
-                      if (!isLocked)
-                        SizedBox(
-                          width: 32,
-                          height: 32,
-                          child: PopupMenuButton<String>(
-                            icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant, size: 20),
-                            color: colorScheme.surfaceContainerHigh,
-
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            onSelected: (value) {
-                                if (value == 'edit') {
-                                  // Navigate to edit
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => EditWorkoutScreen(
-                                        existingWorkout: workout,
-                                      ),
+                      // Edit/Delete Menu (Always enabled now)
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: PopupMenuButton<String>(
+                          icon: Icon(Icons.more_vert, color: colorScheme.onSurfaceVariant, size: 20),
+                          color: colorScheme.surfaceContainerHigh,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          onSelected: (value) {
+                              if (value == 'edit') {
+                                // Navigate to edit
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => EditWorkoutScreen(
+                                      existingWorkout: workout,
                                     ),
-                                  );
-                              } else if (value == 'delete') {
-                                onDelete();
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 'edit',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.edit_outlined, size: 20, color: Colors.white),
-                                    SizedBox(width: 12),
-                                    Text('Edit', style: TextStyle(color: Colors.white)),
-                                  ],
-                                ),
+                                  ),
+                                );
+                            } else if (value == 'delete') {
+                              onDelete();
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit_outlined, size: 20, color: Colors.white),
+                                  SizedBox(width: 12),
+                                  Text('Edit', style: TextStyle(color: Colors.white)),
+                                ],
                               ),
-                              const PopupMenuItem(
-                                value: 'delete',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
-                                    SizedBox(width: 12),
-                                    Text('Delete', style: TextStyle(color: Colors.redAccent)),
-                                  ],
-                                ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                                  SizedBox(width: 12),
+                                  Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../app/theme/app_theme.dart';
 import '../../../core/services/settings_service.dart';
 
 class WorkoutPreferencesScreen extends ConsumerStatefulWidget {
@@ -63,9 +62,9 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
     if (mounted) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Preferences saved'),
-          backgroundColor: AppTheme.tealPrimary,
+        SnackBar(
+          content: const Text('Preferences saved'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
       context.pop();
@@ -74,11 +73,13 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('Workout Preferences'),
-        backgroundColor: AppTheme.darkBackground,
+        backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -109,17 +110,17 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
                     child: FilledButton.icon(
                       onPressed: _savePreferences,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppTheme.tealPrimary,
+                        backgroundColor: colorScheme.primary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      icon: const Icon(Icons.save, color: AppTheme.darkBackground),
-                      label: const Text(
+                      icon: Icon(Icons.save, color: colorScheme.onPrimary),
+                      label: Text(
                         'Save Preferences',
                         style: TextStyle(
-                          color: AppTheme.darkBackground,
+                          color: colorScheme.onPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -139,13 +140,14 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
     required IconData icon,
     TextInputType? keyboardType,
   }) {
+    final colorScheme = Theme.of(context).colorScheme; // Fixed: Defined colorScheme
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: AppTheme.textSecondary,
+          style: TextStyle(
+            color: colorScheme.onSurfaceVariant,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -154,20 +156,20 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
         TextField(
           controller: controller,
           keyboardType: keyboardType,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: colorScheme.onSurface),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
             filled: true,
-            fillColor: AppTheme.darkSurface,
-            prefixIcon: Icon(icon, color: AppTheme.tealPrimary),
+            fillColor: colorScheme.surfaceContainer,
+            prefixIcon: Icon(icon, color: colorScheme.primary),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.tealPrimary),
+              borderSide: BorderSide(color: colorScheme.primary),
             ),
           ),
         ),
@@ -176,13 +178,14 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
   }
 
   Widget _buildWeightUnitSelector() {
+    final colorScheme = Theme.of(context).colorScheme; // Fixed: Defined colorScheme
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Weight Unit',
           style: TextStyle(
-            color: AppTheme.textSecondary,
+            color: colorScheme.onSurfaceVariant,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -191,7 +194,7 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: AppTheme.darkSurface,
+            color: colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -203,11 +206,11 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: _weightUnit == 'kg' 
-                          ? AppTheme.tealPrimary.withValues(alpha: 0.2) 
+                          ? colorScheme.primary.withValues(alpha: 0.2) 
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                       border: _weightUnit == 'kg'
-                          ? Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.5))
+                          ? Border.all(color: colorScheme.primary.withValues(alpha: 0.5))
                           : null,
                     ),
                     child: Center(
@@ -215,8 +218,8 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
                         'Kilograms (kg)',
                         style: TextStyle(
                           color: _weightUnit == 'kg' 
-                              ? AppTheme.tealPrimary 
-                              : AppTheme.textSecondary,
+                              ? colorScheme.primary 
+                              : colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -232,11 +235,11 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: _weightUnit == 'lbs' 
-                          ? AppTheme.tealPrimary.withValues(alpha: 0.2) 
+                          ? colorScheme.primary.withValues(alpha: 0.2) 
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                       border: _weightUnit == 'lbs'
-                          ? Border.all(color: AppTheme.tealPrimary.withValues(alpha: 0.5))
+                          ? Border.all(color: colorScheme.primary.withValues(alpha: 0.5))
                           : null,
                     ),
                     child: Center(
@@ -244,8 +247,8 @@ class _WorkoutPreferencesScreenState extends ConsumerState<WorkoutPreferencesScr
                         'Pounds (lbs)',
                         style: TextStyle(
                           color: _weightUnit == 'lbs' 
-                              ? AppTheme.tealPrimary 
-                              : AppTheme.textSecondary,
+                              ? colorScheme.primary 
+                              : colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

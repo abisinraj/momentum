@@ -13,8 +13,10 @@ class SettingsService {
   static const String _keyRestTimer = 'rest_timer_seconds';
   static const String _keyWeightUnit = 'weight_unit'; // 'kg' or 'lbs'
   static const String _keyWidgetTheme = 'widget_theme'; // 'classic', 'liquid_glass'
-  static const String _keyAppTheme = 'app_theme'; // 'teal', 'yellow', 'red', 'black'
+  static const String _keyAppTheme = 'app_theme'; // 'teal', 'black'
+  static const String _keyTimeFormat = 'time_format'; // '12h', '24h'
   static const String _keyModelRotationMode = 'model_rotation_mode'; // 'horizontal', 'full'
+  static const String _keyPermissionsHandled = 'permissions_handled';
 
   final _storage = const FlutterSecureStorage();
 
@@ -45,7 +47,7 @@ class SettingsService {
 
   Future<String> getAppTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyAppTheme) ?? 'teal';
+    return prefs.getString(_keyAppTheme) ?? 'black';
   }
 
   Future<void> setRestTimer(int seconds) async {
@@ -126,6 +128,26 @@ class SettingsService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyWeightUnit) ?? 'kg'; // Default kg
   }
+
+  Future<void> setPermissionsHandled(bool handled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyPermissionsHandled, handled);
+  }
+
+  Future<bool> getPermissionsHandled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyPermissionsHandled) ?? false;
+  }
+
+  Future<void> setTimeFormat(String format) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyTimeFormat, format);
+  }
+
+  Future<String> getTimeFormat() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyTimeFormat) ?? '12h';
+  }
 }
 
 @riverpod
@@ -201,6 +223,21 @@ class ModelRotationMode extends _$ModelRotationMode {
     state = await AsyncValue.guard(() async {
       await ref.read(settingsServiceProvider).setModelRotationMode(mode);
       return mode;
+    });
+  }
+}
+
+@riverpod
+class TimeFormat extends _$TimeFormat {
+  @override
+  Future<String> build() async {
+    return ref.read(settingsServiceProvider).getTimeFormat();
+  }
+
+  Future<void> setFormat(String format) async {
+    state = await AsyncValue.guard(() async {
+      await ref.read(settingsServiceProvider).setTimeFormat(format);
+      return format;
     });
   }
 }

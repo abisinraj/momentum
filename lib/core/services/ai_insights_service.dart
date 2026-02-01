@@ -1,6 +1,27 @@
 import 'dart:typed_data';
+import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:momentum/core/database/app_database.dart';
+
+class AIInsightResponse {
+  final String text;
+  final String mood; // fire, calm, warning, hero
+  final String type; // trend, milestone, recovery, diet_prompt, general
+
+  AIInsightResponse({
+    required this.text,
+    required this.mood,
+    required this.type,
+  });
+
+  factory AIInsightResponse.fromJson(Map<String, dynamic> json) {
+    return AIInsightResponse(
+      text: json['text'] ?? "Consistency is key. Keep pushing forward!",
+      mood: json['mood'] ?? "hero",
+      type: json['type'] ?? "general",
+    );
+  }
+}
 
 class AIInsightsService {
   // TODO: Ideally, move this to a secure backend or use --dart-define
@@ -8,102 +29,146 @@ class AIInsightsService {
   // We'll store it in SharedPreferences for now if provided by user.
   static const String _defaultApiKey = 'YOUR_API_KEY_HERE'; 
 
-  Future<String> getDailyInsight(User user, List<Map<String, dynamic>> recentSessions, String? apiKey) async {
+  Future<AIInsightResponse> getDailyInsight({
+    required User user,
+    required List<Map<String, dynamic>> recentSessions,
+    required Map<String, dynamic> allTimeStats,
+    required List<Map<String, dynamic>> volumeTrend,
+    required int? hoursSinceLastMeal,
+    required String? apiKey,
+  }) async {
     try {
       if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
-        return "Configure your Gemini API Key in Settings to unlock AI insights.";
+        return AIInsightResponse(
+          text: "Configure your Gemini API Key in Settings to unlock AI insights.",
+          mood: "warning",
+          type: "general",
+        );
       }
 
+      // Latest session recovery score check
+      final recoveryScore = recentSessions.isNotEmpty 
+          ? (recentSessions.first['session'] as dynamic).recoveryScore as int? 
+          : null;
 
-
-      // Use robust fallback generation
-      final prompt = _constructDetailedPrompt(user, recentSessions);
+      final prompt = _constructDetailedPrompt(
+        user: user,
+        sessions: recentSessions,
+        stats: allTimeStats,
+        trend: volumeTrend,
+        dietGap: hoursSinceLastMeal,
+        recovery: recoveryScore,
+      );
+      
       final content = [Content.text(prompt)];
       
       try {
         final response = await _generateWithFallback(content, apiKey);
-        return response.text?.trim() ?? "Consistency is key. Keep pushing forward!";
+        final rawText = response.text?.trim() ?? "";
+        
+        // Attempt to parse JSON from AI response
+        try {
+          // Clean typical AI markdown formatting
+          final cleanJson = rawText.replaceAll('```json', '').replaceAll('```', '').trim();
+          final decoded = json.decode(cleanJson);
+          return AIInsightResponse.fromJson(decoded);
+        } catch (e) {
+          // Fallback if AI fails to return valid JSON
+          return AIInsightResponse(
+            text: rawText.isNotEmpty ? rawText : "Keep pushing your limits.",
+            mood: "hero",
+            type: "general",
+          );
+        }
       } catch (e) {
         rethrow;
       }
     } catch (e) {
       final errorStr = e.toString();
+      String text = "Focus on your form and breathing today. You got this!";
       if (errorStr.contains('API_KEY_INVALID')) {
-         return "Invalid API Key. Please check your settings.";
+         text = "Invalid API Key. Please check your settings.";
       } else if (errorStr.contains('not found') || errorStr.contains('404')) {
-         return "AI Model unavailable. Focus on your ${user.goal ?? 'goals'} today!";
+         text = "AI Model unavailable. Focus on your ${user.goal ?? 'goals'} today!";
       } else if (errorStr.contains('User location is not supported')) {
-         return "AI features are not supported in your region yet.";
+         text = "AI features are not supported in your region yet.";
       }
-      return "Focus on your form and breathing today. You got this!";
+      return AIInsightResponse(text: text, mood: "warning", type: "general");
     }
   }
 
-  String _constructDetailedPrompt(User user, List<Map<String, dynamic>> sessions) {
+  String _constructDetailedPrompt({
+    required User user,
+    required List<Map<String, dynamic>> sessions,
+    required Map<String, dynamic> stats,
+    required List<Map<String, dynamic>> trend,
+    required int? dietGap,
+    required int? recovery,
+  }) {
     final goal = user.goal ?? 'General Fitness';
     final weight = user.weightKg != null ? '${user.weightKg}kg' : 'Unknown';
     
     StringBuffer analysis = StringBuffer();
     
+    // 1. Consistency & History
     if (sessions.isEmpty) {
       analysis.writeln("User has no recorded workouts yet.");
-      analysis.writeln("Context: This is their very first step.");
     } else {
-      // Analyze consistency
       final lastWorkout = sessions.first;
       final lastDate = lastWorkout['completedAt'] as DateTime?;
       final daysSince = lastDate != null ? DateTime.now().difference(lastDate).inDays : 99;
-      
       analysis.writeln("Last workout was ${daysSince == 0 ? 'today' : '$daysSince days ago'}.");
-      
-      if (daysSince > 7) {
-        analysis.writeln("Status: User has been inactive. Needs gentle re-engagement.");
-      } else if (daysSince <= 2) {
-        analysis.writeln("Status: User is consistent and active. Needs positive reinforcement or challenge.");
-      }
-      
-      analysis.writeln("Recent History:");
-      for (var s in sessions.take(3)) {
-         final name = s['workoutName'] ?? 'Workout';
-         final date = s['completedAt'] as DateTime?;
-         analysis.writeln("- $name (${date?.day}/${date?.month})");
-         
-         // EXPAND DETAILS FOR LATEST WORKOUT
-         if (s == sessions.first && s.containsKey('exercises')) {
-           final exercises = s['exercises'] as List<Map<String, dynamic>>?;
-           if (exercises != null && exercises.isNotEmpty) {
-             analysis.writeln("  > Details from this session:");
-             for (var ex in exercises) {
-               final eName = ex['exerciseName'] ?? 'Exercise';
-               final totalReps = ex['actualReps'] ?? 0;
-               final sets = ex['completedSets'] ?? 0;
-               // Note: 'weight' might be missing in history view unless specifically queried, 
-               // but 'actualReps' and 'completedSets' gives volume context.
-               analysis.writeln("    * $eName: $sets sets, ~$totalReps total reps");
-             }
-           }
-         }
-      }
+    }
+
+    // 2. Trends
+    if (trend.length >= 2) {
+      final latestVolume = trend.last['volume'] as double;
+      final prevVolume = trend[trend.length - 2]['volume'] as double;
+      final change = prevVolume > 0 ? ((latestVolume - prevVolume) / prevVolume * 100).round() : 0;
+      analysis.writeln("Volume Trend: ${change >= 0 ? '+' : ''}$change% compared to previous session.");
+    }
+
+    // 3. Milestones
+    analysis.writeln("All-time Stats: ${stats['sessions']} sessions, ${stats['sets']} sets, ${stats['reps']} reps.");
+
+    // 4. Recovery
+    if (recovery != null) {
+      analysis.writeln("Current Recovery Score: $recovery/100.");
+    }
+
+    // 5. Diet
+    if (dietGap != null) {
+      analysis.writeln("Hours since last meal logged: $dietGap.");
     }
 
     return '''
-    You are an elite fitness coach for ${user.name}.
+    You are an elite fitness coach for ${user.name}. 
     
     User Profile:
     - Goal: $goal
     - Weight: $weight
     
-    Training Status:
+    Current Data:
     ${analysis.toString()}
     
     Task:
-    Generate a SINGLE, punchy, high-impact sentence to motivate them for today's training.
+    Analyze the data and provide a high-impact coaching insight.
     
-    Guidelines:
-    - If inactive (>7 days): Be encouraging, emphasize that "starting back is the hardest part".
-    - If consistent: Challenge them to focus on form, intensity, or a specific mental cue.
-    - Style: Professional, stoic, inspiring. No emojis. No hashtags.
-    - Max length: 20 words.
+    Return your response in STRICT JSON format:
+    {
+      "text": "A single, punchy, motivational sentence (max 20 words).",
+      "mood": "Choose one: fire (intense/streak), calm (recovery/deload), warning (inactive/missing data), hero (milestone/high volume)",
+      "type": "Choose one: trend, milestone, recovery, diet_prompt, general"
+    }
+
+    Priorities:
+    1. If dietGap > 4 hours, prioritize a 'diet_prompt'.
+    2. If recovery < 40, prioritize 'calm' recovery advice.
+    3. If significant volume trend (+10% or more), prioritize 'trend'.
+    4. If milestone achieved (e.g. 50, 100 sets), prioritize 'milestone'.
+    5. Otherwise, general 'hero' coaching.
+
+    Style: Professional, stoic, inspiring. No emojis.
     ''';
   }
 

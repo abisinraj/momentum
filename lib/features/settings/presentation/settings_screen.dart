@@ -73,16 +73,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                children: [
                  Text('App Interface Theme', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: colorScheme.onSurface)),
                  const SizedBox(height: 16),
-                 currentThemeAsync.when(
+                   currentThemeAsync.when(
                    data: (current) => Column(
                      children: [
-                       _buildThemeOption(context, ref, 'Teal (Default)', 'teal', current, isAppTheme: true),
+                       _buildThemeOption(context, ref, 'OLED Black (Default)', 'black', current, isAppTheme: true),
                        const SizedBox(height: 12),
-                       _buildThemeOption(context, ref, 'Cyber Yellow', 'yellow', current, isAppTheme: true),
-                       const SizedBox(height: 12),
-                       _buildThemeOption(context, ref, 'Crimson Red', 'red', current, isAppTheme: true),
-                       const SizedBox(height: 12),
-                       _buildThemeOption(context, ref, 'OLED Black', 'black', current, isAppTheme: true),
+                       _buildThemeOption(context, ref, 'Teal', 'teal', current, isAppTheme: true),
                      ],
                    ),
                    loading: () => const Center(child: CircularProgressIndicator()),

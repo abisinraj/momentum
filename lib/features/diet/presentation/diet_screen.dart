@@ -2,12 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/services/diet_service.dart';
 import 'dart:io';
 import 'package:drift/drift.dart' as drift;
+import 'package:intl/intl.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/services/settings_service.dart'; // Import settings service
 
 class DietScreen extends ConsumerStatefulWidget {
   const DietScreen({super.key});
@@ -22,13 +25,42 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
   final ScrollController _chatScrollController = ScrollController();
   
   // Chat State
-  final List<Map<String, String>> _messages = []; // role: user/ai, content: text
   bool _isAnalyzing = false;
+  int? _editingMessageId;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _initConnectivity();
+  }
+
+  void _initConnectivity() {
+    Connectivity().onConnectivityChanged.listen((results) {
+       // if any result in results is not none, we are online
+       final isOnline = results.any((r) => r != ConnectivityResult.none);
+       if (isOnline) {
+         _processOfflineMessages();
+       }
+    });
+  }
+
+  Future<void> _processOfflineMessages() async {
+    final db = ref.read(appDatabaseProvider);
+    final history = await db.getDietChatHistory();
+    final unprocessed = history.where((msg) => msg.role == 'user' && !msg.isProcessed).toList();
+    
+    if (unprocessed.isEmpty) return;
+    
+    for (final msg in unprocessed) {
+       await _analyzeText(msg.content, isRetry: true, messageId: msg.id);
+    }
+    
+    NotificationService.showNotification(
+      id: 1,
+      title: 'Diet Analysis Complete',
+      body: 'Processed ${unprocessed.length} pending food logs.',
+    );
   }
 
   @override
@@ -39,11 +71,37 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     super.dispose();
   }
 
-  Future<void> _analyzeText(String text) async {
+  Future<void> _analyzeText(String text, {bool isRetry = false, int? messageId}) async {
     if (text.trim().isEmpty) return;
     
+    final db = ref.read(appDatabaseProvider);
+    final connectivity = await Connectivity().checkConnectivity();
+    final isOnline = connectivity.any((c) => c != ConnectivityResult.none);
+
+    if (!isRetry) {
+      _editingMessageId = null; // Reset editing state
+      await db.addDietChatMessage(DietChatMessagesCompanion.insert(
+        role: 'user',
+        content: text,
+        isProcessed: drift.Value(isOnline),
+      ));
+    } else if (messageId != null && isOnline) {
+      await db.updateDietChatMessage(DietChatMessagesCompanion(
+        id: drift.Value(messageId),
+        isProcessed: const drift.Value(true),
+      ));
+    }
+
+    if (!isOnline) {
+      _textInputController.clear();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Offline. Meal will be processed when you reconnect.')),
+      );
+      return;
+    }
+
     setState(() {
-      _messages.add({'role': 'user', 'content': text});
       _isAnalyzing = true;
     });
     _textInputController.clear();
@@ -54,12 +112,16 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
       final result = await dietService.analyzeFoodText(text);
       
       if (!mounted) return;
-      _handleAnalysisResult(result);
+      await _handleAnalysisResult(result);
       
     } catch (e) {
       if (!mounted) return;
+      final db = ref.read(appDatabaseProvider);
+      await db.addDietChatMessage(DietChatMessagesCompanion.insert(
+        role: 'ai',
+        content: 'Error: $e. Please check your API key in Settings.',
+      ));
       setState(() {
-        _messages.add({'role': 'ai', 'content': 'Error: $e. Please check your API key in Settings.'});
         _isAnalyzing = false;
       });
       _scrollToBottom();
@@ -71,8 +133,13 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     final pickedFile = await picker.pickImage(source: source);
     
     if (pickedFile != null) {
+      final db = ref.read(appDatabaseProvider);
+      await db.addDietChatMessage(DietChatMessagesCompanion.insert(
+        role: 'user',
+        content: 'Analyzing image...',
+      ));
+
       setState(() {
-        _messages.add({'role': 'user', 'content': 'Analyzing image...'});
         _isAnalyzing = true;
       });
       _scrollToBottom();
@@ -89,11 +156,18 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
         final extendedResult = Map<String, dynamic>.from(result);
         extendedResult['imageUrl'] = pickedFile.path;
         
-        _handleAnalysisResult(extendedResult);
+        extendedResult['imageUrl'] = pickedFile.path;
+        
+        await _handleAnalysisResult(extendedResult);
       } catch (e) {
         if (!mounted) return;
+        final db = ref.read(appDatabaseProvider);
+        await db.addDietChatMessage(DietChatMessagesCompanion.insert(
+          role: 'ai',
+          content: 'Error analyzing image: $e',
+        ));
         setState(() {
-          _messages.add({'role': 'ai', 'content': 'Error analyzing image: $e'});
+          _isAnalyzing = true; // Wait, actually false
           _isAnalyzing = false;
         });
         _scrollToBottom();
@@ -101,28 +175,26 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     }
   }
 
-  void _handleAnalysisResult(Map<String, dynamic> result) {
+  Future<void> _handleAnalysisResult(Map<String, dynamic> result) async {
     // Format the result nicely
     final desc = result['description'] ?? 'Food';
     final cal = result['calories'] ?? 0;
     final p = result['protein'] ?? 0;
     final c = result['carbs'] ?? 0;
     final f = result['fats'] ?? 0;
-    // imageUrl is stored in result for logging but not displayed here
 
     final responseText = "I found: **$desc**\n"
         "Calories: $cal kcal\n"
         "P: ${p}g | C: ${c}g | F: ${f}g";
 
     if (!mounted) return;
+    final db = ref.read(appDatabaseProvider);
+    await db.addDietChatMessage(DietChatMessagesCompanion.insert(
+      role: 'ai',
+      content: responseText,
+    ));
+
     setState(() {
-      _messages.add({'role': 'ai', 'content': responseText});
-      _messages.add({'role': 'action_log', 'data': responseText, 'json': result.toString()}); 
-      // We store the structured data to allow one-tap logging
-      // But for simplicity in this MVP, let's just use a special message type or just a button below?
-      // Better: Add a "Log this" button inside the AI message bubble if possible.
-      // For now, I'll store the 'pending' log in a separate state or just immediately ask to log?
-      // Let's make the AI message actionable.
       _isAnalyzing = false;
     });
     
@@ -130,6 +202,43 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     if (mounted) {
       _showLogConfirmationDialog(result);
       _scrollToBottom();
+    }
+  }
+
+  Future<void> _editMessage(DietChatMessage message) async {
+    _editingMessageId = message.id;
+    _textInputController.text = message.content;
+    _tabController.animateTo(1); // Switch to AI Assistant tab
+  }
+
+  Future<void> _saveEditedMessage() async {
+    if (_editingMessageId == null) return;
+    final text = _textInputController.text.trim();
+    if (text.isEmpty) return;
+
+    final db = ref.read(appDatabaseProvider);
+    await db.updateDietChatMessage(DietChatMessagesCompanion(
+      id: drift.Value(_editingMessageId!),
+      content: drift.Value(text),
+    ));
+
+    setState(() {
+      _editingMessageId = null;
+      _textInputController.clear();
+      _isAnalyzing = true;
+    });
+
+    // Re-analyze after edit
+    await _analyzeText(text);
+  }
+
+  Future<void> _clearChat() async {
+    final db = ref.read(appDatabaseProvider);
+    await db.clearDietChatHistory();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Chat history cleared')),
+      );
     }
   }
   
@@ -308,12 +417,48 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
           ],
         ),
         actions: [
-           IconButton(
-             icon: const Icon(Icons.settings),
-             onPressed: () {
-               context.push('/settings');
-             },
-           ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'clear_history') {
+                _showClearConfirmation();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'clear_history',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_sweep, size: 20, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Clear Chat History'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                enabled: false,
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final is24h = ref.watch(timeFormatProvider).asData?.value == '24h';
+                    return GestureDetector(
+                      onTap: () {
+                         final newFormat = is24h ? '12h' : '24h';
+                         ref.read(timeFormatProvider.notifier).setFormat(newFormat);
+                         Navigator.pop(context); // Close menu
+                      },
+                      child: Row(
+                        children: [
+                          Icon(is24h ? Icons.access_time_filled : Icons.access_time, size: 20, color: theme.colorScheme.onSurface),
+                          const SizedBox(width: 8),
+                          Text(is24h ? 'Use 12h Format' : 'Use 24h Format'),
+                        ],
+                      ),
+                    );
+                  }
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: TabBarView(
@@ -332,16 +477,9 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     // Let's use a FutureBuilder that watches a stream locally or creating a quick ad-hoc stream
     final db = ref.watch(appDatabaseProvider);
     
-    return FutureBuilder<List<FoodLog>>(
-      future: db.getFoodLogsForDate(DateTime.now()),
+    return StreamBuilder<List<FoodLog>>(
+      stream: db.watchFoodLogsForDate(DateTime.now()),
       builder: (context, snapshot) {
-         // Note: FutureBuilder won't auto-refresh on add. 
-         // Better to use StreamBuilder if we had a stream, or `setState` trigger.
-         // For now, let's assume we might need a workaround or better provider.
-         // A simple workaround is to wrap this in a Consumer that watches a provider we invalidate.
-         // BUT, simpler: let's make a new Provider in database_providers.dart in next step?
-         // Or just use the Future and call setState on log add.
-         
          if (!snapshot.hasData) {
            return const Center(child: CircularProgressIndicator());
          }
@@ -417,33 +555,101 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
   }
 
   Widget _buildAiChatTab(ThemeData theme) {
+    final db = ref.watch(appDatabaseProvider);
+    final timeFormatAsync = ref.watch(timeFormatProvider);
+    final is24h = timeFormatAsync.valueOrNull == '24h';
+    
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
-            controller: _chatScrollController,
-            padding: const EdgeInsets.all(16),
-            itemCount: _messages.length,
-            itemBuilder: (context, index) {
-              final msg = _messages[index];
-              final isUser = msg['role'] == 'user';
-              return Align(
-                alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isUser ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(16),
+          child: StreamBuilder<List<DietChatMessage>>(
+            stream: db.watchDietChatHistory(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              
+              final messages = snapshot.data ?? [];
+              
+              if (messages.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.chat_bubble_outline, size: 48, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No messages yet.\nAsk me about your meals!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)),
+                      ),
+                    ],
                   ),
-                  constraints: const BoxConstraints(maxWidth: 280),
-                  child: Text(
-                    msg['content'] ?? '',
-                    style: TextStyle(
-                      color: isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+                );
+              }
+
+              return ListView.builder(
+                controller: _chatScrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final msg = messages[index];
+                  final isUser = msg.role == 'user';
+                  return Align(
+                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    child: GestureDetector(
+                      onLongPress: isUser ? () => _editMessage(msg) : null,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isUser ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(16).copyWith(
+                            bottomRight: isUser ? Radius.zero : null,
+                            bottomLeft: !isUser ? Radius.zero : null,
+                          ),
+                          border: _editingMessageId == msg.id 
+                              ? Border.all(color: theme.colorScheme.onPrimary, width: 2)
+                              : null,
+                        ),
+                        constraints: const BoxConstraints(maxWidth: 280),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              msg.content,
+                              style: TextStyle(
+                                color: isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                if (isUser && !msg.isProcessed)
+                                  Icon(Icons.access_time, size: 10, color: theme.colorScheme.onPrimary.withValues(alpha: 0.5))
+                                else if (isUser)
+                                  Icon(Icons.done_all, size: 10, color: theme.colorScheme.onPrimary.withValues(alpha: 0.7)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  DateFormat(is24h ? 'HH:mm' : 'h:mm a').format(msg.createdAt),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: isUser 
+                                        ? theme.colorScheme.onPrimary.withValues(alpha: 0.6)
+                                        : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
           ),
@@ -454,32 +660,80 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
             child: LinearProgressIndicator(),
           ),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.camera_alt),
-                onPressed: () => _showImageSourceSheet(),
+                icon: Icon(_editingMessageId != null ? Icons.cancel : Icons.camera_alt),
+                onPressed: () {
+                  if (_editingMessageId != null) {
+                    setState(() {
+                      _editingMessageId = null;
+                      _textInputController.clear();
+                    });
+                  } else {
+                    _showImageSourceSheet();
+                  }
+                },
+                tooltip: _editingMessageId != null ? 'Cancel Edit' : 'Take Photo',
               ),
               Expanded(
                 child: TextField(
                   controller: _textInputController,
-                  decoration: const InputDecoration(
-                    hintText: 'e.g. "Ate a chicken burger"',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                  decoration: InputDecoration(
+                    hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    suffixIcon: _textInputController.text.isNotEmpty && _editingMessageId == null
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () => _textInputController.clear(),
+                          )
+                        : null,
                   ),
-                  onSubmitted: _analyzeText,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (val) => _editingMessageId != null ? _saveEditedMessage() : _analyzeText(val),
                 ),
               ),
+              const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: () => _analyzeText(_textInputController.text),
+                style: IconButton.styleFrom(
+                  backgroundColor: const Color(0xFF1F1F1F), // Dark background always
+                  foregroundColor: Colors.white, // White icon always
+                ),
+                icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
+                onPressed: () {
+                  if (_editingMessageId != null) {
+                    _saveEditedMessage();
+                  } else {
+                    _analyzeText(_textInputController.text);
+                  }
+                },
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  void _showClearConfirmation() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear Chat History?'),
+        content: const Text('This will permanently delete all messages in this chat.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _clearChat();
+            },
+            child: Text('Clear', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          ),
+        ],
+      ),
     );
   }
   

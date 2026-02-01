@@ -8,7 +8,6 @@ import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../workout/presentation/active_workout_screen.dart';
 import '../../../app/widgets/skeleton_loader.dart';
-import '../../health/presentation/health_insights_card.dart';
 import '../../home/presentation/widgets/ai_insights_card.dart';
 import '../../home/presentation/widgets/consistency_grid_widget.dart';
 import '../../home/presentation/widgets/analytics_card.dart';
@@ -41,8 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ScreenUtils.printScreenInfo(context);
-        // Check for crashed session
-        ref.read(activeWorkoutSessionProvider.notifier).checkResumableSession();
+        // Session check now handled by ActiveWorkoutSession.build() self-hydration
       }
     });
   }
@@ -119,9 +117,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Nutrition / Net Calories Card (New)
               const NutritionCard(),
 
+
               const SizedBox(height: 16),
-              // Health Insights Card (from Health Connect)
-              const HealthInsightsCard(),
 
               const SizedBox(height: 32),
               

@@ -6,6 +6,7 @@ import 'package:momentum/core/providers/database_providers.dart';
 import 'package:momentum/core/providers/health_connect_provider.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:momentum/core/services/settings_service.dart';
 import '../../../../app/router.dart';
 import 'themed_card.dart';
 import 'trend_chart.dart';
@@ -65,7 +66,7 @@ class AnalyticsCard extends ConsumerWidget {
           
           // 2. Metrics & Progression Grid
           analyticsAsync.when(
-            data: (data) => _buildMetricsGrid(context, ref, data, userAsync.valueOrNull),
+            data: (data) => _buildMetricsGrid(context, ref, data, userAsync.valueOrNull, healthState),
             loading: () => const Center(child: LinearProgressIndicator()),
             error: (err, _) => Text('Error loading metrics', style: TextStyle(color: colorScheme.error)),
           ),
@@ -305,7 +306,7 @@ class AnalyticsCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricsGrid(BuildContext context, WidgetRef ref, Map<String, dynamic> data, User? user) {
+  Widget _buildMetricsGrid(BuildContext context, WidgetRef ref, Map<String, dynamic> data, User? user, HealthState healthState) {
     final colorScheme = Theme.of(context).colorScheme;
     final avgIntensity = data['avgIntensity'] as double;
     final calories = data['calories'] as int;
@@ -348,6 +349,29 @@ class AnalyticsCard extends ConsumerWidget {
               Icons.timer, 
               colorScheme.secondary
             )),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+             Expanded(child: _buildMetric(
+               context, 
+               'STEP COUNT', 
+               _formatSteps(healthState.todaySteps), 
+               'steps', 
+               Icons.directions_walk_rounded, 
+               colorScheme.primary
+             )),
+             Expanded(child: _buildMetric(
+               context, 
+               'WEIGHT', 
+               _formatWeight(ref, healthState.latestWeight ?? user?.weightKg), 
+               ref.watch(weightUnitProvider).valueOrNull ?? 'kg', 
+               Icons.monitor_weight_rounded, 
+               colorScheme.tertiary
+             )),
+             const Spacer(), // Keep 2 slots in this row for now
           ],
         ),
         const SizedBox(height: 24),
@@ -481,5 +505,21 @@ class AnalyticsCard extends ConsumerWidget {
   String _formatValue(num val) {
     if (val >= 1000) return '${(val / 1000).toStringAsFixed(1)}k';
     return val.toString();
+  }
+
+  String _formatSteps(int steps) {
+    if (steps >= 1000) {
+      return '${(steps / 1000).toStringAsFixed(1)}k';
+    }
+    return steps.toString();
+  }
+
+  String _formatWeight(WidgetRef ref, double? weight) {
+    if (weight == null) return '--';
+    final weightUnit = ref.watch(weightUnitProvider).valueOrNull ?? 'kg';
+    if (weightUnit == 'lbs') {
+      return (weight * 2.20462).toStringAsFixed(1);
+    }
+    return weight.toStringAsFixed(1);
   }
 }

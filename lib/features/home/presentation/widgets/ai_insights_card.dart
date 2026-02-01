@@ -15,9 +15,9 @@ class AIInsightsCard extends ConsumerWidget {
     final apiKeyAsync = ref.watch(geminiApiKeyProvider);
     final colorScheme = Theme.of(context).colorScheme;
     
-    // Add import manually at top if not auto-added, but for now assuming context works
-    // Actually, I should add the import line first separately or here if included in range?
-    // Let's modify the build method to wrap content.
+    final insight = insightAsync.valueOrNull;
+    final mood = insight?.mood ?? 'hero';
+    final type = insight?.type ?? 'general';
 
     // Premium Gradient Card Design
     return Container(
@@ -25,13 +25,14 @@ class AIInsightsCard extends ConsumerWidget {
         color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: colorScheme.secondary.withValues(alpha: 0.1),
+          color: _getMoodColor(mood, colorScheme).withValues(alpha: 0.2),
+          width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: _getMoodColor(mood, colorScheme).withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -77,9 +78,9 @@ class AIInsightsCard extends ConsumerWidget {
                         children: [
                            ShaderMask(
                              shaderCallback: (bounds) => LinearGradient(
-                               colors: [colorScheme.primary, colorScheme.tertiary],
+                               colors: _getMoodGradient(mood, colorScheme),
                              ).createShader(bounds),
-                             child: const Icon(Icons.auto_awesome, size: 24, color: Colors.white), 
+                             child: Icon(_getMoodIcon(type), size: 24, color: Colors.white), 
                            ),
                            const SizedBox(width: 12),
                            Text(
@@ -142,20 +143,19 @@ class AIInsightsCard extends ConsumerWidget {
                             );
                           }
 
-                          final insight = insightAsync.valueOrNull;
                           if (insight != null) {
                             // Also filter out the specific service message just in case
-                            if (insight.contains("Configure your Gemini API Key")) {
+                            if (insight.text.contains("Configure your Gemini API Key")) {
                                return const SizedBox.shrink(); // Should remain hidden or use above logic
                             }
                             
                             return Text(
-                              insight,
+                              insight.text,
                               style: TextStyle(
                                 fontSize: 16,
                                 height: 1.6,
                                 color: colorScheme.onSurface,
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w600,
                               ),
                             );
                           }
@@ -240,5 +240,35 @@ class AIInsightsCard extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Color _getMoodColor(String mood, ColorScheme colorScheme) {
+    switch (mood) {
+      case 'fire': return Colors.orange;
+      case 'calm': return Colors.blue;
+      case 'warning': return Colors.amber;
+      case 'hero': return colorScheme.primary;
+      default: return colorScheme.primary;
+    }
+  }
+
+  List<Color> _getMoodGradient(String mood, ColorScheme colorScheme) {
+    switch (mood) {
+      case 'fire': return [Colors.orange, Colors.red];
+      case 'calm': return [Colors.blue, Colors.cyan];
+      case 'warning': return [Colors.amber, Colors.orange];
+      case 'hero': return [colorScheme.primary, colorScheme.tertiary];
+      default: return [colorScheme.primary, colorScheme.tertiary];
+    }
+  }
+
+  IconData _getMoodIcon(String type) {
+    switch (type) {
+      case 'trend': return Icons.trending_up;
+      case 'milestone': return Icons.emoji_events;
+      case 'recovery': return Icons.self_improvement;
+      case 'diet_prompt': return Icons.restaurant;
+      default: return Icons.auto_awesome;
+    }
   }
 }

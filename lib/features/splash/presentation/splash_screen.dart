@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/widget_service.dart';
 import '../../../../core/services/permission_service.dart';
-import '../../../app/theme/app_theme.dart';
 import '../../../app/widgets/permission_bottom_sheet.dart';
 
 /// Splash screen shown while app initializes
@@ -58,16 +57,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   Future<void> _checkPermissions() async {
     final service = ref.read(permissionServiceProvider.notifier);
-    final status = await service.checkAllPermissions();
+    
+    // Fail-safe: Mark as handled anyway after 45 seconds to ensure app never stays stuck
+    Future.delayed(const Duration(seconds: 45), () async {
+      if (mounted && !ref.read(permissionsHandledProvider)) {
+        debugPrint('[SplashScreen] Permission fail-safe triggered.');
+        await ref.read(permissionsHandledProvider.notifier).markAsHandled();
+      }
+    });
+
+    final status = await service.checkStartupPermissions();
     
     // Identify missing permissions
-    final missing = Map.fromEntries(
+    final missing = Map<AppPermission, PermissionStatusInfo>.fromEntries(
       status.entries.where((e) => !e.value.isGranted)
     );
 
     if (missing.isNotEmpty && mounted) {
       // Show elegant bottom sheet
-      final result = await showModalBottomSheet<bool>(
+      await showModalBottomSheet<bool>(
         context: context,
         isScrollControlled: true,
         enableDrag: false,
@@ -75,14 +83,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         builder: (context) => PermissionBottomSheet(missingPermissions: missing),
       );
 
-      // Even if they skip/close (limited access), we mark as handled to proceed
+      // Once the sheet is closed (any way), we proceed
       if (mounted) {
-        ref.read(permissionsHandledProvider.notifier).markAsHandled();
+        await ref.read(permissionsHandledProvider.notifier).markAsHandled();
       }
     } else {
-      // All good, mark as handled
+      // All good, move on
       if (mounted) {
-        ref.read(permissionsHandledProvider.notifier).markAsHandled();
+        await ref.read(permissionsHandledProvider.notifier).markAsHandled();
       }
     }
   }
@@ -95,8 +103,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
+      backgroundColor: colorScheme.surface,
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: Stack(
@@ -107,28 +117,28 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // App icon - Stylized M in rounded square
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppTheme.darkSurfaceContainer,
-                      borderRadius: BorderRadius.circular(24),
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Center(
+                        child: _buildMomentumLogo(colorScheme.primary),
+                      ),
                     ),
-                    child: Center(
-                      child: _buildMomentumLogo(),
+                    const SizedBox(height: 32),
+                    // App name
+                    Text(
+                      'Momentum',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  // App name
-                  const Text(
-                    'Momentum',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.tealPrimary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   // Subtle loading indicator
                   SizedBox(
@@ -137,7 +147,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.tealPrimary.withValues(alpha: 0.5),
+                        colorScheme.primary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -145,7 +155,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ),
             ),
             // Bottom tagline
-            const Positioned(
+             Positioned(
               bottom: 60,
               left: 0,
               right: 0,
@@ -155,7 +165,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: AppTheme.textMuted,
+                    color: colorScheme.onSurfaceVariant,
                     letterSpacing: 2.0,
                   ),
                 ),
@@ -168,7 +178,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
   
   /// Custom M logo matching the design
-  Widget _buildMomentumLogo() {
+  Widget _buildMomentumLogo(Color iconColor) {
     return Container(
       width: 60,
       height: 60,
@@ -180,9 +190,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           debugPrint('Error loading logo: $error');
-          return const Icon(
+          return Icon(
             Icons.broken_image_outlined,
-            color: AppTheme.tealPrimary,
+            color: iconColor,
             size: 40,
           );
         },

@@ -39,10 +39,18 @@ class ActiveSession {
 
 
 /// Notifier for managing active workout session
-@riverpod
+@Riverpod(keepAlive: true)
 class ActiveWorkoutSession extends _$ActiveWorkoutSession {
   @override
-  ActiveSession? build() => null;
+  ActiveSession? build() {
+    // Attempt auto-hydration immediately
+    _hydrate();
+    return null;
+  }
+  
+  Future<void> _hydrate() async {
+    await checkResumableSession();
+  }
   
   /// Check for any crashed/incomplete sessions and restore state
   Future<void> checkResumableSession() async {

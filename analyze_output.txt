@@ -1,8 +1,0 @@
-Analyzing momentum...                                           
-
-warning • The value of the local variable 'activeDays' isn't used • lib/features/info/presentation/info_screen.dart:85:11 • unused_local_variable
-warning • The declaration '_buildStatColumn' isn't referenced • lib/features/info/presentation/info_screen.dart:209:10 • unused_element
-warning • The declaration '_buildDivider' isn't referenced • lib/features/info/presentation/info_screen.dart:235:10 • unused_element
-  error • The named parameter 'gradient' isn't defined • lib/features/info/presentation/user_analytics_screen.dart:104:15 • undefined_named_parameter
-
-4 issues found. (ran in 3.9s)

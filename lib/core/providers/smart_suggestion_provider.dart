@@ -90,7 +90,7 @@ final smartSuggestionsProvider = FutureProvider.autoDispose<List<SmartSuggestion
         final lastNotify = DateTime.fromMillisecondsSinceEpoch(lastNotifyMs);
         
         if (now.difference(lastNotify).inHours >= 24) {
-          NotificationService().showNotification(
+          NotificationService.showNotification(
             id: workout.id + 1000, // Unique-ish ID
             title: 'Cycle Balance',
             body: 'It\'s been a while since you did ${workout.name}. Consider prioritizing it today!',

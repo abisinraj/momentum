@@ -13,38 +13,51 @@ final aiInsightsServiceProvider = Provider<AIInsightsService>((ref) {
 
 /// Future provider to fetch the daily insight
 /// Caches the result to avoid unnecessary API calls on rebuilds
-final dailyInsightProvider = FutureProvider.autoDispose<String>((ref) async {
+final dailyInsightProvider = FutureProvider.autoDispose<AIInsightResponse>((ref) async {
   // refresh every 4 hours or on app restart
-  ref.keepAlive(); // Keep alive while listening, but dispose when not used? 
-  // actually, let's keep it simple: rebuild when user/history changes.
-  // To support "periodic", we can use a Timer to invalidate this provider.
-  // But purely periodic polling might cost API money.
-  // Better: Invalidate on app resume?
-  // User asked "periodically fetch". Let's settle for autoDispose so it refetches on screen revisit if logic evicted.
-  // Or better: Watch a timer provider.
-
+  ref.keepAlive();
+  
   // Watch user data
   final user = await ref.watch(currentUserProvider.future);
-  if (user == null) return "Welcome to Momentum! Setup your profile to get started.";
+  if (user == null) {
+     return AIInsightResponse(
+       text: "Welcome to Momentum! Setup your profile to get started.",
+       mood: "hero",
+       type: "general",
+     );
+  }
   
   // Watch database to get history
   final db = ref.watch(appDatabaseProvider);
-  // Get recent 5 sessions for context
-  final history = await db.getRecentSessionsWithDetails(limit: 5);
   
-  // Enrich the LATEST session with specific exercise details so AI knows what was lifted
+  // 1. History (Recent 5 sessions)
+  final history = await db.getRecentSessionsWithDetails(limit: 5);
   if (history.isNotEmpty) {
     final latestSession = history.first;
     final sessionId = (latestSession['session'] as dynamic).id;
     final exerciseDetails = await db.getSessionExerciseDetails(sessionId);
-    latestSession['exercises'] = exerciseDetails; // Inject into the map
+    latestSession['exercises'] = exerciseDetails;
   }
   
+  // 2. Trends (Last 30 days)
+  final trend = await db.getVolumeTrend(30);
+  
+  // 3. Milestones (All-time stats)
+  final stats = await db.getAllTimeStats();
+  
+  // 4. Diet Gap (Hours since last meal)
+  final dietGap = await db.getHoursSinceLastFoodLog();
+
   // Get API Key
   final apiKey = ref.watch(geminiApiKeyProvider).valueOrNull;
 
-  
   // Generate insight
-  return ref.watch(aiInsightsServiceProvider).getDailyInsight(user, history, apiKey);
-
+  return ref.watch(aiInsightsServiceProvider).getDailyInsight(
+    user: user,
+    recentSessions: history,
+    allTimeStats: stats,
+    volumeTrend: trend,
+    hoursSinceLastMeal: dietGap,
+    apiKey: apiKey,
+  );
 });

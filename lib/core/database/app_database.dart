@@ -103,13 +103,22 @@ class SleepLogs extends Table {
   IntColumn get recoveryScore => integer().nullable()(); // 0-100 calculated score
 }
 
+/// DietChatMessages table - stores AI chat history for diet assistant
+class DietChatMessages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get role => text()(); // "user" or "ai"
+  TextColumn get content => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isProcessed => boolean().withDefault(const Constant(true))();
+}
+
 /// The main application database
-@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises, FoodLogs, SleepLogs])
+@DriftDatabase(tables: [Users, Workouts, Sessions, Exercises, SessionExercises, FoodLogs, SleepLogs, DietChatMessages])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.openConnection());
   
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration {
@@ -198,6 +207,11 @@ class AppDatabase extends _$AppDatabase {
             // ignore: avoid_print
             print('Migration v15 note: intentionally skipped addColumn for recoveryScore to fix duplicate column error');
             // await m.addColumn(sleepLogs, sleepLogs.recoveryScore);
+        }
+        if (from < 18) {
+          // Schema v18 changes:
+          // Add DietChatMessages table
+          await m.createTable(dietChatMessages);
         }
       },
     );
@@ -1085,6 +1099,17 @@ class AppDatabase extends _$AppDatabase {
   Future<int> deleteFoodLog(int id) =>
       (delete(foodLogs)..where((f) => f.id.equals(id))).go();
       
+  /// Get food logs for a specific date (Watch/Stream)
+  Stream<List<FoodLog>> watchFoodLogsForDate(DateTime date) {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    return (select(foodLogs)
+          ..where((f) => f.date.isBiggerOrEqualValue(start) & 
+                        f.date.isSmallerThanValue(end))
+          ..orderBy([(f) => OrderingTerm.desc(f.date)]))
+        .watch();
+  }
+  
   /// Get food logs for a specific date
   Future<List<FoodLog>> getFoodLogsForDate(DateTime date) {
     final start = DateTime(date.year, date.month, date.day);
@@ -1148,6 +1173,85 @@ class AppDatabase extends _$AppDatabase {
   Future<SleepLog?> getSleepLogForDate(DateTime date) {
     final day = DateTime(date.year, date.month, date.day);
     return (select(sleepLogs)..where((s) => s.date.equals(day))).getSingleOrNull();
+  }
+
+  // ===== Diet Chat Operations =====
+
+  /// Get the diet chat history
+  Future<List<DietChatMessage>> getDietChatHistory() =>
+      (select(dietChatMessages)..orderBy([(d) => OrderingTerm.asc(d.createdAt)])).get();
+
+  /// Watch the diet chat history
+  Stream<List<DietChatMessage>> watchDietChatHistory() =>
+      (select(dietChatMessages)..orderBy([(d) => OrderingTerm.asc(d.createdAt)])).watch();
+
+  /// Add a message to the diet chat history
+  Future<int> addDietChatMessage(DietChatMessagesCompanion entry) =>
+      into(dietChatMessages).insert(entry);
+
+  /// Update a message in the diet chat history (e.g. for editing)
+  Future<bool> updateDietChatMessage(DietChatMessagesCompanion entry) =>
+      update(dietChatMessages).replace(entry);
+
+  /// Clear the diet chat history
+  Future<int> clearDietChatHistory() => delete(dietChatMessages).go();
+
+  // ===== AI Insight Data Methods =====
+
+  /// Get all-time sessions, volume, reps, and sets
+  Future<Map<String, dynamic>> getAllTimeStats() async {
+    final completedSessions = await (select(sessions)..where((s) => s.completedAt.isNotNull())).get();
+    final allSessionEx = await (select(sessionExercises)).get();
+    
+    double totalVolume = 0;
+    int totalReps = 0;
+    int totalSets = 0;
+    
+    for (final se in allSessionEx) {
+      totalVolume += (se.weightKg ?? 0) * se.completedReps;
+      totalReps += se.completedReps;
+      totalSets += se.completedSets;
+    }
+    
+    return {
+      'sessions': completedSessions.length,
+      'volume': totalVolume,
+      'reps': totalReps,
+      'sets': totalSets,
+    };
+  }
+
+  /// Get volume trend for last N days
+  Future<List<Map<String, dynamic>>> getVolumeTrend(int days) async {
+    final start = DateTime.now().subtract(Duration(days: days));
+    
+    final query = select(sessions).join([
+      innerJoin(sessionExercises, sessionExercises.sessionId.equalsExp(sessions.id)),
+    ])
+    ..where(sessions.startedAt.isBiggerOrEqualValue(start) & sessions.completedAt.isNotNull());
+    
+    final result = await query.get();
+    final volumeByDay = <DateTime, double>{};
+    
+    for (final row in result) {
+      final session = row.readTable(sessions);
+      final se = row.readTable(sessionExercises);
+      
+      final date = DateTime(session.startedAt.year, session.startedAt.month, session.startedAt.day);
+      final volume = (se.weightKg ?? 0) * se.completedReps;
+      volumeByDay[date] = (volumeByDay[date] ?? 0) + volume.toDouble();
+    }
+    
+    final trend = volumeByDay.entries.map((e) => {'date': e.key, 'volume': e.value}).toList();
+    trend.sort((a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime));
+    return trend;
+  }
+
+  /// Get hours since last food log
+  Future<int?> getHoursSinceLastFoodLog() async {
+    final lastLog = await (select(foodLogs)..orderBy([(f) => OrderingTerm.desc(f.date)])..limit(1)).getSingleOrNull();
+    if (lastLog == null) return null;
+    return DateTime.now().difference(lastLog.date).inHours;
   }
 }
 

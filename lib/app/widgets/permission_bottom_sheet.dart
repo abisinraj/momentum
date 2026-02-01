@@ -27,9 +27,18 @@ class _PermissionBottomSheetState extends ConsumerState<PermissionBottomSheet> {
   Future<void> _handleGrantAll() async {
     final service = ref.read(permissionServiceProvider.notifier);
     
+    // Attempt everything sequentially to avoid system UI overlap issues
     for (final permission in _currentStatus.keys) {
       if (!_currentStatus[permission]!.isGranted) {
-        await service.requestPermission(permission);
+        try {
+          // Add a 10-second timeout per permission to prevent being stuck forever
+          await service.requestPermission(permission).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => false,
+          );
+        } catch (e) {
+          debugPrint('[PermissionSheet] Error requesting $permission: $e');
+        }
       }
     }
 
@@ -39,24 +48,22 @@ class _PermissionBottomSheetState extends ConsumerState<PermissionBottomSheet> {
         _currentStatus = newStatus;
       });
 
-      // If all critical are granted, close
-      final allGranted = _currentStatus.values.every((s) => s.isGranted);
-      if (allGranted) {
-        Navigator.pop(context, true);
-      }
+      // ALWAYS close after attempting to grant all. 
+      // If some failed, they'll be "Limited Access" users.
+      // We don't want to get them stuck in a loop.
+      Navigator.pop(context, true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      decoration: const BoxDecoration(
         color: AppTheme.darkSurface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -74,7 +81,7 @@ class _PermissionBottomSheetState extends ConsumerState<PermissionBottomSheet> {
           ),
           const SizedBox(height: 24),
           Text(
-            'PERMISSIONS REQUIRED',
+            'PERMISSIONS',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w900,
               letterSpacing: 1.0,
@@ -82,12 +89,19 @@ class _PermissionBottomSheetState extends ConsumerState<PermissionBottomSheet> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Momentum needs these to track your progress and provide AI insights.',
+            'Grant access to enable tracking and AI features.',
             style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 32),
-          ..._currentStatus.entries.map((entry) => _buildPermissionItem(entry.key, entry.value)),
-          const SizedBox(height: 32),
+          // Wrap in flexible to handle small screens
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                children: _currentStatus.entries.map((entry) => _buildPermissionItem(entry.key, entry.value)).toList(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
@@ -95,17 +109,18 @@ class _PermissionBottomSheetState extends ConsumerState<PermissionBottomSheet> {
               child: const Text('GRANT ALL PERMISSIONS'),
             ),
           ),
-          const SizedBox(height: 12),
-          Center(
-            child: TextButton(
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(
-                'CONTINUE WITH LIMITED ACCESS',
-                style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppTheme.darkBorder),
+                foregroundColor: AppTheme.textMuted,
               ),
+              child: const Text('CONTINUE WITH LIMITED ACCESS'),
             ),
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
@@ -145,7 +160,7 @@ class _PermissionBottomSheetState extends ConsumerState<PermissionBottomSheet> {
                 ),
                 Text(
                   info.description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.textMuted,
                     fontSize: 13,
                   ),

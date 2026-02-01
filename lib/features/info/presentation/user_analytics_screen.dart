@@ -5,6 +5,8 @@ import '../../../core/providers/dashboard_providers.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../home/presentation/widgets/themed_card.dart';
 import '../../home/presentation/widgets/trend_chart.dart';
+import '../../../core/providers/health_connect_provider.dart';
+import '../../../core/services/settings_service.dart';
 
 class UserAnalyticsScreen extends ConsumerWidget {
   const UserAnalyticsScreen({super.key});
@@ -15,6 +17,9 @@ class UserAnalyticsScreen extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final activityAsync = ref.watch(activityGridProvider(365));
     final analyticsAsync = ref.watch(analyticsSummaryProvider);
+    final healthState = ref.watch(healthNotifierProvider);
+    final weightUnit = ref.watch(weightUnitProvider).valueOrNull ?? 'kg';
+    final userAsync = ref.watch(currentUserProvider);
     
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -40,13 +45,38 @@ class UserAnalyticsScreen extends ConsumerWidget {
                 final activeHours = (totalWorkouts * 0.75).toStringAsFixed(1);
                 final totalCalories = totalWorkouts * 85;
 
-                return Row(
+                return Column(
                   children: [
-                    _buildSummaryCard(context, 'Workouts', totalWorkouts.toString(), Icons.fitness_center, colorScheme.primary),
-                    const SizedBox(width: 12),
-                    _buildSummaryCard(context, 'Hours', activeHours, Icons.timer, colorScheme.secondary),
-                    const SizedBox(width: 12),
-                    _buildSummaryCard(context, 'Calories', totalCalories.toString(), Icons.local_fire_department, Colors.orangeAccent),
+                    Row(
+                      children: [
+                        _buildSummaryCard(context, 'Workouts', totalWorkouts.toString(), Icons.fitness_center, colorScheme.primary),
+                        const SizedBox(width: 12),
+                        _buildSummaryCard(context, 'Hours', activeHours, Icons.timer, colorScheme.secondary),
+                        const SizedBox(width: 12),
+                        _buildSummaryCard(context, 'Calories', totalCalories.toString(), Icons.local_fire_department, Colors.orangeAccent),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        _buildSummaryCard(
+                          context, 
+                          'Steps Today', 
+                          _formatSteps(healthState.todaySteps), 
+                          Icons.directions_walk_rounded, 
+                          colorScheme.primary
+                        ),
+                        const SizedBox(width: 12),
+                        _buildSummaryCard(
+                          context, 
+                          weightUnit.toUpperCase(), 
+                          _formatWeight(weightUnit, healthState.latestWeight ?? userAsync.valueOrNull?.weightKg), 
+                          Icons.monitor_weight_rounded, 
+                          colorScheme.tertiary
+                        ),
+                        const Spacer(),
+                      ],
+                    ),
                   ],
                 );
               },
@@ -99,41 +129,7 @@ class UserAnalyticsScreen extends ConsumerWidget {
             
             const SizedBox(height: 32),
             
-            // Consistency Insight
-            ThemedCard(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.auto_awesome, color: colorScheme.onPrimary, size: 24),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Consistency Insight',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'You are in the top 15% of active users this month. Keep building that momentum!',
-                            style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -185,5 +181,20 @@ class UserAnalyticsScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  String _formatSteps(int steps) {
+    if (steps >= 1000) {
+      return '${(steps / 1000).toStringAsFixed(1)}k';
+    }
+    return steps.toString();
+  }
+
+  String _formatWeight(String unit, double? weight) {
+    if (weight == null) return '--';
+    if (unit == 'lbs') {
+      return (weight * 2.20462).toStringAsFixed(1);
+    }
+    return weight.toStringAsFixed(1);
   }
 }

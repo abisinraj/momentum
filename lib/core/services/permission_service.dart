@@ -1,6 +1,9 @@
+import 'package:health/health.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'health_connect_service.dart';
+import 'settings_service.dart';
+import 'package:flutter/foundation.dart';
 
 part 'permission_service.g.dart';
 
@@ -28,13 +31,30 @@ class PermissionsHandled extends _$PermissionsHandled {
   @override
   bool build() => false;
 
-  void markAsHandled() => state = true;
+  Future<void> markAsHandled() async {
+    state = true;
+    await ref.read(permissionServiceProvider.notifier).markAsHandled();
+  }
 }
 
 @riverpod
 class PermissionService extends _$PermissionService {
   @override
   void build() {}
+
+  Future<bool> isHandled() async {
+    return await ref.read(settingsServiceProvider).getPermissionsHandled();
+  }
+
+  Future<void> markAsHandled() async {
+    await ref.read(settingsServiceProvider).setPermissionsHandled(true);
+  }
+
+  Future<Map<AppPermission, PermissionStatusInfo>> checkStartupPermissions() async {
+    final handled = await isHandled();
+    if (handled) return {}; 
+    return await checkAllPermissions();
+  }
 
   Future<Map<AppPermission, PermissionStatusInfo>> checkAllPermissions() async {
     final results = <AppPermission, PermissionStatusInfo>{};
@@ -64,11 +84,18 @@ class PermissionService extends _$PermissionService {
     );
 
     // Health Connect
-    final healthConnectGranted = await HealthConnectService().hasPermissions();
-    results[AppPermission.healthConnect] = PermissionStatusInfo(
-      permission: AppPermission.healthConnect,
-      isGranted: healthConnectGranted,
-    );
+    try {
+      final healthConnectStatus = await HealthConnectService.checkAvailability();
+      if (healthConnectStatus == HealthConnectSdkStatus.sdkAvailable) {
+        final healthConnectGranted = await HealthConnectService().hasPermissions();
+        results[AppPermission.healthConnect] = PermissionStatusInfo(
+          permission: AppPermission.healthConnect,
+          isGranted: healthConnectGranted,
+        );
+      }
+    } catch (e) {
+      debugPrint('[PermissionService] Error checking Health Connect: $e');
+    }
 
     return results;
   }

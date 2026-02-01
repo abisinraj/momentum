@@ -156,5 +156,21 @@ final modelRotationModeProvider =
     );
 
 typedef _$ModelRotationMode = AutoDisposeAsyncNotifier<String>;
+String _$timeFormatHash() => r'a2681a02b89a4f5e416c4e91516de6ba4008cea1';
+
+/// See also [TimeFormat].
+@ProviderFor(TimeFormat)
+final timeFormatProvider =
+    AutoDisposeAsyncNotifierProvider<TimeFormat, String>.internal(
+      TimeFormat.new,
+      name: r'timeFormatProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$timeFormatHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$TimeFormat = AutoDisposeAsyncNotifier<String>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
