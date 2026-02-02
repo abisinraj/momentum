@@ -43,7 +43,7 @@
     <script src="GLTFLoader_global.js"></script>
     <script src="OrbitControls_global.js"></script>
     <script src="RoomEnvironment_global.js"></script>
-    <script src="debug_loader.js"></script>
+
 
     <script>
         // Explicitly alias globals to ensure access
@@ -138,7 +138,7 @@
                     'RightForeArm': { rx: 0, ry: 0, rz: -0.2 },
                     'LeftForeArm': { rx: 0, ry: 0, rz: 0.2 },
                     'Head': { rx: 0, ry: 0, rz: 0 },
-                    'Fist': -0.3 // Counteract model's natural curl to make them straight
+                    'Fist': 0.1 // Natural Arc (Not 0.0) - Golden Ratio "A-Pose"
                 },
                 FIGHT: {
                     'Spine': { rx: 0.1, ry: 0, rz: 0 },
@@ -159,22 +159,24 @@
                     'Fist': 1.0
                 },
                 PUNCH_RIGHT: {
-                    'Spine': { rx: 0, ry: -0.3, rz: 0 }, // Rotate torso
-                    'RightArm': { rx: 0.2, ry: 0, rz: 0 }, // Extend arm
-                    'LeftArm': { rx: 1.1, ry: 0.4, rz: 0.6 }, // Guard with left
-                    'RightForeArm': { rx: 0, ry: 0, rz: 0 }, // Straighten
-                    'LeftForeArm': { rx: 0, ry: 0, rz: 1.6 },
-                    'Head': { rx: 0.1, ry: -0.2, rz: 0 },
-                    'Fist': 1.0
+                    'Spine': { rx: 0.1, ry: -0.5, rz: 0.1 }, // Deeper twist
+                    'RightArm': { rx: -0.2, ry: -0.2, rz: -1.3 }, // Aim at camera (center)
+                    'LeftArm': { rx: 1.2, ry: 0.5, rz: 0.5 }, // Tight guard
+                    'RightForeArm': { rx: 0, ry: 0, rz: 0 }, // Fully extended
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 2.2 },
+                    'Head': { rx: 0.0, ry: -0.3, rz: 0 }, // Look at target
+                    'Fist': 1.0,
+                    lunge: 0.8 // Forward movement
                 },
                 PUNCH_LEFT: {
-                    'Spine': { rx: 0, ry: 0.3, rz: 0 },
-                    'RightArm': { rx: 0.8, ry: -0.4, rz: -0.6 }, // Guard with right
-                    'LeftArm': { rx: 0.2, ry: 0, rz: 0 }, // Extend arm
-                    'RightForeArm': { rx: 0, ry: 0, rz: -1.6 },
-                    'LeftForeArm': { rx: 0, ry: 0, rz: 0 }, // Straighten
-                    'Head': { rx: 0.1, ry: 0.2, rz: 0 },
-                    'Fist': 1.0
+                    'Spine': { rx: 0.1, ry: 0.5, rz: -0.1 },
+                    'RightArm': { rx: 1.2, ry: -0.5, rz: -0.5 }, // Tight guard
+                    'LeftArm': { rx: -0.2, ry: 0.2, rz: 1.3 }, // Aim at camera
+                    'RightForeArm': { rx: 0, ry: 0, rz: -2.2 },
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 0 }, // Fully extended
+                    'Head': { rx: 0.0, ry: 0.3, rz: 0 },
+                    'Fist': 1.0,
+                    lunge: 0.8
                 }
             },
             init: function () {
@@ -237,7 +239,10 @@
                         }
                     }
                 }
-                console.log("🥊 Stance Controller Ready (v3.0 - AI Fighter)");
+                const rFin = this.bones['RightHand'] ? this.bones['RightHand'].fingers.length : 0;
+                const lFin = this.bones['LeftHand'] ? this.bones['LeftHand'].fingers.length : 0;
+                console.log(`🥊 Stance Controller: Found R:${rFin} L:${lFin} finger joints`);
+                console.log("🥊 Stance Controller Ready (v6.2 - Syntax Fixed)");
             },
             triggerHit: function (muscle) {
                 const force = 1.5;
@@ -306,81 +311,242 @@
                     );
 
                     if (name === 'Spine' && boneData.cameraShake > 0.001) {
-                        // More stable shake: offset controls target instead of camera position
+                        // More stable shake
                         controls.target.x += (Math.random() - 0.5) * boneData.cameraShake;
                         controls.target.y += (Math.random() - 0.5) * boneData.cameraShake;
                         boneData.cameraShake *= 0.7; // Faster decay
                         if (boneData.cameraShake <= 0.001) {
-                            // Reset target to original (which is 0,1,0 for this model)
                             controls.target.set(0, 1, 0);
                         }
                     }
 
-                    if (name === 'Spine') boneData.ref.rotation.x += breathing;
-                    if (name.includes('Arm')) boneData.ref.rotation.x += breathing * 0.4;
+                    // --- Procedural "Noise" for Life ---
+                    const t = time * 0.0005;
+                    if (name === 'Spine') {
+                        boneData.ref.rotation.x += breathing; // Main breathing
+                        boneData.ref.rotation.y += Math.sin(t * 3.1) * 0.02; // Micro twisting
+                    }
+                    if (name === 'Head') {
+                        // Look around slightly
+                        boneData.ref.rotation.y += Math.sin(t * 4.5) * 0.03;
+                        boneData.ref.rotation.x += Math.cos(t * 3.5) * 0.02;
+                    }
+                    if (name.includes('Arm')) {
+                        boneData.ref.rotation.x += breathing * 0.4;
+                        // Uneven arm sway
+                        const offset = name.includes('Right') ? 0 : 2;
+                        boneData.ref.rotation.z += Math.sin(t * 2 + offset) * 0.01;
+                    }
 
+                    // UPDATED: Advanced Anatomical Grip
                     if (boneData.fingers) {
                         const amount = this.poses[this.targetPose].Fist || 0;
+                        const isRight = name.includes('Right');
+                        const sideSig = isRight ? -1 : 1;
+
                         boneData.fingers.forEach(f => {
-                            const isThumb = f.ref.name.toLowerCase().includes('thumb');
-                            const sideFactor = name.includes('Right') ? -1.0 : 1.0;
-                            const curlIntensity = amount * (isThumb ? 0.8 : 1.2);
+                            const fname = f.ref.name.toLowerCase();
+                            const isThumb = fname.includes('thumb');
 
-                            // Distribute rotation across all 3 joints
-                            const curlVal = curlIntensity * sideFactor;
+                            // Reset everything first
+                            f.ref.scale.set(1, 1, 1);
 
-                            if (isThumb) {
-                                if (f.jointLevel === 1) {
-                                    f.ref.rotation.z = f.originalRot.z + (curlVal * 0.4);
-                                    f.ref.rotation.y = f.originalRot.y + (curlVal * 0.6);
-                                } else {
-                                    f.ref.rotation.z = f.originalRot.z + (curlVal * 0.5);
-                                }
-                            } else {
-                                // Even more subtle roll: 0.6x for knuckle, 0.8x for middle, 0.8x for tip
-                                const jointMultiplier = f.jointLevel === 1 ? 0.6 : 0.8;
-                                f.ref.rotation.z = f.originalRot.z + (curlVal * jointMultiplier);
-                                f.ref.rotation.x = f.originalRot.x; // Lock X to prevent twist
+                            if (amount < 0.1) {
+                                // Return to rest pose smoothly
+                                f.ref.rotation.x += (f.originalRot.x - f.ref.rotation.x) * 0.1;
+                                f.ref.rotation.y += (f.originalRot.y - f.ref.rotation.y) * 0.1;
+                                f.ref.rotation.z += (f.originalRot.z - f.ref.rotation.z) * 0.1;
+                                return;
                             }
 
-                            // Ensure no accidental scaling which causes 'compression' look
-                            f.ref.scale.set(1, 1, 1);
+                            // --- FIST 6.0: The "Avalanche" Scale (Depth & Axis Fix) ---
+                            // 1. Staggered Z (Curl): Pinky curls much deeper than Index to create a slope.
+                            // 2. Swapped Spread Axis: Moving convergence from Y (Twist) to X (Spread).
+
+                            const FIST_ANGLES = {
+                                'Thumb': {
+                                    // Thumb is special, uses all axes
+                                    1: { x: 0.3, y: 0.5, z: 0.6 }, // CMC: Fold across
+                                    2: { x: -0.1, y: 0.0, z: 0.8 }, // MCP: Bend
+                                    3: { x: 0.0, y: 0.0, z: 1.5 }   // IP: Hook tip
+                                },
+                                'Index': {
+                                    // KNUCKLE: High & Proud (The "peak" of the fist ridge)
+                                    1: { x: -0.15, y: 0.0, z: 1.3 }, // X: Flare OUT (Spread), Z: Less Curl
+                                    2: { x: 0.0, y: 0.0, z: 1.8 },
+                                    3: { x: 0.0, y: 0.0, z: 0.6 }
+                                },
+                                'Middle': {
+                                    1: { x: 0.0, y: 0.0, z: 1.5 }, // Baseline
+                                    2: { x: 0.0, y: 0.0, z: 1.9 },
+                                    3: { x: 0.0, y: 0.0, z: 0.7 }
+                                },
+                                'Ring': {
+                                    1: { x: 0.1, y: 0.0, z: 1.7 }, // X: Converge IN, Z: Deeper
+                                    2: { x: 0.0, y: 0.0, z: 2.1 },
+                                    3: { x: 0.0, y: 0.0, z: 0.8 }
+                                },
+                                'Pinky': {
+                                    // KNUCKLE: Buried & Cupped (The bottom of the slope)
+                                    1: { x: 0.25, y: 0.0, z: 2.0 }, // X: Strong Cup IN, Z: Max Curl
+                                    2: { x: 0.0, y: 0.0, z: 2.2 }, // Compact
+                                    3: { x: 0.0, y: 0.0, z: 0.9 }
+                                }
+                            };
+
+                            // Identify Finger Type
+                            let type = '';
+                            if (fname.includes('thumb')) type = 'Thumb';
+                            else if (fname.includes('index')) type = 'Index';
+                            else if (fname.includes('middle')) type = 'Middle';
+                            else if (fname.includes('ring')) type = 'Ring';
+                            else if (fname.includes('pinky')) type = 'Pinky';
+
+                            if (type && FIST_ANGLES[type] && FIST_ANGLES[type][f.jointLevel]) {
+                                const tgt = FIST_ANGLES[type][f.jointLevel];
+
+                                // Apply side inversion
+                                // X (Spread/Deviate) needs flip: -X goes Left, +X goes Right.
+                                // For Right Hand: +X is Ulnar (Pinky), -X is Radial (Thumb)?
+
+                                let targetX, targetY, targetZ;
+
+                                if (type === 'Thumb') {
+                                    // THUMB LOGIC (Separate Coordinate System)
+                                    // Usually Thumb bends on Z or Y.
+                                    // Let's try Z-Curl again for thumb, but stronger.
+
+                                    // Adjust targets for proper tuck
+                                    const thumbScale = amount;
+                                    const tBend = tgt.z * thumbScale; // Main bend
+                                    const tRoll = tgt.x * thumbScale;
+                                    const tYaw = tgt.y * thumbScale; // Opposition
+
+                                    // Thumb Axis Mapping (Correction: Invert Z)
+                                    // If it was going wrong way, we flip the signed bend.
+
+                                    // Try: Z is Bend (Inverted), Y is Twist, X is Spread?
+                                    // Mixamo Thumbs are notoriously weird.
+
+                                    targetX = f.originalRot.x + (tRoll * sideSig);
+                                    targetY = f.originalRot.y + (tYaw * sideSig);
+                                    targetZ = f.originalRot.z + (tBend * sideSig * -1.0); // INVERTED Z
+
+                                } else {
+                                    // FINGER LOGIC (Proven: X is Curl)
+                                    // X = Bend (from defined Z)
+                                    // Y = Spread/Yaw (from defined Y)
+                                    // Z = Twist/Roll (from defined X)
+
+                                    const tx = tgt.x * sideSig;
+                                    const ty = tgt.y * sideSig;
+                                    const tz = tgt.z * sideSig;
+
+                                    // Axis Swap: Map defined Z (Curl) to Bone X (Bend)
+                                    targetX = f.originalRot.x + (tz * amount);  // Curl
+                                    targetY = f.originalRot.y + (ty * amount);  // Spread
+                                    targetZ = f.originalRot.z + (tx * amount);  // Twist
+                                }
+
+                                f.ref.rotation.x += (targetX - f.ref.rotation.x) * 0.2;
+                                f.ref.rotation.y += (targetY - f.ref.rotation.y) * 0.2;
+                                f.ref.rotation.z += (targetZ - f.ref.rotation.z) * 0.2;
+                            }
+
+                            // Volume Scale (Keep subtle)
+                            if (f.jointLevel === 2 && !type.includes('Thumb')) {
+                                const s = 1.0 + (amount * 0.08);
+                                f.ref.scale.set(s, s, s);
+                            }
                         });
                     }
+                }
+
+                // Camera Tracking (Upper Body Focus)
+                if (window.controls && model) {
+                    // Smoothly track current target (Spine/Head area)
+                    // We target 1.4m up from the model's current position
+                    const targetY = 1.3;
+                    const lerpSpeed = 0.05;
+
+                    controls.target.x += (model.position.x - controls.target.x) * lerpSpeed;
+                    controls.target.z += (model.position.z - controls.target.z) * lerpSpeed;
+
+                    // Maintain height focus
+                    controls.target.y += (targetY - controls.target.y) * lerpSpeed;
                 }
             }
         };
 
-        // AI Controller for counter-attacks
+        // AI Controller for counter-attacks and movement
         const aiController = {
             enabled: false,
-            difficulty: 'medium', // easy, medium, hard
+            difficulty: 'medium',
             lastAttackTime: 0,
-            attackCooldown: 3000, // ms between attacks
+            attackCooldown: 3000,
             isAttacking: false,
-            attackDuration: 600, // ms for punch animation
+            attackDuration: 500, // Faster, snappier punches
+
+            // Movement State
+            targetX: 0,
+            targetZ: -1.0, // Base distance
+            moveTimer: 0,
 
             patterns: {
-                easy: { cooldown: 4000, damage: 5, accuracy: 0.3 },
-                medium: { cooldown: 3000, damage: 10, accuracy: 0.5 },
-                hard: { cooldown: 2000, damage: 15, accuracy: 0.7 }
+                easy: { cooldown: 4000, damage: 5, accuracy: 0.3, moveSpeed: 0.01 },
+                medium: { cooldown: 2500, damage: 10, accuracy: 0.5, moveSpeed: 0.02 },
+                hard: { cooldown: 1500, damage: 15, accuracy: 0.8, moveSpeed: 0.04 }
             },
 
             init: function () {
                 this.enabled = false;
                 this.lastAttackTime = 0;
                 this.isAttacking = false;
-                console.log('🤖 AI Controller Initialized');
+                if (model) {
+                    model.position.x = 0;
+                    model.position.z = 0;
+                }
+                console.log('🤖 AI Controller Initialized (v3.5 - Pro Motion)');
             },
 
             update: function (time) {
-                if (!this.enabled || !gameMode || this.isAttacking) return;
+                if (!this.enabled || !gameMode || !model) return;
 
                 const pattern = this.patterns[this.difficulty];
-                const timeSinceLastAttack = time - this.lastAttackTime;
 
-                // Check if enough time has passed and random chance
-                if (timeSinceLastAttack > pattern.cooldown) {
+                // 1. Organic Movement (Layered Sine Waves for "Life")
+                if (!this.isAttacking) {
+                    const t = time * 0.001;
+
+                    // Compound waves: Primary sway + slow drift + fast jitter
+                    // X (Left/Right)
+                    const w1 = Math.sin(t * pattern.moveSpeed * 20); // Main sway
+                    const w2 = Math.sin(t * 0.5); // Slow drift
+                    const offsetX = (w1 * 0.3) + (w2 * 0.15);
+
+                    // Z (Forward/Back)
+                    const w3 = Math.cos(t * pattern.moveSpeed * 15);
+                    const offsetZ = (w3 * 0.15) - (Math.sin(t * 0.2) * 0.1); // Bias forward slightly
+
+                    // Y (Bobbing/Breathing) - Sync with spine breathing
+                    const bobY = (Math.sin(t * 2.5) * 0.02) - 0.9;
+
+                    // Smooth visual updates (Damped Spring)
+                    const smooth = 0.05;
+                    model.position.x += (offsetX - model.position.x) * smooth;
+                    model.position.z += (offsetZ - model.position.z) * smooth;
+                    model.position.y += (bobY - model.position.y) * 0.1;
+
+                    // Torso Counter-Sway (leaning into movement)
+                    if (stanceController.bones['Spine']) {
+                        const sway = (model.position.x - offsetX) * -2.0; // Invert delta
+                        stanceController.bones['Spine'].ref.rotation.z += sway * 0.1;
+                    }
+                }
+
+                // 2. Attack Logic
+                const timeSinceLastAttack = time - this.lastAttackTime;
+                if (timeSinceLastAttack > pattern.cooldown && !this.isAttacking) {
                     if (Math.random() < pattern.accuracy) {
                         this.executeAttack(pattern.damage);
                     }
@@ -390,44 +556,77 @@
 
             executeAttack: function (damage) {
                 if (this.isAttacking) return;
-
                 this.isAttacking = true;
+
                 const punchType = Math.random() > 0.5 ? 'PUNCH_RIGHT' : 'PUNCH_LEFT';
                 const originalPose = stanceController.targetPose;
+                const lungingForce = 1.2; // How close they get to camera
 
                 console.log(`🥊 AI Attacking with ${punchType}`);
 
-                // Wind up
+                // Wind up (Pull back slightly)
                 stanceController.targetPose = 'GUARD';
 
+                // Quick tween for windup (pull back Z)
+                const startZ = model.position.z;
+                model.position.z = startZ - 0.3;
+
                 setTimeout(() => {
-                    // Throw punch
+                    // THROW PUNCH
                     stanceController.targetPose = punchType;
 
+                    // Lunge forward logic (manual tween)
+                    let lungeProgress = 0;
+                    const lungeInterval = setInterval(() => {
+                        lungeProgress += 0.1;
+                        if (lungeProgress <= 0.5) {
+                            // Moving forward (Lunge)
+                            model.position.z = startZ + (lungingForce * (lungeProgress * 2));
+                        } else {
+                            // Moving back
+                            // model.position.z lerps back later
+                        }
+
+                        // Stop lunge logic at impact
+                        if (lungeProgress >= 0.5) clearInterval(lungeInterval);
+                    }, 20);
+
+
                     setTimeout(() => {
-                        // Apply damage to player
+                        // IMPACT MOMENT (Mid-punch)
                         this.hitPlayer(damage);
+
+                        // Shake camera violently on impact
+                        this.shakeCamera(0.3);
 
                         // Return to stance
                         setTimeout(() => {
                             stanceController.targetPose = originalPose;
                             this.isAttacking = false;
+
+                            // Reset Position smoothly handled by update loop
                         }, 200);
                     }, this.attackDuration / 2);
-                }, 300);
+                }, 250); // Fast windup
+            },
+
+            shakeCamera: function (intensity) {
+                if (window.controls) {
+                    // Shake target
+                    controls.target.x += (Math.random() - 0.5) * intensity;
+                    controls.target.y += (Math.random() - 0.5) * intensity;
+
+                    // Shake position (creates "head being hit" feel)
+                    camera.position.x += (Math.random() - 0.5) * intensity * 0.5;
+                }
+
+                // Flash red with varying intensity
+                this.flashScreen();
             },
 
             hitPlayer: function (damage) {
                 playerHealth -= damage;
-                console.log(`💥 Player hit! Damage: ${damage}, Health: ${playerHealth}`);
-
-                // Flash screen red
-                this.flashScreen();
-
-                // Update UI
                 updateGameUI();
-
-                // Check if player is knocked out
                 if (playerHealth <= 0) {
                     endBoxingGame(false);
                 }
@@ -440,14 +639,16 @@
                 flash.style.left = '0';
                 flash.style.width = '100%';
                 flash.style.height = '100%';
-                flash.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+                flash.style.background = 'radial-gradient(circle, transparent 40%, rgba(255,0,0,0.6) 100%)'; // Vignette hit effect
                 flash.style.pointerEvents = 'none';
                 flash.style.zIndex = '9999';
+                flash.style.transition = 'opacity 0.2s';
                 document.body.appendChild(flash);
 
                 setTimeout(() => {
-                    flash.remove();
-                }, 150);
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 200);
+                }, 100);
             }
         };
 
@@ -542,7 +743,8 @@
             document.body.appendChild(renderer.domElement);
 
             camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, 1.2, 3.5);
+            // Default Position: Closer and higher to frame upper body
+            camera.position.set(0, 1.3, 2.8); // Raised Y to 1.3, Moved Z closer to 2.8
 
             scene = new THREE.Scene();
 
@@ -578,6 +780,8 @@
 
                 scene.add(model);
 
+                // Animations (Procedural Fallback)
+                // Initialize Procedural Stance (ALWAYS)
                 // Animations (Procedural Fallback)
                 // Initialize Procedural Stance (ALWAYS)
                 stanceController.init();
@@ -625,6 +829,7 @@
                     window.pendingHeatmap = null;
                 }
             }
+            window.onModelLoaded = onModelLoaded;
 
             // Expose Loader for Base64 (Flutter Injection)
             window._actualLoadGLTFFromBase64 = function (base64Data) {
@@ -1032,22 +1237,29 @@
         function animate() {
             const time = Date.now();
             requestAnimationFrame(animate);
-            if (window.mixer) window.mixer.update(0.016);
-
             // Apply Manual/Procedural Stance
-            stanceController.update(time);
 
-            // AI Decision Making
-            aiController.update(time);
+            const delta = 0.016; // Assuming 60fps
+            if (window.mixer) {
+                // Force disable finger tracks if possible, or just accept we overwrite them
+                window.mixer.update(delta);
+            }
+
+            const now = Date.now();
+            if (stanceController) {
+                // IMPORTANT: Run stance controller AFTER mixer to overwrite bone rotations
+                stanceController.update(now);
+            }
+            if (aiController) aiController.update(now);
 
             if (isZooming) {
                 updateZoom();
                 if (controls) controls.enabled = false;
             } else {
-                if (controls) controls.enabled = true;
+                if (window.controls) controls.enabled = true;
             }
 
-            if (controls) controls.update();
+            if (window.controls) controls.update();
             updateUniforms();
             renderer.render(scene, camera);
         }
@@ -1374,6 +1586,7 @@
             document.body.appendChild(script);
         }
     </script>
+    <script src="debug_loader.js"></script>
 </body>
 
 </html>
