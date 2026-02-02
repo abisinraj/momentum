@@ -169,8 +169,6 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       content: drift.Value(text),
     ));
 
-    final oldId = _editingMessageId;
-
     setState(() {
       _editingMessageId = null;
       _textController.clear();

@@ -412,9 +412,8 @@
 
                 // PHYSICS TUNING: "Heavy Bag" Feel
                 // PHYSICS TUNING: CONSTANT SAFE MODE
-                const stiffness = 0.04;
-                // if (window.aiController) ... (Disabled for stability debug)
-                const damping = 0.75;
+                const stiffness = 0.03; // Smoother transitions (from 0.04)
+                const damping = 0.82; // Higher damping to prevent break-dancing oscillations (from 0.75)
 
                 for (let name in this.bones) {
                     const boneData = this.bones[name];
@@ -609,15 +608,14 @@
 
                 // Camera Tracking (Upper Body Focus)
                 if (window.controls && model) {
-                    // Smoothly track current target (Spine/Head area)
-                    // We target 1.4m up from the model's current position
-                    const targetY = 1.3;
+                    // Smoothly track current target (Eye level focus)
+                    const targetY = 1.60;
                     const lerpSpeed = 0.05;
 
                     controls.target.x += (model.position.x - controls.target.x) * lerpSpeed;
                     controls.target.z += (model.position.z - controls.target.z) * lerpSpeed;
 
-                    // Maintain height focus
+                    // Maintain eye-level focus
                     controls.target.y += (targetY - controls.target.y) * lerpSpeed;
                 }
             }
@@ -630,6 +628,8 @@
             lastAttackTime: 0,
             attackCooldown: 3000,
             isAttacking: false,
+            isStunned: false,
+            stunEndTime: 0,
             attackDuration: 500, // Faster, snappier punches
 
             // Movement State
@@ -644,11 +644,14 @@
             },
 
             init: function () {
+                window.aiController = this; // Explicitly expose to window for handleGameHit
                 console.log("🤖 AI Controller Initialized (v5.1 - VISIBILITY FIXED)");
                 this.enabled = false;
                 this.lastAttackTime = 0;
                 this.isAttacking = false;
                 this.isGuarding = false;
+                this.isStunned = false;
+                this.stunEndTime = 0;
                 this.comboQueue = []; // Init Queue
                 if (model) {
                     model.position.x = 0;
@@ -664,9 +667,14 @@
                 if (isNaN(model.position.x) || isNaN(model.position.z)) {
                     model.position.set(0, 0, 0);
                 }
-                // LEASH
-                if (Math.abs(model.position.z) > 5.0 || Math.abs(model.position.x) > 5.0) {
-                    model.position.set(0, 0, 0);
+
+                // 0. HIT STUN CHECK
+                if (this.isStunned) {
+                    if (time < this.stunEndTime) {
+                        return; // Cannot move or attack while stunned
+                    } else {
+                        this.isStunned = false;
+                    }
                 }
 
                 const pattern = this.patterns[this.difficulty];
@@ -675,30 +683,26 @@
                 if (!this.isAttacking) {
                     const t = time * 0.001;
 
-                    // Compound waves: Primary sway + slow drift + fast jitter
+                    // REDUCED MAGNITUDE: Primary sway + slow drift
                     // X (Left/Right)
-                    const w1 = Math.sin(t * pattern.moveSpeed * 20); // Main sway
-                    const w2 = Math.sin(t * 0.5); // Slow drift
-                    const offsetX = (w1 * 0.3) + (w2 * 0.15);
+                    const w1 = Math.sin(t * pattern.moveSpeed * 20);
+                    const w2 = Math.sin(t * 0.5);
+                    const offsetX = (w1 * 0.15) + (w2 * 0.08); // Halved from 0.3/0.15
 
                     // Z (Forward/Back)
                     const w3 = Math.cos(t * pattern.moveSpeed * 15);
-                    const offsetZ = (w3 * 0.15) - (Math.sin(t * 0.2) * 0.1); // Bias forward slightly
+                    const offsetZ = (w3 * 0.08) - (Math.sin(t * 0.2) * 0.05);
 
-                    // Y (Bobbing/Breathing) - Sync with spine breathing
-                    const bobY = (Math.sin(t * 2.5) * 0.02) - 0.9;
+                    // Y (Bobbing/Breathing) - Grounded at y=0
+                    const bobY = (Math.sin(t * 2.5) * 0.015);
 
                     // Smooth visual updates (Damped Spring)
-                    const smooth = 0.05;
+                    const smooth = 0.03; // Smoother
                     model.position.x += (offsetX - model.position.x) * smooth;
                     model.position.z += (offsetZ - model.position.z) * smooth;
                     model.position.y += (bobY - model.position.y) * 0.1;
 
-                    // Torso Counter-Sway (leaning into movement)
-                    if (stanceController.bones['Spine']) {
-                        const sway = (model.position.x - offsetX) * -2.0; // Invert delta
-                        stanceController.bones['Spine'].ref.rotation.z += sway * 0.1;
-                    }
+                    // REMOVED: Torso Counter-Sway (Prevent "Break Dancing" cumulative rotation)
                 }
 
                 // 2. Attack Logic (Combos)
@@ -863,8 +867,13 @@
 
             cancelAttack: function () {
                 if (this.isAttacking) {
-                    console.log("🤖 Attack Cancelled");
+                    console.log("🤖 AI INTERRUPTED! Entering Hit Stun...");
                     this.isAttacking = false;
+
+                    // Trigger Stun State (Opponent flinches/cannot attack)
+                    this.isStunned = true;
+                    this.stunEndTime = Date.now() + 800; // 800ms stun on interrupt
+
                     this.comboQueue = [];
                     if (this.currentLungeInterval) clearInterval(this.currentLungeInterval);
                     stanceController.targetPose = 'FIGHT';
@@ -900,6 +909,17 @@
             },
 
             hitPlayer: function (damage) {
+                // DEFENSE: Reduction if player is guarding
+                if (window.isPlayerGuarding) {
+                    damage *= 0.3; // 70% reduction
+                    console.log("🛡️ Player Blocked Damage!");
+                } else {
+                    // STUN PLAYER: Briefly interrupt input if not guarding
+                    window.isPlayerStunned = true;
+                    window.playerStunEndTime = Date.now() + 600; // 600ms stun
+                    console.log("🥊 Player Stunned!");
+                }
+
                 playerHealth -= damage;
                 updateGameUI();
                 if (playerHealth <= 0) {
@@ -991,9 +1011,29 @@
             console.log("🥊 Combat Pose:", stanceController.targetPose);
         };
 
+        window.isPlayerGuarding = false;
         window.setGuarding = function (isGuarding) {
-            if (stanceController.targetPose === 'IDLE') return; // Only guard in combat mode
-            stanceController.targetPose = isGuarding ? 'GUARD' : 'FIGHT';
+            if (!gameMode) return;
+            window.isPlayerGuarding = isGuarding;
+            console.log("🛡️ Player Guarding:", isGuarding);
+
+            const ui = document.getElementById('game-ui');
+            if (ui) {
+                let msg = document.getElementById('guard-indicator');
+                if (isGuarding) {
+                    if (!msg) {
+                        msg = document.createElement('div');
+                        msg.id = 'guard-indicator';
+                        msg.style.color = '#2196F3';
+                        msg.style.fontWeight = 'bold';
+                        msg.style.marginTop = '10px';
+                        msg.innerText = '🛡️ GUARD ACTIVATED';
+                        ui.appendChild(msg);
+                    }
+                } else if (msg) {
+                    msg.remove();
+                }
+            }
         };
 
         checkDependencies();
@@ -1144,16 +1184,30 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
+        window.isPlayerStunned = false;
+        window.playerStunEndTime = 0;
+
         function onPointerDown(event) {
             if (!model) return;
 
+            // STUN CHECK: Ignore input if stunned
+            if (gameMode && window.isPlayerStunned) {
+                if (Date.now() < window.playerStunEndTime) {
+                    console.log("😵 Player is stunned! Cannot attack.");
+                    return;
+                } else {
+                    window.isPlayerStunned = false;
+                }
+            }
+
             // Start Long-Press timer for Guarding
             if (gameMode) {
+                // If we tap the body, we don't guard (we attack)
+                // But the timer starts anyway. We'll clear it in handleGameHit if needed.
                 if (stanceController.guardTimer) clearTimeout(stanceController.guardTimer);
                 stanceController.guardTimer = setTimeout(() => {
-                    console.log("🛡️ GUARD ACTIVATED");
                     window.setGuarding(true);
-                }, 250); // Faster reaction: 250ms
+                }, 200); // 200ms trigger for guard
             }
 
             const currentTime = Date.now();
@@ -1242,11 +1296,11 @@
                 // DISABLE ORBIT CONTROLS COMPLETELY
                 controls.enabled = false;
 
-                // Manual Camera Set
+                // Eye Level Camera Set
                 camera.near = 0.05;
                 camera.updateProjectionMatrix();
-                camera.position.set(0, 1.2, 3.0); // SYNC WITH SAFETY NET (3.0m)
-                camera.lookAt(0, 1.0, 0);
+                camera.position.set(0, 1.60, 3.0); // EYE LEVEL (3.0m)
+                camera.lookAt(0, 1.60, 0);
             }
 
             // VISUAL DEBUGGER (Clean up)
@@ -1316,6 +1370,13 @@
         function handleGameHit(muscle, point) {
             if (!gameMode) return;
 
+            // CLEAR GUARD TIMER: If we are attacking, we are not guarding
+            if (stanceController.guardTimer) {
+                clearTimeout(stanceController.guardTimer);
+                stanceController.guardTimer = null;
+            }
+            window.setGuarding(false);
+
             let damage = 5;
             let isWeakPoint = false;
             let hitText = "HIT!";
@@ -1366,8 +1427,8 @@
             }
 
             // CANCEL ATTACK & TRIGGER GUARD
-            if (window.aiController) {
-                window.aiController.cancelAttack();
+            if (aiController) {
+                aiController.cancelAttack();
 
                 // Reactive Guard (try to block next hit)
                 if (Math.random() < 0.4 && !aiController.isGuarding) {
@@ -1691,10 +1752,10 @@
                 camera.near = 0.05; // Even closer near plane
                 camera.updateProjectionMatrix();
                 // Move Back slightly (3.0m) to reduce "Too Big" feeling
-                camera.position.set(0, 1.2, 3.0);
-                camera.lookAt(0, 1.0, 0);
+                camera.position.set(0, 1.60, 3.0); // EYE LEVEL
+                camera.lookAt(0, 1.60, 0);
                 if (controls) {
-                    controls.target.set(0, 1.0, 0);
+                    controls.target.set(0, 1.60, 0);
                     controls.update();
                 }
             }
