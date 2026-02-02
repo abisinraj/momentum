@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mannequin V2</title>
+    <title>Momentum 3D Debug (v5.1)</title>
     <style>
         body {
             margin: 0;
-            background-color: transparent;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
             color: #eee;
         }
 
@@ -133,12 +132,12 @@
             poses: {
                 IDLE: {
                     'Spine': { rx: 0, ry: 0, rz: 0 },
-                    'RightArm': { rx: 0, ry: 0, rz: -1.3 },
-                    'LeftArm': { rx: 0, ry: 0, rz: 1.3 },
-                    'RightForeArm': { rx: 0, ry: 0, rz: -0.2 },
-                    'LeftForeArm': { rx: 0, ry: 0, rz: 0.2 },
+                    'RightArm': { rx: 0, ry: 0.1, rz: -1.4 }, // 80 deg down, slight forward
+                    'LeftArm': { rx: 0, ry: -0.1, rz: 1.4 },
+                    'RightForeArm': { rx: 0, ry: 0, rz: -0.25 }, // Slight elbow bend
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 0.25 }, // Slight elbow bend
                     'Head': { rx: 0, ry: 0, rz: 0 },
-                    'Fist': 0.1 // Natural Arc (Not 0.0) - Golden Ratio "A-Pose"
+                    'Fist': 0.6 // Relaxed Curl (Fixes "Zombie Hands")
                 },
                 FIGHT: {
                     'Spine': { rx: 0.1, ry: 0, rz: 0 },
@@ -150,12 +149,61 @@
                     'Fist': 1.0 // Maximum clench for FIGHT too
                 },
                 GUARD: {
-                    'Spine': { rx: 0.4, ry: 0, rz: 0 }, // Tucked in body
-                    'RightArm': { rx: 1.5, ry: -0.3, rz: -0.1 }, // Arms high
+                    'Spine': { rx: 0.4, ry: 0, rz: 0 },
+                    'RightArm': { rx: 1.5, ry: -0.3, rz: -0.1 },
                     'LeftArm': { rx: 1.5, ry: 0.3, rz: 0.1 },
-                    'RightForeArm': { rx: 0, ry: 0, rz: -2.0 }, // Peaked arms
+                    'RightForeArm': { rx: 0, ry: 0, rz: -2.0 },
                     'LeftForeArm': { rx: 0, ry: 0, rz: 2.0 },
-                    'Head': { rx: 0.4, ry: 0, rz: 0 }, // Tucked chin
+                    'Head': { rx: 0.4, ry: 0, rz: 0 },
+                    'Fist': 1.0
+                },
+                // 1-6 BASIC STRIKES (Cinematic Reach)
+                ATTACK_1: { // JAB (Left Straight)
+                    'Spine': { rx: 0.3, ry: -0.8, rz: 0 }, // Leaning in + Twist
+                    'LeftArm': { rx: 0, ry: 1.4, rz: 1.6 }, // Reach Forward
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 0.1 }, // Straight
+                    'RightArm': { rx: 0, ry: -0.5, rz: -1.0 },
+                    'Head': { rx: 0, ry: 0.8, rz: 0 },
+                    'Fist': 1.0
+                },
+                ATTACK_2: { // CROSS (Right Power)
+                    'Spine': { rx: 0.4, ry: 0.8, rz: 0 },
+                    'RightArm': { rx: 0, ry: -1.4, rz: -1.6 },
+                    'RightForeArm': { rx: 0, ry: 0, rz: -0.1 },
+                    'LeftArm': { rx: 0, ry: 0.8, rz: 1.2 },
+                    'Head': { rx: 0, ry: -0.8, rz: 0 },
+                    'Fist': 1.0
+                },
+                ATTACK_3: { // LEFT HOOK
+                    'Spine': { rx: 0.2, ry: -1.2, rz: 0 },
+                    'LeftArm': { rx: 0, ry: 1.0, rz: 1.6 },
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 1.5 },
+                    'RightArm': { rx: 0, ry: -0.5, rz: -1.0 },
+                    'Head': { rx: 0, ry: 1.2, rz: 0 },
+                    'Fist': 1.0
+                },
+                ATTACK_4: { // RIGHT HOOK
+                    'Spine': { rx: 0.2, ry: 1.2, rz: 0 },
+                    'RightArm': { rx: 0, ry: -1.0, rz: -1.6 },
+                    'RightForeArm': { rx: 0, ry: 0, rz: -1.5 },
+                    'LeftArm': { rx: 0, ry: 0.8, rz: 1.2 },
+                    'Head': { rx: 0, ry: -1.2, rz: 0 },
+                    'Fist': 1.0
+                },
+                ATTACK_5: { // LEFT UPPERCUT
+                    'Spine': { rx: -0.1, ry: -0.6, rz: -0.3 },
+                    'LeftArm': { rx: -0.5, ry: 0.5, rz: 0.5 },
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 2.0 },
+                    'RightArm': { rx: 0, ry: -0.5, rz: -1.0 },
+                    'Head': { rx: 0.2, ry: 0.6, rz: 0 },
+                    'Fist': 1.0
+                },
+                ATTACK_6: { // RIGHT UPPERCUT
+                    'Spine': { rx: -0.1, ry: 0.6, rz: 0.3 },
+                    'RightArm': { rx: -0.5, ry: -0.5, rz: -0.5 },
+                    'RightForeArm': { rx: 0, ry: 0, rz: -2.0 },
+                    'LeftArm': { rx: 0, ry: 0.8, rz: 1.2 },
+                    'Head': { rx: 0.2, ry: -0.6, rz: 0 },
                     'Fist': 1.0
                 },
                 PUNCH_RIGHT: {
@@ -244,40 +292,129 @@
                 console.log(`🥊 Stance Controller: Found R:${rFin} L:${lFin} finger joints`);
                 console.log("🥊 Stance Controller Ready (v6.2 - Syntax Fixed)");
             },
-            triggerHit: function (muscle) {
-                const force = 1.5;
-                if (this.bones['Spine']) this.bones['Spine'].cameraShake = 0.12;
+            triggerHit: function (muscle, point, isCritical) {
+                const baseForce = isCritical ? 2.2 : 0.9; // Reduced from 1.8/3.5 to fix "throw off"
 
-                if (!muscle) {
-                    if (this.bones['Spine']) this.bones['Spine'].velocity.x -= force * 0.5;
-                    return;
+                // --- BOXING PHYSICS ENGINE (1-6 Strikes & Body Zones) ---
+                let reactionType = 'GENERIC';
+                let side = 'CENTER';
+
+                if (point) {
+                    // Side: x > 0.05 (Left), x < -0.05 (Right)
+                    if (point.x > 0.05) side = 'LEFT_SIDE'; // Model's Left
+                    else if (point.x < -0.05) side = 'RIGHT_SIDE'; // Model's Right
+                    else side = 'CENTER';
+
+                    const absX = Math.abs(point.x);
+
+                    // Height (Y)
+                    if (point.y > 1.48) {
+                        // High Head
+                        if (side === 'CENTER') reactionType = 'UPPERCUT_HEAD';
+                        else reactionType = 'HOOK_HEAD';
+                    } else if (point.y > 1.32) {
+                        // Face
+                        if (absX > 0.12) reactionType = 'HOOK_HEAD';
+                        else reactionType = 'STRAIGHT_HEAD';
+                    } else if (point.y > 1.15) {
+                        // Chest
+                        reactionType = 'BODY_CHEST';
+                    } else if (point.y > 0.95) {
+                        // Abs/Obliques
+                        if (absX > 0.15) reactionType = 'BODY_OBLIQUE';
+                        else reactionType = 'BODY_ABS';
+                    } else {
+                        // Low
+                        reactionType = 'BODY_LOW';
+                    }
                 }
 
-                const m = muscle.toLowerCase();
-                if (m.includes('head') || m.includes('neck')) {
-                    if (this.bones['Head']) {
-                        this.bones['Head'].velocity.x -= force * 1.5; // Reduced from 2.5
-                        this.bones['Head'].velocity.y += (Math.random() - 0.5) * 0.5;
+                let turnDir = 0;
+                if (side === 'LEFT_SIDE') turnDir = -1.0;
+                if (side === 'RIGHT_SIDE') turnDir = 1.0;
+
+                console.log(`🥊 Hit: ${reactionType} on ${side}`);
+
+                if (reactionType.includes('HEAD') && this.bones['Head']) {
+                    const b = this.bones['Head'];
+
+                    if (reactionType === 'UPPERCUT_HEAD') {
+                        // 5 & 6: Snap Head UP/BACK
+                        b.velocity.x -= baseForce * 1.5;
+                        b.velocity.y += (Math.random() - 0.5) * 0.5;
+                        if (this.bones['Spine']) this.bones['Spine'].velocity.y += 0.08;
                     }
-                    if (this.bones['Spine']) this.bones['Spine'].velocity.x -= force * 0.4;
-                } else if (m.includes('chest') || m.includes('abs')) {
-                    if (this.bones['Spine']) {
-                        this.bones['Spine'].velocity.x -= force * 0.8; // Reduced from 1.2
-                        this.bones['Spine'].velocity.y += (Math.random() - 0.5) * 0.2;
+                    else if (reactionType === 'HOOK_HEAD') {
+                        // 3 & 4: Violent Spin
+                        b.velocity.y += turnDir * baseForce * 1.8;
+                        b.velocity.z -= turnDir * baseForce * 0.4;
+                        b.velocity.x -= baseForce * 0.3;
                     }
-                } else if (m.includes('thigh') || m.includes('calf') || m.includes('glute')) {
-                    if (this.bones['Hips']) {
-                        this.bones['Hips'].velocity.z += (Math.random() - 0.5) * force;
-                        this.bones['Hips'].velocity.x -= force * 0.5;
+                    else if (reactionType === 'STRAIGHT_HEAD') {
+                        // 1 & 2: Snap Back
+                        b.velocity.x -= baseForce * 1.2;
+                        b.velocity.y += turnDir * baseForce * 0.6;
                     }
                 }
+
+                else if (reactionType.includes('BODY') && this.bones['Spine']) {
+                    const b = this.bones['Spine'];
+
+                    if (reactionType === 'BODY_CHEST') {
+                        b.velocity.z -= baseForce * 0.4;
+                        b.velocity.x -= baseForce * 0.3;
+                        // Fix: Add directional twist away from hit
+                        // Hit Left -> Turn Right (turnDir = -1)
+                        if (turnDir !== 0) b.velocity.y += turnDir * baseForce * 0.5;
+                    }
+                    else if (reactionType === 'BODY_ABS') {
+                        b.velocity.x += baseForce * 1.0;
+                        b.velocity.y -= 0.05;
+                        if (this.bones['Head']) this.bones['Head'].velocity.x += baseForce * 0.5;
+                    }
+                    else if (reactionType === 'BODY_OBLIQUE') {
+                        // Fix: Sway AWAY from hit
+                        const sway = (side === 'LEFT_SIDE') ? -1.0 : 1.0;
+                        b.velocity.z += sway * baseForce * 0.8;
+                        b.velocity.x += baseForce * 0.4;
+
+                        // Subtle Hip Sway (0.2) - Grounded but reactive
+                        if (this.bones['Hips']) {
+                            this.bones['Hips'].velocity.z += sway * 0.2;
+                            this.bones['Hips'].velocity.y -= 0.02;
+                        }
+                    }
+                    else if (reactionType === 'BODY_LOW') {
+                        if (this.bones['Hips']) {
+                            // Reduced rotation significantly (0.5 -> 0.15) to anchor feet
+                            this.bones['Hips'].velocity.z += turnDir * baseForce * 0.15;
+                            this.bones['Hips'].velocity.x -= 0.2;
+                        }
+                    }
+                }
+
+                if (this.bones['Spine']) this.bones['Spine'].cameraShake = isCritical ? 0.35 : 0.15;
             },
             update: function (time) {
                 if (!model || Object.keys(this.bones).length === 0) return;
 
-                const breathing = Math.sin(time * 0.002) * (this.targetPose === 'IDLE' ? 0.025 : 0.01);
-                const stiffness = 0.08;
-                const damping = 0.85;
+                // RESTORED: Breathing & Fatigue (Safe)
+                const breathing = Math.sin(time * 0.002) * (this.targetPose === 'IDLE' ? 0.012 : 0.005);
+                const fatigue = (typeof modelHealth !== 'undefined') ? Math.max(0, (100 - modelHealth) / 100) : 0;
+
+                // Fatigue Effects (Chin Lift)
+                if (this.bones['Head']) {
+                    this.bones['Head'].ref.rotation.x -= (fatigue * 0.45);
+                }
+                if (this.bones['Spine']) {
+                    this.bones['Spine'].ref.rotation.x += (fatigue * 0.2);
+                }
+
+                // PHYSICS TUNING: "Heavy Bag" Feel
+                // PHYSICS TUNING: CONSTANT SAFE MODE
+                const stiffness = 0.04;
+                // if (window.aiController) ... (Disabled for stability debug)
+                const damping = 0.75;
 
                 for (let name in this.bones) {
                     const boneData = this.bones[name];
@@ -304,11 +441,19 @@
                     boneData.recoil.y = Math.max(-maxRecoil, Math.min(maxRecoil, boneData.recoil.y));
                     boneData.recoil.z = Math.max(-maxRecoil, Math.min(maxRecoil, boneData.recoil.z));
 
-                    boneData.ref.rotation.set(
-                        boneData.currentRot.x + boneData.recoil.x,
-                        boneData.currentRot.y + boneData.recoil.y,
-                        boneData.currentRot.z + boneData.recoil.z
-                    );
+                    // NaN SAFETY
+                    let rx = boneData.currentRot.x + boneData.recoil.x;
+                    let ry = boneData.currentRot.y + boneData.recoil.y;
+                    let rz = boneData.currentRot.z + boneData.recoil.z;
+
+                    if (isNaN(rx) || isNaN(ry) || isNaN(rz)) {
+                        boneData.currentRot.set(0, 0, 0);
+                        boneData.recoil.set(0, 0, 0);
+                        boneData.velocity.set(0, 0, 0);
+                        rx = 0; ry = 0; rz = 0;
+                    }
+
+                    boneData.ref.rotation.set(rx, ry, rz);
 
                     if (name === 'Spine' && boneData.cameraShake > 0.001) {
                         // More stable shake
@@ -438,12 +583,12 @@
                                     // Y = Spread/Yaw (from defined Y)
                                     // Z = Twist/Roll (from defined X)
 
-                                    const tx = tgt.x * sideSig;
+                                    const tx = tgt.x * sideSig; // Spread/Twist needs mirror
                                     const ty = tgt.y * sideSig;
-                                    const tz = tgt.z * sideSig;
+                                    const tz = tgt.z; // CURL DOES NOT NEED MIRROR (Usually +X for both)
 
                                     // Axis Swap: Map defined Z (Curl) to Bone X (Bend)
-                                    targetX = f.originalRot.x + (tz * amount);  // Curl
+                                    targetX = f.originalRot.x + (tz * amount);  // Curl (Positive = In)
                                     targetY = f.originalRot.y + (ty * amount);  // Spread
                                     targetZ = f.originalRot.z + (tx * amount);  // Twist
                                 }
@@ -493,24 +638,36 @@
             moveTimer: 0,
 
             patterns: {
-                easy: { cooldown: 4000, damage: 5, accuracy: 0.3, moveSpeed: 0.01 },
-                medium: { cooldown: 2500, damage: 10, accuracy: 0.5, moveSpeed: 0.02 },
-                hard: { cooldown: 1500, damage: 15, accuracy: 0.8, moveSpeed: 0.04 }
+                easy: { cooldown: 4000, damage: 5, comboChance: 0.1, moveSpeed: 0.02 },
+                medium: { cooldown: 2500, damage: 8, comboChance: 0.6, moveSpeed: 0.04 },
+                hard: { cooldown: 1500, damage: 12, comboChance: 1.0, moveSpeed: 0.06 }
             },
 
             init: function () {
+                console.log("🤖 AI Controller Initialized (v5.1 - VISIBILITY FIXED)");
                 this.enabled = false;
                 this.lastAttackTime = 0;
                 this.isAttacking = false;
+                this.isGuarding = false;
+                this.comboQueue = []; // Init Queue
                 if (model) {
                     model.position.x = 0;
                     model.position.z = 0;
                 }
-                console.log('🤖 AI Controller Initialized (v3.5 - Pro Motion)');
+                console.log('🤖 AI Controller Initialized (v4.0 - Combo Master)');
             },
 
             update: function (time) {
                 if (!this.enabled || !gameMode || !model) return;
+
+                // SAFETY: Prevent Vanishing & Drift
+                if (isNaN(model.position.x) || isNaN(model.position.z)) {
+                    model.position.set(0, 0, 0);
+                }
+                // LEASH
+                if (Math.abs(model.position.z) > 5.0 || Math.abs(model.position.x) > 5.0) {
+                    model.position.set(0, 0, 0);
+                }
 
                 const pattern = this.patterns[this.difficulty];
 
@@ -544,12 +701,10 @@
                     }
                 }
 
-                // 2. Attack Logic
+                // 2. Attack Logic (Combos)
                 const timeSinceLastAttack = time - this.lastAttackTime;
-                if (timeSinceLastAttack > pattern.cooldown && !this.isAttacking) {
-                    if (Math.random() < pattern.accuracy) {
-                        this.executeAttack(pattern.damage);
-                    }
+                if (timeSinceLastAttack > pattern.cooldown && !this.isAttacking && (!this.comboQueue || this.comboQueue.length === 0)) {
+                    this.decideAttack(pattern);
                     this.lastAttackTime = time;
                 }
             },
@@ -558,56 +713,176 @@
                 if (this.isAttacking) return;
                 this.isAttacking = true;
 
-                const punchType = Math.random() > 0.5 ? 'PUNCH_RIGHT' : 'PUNCH_LEFT';
+                // Pick from 1-6 Basic Strikes
+                const type = Math.floor(Math.random() * 6) + 1;
+                const attackPose = `ATTACK_${type}`;
                 const originalPose = stanceController.targetPose;
-                const lungingForce = 1.2; // How close they get to camera
 
-                console.log(`🥊 AI Attacking with ${punchType}`);
+                stanceController.targetPose = attackPose;
 
-                // Wind up (Pull back slightly)
-                stanceController.targetPose = 'GUARD';
-
-                // Quick tween for windup (pull back Z)
+                // CINEMATIC LUNGE (Move model closer to camera)
                 const startZ = model.position.z;
-                model.position.z = startZ - 0.3;
+                const lungeDepth = 1.6; // Deep lunge to reach camera
+
+                // Animate Lunge with interval (Simple tween)
+                const startTime = Date.now();
+                const duration = this.attackDuration;
+
+                const lungeInterval = setInterval(() => {
+                    const now = Date.now();
+                    const progress = (now - startTime) / duration;
+
+                    if (progress >= 1.0) {
+                        clearInterval(lungeInterval);
+                        return;
+                    }
+
+                    // Forward then Back (Sine wave for lunge)
+                    const offset = Math.sin(progress * Math.PI) * lungeDepth;
+                    model.position.z = startZ + offset;
+
+                }, 16);
+
+                // Hit Logic
+                setTimeout(() => {
+                    if (window.parent) window.parent.postMessage({ type: 'player_hit', damage: damage }, '*');
+                    playerHealth -= damage;
+                    if (playerHealth < 0) playerHealth = 0;
+                    updateGameUI();
+
+                    // Camera Impact Shake
+                    if (window.controls) {
+                        const shake = 0.05;
+                        controls.target.x += (Math.random() - 0.5) * shake;
+                        controls.target.y += (Math.random() - 0.5) * shake;
+                    }
+
+                    // Red Flash
+                    document.body.style.backgroundColor = 'rgba(255,0,0,0.1)';
+                    setTimeout(() => document.body.style.backgroundColor = 'transparent', 100);
+
+                }, 250);
+
+                // Reset
+                setTimeout(() => {
+                    stanceController.targetPose = 'FIGHT';
+                    this.isAttacking = false;
+                    model.position.z = startZ; // Ensure reset
+                }, this.attackDuration);
+            },
+
+
+            decideAttack: function (pattern) {
+                const isCombo = Math.random() < pattern.comboChance;
+
+                if (isCombo) {
+                    const combos = [
+                        [1, 2], [1, 1, 2], [2, 3], [1, 2, 3], [3, 4], [5, 2], [6, 3]
+                    ];
+                    this.comboQueue = combos[Math.floor(Math.random() * combos.length)];
+                    console.log(`🤖 Combo: ${this.comboQueue}`);
+                } else {
+                    this.comboQueue = [Math.floor(Math.random() * 6) + 1];
+                }
+
+                this.processComboStep(pattern.damage);
+            },
+
+            processComboStep: function (damage) {
+                if (!this.comboQueue || this.comboQueue.length === 0) {
+                    this.isAttacking = false;
+                    return;
+                }
+
+                this.isAttacking = true;
+                const type = this.comboQueue.shift();
+                this.executeSingleStrike(type, damage);
+
+                let delay = 600;
+                if (type === 1) delay = 400; // Fast Jab
 
                 setTimeout(() => {
-                    // THROW PUNCH
-                    stanceController.targetPose = punchType;
+                    if (this.enabled && gameMode) this.processComboStep(damage);
+                }, delay);
+            },
 
-                    // Lunge forward logic (manual tween)
-                    let lungeProgress = 0;
-                    const lungeInterval = setInterval(() => {
-                        lungeProgress += 0.1;
-                        if (lungeProgress <= 0.5) {
-                            // Moving forward (Lunge)
-                            model.position.z = startZ + (lungingForce * (lungeProgress * 2));
-                        } else {
-                            // Moving back
-                            // model.position.z lerps back later
-                        }
+            executeSingleStrike: function (type, damage) {
+                const attackPose = `ATTACK_${type}`;
+                const startZ = 0; // Fix: Always lunge from center
 
-                        // Stop lunge logic at impact
-                        if (lungeProgress >= 0.5) clearInterval(lungeInterval);
-                    }, 20);
+                stanceController.targetPose = attackPose;
 
+                // CINEMATIC LUNGE
+                // Hooks/Uppers (3+) lunge deeper
+                const lungeDepth = (type >= 3) ? 1.4 : 1.2;
 
-                    setTimeout(() => {
-                        // IMPACT MOMENT (Mid-punch)
+                this.animateLunge(startZ, lungeDepth);
+
+                // Hit Logic
+                setTimeout(() => {
+                    if (this.isAttacking) {
                         this.hitPlayer(damage);
+                        this.shakeCamera(0.2);
+                    }
+                }, 200);
 
-                        // Shake camera violently on impact
-                        this.shakeCamera(0.3);
+                // Reset Momentary
+                setTimeout(() => {
+                    if (this.isAttacking && this.comboQueue.length > 0) {
+                        // Blend to next
+                    } else {
+                        stanceController.targetPose = 'FIGHT';
+                        if (this.comboQueue.length === 0) this.isAttacking = false;
+                    }
+                }, 400);
+            },
 
-                        // Return to stance
-                        setTimeout(() => {
-                            stanceController.targetPose = originalPose;
-                            this.isAttacking = false;
+            animateLunge: function (startZ, depth) {
+                if (this.currentLungeInterval) clearInterval(this.currentLungeInterval);
+                const startTime = Date.now();
+                const duration = 400;
 
-                            // Reset Position smoothly handled by update loop
-                        }, 200);
-                    }, this.attackDuration / 2);
-                }, 250); // Fast windup
+                this.currentLungeInterval = setInterval(() => {
+                    if (!this.isAttacking) {
+                        clearInterval(this.currentLungeInterval);
+                        return;
+                    }
+                    const now = Date.now();
+                    const progress = (now - startTime) / duration;
+
+                    if (progress >= 1.0) {
+                        clearInterval(this.currentLungeInterval);
+                        model.position.z = startZ;
+                        return;
+                    }
+
+                    const offset = Math.sin(progress * Math.PI) * depth;
+                    model.position.z = startZ + offset;
+                }, 16);
+            },
+
+            cancelAttack: function () {
+                if (this.isAttacking) {
+                    console.log("🤖 Attack Cancelled");
+                    this.isAttacking = false;
+                    this.comboQueue = [];
+                    if (this.currentLungeInterval) clearInterval(this.currentLungeInterval);
+                    stanceController.targetPose = 'FIGHT';
+                }
+            },
+
+            activateGuard: function () {
+                if (this.isAttacking || this.isGuarding) return;
+
+                console.log("🛡️ AI Guarding!");
+                this.isGuarding = true;
+                stanceController.targetPose = 'GUARD';
+
+                // Hold guard
+                setTimeout(() => {
+                    this.isGuarding = false;
+                    if (!this.isAttacking) stanceController.targetPose = 'FIGHT';
+                }, 1500 + Math.random() * 1000);
             },
 
             shakeCamera: function (intensity) {
@@ -744,7 +1019,7 @@
 
             camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
             // Default Position: Closer and higher to frame upper body
-            camera.position.set(0, 1.3, 2.8); // Raised Y to 1.3, Moved Z closer to 2.8
+            camera.position.set(0, 1.2, 4.0); // Full View Init
 
             scene = new THREE.Scene();
 
@@ -899,8 +1174,8 @@
                 tapsOutsideCount = 0;
 
                 if (isDoubleTap) {
-                    window.resetCamera();
-                    return;
+                    // window.resetCamera(); // DISABLED BY USER REQUEST
+                    // return;
                 }
 
                 const hit = intersects[0];
@@ -939,6 +1214,11 @@
                 return;
             }
             console.log("🥊 BOXING GAME STARTING...");
+            if (model) model.position.set(0, 0, 0);
+            isZooming = false;
+            if (window.camera) {
+                // Initial set, verified below
+            }
             gameMode = true;
             modelHealth = 100;
             playerHealth = 100;
@@ -959,9 +1239,71 @@
 
             // Reset camera to center for the challenge and ZOOM OUT
             if (window.controls && window.camera) {
-                controls.target.set(0, 1, 0);
-                camera.position.set(0, 1.2, 4.5); // Zoom out a bit (default was 3.5)
-                controls.update();
+                // DISABLE ORBIT CONTROLS COMPLETELY
+                controls.enabled = false;
+
+                // Manual Camera Set
+                camera.near = 0.05;
+                camera.updateProjectionMatrix();
+                camera.position.set(0, 1.2, 3.0); // SYNC WITH SAFETY NET (3.0m)
+                camera.lookAt(0, 1.0, 0);
+            }
+
+            // VISUAL DEBUGGER (Clean up)
+            if (scene.getObjectByName("debug_cube")) scene.remove(scene.getObjectByName("debug_cube"));
+
+            // LIGHTING FIX (Prevent Accumulation)
+            if (scene.getObjectByName("game_ambient")) scene.remove(scene.getObjectByName("game_ambient"));
+            const amb = new THREE.AmbientLight(0xffffff, 1.5); // Reduced from 2.0
+            amb.name = "game_ambient";
+            scene.add(amb);
+
+            // GEOMETRY & MATERIAL FIX
+            if (model) {
+                model.scale.set(1.2, 1.2, 1.2);
+                model.updateMatrixWorld(true);
+
+                model.traverse(c => {
+                    if (c.isMesh) {
+                        // SKIP HIDDEN MESHES (Sunglasses, Layers)
+                        if (!c.visible) return;
+
+                        c.frustumCulled = false;
+                        c.renderOrder = 0;
+
+                        if (c.material) {
+                            // STRIP SHADER (Fix Invisibility)
+                            const oldMat = c.material;
+                            // Only replace if not already Standard (Prevent double-strip)
+                            if (oldMat.type !== 'MeshStandardMaterial') {
+                                console.log(`Strip Shader on: ${c.name}`);
+                                const newMat = new THREE.MeshStandardMaterial({
+                                    map: oldMat.map,
+                                    normalMap: oldMat.normalMap,
+                                    roughnessMap: oldMat.roughnessMap,
+                                    color: oldMat.color,
+                                    roughness: 0.6,
+                                    metalness: 0.1,
+                                    skinning: true,
+                                    side: THREE.DoubleSide
+                                });
+                                c.material = newMat;
+                            }
+                        }
+                    }
+                });
+                console.log("SHADERS STRIPPED: Standard Material Applied");
+            }
+
+            // RE-ENABLE STANCE CONTROLLER
+            // (References were not actually broken by previous step if we reload/restart,
+            // but just in case we are in the same session without reload)
+            if (window._savedBones) {
+                console.log("RESTORING STANCE CONTROLLER");
+                stanceController.bones = window._savedBones;
+                stanceController.targetPose = 'FIGHT';
+            } else {
+                stanceController.targetPose = 'FIGHT';
             }
 
             showGameUI();
@@ -977,14 +1319,34 @@
             let damage = 5;
             let isWeakPoint = false;
             let hitText = "HIT!";
+            let isCritical = false;
 
+            // CHECK GUARD (Damage Mitigation)
+            if (stanceController.targetPose === 'GUARD') {
+                damage *= 0.3; // Blocked damage
+                hitText = "BLOCKED";
+                // Play metallic/thud sound?
+            }
+
+            // 1. Weak Point (Anatomical)
             const weakPoints = ['Neck', 'Chest', 'Upper Abs', 'Lower Abs'];
             if (muscle && weakPoints.includes(muscle)) {
-                damage = 15;
+                damage = 10;
                 isWeakPoint = true;
-                hitText = "CRITICAL!";
-            } else if (!muscle) {
-                damage = 2; // Hit the generic mesh but not a specific muscle
+                hitText = "SOLID!";
+            }
+
+            // 2. Tired Spot (Heatmap Logic)
+            if (muscle && activeHeatmap[muscle] > 0.6) {
+                damage += 15; // Massive Bonus
+                isCritical = true;
+                isWeakPoint = true;
+                hitText = "TIRED SPOT!";
+                gameScore += 100; // Extra points
+            }
+
+            if (!muscle) {
+                damage = 2; // Generic hit
             }
 
             modelHealth -= damage;
@@ -999,13 +1361,30 @@
             gameLastHitTime = now;
 
             // Procedural Twitch/Block React
-            if (stanceController.triggerHit) stanceController.triggerHit(muscle);
+            if (stanceController.triggerHit) {
+                stanceController.triggerHit(muscle, point, isCritical);
+            }
 
-            // Visual feedback - flash red
-            flashModelColor(isWeakPoint ? 0xff0000 : 0xffffff);
+            // CANCEL ATTACK & TRIGGER GUARD
+            if (window.aiController) {
+                window.aiController.cancelAttack();
 
-            // Floating text in 3D? Too complex for now, use UI overlay update
+                // Reactive Guard (try to block next hit)
+                if (Math.random() < 0.4 && !aiController.isGuarding) {
+                    setTimeout(() => aiController.activateGuard(), 300);
+                }
+            }
+
+            // Visual feedback - flash red (brighter if critical)
+            flashModelColor(isCritical ? 0xffaa00 : (isWeakPoint ? 0xff0000 : 0xffffff));
+
+            // Add Hit Marker UI? Just console for now
+            if (isCritical) console.log("🔥 CRITICAL TIRED HIT!");
+
             updateGameUI();
+
+            // Update Heatmap for this hit (make it hotter)
+            updateHeatmap(muscle, point);
 
             if (modelHealth <= 0) {
                 endBoxingGame(true);
@@ -1013,6 +1392,9 @@
         }
 
         function flashModelColor(color) {
+            // DISABLED FOR DEBUGGING (Prevent Invisible Material)
+            return;
+            /*
             if (!model) return;
             model.traverse(child => {
                 if (child.isMesh && child.material) {
@@ -1023,24 +1405,25 @@
                     }, 100);
                 }
             });
+            */
         }
 
         function showGameUI() {
-            console.log('Showing Game UI...');
+            console.log("Showing Game UI...");
             let ui = document.getElementById('game-ui');
             if (!ui) {
                 ui = document.createElement('div');
                 ui.id = 'game-ui';
-                ui.style.position = 'absolute';
+                ui.style.position = 'absolute'; // REQUIRED for z-index/overlay
                 ui.style.top = '20px';
                 ui.style.left = '50%';
                 ui.style.transform = 'translateX(-50%)';
-                ui.style.padding = '15px 25px';
-                ui.style.background = 'rgba(0,0,0,0.7)';
-                ui.style.borderRadius = '15px';
                 ui.style.textAlign = 'center';
                 ui.style.pointerEvents = 'none';
                 ui.style.border = '2px solid #ff4444';
+                ui.style.background = 'rgba(0, 0, 0, 0.5)'; // Add background for contrast
+                ui.style.padding = '10px';
+                ui.style.borderRadius = '8px';
                 ui.style.zIndex = '1000';
                 ui.innerHTML = `
                     <div style="font-weight: bold; color: #4CAF50; font-size: 14px; margin-bottom: 3px;">YOUR HEALTH</div>
@@ -1051,7 +1434,7 @@
                     <div style="width: 200px; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 5px;">
                         <div id="health-bar" style="width: 100%; height: 100%; background: #ff4444; transition: width 0.3s ease;"></div>
                     </div>
-                    <div style="font-size: 8px; color: #555;">v3.0-FIGHTER</div>
+                    <div style="font-size: 8px; color: #555;">v5.1-STABLE</div>
                 `;
                 document.body.appendChild(ui);
             }
@@ -1069,8 +1452,29 @@
             gameMode = false;
             aiController.enabled = false;
             aiController.isAttacking = false;
+            aiController.isGuarding = false;
             stanceController.targetPose = 'IDLE';
             if (window.setCombatMode) window.setCombatMode(false);
+
+            // FORCE RESTORE MODEL
+            if (model) {
+                model.position.set(0, 0, 0);
+                model.scale.set(1, 1, 1);
+                // model.visible = true; // REMOVED (Respect GLTF)
+                model.traverse(c => {
+                    if (c.isMesh) {
+                        // SKIP HIDDEN (Respect Original Visibility)
+                        if (!c.visible) return;
+
+                        c.frustumCulled = false;
+                    }
+                    if (c.material && c.visible) {
+                        c.material.opacity = 1.0;
+                        c.material.transparent = false;
+                    }
+                });
+            }
+
             const ui = document.getElementById('game-ui');
             if (ui) {
                 ui.innerHTML = `
@@ -1101,7 +1505,15 @@
 
                 // Return camera zoom to normal
                 if (window.camera && window.controls) {
-                    camera.position.set(0, 1.2, 3.5);
+                    camera.position.set(0, 1.2, 4.0); // Full View Reset
+
+                    // UNLOCK CONTROLS
+                    controls.enabled = true; // Re-enable
+                    controls.enableZoom = true;
+                    controls.enablePan = true;
+                    controls.enableRotate = true;
+                    controls.enableDamping = true;
+
                     controls.update();
                 }
             }, 3000);
@@ -1193,7 +1605,7 @@
                     uniform float u_zone_intensities[${MAX_ZONES}];
                     uniform int u_zone_count;
                     varying vec3 vWorldPosition;
-                    
+
                     float distToSegment(vec3 p, vec3 a, vec3 b) {
                         vec3 pa = p - a, ba = b - a;
                         float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
@@ -1233,15 +1645,24 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
-
         function animate() {
             const time = Date.now();
             requestAnimationFrame(animate);
+
+            // PERSISTENT VISIBILITY FIX (Prevent Flickering)
+            if (model && gameMode) {
+                model.traverse(c => {
+                    if (c.isMesh) {
+                        c.frustumCulled = false;
+                        // c.visible = true; // REMOVED: Do not force visibility of hidden meshes (Sunglasses/Layers)
+                    }
+                });
+            }
+
             // Apply Manual/Procedural Stance
 
             const delta = 0.016; // Assuming 60fps
             if (window.mixer) {
-                // Force disable finger tracks if possible, or just accept we overwrite them
                 window.mixer.update(delta);
             }
 
@@ -1252,11 +1673,30 @@
             }
             if (aiController) aiController.update(now);
 
+            // CAMERA CONTROL LOGIC
             if (isZooming) {
                 updateZoom();
                 if (controls) controls.enabled = false;
             } else {
-                if (window.controls) controls.enabled = true;
+                // Only enable controls if NOT in game mode (Boxing locks camera)
+                if (window.controls) {
+                    if (!gameMode) controls.enabled = true;
+                    // If gameMode, controls.enabled was set to false by startBoxingGame
+                }
+            }
+
+            // SAFETY NET: Check for NaN Camera
+            if (camera && (isNaN(camera.position.x) || isNaN(camera.position.y) || isNaN(camera.position.z))) {
+                console.error("CAMERA BECAME NAN! RESETTING!");
+                camera.near = 0.05; // Even closer near plane
+                camera.updateProjectionMatrix();
+                // Move Back slightly (3.0m) to reduce "Too Big" feeling
+                camera.position.set(0, 1.2, 3.0);
+                camera.lookAt(0, 1.0, 0);
+                if (controls) {
+                    controls.target.set(0, 1.0, 0);
+                    controls.update();
+                }
             }
 
             if (window.controls) controls.update();
@@ -1436,13 +1876,38 @@
         window.resetCamera = function () {
             // Reset to initial state
             targetControlsTarget.set(0, 1.0, 0);
-            targetCameraPos.set(0, 1.2, 3);
+            targetCameraPos.set(0, 1.2, 4.0); // Full View Default
 
             startCameraPos.copy(camera.position);
             startControlsTarget.copy(controls.target);
             zoomStartTime = Date.now();
             isZooming = true;
         };
+
+        // HEATMAP LOGIC
+        // const activeHeatmap = {}; // Already declared globally
+
+        function updateHeatmap(muscle, point) {
+            if (!muscle) return;
+
+            // Increment heat
+            if (!activeHeatmap[muscle]) activeHeatmap[muscle] = 0;
+            activeHeatmap[muscle] += 0.3; // 3-4 hits to max out
+            if (activeHeatmap[muscle] > 1.0) activeHeatmap[muscle] = 1.0;
+
+            // "Splash" damage? Maybe slightly heat neighbors?
+            // For now, simple direct heat.
+        }
+
+        // Decay Heatmap over time (in animate loop or here with setInterval)
+        setInterval(() => {
+            for (let m in activeHeatmap) {
+                if (activeHeatmap[m] > 0) {
+                    activeHeatmap[m] -= 0.05; // Cooldown
+                    if (activeHeatmap[m] < 0) activeHeatmap[m] = 0;
+                }
+            }
+        }, 1000); // Run every second
 
         window.setMuscleHeatmap = function (heatmap) {
             if (!model) {
