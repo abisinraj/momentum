@@ -604,28 +604,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showModelsDialog(BuildContext context, WidgetRef ref, String apiKey) async {
-    // Show a loading snackbar or similar
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Fetching available models...'), duration: Duration(seconds: 1)),
     );
 
     try {
+      final currentModelAsync = ref.read(geminiModelProvider);
+      final currentModel = currentModelAsync.valueOrNull ?? 'gemini-1.5-flash';
       final models = await ref.read(aiInsightsServiceProvider).listAvailableModels(apiKey);
+      
       if (context.mounted) {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Available Gemini Models'),
+            title: const Text('Select Gemini Model'),
             content: SizedBox(
               width: double.maxFinite,
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: models.length,
-                itemBuilder: (context, index) => ListTile(
-                  leading: const Icon(Icons.model_training, size: 20),
-                  title: Text(models[index], style: const TextStyle(fontSize: 14)),
-                  dense: true,
-                ),
+                itemBuilder: (context, index) {
+                  final modelName = models[index];
+                  final isSelected = modelName == currentModel;
+                  
+                  return ListTile(
+                    leading: Icon(
+                      isSelected ? Icons.check_circle : Icons.model_training, 
+                      color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                      size: 20
+                    ),
+                    title: Text(
+                      modelName, 
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                      )
+                    ),
+                    onTap: () async {
+                      await ref.read(geminiModelProvider.notifier).setModel(modelName);
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Model updated to $modelName')),
+                        );
+                      }
+                    },
+                    dense: true,
+                  );
+                },
               ),
             ),
             actions: [

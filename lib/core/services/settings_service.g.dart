@@ -108,6 +108,22 @@ final weightUnitProvider = AutoDisposeFutureProvider<String>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef WeightUnitRef = AutoDisposeFutureProviderRef<String>;
+String _$geminiModelHash() => r'9d366f200222c96422c8e25549b7dd9e7e5a8beb';
+
+/// See also [GeminiModel].
+@ProviderFor(GeminiModel)
+final geminiModelProvider =
+    AutoDisposeAsyncNotifierProvider<GeminiModel, String>.internal(
+      GeminiModel.new,
+      name: r'geminiModelProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$geminiModelHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$GeminiModel = AutoDisposeAsyncNotifier<String>;
 String _$widgetThemeHash() => r'82afa081250e3cc8357644552eca71184fe4da87';
 
 /// See also [WidgetTheme].

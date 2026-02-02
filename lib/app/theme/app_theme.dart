@@ -66,9 +66,9 @@ class AppTheme {
         return _buildTheme(
           primary: const Color(0xFFFFFFFF), // White
           primaryContainer: const Color(0xFFCCCCCC),
-          background: const Color(0xFF000000), // True Black
-          surface: const Color(0xFF000000), // True Black surfaces
-          surfaceContainer: const Color(0xFF000000), // True Black containers
+          background: const Color(0xFF000000), // True Black (Scaffold)
+          surface: const Color(0xFF0C0C0C), // Slightly off-black for modals/dialogs
+          surfaceContainer: const Color(0xFF121212), // Distinguishable grey for inputs/cards
           border: const Color(0xFF333333), // Visible grey borders
           isMonochrome: true,
         );
@@ -122,7 +122,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: surface,
       textTheme: _buildTextTheme(ThemeData.dark().textTheme),
       
       // App Bar

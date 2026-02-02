@@ -37,6 +37,7 @@ class AIInsightsService {
     required List<Map<String, dynamic>> volumeTrend,
     required int? hoursSinceLastMeal,
     required String? apiKey,
+    String? preferredModel,
   }) async {
     try {
       if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
@@ -64,7 +65,7 @@ class AIInsightsService {
       final content = [Content.text(prompt)];
       
       try {
-        final response = await _generateWithFallback(content, apiKey);
+        final response = await _generateWithFallback(content, apiKey, preferredModel: preferredModel);
         final rawText = response.text?.trim() ?? "";
         
         // Attempt to parse JSON from AI response
@@ -181,6 +182,7 @@ class AIInsightsService {
     required int? intensity,
     required String? apiKey,
     required List<Exercise> exerciseDefinitions,
+    String? preferredModel,
   }) async {
     try {
       if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
@@ -198,7 +200,7 @@ class AIInsightsService {
       
       GenerateContentResponse response;
       try {
-         response = await _generateWithFallback(content, apiKey);
+         response = await _generateWithFallback(content, apiKey, preferredModel: preferredModel);
       } catch (e) {
          return null;
       }
@@ -262,6 +264,7 @@ class AIInsightsService {
     List<int>? imageBytes,
     required String? apiKey,
     String? extraContext,
+    String? preferredModel,
   }) async {
     try {
       if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
@@ -300,7 +303,7 @@ Instructions:
       
       GenerateContentResponse response;
       try {
-        response = await _generateWithFallback(content, apiKey);
+        response = await _generateWithFallback(content, apiKey, preferredModel: preferredModel);
       } catch (e) {
          final errorStr = e.toString();
          if (errorStr.contains('API_KEY_INVALID')) {
@@ -318,18 +321,23 @@ Instructions:
   }
   Future<GenerateContentResponse> _generateWithFallback(
     List<Content> content,
-    String apiKey,
-  ) async {
+    String apiKey, {
+    String? preferredModel,
+  }) async {
     // Updated 2026 Model Priority List
-    const modelsToTry = [
+    final modelsToTry = [
+      if (preferredModel != null) preferredModel,
       'gemini-2.0-flash',
       'gemini-1.5-flash',
       'gemini-1.5-pro',
     ];
 
+    // Remove duplicates while preserving order
+    final uniqueModels = modelsToTry.toSet().toList();
+
     Object? lastError;
 
-    for (final modelName in modelsToTry) {
+    for (final modelName in uniqueModels) {
       try {
         debugPrint('AI: Trying model $modelName...');
         final model = GenerativeModel(model: modelName, apiKey: apiKey);

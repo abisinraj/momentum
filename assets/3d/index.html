@@ -43,6 +43,7 @@
     <script src="GLTFLoader_global.js"></script>
     <script src="OrbitControls_global.js"></script>
     <script src="RoomEnvironment_global.js"></script>
+    <script src="debug_loader.js"></script>
 
     <script>
         // Explicitly alias globals to ensure access
@@ -63,6 +64,13 @@
         const startCameraPos = new THREE.Vector3();
         const startControlsTarget = new THREE.Vector3();
         let lastTapTime = 0;
+        let tapsOutsideCount = 0;
+        let gameMode = false;
+        let modelHealth = 100;
+        let playerHealth = 100;
+        let gameScore = 0;
+        let comboCount = 0;
+        let gameLastHitTime = 0;
 
         // --- MUSCLE DEFINITIONS (For Shader) ---
         // --- MUSCLE DEFINITIONS (Initially Empty - Populated by Flutter) ---
@@ -80,15 +88,19 @@
                 if (original) {
                     const mirror = { ...original }; // Shallow copy
 
-                    // Flip Bone Names
-                    if (mirror.bone) mirror.bone = mirror.bone.replace('Right', 'Left');
-                    if (mirror.start) mirror.start = mirror.start.replace('Right', 'Left');
-                    if (mirror.end) mirror.end = mirror.end.replace('Right', 'Left');
+                    // Unique name for targeting
+                    mirror.name = original.name + ' (Left)';
 
-                    // Flip X Offset
-                    if (mirror.offset) {
-                        mirror.offset = [-mirror.offset[0], mirror.offset[1], mirror.offset[2]];
-                    }
+                    // Flip Bone Names (More robust replacement)
+                    if (mirror.bone) mirror.bone = mirror.bone.replace('Right', 'Left').replace('right', 'left');
+                    if (mirror.start) mirror.start = mirror.start.replace('Right', 'Left').replace('right', 'left');
+                    if (mirror.end) mirror.end = mirror.end.replace('Right', 'Left').replace('right', 'left');
+
+                    // NOTE: Whether to flip X depends on the rig.
+                    // For Mixamo rigs, local X is often already mirrored (Right +X = World Right, Left +X = World Left).
+                    // If we flip the offset, we'd actually move the point to the wrong side of the bone.
+                    // Based on user feedback ("taking to wrong side"), let's NOT flip X and see if it aligns.
+                    // We'll keep the shallow copy's offset.
 
                     muscleDefs.push(mirror);
                 }
@@ -97,7 +109,7 @@
         };
 
         // Shader Uniforms
-        const MAX_ZONES = 32;
+        const MAX_ZONES = 64;
         const uniformData = {
             u_zone_starts: { value: new Float32Array(MAX_ZONES * 3) },
             u_zone_ends: { value: new Float32Array(MAX_ZONES * 3) },
@@ -110,6 +122,354 @@
 
         // Efficient dependency gatekeeper
         window.isReady = false;
+        window._pendingModelData = null;
+
+        const stanceController = window.stanceController = {
+            activePose: 'IDLE',
+            targetPose: 'IDLE',
+            bones: {},
+            lastHitTime: 0,
+            guardTimer: null,
+            poses: {
+                IDLE: {
+                    'Spine': { rx: 0, ry: 0, rz: 0 },
+                    'RightArm': { rx: 0, ry: 0, rz: -1.3 },
+                    'LeftArm': { rx: 0, ry: 0, rz: 1.3 },
+                    'RightForeArm': { rx: 0, ry: 0, rz: -0.2 },
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 0.2 },
+                    'Head': { rx: 0, ry: 0, rz: 0 },
+                    'Fist': -0.3 // Counteract model's natural curl to make them straight
+                },
+                FIGHT: {
+                    'Spine': { rx: 0.1, ry: 0, rz: 0 },
+                    'RightArm': { rx: 0.8, ry: -0.4, rz: -0.6 },
+                    'LeftArm': { rx: 1.1, ry: 0.4, rz: 0.6 },
+                    'RightForeArm': { rx: 0, ry: 0, rz: -1.6 },
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 1.6 },
+                    'Head': { rx: 0.15, ry: 0, rz: 0 },
+                    'Fist': 1.0 // Maximum clench for FIGHT too
+                },
+                GUARD: {
+                    'Spine': { rx: 0.4, ry: 0, rz: 0 }, // Tucked in body
+                    'RightArm': { rx: 1.5, ry: -0.3, rz: -0.1 }, // Arms high
+                    'LeftArm': { rx: 1.5, ry: 0.3, rz: 0.1 },
+                    'RightForeArm': { rx: 0, ry: 0, rz: -2.0 }, // Peaked arms
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 2.0 },
+                    'Head': { rx: 0.4, ry: 0, rz: 0 }, // Tucked chin
+                    'Fist': 1.0
+                },
+                PUNCH_RIGHT: {
+                    'Spine': { rx: 0, ry: -0.3, rz: 0 }, // Rotate torso
+                    'RightArm': { rx: 0.2, ry: 0, rz: 0 }, // Extend arm
+                    'LeftArm': { rx: 1.1, ry: 0.4, rz: 0.6 }, // Guard with left
+                    'RightForeArm': { rx: 0, ry: 0, rz: 0 }, // Straighten
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 1.6 },
+                    'Head': { rx: 0.1, ry: -0.2, rz: 0 },
+                    'Fist': 1.0
+                },
+                PUNCH_LEFT: {
+                    'Spine': { rx: 0, ry: 0.3, rz: 0 },
+                    'RightArm': { rx: 0.8, ry: -0.4, rz: -0.6 }, // Guard with right
+                    'LeftArm': { rx: 0.2, ry: 0, rz: 0 }, // Extend arm
+                    'RightForeArm': { rx: 0, ry: 0, rz: -1.6 },
+                    'LeftForeArm': { rx: 0, ry: 0, rz: 0 }, // Straighten
+                    'Head': { rx: 0.1, ry: 0.2, rz: 0 },
+                    'Fist': 1.0
+                }
+            },
+            init: function () {
+                console.log("🥊 Procedural Controller: Mapping Skeleton...");
+
+                const searchGroups = {
+                    'Spine': ['Spine2', 'Spine1', 'Chest', 'Spine', 'Hips'],
+                    'RightArm': ['RightArm', 'UpperArm_R', 'Arm_R', 'mixamorigRightArm'],
+                    'LeftArm': ['LeftArm', 'UpperArm_L', 'Arm_L', 'mixamorigLeftArm'],
+                    'RightForeArm': ['RightForeArm', 'ForeArm_R', 'LowerArm_R', 'mixamorigRightForeArm'],
+                    'LeftForeArm': ['LeftForeArm', 'ForeArm_L', 'LowerArm_L', 'mixamorigLeftForeArm'],
+                    'Head': ['Head', 'Neck', 'mixamorigHead'],
+                    'Hips': ['Hips', 'Pelvis', 'mixamorigHips'],
+                    'RightHand': ['RightHand', 'Hand_R', 'Right_Hand', 'mixamorigRightHand'],
+                    'LeftHand': ['LeftHand', 'Hand_L', 'Left_Hand', 'mixamorigLeftHand']
+                };
+
+                const fingerBases = ['Index', 'Middle', 'Ring', 'Pinky', 'Thumb'];
+                const joints = ['1', '2', '3']; // Find all 3 joints for better curling
+
+                for (let logicalName in searchGroups) {
+                    let found = null;
+                    for (let term of searchGroups[logicalName]) {
+                        found = findBone(term);
+                        if (found) break;
+                    }
+
+                    if (found) {
+                        this.bones[logicalName] = {
+                            ref: found,
+                            currentRot: found.rotation.clone(),
+                            recoil: new THREE.Vector3(0, 0, 0),
+                            velocity: new THREE.Vector3(0, 0, 0),
+                            cameraShake: 0
+                        };
+
+                        if (logicalName.includes('Hand')) {
+                            const side = logicalName.includes('Right') ? 'Right' : 'Left';
+                            this.bones[logicalName].fingers = [];
+                            console.log(`🔍 Searching fingers for ${logicalName}...`);
+
+                            fingerBases.forEach((base) => {
+                                joints.forEach(j => {
+                                    // Try patterns: RightHandIndex1, RightIndex1, mixamorigRightHandIndex1
+                                    let fingerBone = findBone(side + 'Hand' + base + j) ||
+                                        findBone(side + base + j) ||
+                                        findBone('mixamorig' + side + 'Hand' + base + j) ||
+                                        findBone('mixamorig' + side + base + j);
+
+                                    if (fingerBone) {
+                                        console.log(`   ✓ Found finger joint: ${fingerBone.name}`);
+                                        this.bones[logicalName].fingers.push({
+                                            ref: fingerBone,
+                                            originalRot: fingerBone.rotation.clone(),
+                                            jointLevel: parseInt(j)
+                                        });
+                                    }
+                                });
+                            });
+                        }
+                    }
+                }
+                console.log("🥊 Stance Controller Ready (v3.0 - AI Fighter)");
+            },
+            triggerHit: function (muscle) {
+                const force = 1.5;
+                if (this.bones['Spine']) this.bones['Spine'].cameraShake = 0.12;
+
+                if (!muscle) {
+                    if (this.bones['Spine']) this.bones['Spine'].velocity.x -= force * 0.5;
+                    return;
+                }
+
+                const m = muscle.toLowerCase();
+                if (m.includes('head') || m.includes('neck')) {
+                    if (this.bones['Head']) {
+                        this.bones['Head'].velocity.x -= force * 1.5; // Reduced from 2.5
+                        this.bones['Head'].velocity.y += (Math.random() - 0.5) * 0.5;
+                    }
+                    if (this.bones['Spine']) this.bones['Spine'].velocity.x -= force * 0.4;
+                } else if (m.includes('chest') || m.includes('abs')) {
+                    if (this.bones['Spine']) {
+                        this.bones['Spine'].velocity.x -= force * 0.8; // Reduced from 1.2
+                        this.bones['Spine'].velocity.y += (Math.random() - 0.5) * 0.2;
+                    }
+                } else if (m.includes('thigh') || m.includes('calf') || m.includes('glute')) {
+                    if (this.bones['Hips']) {
+                        this.bones['Hips'].velocity.z += (Math.random() - 0.5) * force;
+                        this.bones['Hips'].velocity.x -= force * 0.5;
+                    }
+                }
+            },
+            update: function (time) {
+                if (!model || Object.keys(this.bones).length === 0) return;
+
+                const breathing = Math.sin(time * 0.002) * (this.targetPose === 'IDLE' ? 0.025 : 0.01);
+                const stiffness = 0.08;
+                const damping = 0.85;
+
+                for (let name in this.bones) {
+                    const boneData = this.bones[name];
+                    const target = this.poses[this.targetPose][name];
+
+                    if (target) {
+                        boneData.currentRot.x += (target.rx - boneData.currentRot.x) * stiffness;
+                        boneData.currentRot.y += (target.ry - boneData.currentRot.y) * stiffness;
+                        boneData.currentRot.z += (target.rz - boneData.currentRot.z) * stiffness;
+                    }
+
+                    // Physics damping and clamping
+                    boneData.velocity.multiplyScalar(damping);
+                    boneData.recoil.add(boneData.velocity);
+
+                    // BRING BACK: Recoil spring (pull back to zero)
+                    boneData.recoil.x -= boneData.recoil.x * 0.1;
+                    boneData.recoil.y -= boneData.recoil.y * 0.1;
+                    boneData.recoil.z -= boneData.recoil.z * 0.1;
+
+                    // CLAMP: Prevent bones from snapping 360 degrees
+                    const maxRecoil = 0.8; // radians (~45 deg)
+                    boneData.recoil.x = Math.max(-maxRecoil, Math.min(maxRecoil, boneData.recoil.x));
+                    boneData.recoil.y = Math.max(-maxRecoil, Math.min(maxRecoil, boneData.recoil.y));
+                    boneData.recoil.z = Math.max(-maxRecoil, Math.min(maxRecoil, boneData.recoil.z));
+
+                    boneData.ref.rotation.set(
+                        boneData.currentRot.x + boneData.recoil.x,
+                        boneData.currentRot.y + boneData.recoil.y,
+                        boneData.currentRot.z + boneData.recoil.z
+                    );
+
+                    if (name === 'Spine' && boneData.cameraShake > 0.001) {
+                        // More stable shake: offset controls target instead of camera position
+                        controls.target.x += (Math.random() - 0.5) * boneData.cameraShake;
+                        controls.target.y += (Math.random() - 0.5) * boneData.cameraShake;
+                        boneData.cameraShake *= 0.7; // Faster decay
+                        if (boneData.cameraShake <= 0.001) {
+                            // Reset target to original (which is 0,1,0 for this model)
+                            controls.target.set(0, 1, 0);
+                        }
+                    }
+
+                    if (name === 'Spine') boneData.ref.rotation.x += breathing;
+                    if (name.includes('Arm')) boneData.ref.rotation.x += breathing * 0.4;
+
+                    if (boneData.fingers) {
+                        const amount = this.poses[this.targetPose].Fist || 0;
+                        boneData.fingers.forEach(f => {
+                            const isThumb = f.ref.name.toLowerCase().includes('thumb');
+                            const sideFactor = name.includes('Right') ? -1.0 : 1.0;
+                            const curlIntensity = amount * (isThumb ? 0.8 : 1.2);
+
+                            // Distribute rotation across all 3 joints
+                            const curlVal = curlIntensity * sideFactor;
+
+                            if (isThumb) {
+                                if (f.jointLevel === 1) {
+                                    f.ref.rotation.z = f.originalRot.z + (curlVal * 0.4);
+                                    f.ref.rotation.y = f.originalRot.y + (curlVal * 0.6);
+                                } else {
+                                    f.ref.rotation.z = f.originalRot.z + (curlVal * 0.5);
+                                }
+                            } else {
+                                // Even more subtle roll: 0.6x for knuckle, 0.8x for middle, 0.8x for tip
+                                const jointMultiplier = f.jointLevel === 1 ? 0.6 : 0.8;
+                                f.ref.rotation.z = f.originalRot.z + (curlVal * jointMultiplier);
+                                f.ref.rotation.x = f.originalRot.x; // Lock X to prevent twist
+                            }
+
+                            // Ensure no accidental scaling which causes 'compression' look
+                            f.ref.scale.set(1, 1, 1);
+                        });
+                    }
+                }
+            }
+        };
+
+        // AI Controller for counter-attacks
+        const aiController = {
+            enabled: false,
+            difficulty: 'medium', // easy, medium, hard
+            lastAttackTime: 0,
+            attackCooldown: 3000, // ms between attacks
+            isAttacking: false,
+            attackDuration: 600, // ms for punch animation
+
+            patterns: {
+                easy: { cooldown: 4000, damage: 5, accuracy: 0.3 },
+                medium: { cooldown: 3000, damage: 10, accuracy: 0.5 },
+                hard: { cooldown: 2000, damage: 15, accuracy: 0.7 }
+            },
+
+            init: function () {
+                this.enabled = false;
+                this.lastAttackTime = 0;
+                this.isAttacking = false;
+                console.log('🤖 AI Controller Initialized');
+            },
+
+            update: function (time) {
+                if (!this.enabled || !gameMode || this.isAttacking) return;
+
+                const pattern = this.patterns[this.difficulty];
+                const timeSinceLastAttack = time - this.lastAttackTime;
+
+                // Check if enough time has passed and random chance
+                if (timeSinceLastAttack > pattern.cooldown) {
+                    if (Math.random() < pattern.accuracy) {
+                        this.executeAttack(pattern.damage);
+                    }
+                    this.lastAttackTime = time;
+                }
+            },
+
+            executeAttack: function (damage) {
+                if (this.isAttacking) return;
+
+                this.isAttacking = true;
+                const punchType = Math.random() > 0.5 ? 'PUNCH_RIGHT' : 'PUNCH_LEFT';
+                const originalPose = stanceController.targetPose;
+
+                console.log(`🥊 AI Attacking with ${punchType}`);
+
+                // Wind up
+                stanceController.targetPose = 'GUARD';
+
+                setTimeout(() => {
+                    // Throw punch
+                    stanceController.targetPose = punchType;
+
+                    setTimeout(() => {
+                        // Apply damage to player
+                        this.hitPlayer(damage);
+
+                        // Return to stance
+                        setTimeout(() => {
+                            stanceController.targetPose = originalPose;
+                            this.isAttacking = false;
+                        }, 200);
+                    }, this.attackDuration / 2);
+                }, 300);
+            },
+
+            hitPlayer: function (damage) {
+                playerHealth -= damage;
+                console.log(`💥 Player hit! Damage: ${damage}, Health: ${playerHealth}`);
+
+                // Flash screen red
+                this.flashScreen();
+
+                // Update UI
+                updateGameUI();
+
+                // Check if player is knocked out
+                if (playerHealth <= 0) {
+                    endBoxingGame(false);
+                }
+            },
+
+            flashScreen: function () {
+                const flash = document.createElement('div');
+                flash.style.position = 'fixed';
+                flash.style.top = '0';
+                flash.style.left = '0';
+                flash.style.width = '100%';
+                flash.style.height = '100%';
+                flash.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+                flash.style.pointerEvents = 'none';
+                flash.style.zIndex = '9999';
+                document.body.appendChild(flash);
+
+                setTimeout(() => {
+                    flash.remove();
+                }, 150);
+            }
+        };
+
+        // Initialize AI on page load
+        aiController.init();
+
+        window.loadGLTFFromBase64 = function (base64Data) {
+            if (!window.isReady) {
+                console.log("3D Viewer not ready, buffering model data...");
+                window._pendingModelData = base64Data;
+                return;
+            }
+
+            // Existing logic will be attached to this later or we can just define it here
+            // But for now, we'll keep the specialized definition inside init() but 
+            // allow this top-level one to catch the early call.
+            if (window._actualLoadGLTFFromBase64) {
+                window._actualLoadGLTFFromBase64(base64Data);
+            } else {
+                window._pendingModelData = base64Data;
+            }
+        };
 
         function checkDependencies() {
             const startTime = Date.now();
@@ -128,6 +488,13 @@
                     init();
                     animate();
                     window.isReady = true;
+
+                    // Execute buffered model load
+                    if (window._pendingModelData) {
+                        console.log("Loading buffered model data...");
+                        window.loadGLTFFromBase64(window._pendingModelData);
+                        window._pendingModelData = null;
+                    }
                     return;
                 }
 
@@ -142,6 +509,16 @@
             }
             check();
         }
+
+        window.setCombatMode = function (enabled) {
+            stanceController.targetPose = enabled ? 'FIGHT' : 'IDLE';
+            console.log("🥊 Combat Pose:", stanceController.targetPose);
+        };
+
+        window.setGuarding = function (isGuarding) {
+            if (stanceController.targetPose === 'IDLE') return; // Only guard in combat mode
+            stanceController.targetPose = isGuarding ? 'GUARD' : 'FIGHT';
+        };
 
         checkDependencies();
 
@@ -201,7 +578,10 @@
 
                 scene.add(model);
 
-                // Animations
+                // Animations (Procedural Fallback)
+                // Initialize Procedural Stance (ALWAYS)
+                stanceController.init();
+
                 if (gltf.animations && gltf.animations.length) {
                     window.mixer = new THREE.AnimationMixer(model);
                     const idle = gltf.animations.find(a => a.name.toLowerCase().includes('idle')) || gltf.animations[0];
@@ -247,7 +627,7 @@
             }
 
             // Expose Loader for Base64 (Flutter Injection)
-            window.loadGLTFFromBase64 = function (base64Data) {
+            window._actualLoadGLTFFromBase64 = function (base64Data) {
                 console.log("Received Base64 Model Data");
                 try {
                     const dataUri = 'data:model/gltf-binary;base64,' + base64Data;
@@ -259,10 +639,15 @@
                 }
             };
 
-            // Attempt default load
-            loader.load('model.glb', onModelLoaded, undefined, function (error) {
-                console.warn('Default model load failed. Waiting for Base64 injection.', error);
-            });
+            // Re-check for pending data now that we have the actual loader
+            if (window._pendingModelData) {
+                window._actualLoadGLTFFromBase64(window._pendingModelData);
+                window._pendingModelData = null;
+            }
+
+            // NO DEFAULT LOAD: 'model.glb' fails on Android WebView via file://
+            // We wait for Flutter to inject the model via window.loadGLTFFromBase64
+            console.log("3D Viewer initialized. Waiting for injection.");
 
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
@@ -280,35 +665,244 @@
         const mouse = new THREE.Vector2();
 
         function onPointerDown(event) {
-            // Prevent interaction if model isn't ready
             if (!model) return;
+
+            // Start Long-Press timer for Guarding
+            if (gameMode) {
+                if (stanceController.guardTimer) clearTimeout(stanceController.guardTimer);
+                stanceController.guardTimer = setTimeout(() => {
+                    console.log("🛡️ GUARD ACTIVATED");
+                    window.setGuarding(true);
+                }, 250); // Faster reaction: 250ms
+            }
 
             const currentTime = Date.now();
             const tapDelay = currentTime - lastTapTime;
 
-            if (tapDelay < 300 && tapDelay > 10) {
-                // Double tap detected -> Zoom Out
-                window.resetCamera();
-                lastTapTime = 0;
-                return;
-            }
             lastTapTime = currentTime;
+            const isDoubleTap = tapDelay < 300 && tapDelay > 10;
 
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObject(model, true);
+            console.log('Intersects:', intersects.length);
 
             if (intersects.length > 0) {
+                // Tapped the BODY
+                tapsOutsideCount = 0;
+
+                if (isDoubleTap) {
+                    window.resetCamera();
+                    return;
+                }
+
                 const hit = intersects[0];
                 const muscle = getMuscleAtPoint(hit.point);
-                if (muscle) {
-                    console.log("Hit muscle:", muscle);
+
+                if (gameMode) {
+                    handleGameHit(muscle, hit.point);
+                } else if (muscle) {
+                    console.log("Hit muscle:", muscle, "at", hit.point);
                     if (window.FlutterChannel) {
                         window.FlutterChannel.postMessage(JSON.stringify({ type: 'muscle_tap', name: muscle }));
                     }
                 }
+            } else {
+                // Tapped background (OUTSIDE body)
+                console.log('Tapped background. isZooming:', isZooming, 'isDoubleTap:', isDoubleTap, 'Current Taps:', tapsOutsideCount + 1);
+
+                if (isDoubleTap) {
+                    console.log('Double tap background -> Starting Game');
+                    startBoxingGame();
+                    tapsOutsideCount = 0;
+                } else {
+                    tapsOutsideCount++;
+                    if (tapsOutsideCount >= 3) {
+                        console.log('3 taps outside -> Starting Game');
+                        startBoxingGame();
+                        tapsOutsideCount = 0;
+                    }
+                }
+            }
+        }
+
+        function startBoxingGame() {
+            if (gameMode) {
+                console.log('Game already active');
+                return;
+            }
+            console.log("🥊 BOXING GAME STARTING...");
+            gameMode = true;
+            modelHealth = 100;
+            playerHealth = 100;
+            gameScore = 0;
+            comboCount = 0;
+
+            // Enable AI
+            aiController.enabled = true;
+            aiController.lastAttackTime = Date.now();
+
+            // Disable animations that might fight procedural stance
+            if (window.mixer) {
+                window.mixer.stopAllAction();
+            }
+
+            // Switch stance
+            if (window.setCombatMode) window.setCombatMode(true);
+
+            // Reset camera to center for the challenge and ZOOM OUT
+            if (window.controls && window.camera) {
+                controls.target.set(0, 1, 0);
+                camera.position.set(0, 1.2, 4.5); // Zoom out a bit (default was 3.5)
+                controls.update();
+            }
+
+            showGameUI();
+
+            if (window.FlutterChannel) {
+                window.FlutterChannel.postMessage(JSON.stringify({ type: 'game_start', mode: 'boxing' }));
+            }
+        }
+
+        function handleGameHit(muscle, point) {
+            if (!gameMode) return;
+
+            let damage = 5;
+            let isWeakPoint = false;
+            let hitText = "HIT!";
+
+            const weakPoints = ['Neck', 'Chest', 'Upper Abs', 'Lower Abs'];
+            if (muscle && weakPoints.includes(muscle)) {
+                damage = 15;
+                isWeakPoint = true;
+                hitText = "CRITICAL!";
+            } else if (!muscle) {
+                damage = 2; // Hit the generic mesh but not a specific muscle
+            }
+
+            modelHealth -= damage;
+            gameScore += damage * (comboCount + 1);
+
+            const now = Date.now();
+            if (now - gameLastHitTime < 1000) {
+                comboCount++;
+            } else {
+                comboCount = 0;
+            }
+            gameLastHitTime = now;
+
+            // Procedural Twitch/Block React
+            if (stanceController.triggerHit) stanceController.triggerHit(muscle);
+
+            // Visual feedback - flash red
+            flashModelColor(isWeakPoint ? 0xff0000 : 0xffffff);
+
+            // Floating text in 3D? Too complex for now, use UI overlay update
+            updateGameUI();
+
+            if (modelHealth <= 0) {
+                endBoxingGame(true);
+            }
+        }
+
+        function flashModelColor(color) {
+            if (!model) return;
+            model.traverse(child => {
+                if (child.isMesh && child.material) {
+                    const originalColor = child.material.color.clone();
+                    child.material.color.set(color);
+                    setTimeout(() => {
+                        if (child.material) child.material.color.copy(originalColor);
+                    }, 100);
+                }
+            });
+        }
+
+        function showGameUI() {
+            console.log('Showing Game UI...');
+            let ui = document.getElementById('game-ui');
+            if (!ui) {
+                ui = document.createElement('div');
+                ui.id = 'game-ui';
+                ui.style.position = 'absolute';
+                ui.style.top = '20px';
+                ui.style.left = '50%';
+                ui.style.transform = 'translateX(-50%)';
+                ui.style.padding = '15px 25px';
+                ui.style.background = 'rgba(0,0,0,0.7)';
+                ui.style.borderRadius = '15px';
+                ui.style.textAlign = 'center';
+                ui.style.pointerEvents = 'none';
+                ui.style.border = '2px solid #ff4444';
+                ui.style.zIndex = '1000';
+                ui.innerHTML = `
+                    <div style="font-weight: bold; color: #4CAF50; font-size: 14px; margin-bottom: 3px;">YOUR HEALTH</div>
+                    <div style="width: 200px; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+                        <div id="player-health-bar" style="width: 100%; height: 100%; background: #4CAF50; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div style="font-weight: bold; color: #ff4444; font-size: 14px; margin-bottom: 3px;">TARGET HEALTH</div>
+                    <div style="width: 200px; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 5px;">
+                        <div id="health-bar" style="width: 100%; height: 100%; background: #ff4444; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div style="font-size: 8px; color: #555;">v3.0-FIGHTER</div>
+                `;
+                document.body.appendChild(ui);
+            }
+            ui.style.display = 'block';
+        }
+
+        function updateGameUI() {
+            const healthBar = document.getElementById('health-bar');
+            const playerHealthBar = document.getElementById('player-health-bar');
+            if (healthBar) healthBar.style.width = modelHealth + '%';
+            if (playerHealthBar) playerHealthBar.style.width = playerHealth + '%';
+        }
+
+        function endBoxingGame(won) {
+            gameMode = false;
+            aiController.enabled = false;
+            aiController.isAttacking = false;
+            stanceController.targetPose = 'IDLE';
+            if (window.setCombatMode) window.setCombatMode(false);
+            const ui = document.getElementById('game-ui');
+            if (ui) {
+                ui.innerHTML = `
+                    <div style="font-weight: bold; color: #ff4444; font-size: 20px; margin-bottom: 10px;">${won ? 'KNOCKOUT!' : 'FINISHED'}</div>
+                    <div style="font-size: 14px; color: #888; margin-top: 10px;">Body reset in 3s...</div>
+                `;
+            }
+
+            // Knockdown animation if won
+            if (won && window.mixer) {
+                const fallAnim = model.animations.find(a => a.name.toLowerCase().includes('fall') || a.name.toLowerCase().includes('death') || a.name.toLowerCase().includes('hit'));
+                if (fallAnim) {
+                    const action = window.mixer.clipAction(fallAnim);
+                    action.setLoop(THREE.LoopOnce);
+                    action.clampWhenFinished = true;
+                    action.reset().fadeIn(0.2).play();
+                    model.animations.forEach(a => {
+                        if (a !== fallAnim) window.mixer.clipAction(a).fadeOut(0.2);
+                    });
+                }
+            }
+
+            setTimeout(() => {
+                const ui = document.getElementById('game-ui');
+                if (ui) ui.style.display = 'none';
+                // Return to idle stance
+                if (window.setCombatMode) window.setCombatMode(false);
+
+                // Return camera zoom to normal
+                if (window.camera && window.controls) {
+                    camera.position.set(0, 1.2, 3.5);
+                    controls.update();
+                }
+            }, 3000);
+
+            if (window.FlutterChannel) {
+                window.FlutterChannel.postMessage(JSON.stringify({ type: 'game_end', score: gameScore }));
             }
         }
 
@@ -321,7 +915,7 @@
                 let endPos = new THREE.Vector3();
 
                 if (def.bone) {
-                    const bone = findBone(def.bone);
+                    const bone = getBoneCached(def.bone);
                     if (bone) {
                         bone.getWorldPosition(startPos);
                         if (def.offset) {
@@ -333,8 +927,8 @@
                         endPos.copy(startPos).add(new THREE.Vector3(0, -0.01, 0));
                     }
                 } else if (def.start && def.end) {
-                    const sBone = findBone(def.start);
-                    const eBone = findBone(def.end);
+                    const sBone = getBoneCached(def.start);
+                    const eBone = getBoneCached(def.end);
                     if (sBone && eBone) {
                         sBone.getWorldPosition(startPos);
                         eBone.getWorldPosition(endPos);
@@ -342,9 +936,8 @@
                             const off = new THREE.Vector3(...def.offset);
                             const q = new THREE.Quaternion();
                             sBone.getWorldQuaternion(q);
-                            const offW = off.applyQuaternion(q);
-                            startPos.add(offW);
-                            endPos.add(offW);
+                            startPos.add(off.applyQuaternion(q));
+                            endPos.add(off.applyQuaternion(q));
                         }
                     }
                 }
@@ -437,8 +1030,15 @@
         }
 
         function animate() {
+            const time = Date.now();
             requestAnimationFrame(animate);
             if (window.mixer) window.mixer.update(0.016);
+
+            // Apply Manual/Procedural Stance
+            stanceController.update(time);
+
+            // AI Decision Making
+            aiController.update(time);
 
             if (isZooming) {
                 updateZoom();
@@ -452,6 +1052,14 @@
             renderer.render(scene, camera);
         }
 
+        const boneCache = {};
+        function getBoneCached(name) {
+            if (boneCache[name]) return boneCache[name];
+            const bone = findBone(name);
+            if (bone) boneCache[name] = bone;
+            return bone;
+        }
+
         function updateUniforms() {
             if (!model) return;
             let count = 0;
@@ -462,17 +1070,13 @@
 
             muscleDefs.forEach(def => {
                 const intensity = activeHeatmap[def.name] || 0;
-                // We fill the array regardless of intensity if we want it to be "targetable" 
-                // but the shader only cares about > 0. 
-                // Actually, for targeting, we need the positions to be correct.
-                // For the shader, we only pass active zones to save uniforms.
                 if (intensity > 0) {
                     if (count >= MAX_ZONES) return;
                     let startPos = new THREE.Vector3();
                     let endPos = new THREE.Vector3();
 
                     if (def.bone) {
-                        const bone = findBone(def.bone);
+                        const bone = getBoneCached(def.bone);
                         if (bone) {
                             bone.getWorldPosition(startPos);
                             if (def.offset) {
@@ -484,8 +1088,8 @@
                             endPos.copy(startPos).add(new THREE.Vector3(0, -0.01, 0));
                         }
                     } else if (def.start && def.end) {
-                        const sBone = findBone(def.start);
-                        const eBone = findBone(def.end);
+                        const sBone = getBoneCached(def.start);
+                        const eBone = getBoneCached(def.end);
                         if (sBone && eBone) {
                             sBone.getWorldPosition(startPos);
                             eBone.getWorldPosition(endPos);
@@ -493,9 +1097,8 @@
                                 const off = new THREE.Vector3(...def.offset);
                                 const q = new THREE.Quaternion();
                                 sBone.getWorldQuaternion(q);
-                                const offW = off.applyQuaternion(q);
-                                startPos.add(offW);
-                                endPos.add(offW);
+                                startPos.add(off.applyQuaternion(q));
+                                endPos.add(off.applyQuaternion(q));
                             }
                         }
                     }
@@ -515,19 +1118,49 @@
         }
 
         function findBone(name) {
-            let res = null;
             if (!model) return null;
+            let firstMatch = null;
+            let exactMatch = null;
+
             model.traverse(child => {
-                if (child.isBone && child.name.includes(name)) res = child;
+                // Check basically everything in the hierarchy that has a name
+                const cName = child.name;
+                if (!cName) return;
+
+                const isPotentialBone = child.isBone || child.type === 'Bone' || cName.toLowerCase().includes('bone') || cName.toLowerCase().includes('joint');
+
+                // Check for exact match or standardized patterns
+                if (cName === name || cName === 'Mixamo_' + name || cName.split(':').pop() === name) {
+                    exactMatch = child;
+                }
+
+                // Fallback to fuzzy includes
+                if (!firstMatch && cName.toLowerCase().includes(name.toLowerCase())) {
+                    firstMatch = child;
+                }
             });
-            return res;
+
+            const result = exactMatch || firstMatch;
+            return result;
         }
+
+        window.addEventListener('pointerup', () => {
+            if (stanceController.guardTimer) {
+                clearTimeout(stanceController.guardTimer);
+                stanceController.guardTimer = null;
+            }
+            window.setGuarding(false);
+        });
 
         // --- PUBLIC API ---
 
         window.zoomToMuscle = function (muscleName) {
+            console.log('Zooming to muscle:', muscleName);
             const def = muscleDefs.find(m => m.name === muscleName);
-            if (!def) return;
+            if (!def) {
+                console.warn('Muscle definition not found for:', muscleName);
+                return;
+            }
 
             // Calculate target position (center of muscle)
             let center = new THREE.Vector3();
@@ -535,6 +1168,7 @@
                 const bone = findBone(def.bone);
                 if (bone) {
                     bone.getWorldPosition(center);
+                    console.log(`Def ${def.name}: Bone ${bone.name} at`, center);
                     if (def.offset) {
                         const off = new THREE.Vector3(...def.offset);
                         const q = new THREE.Quaternion();
@@ -550,10 +1184,10 @@
                     const ePos = new THREE.Vector3();
                     sBone.getWorldPosition(sPos);
                     eBone.getWorldPosition(ePos);
+                    console.log(`Def ${def.name}: StartBone ${sBone.name} at ${sPos}, EndBone ${eBone.name} at ${ePos}`);
                     center.addVectors(sPos, ePos).multiplyScalar(0.5);
 
                     if (def.offset) {
-                        // Apply offset relative to start bone rotation for stability
                         const off = new THREE.Vector3(...def.offset);
                         const q = new THREE.Quaternion();
                         sBone.getWorldQuaternion(q);
@@ -561,6 +1195,8 @@
                     }
                 }
             }
+
+            console.log('Final Calculated Center:', center);
 
             // Set controls target to muscle center
             targetControlsTarget.copy(center);
@@ -625,6 +1261,9 @@
                 const intensity = heatmap[key];
                 if (intensity <= 0) continue;
 
+                // Ignore non-muscle keys to prevent log pollution
+                if (key === 'Cardio' || key === 'Full Body') continue;
+
                 let targets = [key];
 
                 // Add aliases
@@ -639,11 +1278,12 @@
                 }
 
                 targets.forEach(t => {
-                    if (activeHeatmap.hasOwnProperty(t)) {
-                        activeHeatmap[t] = Math.max(activeHeatmap[t], intensity);
-                    } else if (muscleDefs.some(d => d.name === t)) {
-                        activeHeatmap[t] = intensity;
-                    }
+                    const variants = [t, t + ' (Left)'];
+                    variants.forEach(v => {
+                        if (muscleDefs.some(d => d.name === v)) {
+                            activeHeatmap[v] = Math.max(activeHeatmap[v] || 0, intensity);
+                        }
+                    });
                 });
             }
 

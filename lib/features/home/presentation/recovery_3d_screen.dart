@@ -19,6 +19,8 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
   bool _isLoadingStats = false;
 
   void _handleMuscleTap(String muscle) {
+    if (!mounted) return;
+    
     if (_selectedMuscle == muscle) {
       // Toggle off (Zoom out)
       setState(() {
@@ -39,8 +41,9 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
 
   Future<void> _fetchStats(String muscle) async {
     final db = ref.read(appDatabaseProvider);
-    // Simulate slight delay for smooth animation if query is too fast? No, instant is better.
-    final aliases = MuscleData.getAliases(muscle);
+    // Sanitize for DB (strip ' (Left)') but keep UI specific
+    final dbName = MuscleData.normalize(muscle);
+    final aliases = MuscleData.getAliases(dbName);
     final stats = await db.getLastSessionForMuscle(aliases);
     
     // Only update if selection hasn't changed during fetch

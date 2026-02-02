@@ -10,6 +10,7 @@ import '../../../core/providers/workout_providers.dart';
 import '../../../core/services/thumbnail_service.dart';
 import '../../../core/services/image_storage_service.dart';
 import '../../../core/constants/muscle_data.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 /// Screen to create a workout as part of a split
 /// Flow: Name -> Thumbnail -> Exercises -> Clock
@@ -594,6 +595,19 @@ Row(
 
                 
                 final images = snapshot.data!;
+                if (images.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.image_search, size: 48, color: colorScheme.outline),
+                        const SizedBox(height: 16),
+                        Text('No images found', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                        TextButton(onPressed: () => setState(() {}), child: const Text('Retry')),
+                      ],
+                    ),
+                  );
+                }
                 return GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -611,42 +625,28 @@ Row(
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          border: isSelected ? Border.all(color: colorScheme.primary, width: 3) : null,
-                          color: colorScheme.surfaceContainerHighest,
+                          border: Border.all(
+                            color: isSelected 
+                                ? colorScheme.primary 
+                                : colorScheme.outline.withValues(alpha: 0.1),
+                            width: isSelected ? 3 : 1,
+                          ),
+                          color: colorScheme.surfaceContainerHigh,
                         ),
-
                         clipBehavior: Clip.antiAlias,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.network(
-                              url,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Center(
-                                  child: Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                                );
-
-                              },
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary));
-
-                              },
+                        child: CachedNetworkImage(
+                          imageUrl: url,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary.withValues(alpha: 0.3)),
                             ),
-                            if (isSelected)
-                              Center(
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(Icons.check, color: colorScheme.onPrimary, size: 20),
-                                ),
-
-                              ),
-                          ],
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                          ),
                         ),
                       ),
                     );

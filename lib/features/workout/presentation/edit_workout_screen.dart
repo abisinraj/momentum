@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_providers.dart';
+import '../../../core/services/thumbnail_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class EditWorkoutScreen extends ConsumerStatefulWidget {
   final int? splitIndex; // For adding new: which day index?
@@ -28,6 +30,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
   int _selectedDayIndex = 0;
   bool _isLoading = false;
   bool _isSaving = false;
+  String? _thumbnailUrl;
   
   final List<({int? id, String name, int sets, int reps})> _exercises = [];
   
@@ -62,6 +65,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
       _nameController.text = w.name;
       _selectedClock = w.clockType;
       _selectedDayIndex = w.orderIndex;
+      _thumbnailUrl = w.thumbnailUrl;
       
       final db = ref.read(appDatabaseProvider);
       final exercises = await db.getExercisesForWorkout(w.id);
@@ -107,6 +111,10 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Section 0: Thumbnail Picker
+                    _buildThumbnailPicker(context),
+                    const SizedBox(height: 24),
+
                     // Section 1: Details
                     _buildSectionTitle(context, 'Details'),
                     const SizedBox(height: 16),
@@ -344,6 +352,76 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
     });
   }
 
+  Widget _buildThumbnailPicker(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildSectionTitle(context, 'Thumbnail'),
+            TextButton.icon(
+              onPressed: _showThumbnailSelection,
+              icon: const Icon(Icons.photo_library_outlined, size: 18),
+              label: const Text('Change'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        GestureDetector(
+          onTap: _showThumbnailSelection,
+          child: Container(
+            height: 160,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+              image: _thumbnailUrl != null
+                  ? DecorationImage(
+                      image: CachedNetworkImageProvider(_thumbnailUrl!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: _thumbnailUrl == null
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_photo_alternate_outlined, size: 40, color: colorScheme.primary.withValues(alpha: 0.3)),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Select Workout Cover',
+                        style: TextStyle(color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                      ),
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showThumbnailSelection() {
+    debugPrint('Opening Thumbnail Selection Sheet...');
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _ThumbnailSelector(
+        onSelected: (url) {
+          debugPrint('Selected Thumbnail URL: $url');
+          setState(() {
+            _thumbnailUrl = url;
+          });
+          Navigator.pop(context);
+        },
+      ),
+    ).then((_) => debugPrint('Thumbnail selection sheet closed. Current selection: $_thumbnailUrl'));
+  }
+
   Widget _buildClockSelector() {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
@@ -410,6 +488,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
           shortCode: drift.Value(shortCode),
           orderIndex: drift.Value(_selectedDayIndex),
           clockType: drift.Value(_selectedClock),
+          thumbnailUrl: drift.Value(_thumbnailUrl),
         ));
         
         // 2. Identify Changes
@@ -455,7 +534,7 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
             shortCode: drift.Value(shortCode),
             orderIndex: drift.Value(_selectedDayIndex),
             clockType: drift.Value(_selectedClock),
-            thumbnailUrl: const drift.Value(null),
+            thumbnailUrl: drift.Value(_thumbnailUrl),
           ),
         );
         
@@ -484,5 +563,160 @@ class _EditWorkoutScreenState extends ConsumerState<EditWorkoutScreen> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+}
+
+class _ThumbnailSelector extends ConsumerStatefulWidget {
+  final ValueChanged<String> onSelected;
+
+  const _ThumbnailSelector({required this.onSelected});
+
+  @override
+  ConsumerState<_ThumbnailSelector> createState() => _ThumbnailSelectorState();
+}
+
+class _ThumbnailSelectorState extends ConsumerState<_ThumbnailSelector> {
+  final _searchController = TextEditingController();
+  List<String> _images = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImages();
+  }
+
+  Future<void> _loadImages() async {
+    try {
+      final service = ref.read(thumbnailServiceProvider);
+      final featured = service.getFeaturedImages();
+      setState(() {
+        _images = featured;
+        _isLoading = false;
+      });
+      debugPrint('Loaded ${featured.length} featured images.');
+    } catch (e) {
+      debugPrint('Error loading featured images: $e');
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _search(String query) async {
+    if (query.trim().isEmpty) {
+      _loadImages();
+      return;
+    }
+    
+    setState(() => _isLoading = true);
+    try {
+      final service = ref.read(thumbnailServiceProvider);
+      final results = await service.searchImages(query);
+      setState(() {
+        _images = results;
+        _isLoading = false;
+      });
+      debugPrint('Search for "$query" returned ${results.length} images.');
+    } catch (e) {
+      debugPrint('Search error: $e');
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Search failed: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final padding = MediaQuery.of(context).viewInsets.bottom;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75 + padding,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + padding),
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colorScheme.outlineVariant,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Text(
+                'Select Thumbnail',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const Spacer(),
+              IconButton(onPressed: _loadImages, icon: const Icon(Icons.refresh, size: 20)),
+              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search (e.g. Chest, Yoga, Run)...',
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: colorScheme.surfaceContainer,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            ),
+            onSubmitted: _search,
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.5,
+                    ),
+                    itemCount: _images.length,
+                    itemBuilder: (context, index) {
+                      final url = _images[index];
+                      return GestureDetector(
+                        onTap: () => widget.onSelected(url),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+                            color: colorScheme.surfaceContainerHigh,
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: CachedNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary.withValues(alpha: 0.3)),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Center(
+                               child: Icon(Icons.broken_image, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
   }
 }

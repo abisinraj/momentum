@@ -16,6 +16,7 @@ class SettingsService {
   static const String _keyAppTheme = 'app_theme'; // 'black', 'heavenly'
   static const String _keyTimeFormat = 'time_format'; // '12h', '24h'
   static const String _keyModelRotationMode = 'model_rotation_mode'; // 'horizontal', 'full'
+  static const String _keyGeminiModel = 'gemini_model';
   static const String _keyPermissionsHandled = 'permissions_handled';
 
   final _storage = const FlutterSecureStorage();
@@ -119,6 +120,16 @@ class SettingsService {
     return value;
   }
 
+  Future<void> setGeminiModel(String model) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyGeminiModel, model);
+  }
+
+  Future<String> getGeminiModel() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyGeminiModel) ?? 'gemini-1.5-flash'; // Default model
+  }
+
   Future<void> setWeightUnit(String unit) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyWeightUnit, unit);
@@ -168,6 +179,22 @@ Future<String?> unsplashApiKey(Ref ref) async {
 @riverpod
 Future<String?> geminiApiKey(Ref ref) async {
   return ref.watch(settingsServiceProvider).getGeminiKey();
+}
+
+@riverpod
+class GeminiModel extends _$GeminiModel {
+  @override
+  Future<String> build() async {
+    return ref.read(settingsServiceProvider).getGeminiModel();
+  }
+
+  Future<void> setModel(String model) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(settingsServiceProvider).setGeminiModel(model);
+      return model;
+    });
+  }
 }
 
 

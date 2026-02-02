@@ -64,6 +64,22 @@ class ThumbnailService {
     'core': [
       'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?auto=format&fit=crop&w=1000&q=80', // Home core
     ],
+    'triceps': [
+      'https://images.unsplash.com/photo-1532384748853-8f54a8f476e2?auto=format&fit=crop&w=1000&q=80', // Tricep extension
+      'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=1000&q=80', // Athlete
+    ],
+    'biceps': [
+      'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1000&q=80', // Curls
+      'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?auto=format&fit=crop&w=1000&q=80', // Gym
+    ],
+    'shoulders': [
+      'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?auto=format&fit=crop&w=1000&q=80', // Overhead press
+      'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=1000&q=80',
+    ],
+    'weights': [
+      'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1000&q=80',
+    ],
   };
   
   // Flattened list of all available images for general display
@@ -112,8 +128,13 @@ class ThumbnailService {
       return [...results, ...variety.take(4)];
     }
     
-    // If no specific match, return shuffled general list
-    return [..._thumbnails]..shuffle();
+    // If no specific match, return popular images
+    final popular = getFeaturedImages();
+    if (popular.isNotEmpty) return popular;
+    
+    // Last resort: return shuffled general list (but at least something)
+    final all = [..._thumbnails]..shuffle();
+    return all.take(12).toList();
   }
   
   Future<List<String>> _searchPexels(String query, String apiKey) async {

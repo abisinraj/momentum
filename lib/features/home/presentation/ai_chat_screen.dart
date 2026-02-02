@@ -124,11 +124,14 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       final workoutContext = await _getWorkoutContext();
       final combinedContext = "$dietContext\n\n$workoutContext";
       
+      final preferredModel = ref.read(geminiModelProvider).valueOrNull;
+      
       final responseFragment = await ref.read(aiInsightsServiceProvider).analyzeMessage(
         text: text.isEmpty && image != null ? "Analyze this image" : text,
         imageBytes: image != null ? List<int>.from(image) : null,
         apiKey: apiKey,
         extraContext: combinedContext,
+        preferredModel: preferredModel,
       );
 
       if (mounted) {
@@ -166,23 +169,27 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       content: drift.Value(text),
     ));
 
+    final oldId = _editingMessageId;
+
     setState(() {
       _editingMessageId = null;
       _textController.clear();
       _isLoading = true;
     });
     
-    // Re-analyze logic? For now just save.
-    // Ideally we should re-trigger analysis.
-    // Let's re-trigger analysis for the edited message.
     try {
        final apiKey = ref.read(geminiApiKeyProvider).valueOrNull;
        final dietContext = await _getDietContext();
-        final response = await ref.read(aiInsightsServiceProvider).analyzeMessage(
-           text: text,
-           apiKey: apiKey,
-           extraContext: dietContext,
-        );
+       final workoutContext = await _getWorkoutContext();
+       final combinedContext = "$dietContext\n\n$workoutContext";
+       
+       final preferredModel = ref.read(geminiModelProvider).valueOrNull;
+       final response = await ref.read(aiInsightsServiceProvider).analyzeMessage(
+          text: text,
+          apiKey: apiKey,
+          extraContext: combinedContext,
+          preferredModel: preferredModel,
+       );
        
        if (mounted) {
           await db.addHomeChatMessage(HomeChatMessagesCompanion.insert(
@@ -191,11 +198,13 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
           ));
        }
     } catch (e) {
-       // ...
+       if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error re-analyzing message: $e')));
+       }
+    } finally {
+       if (mounted) setState(() => _isLoading = false);
+       _scrollToBottom();
     }
-    
-    setState(() => _isLoading = false);
-    _scrollToBottom();
   }
 
   void _scrollToBottom() {
@@ -332,31 +341,44 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                 ? Border.all(color: colorScheme.primary, width: 2)
                 : null,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-               Text(
-                 msg.content, 
-                 style: TextStyle(
-                   color: isUser ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
-                 )
-               ),
-               const SizedBox(height: 4),
-               Row(
-                 mainAxisSize: MainAxisSize.min,
-                 mainAxisAlignment: MainAxisAlignment.end,
-                 children: [
-                    Text(
-                      DateFormat(is24h ? 'HH:mm' : 'h:mm a').format(msg.createdAt),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isUser 
-                             ? colorScheme.onPrimaryContainer.withValues(alpha: 0.6)
-                             : colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                      ),
-                    ),
-                 ],
-               ),
+               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   Text(
+                     msg.content, 
+                     style: TextStyle(
+                       color: isUser ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+                     )
+                   ),
+                   const SizedBox(height: 4),
+                   Row(
+                     mainAxisSize: MainAxisSize.min,
+                     mainAxisAlignment: MainAxisAlignment.end,
+                     children: [
+                        Text(
+                          DateFormat(is24h ? 'HH:mm' : 'h:mm a').format(msg.createdAt),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: isUser 
+                                 ? colorScheme.onPrimaryContainer.withValues(alpha: 0.6)
+                                 : colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          ),
+                        ),
+                     ],
+                   ),
+                ],
+              ),
+              if (isUser)
+                Positioned(
+                  right: -8,
+                  top: -8,
+                  child: IconButton(
+                    icon: Icon(Icons.edit, size: 14, color: colorScheme.onPrimaryContainer.withValues(alpha: 0.5)),
+                    onPressed: () => _editMessage(msg),
+                  ),
+                ),
             ],
           ),
         ),

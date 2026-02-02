@@ -10,6 +10,8 @@ import '../../../core/providers/workout_providers.dart';
 import '../../../core/database/app_database.dart';
 import 'active_workout_screen.dart';
 import 'edit_workout_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
 
 /// Workout screen - shows list of workouts with completion states
 /// Design: Date header, focus subtitle, workout cards with status badges
@@ -535,19 +537,24 @@ class _WorkoutCard extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: workout.thumbnailUrl == null ? LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: _getGradientColors(index),
-                ),
+                ) : null,
                 borderRadius: BorderRadius.circular(12),
+                image: workout.thumbnailUrl != null ? DecorationImage(
+                  image: workout.thumbnailUrl!.startsWith('http') 
+                    ? CachedNetworkImageProvider(workout.thumbnailUrl!)
+                    : FileImage(File(workout.thumbnailUrl!)) as ImageProvider,
+                  fit: BoxFit.cover,
+                ) : null,
               ),
-              child: Icon(
-
+              child: workout.thumbnailUrl == null ? Icon(
                 workout.isRestDay ? Icons.spa : _getWorkoutIcon(workout.clockType),
                 color: Colors.white,
                 size: 24,
-              ),
+              ) : null,
             ),
 
             const SizedBox(width: 16),

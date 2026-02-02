@@ -70,15 +70,20 @@ class DietService {
     String apiKey, {
     bool useJson = false,
   }) async {
+    final preferredModel = await ref.read(settingsServiceProvider).getGeminiModel();
     // Updated 2026 Model Priority List
-    const modelsToTry = [
+    final modelsToTry = [
+      preferredModel,
       'gemini-2.0-flash',
       'gemini-1.5-flash',
       'gemini-1.5-pro',
     ];
 
+    // Remove duplicates while preserving order
+    final uniqueModels = modelsToTry.toSet().toList();
+
     Object? lastError;
-    for (final modelName in modelsToTry) {
+    for (final modelName in uniqueModels) {
       try {
         // debugPrint('DietAI: Trying $modelName...');
         final model = GenerativeModel(

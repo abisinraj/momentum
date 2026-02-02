@@ -60,9 +60,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final suggestionsAsync = ref.watch(smartSuggestionsProvider);
     // Keep widget sync alive and reactive
     final _ = ref.watch(widgetSyncProvider);
-    final theme = Theme.of(context);
-
-    final colorScheme = theme.colorScheme;
     
     final userName = switch (userAsync) {
       AsyncData(:final value) => value?.name ?? 'Athlete',
@@ -70,7 +67,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     };
     
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // Extra bottom padding for BottomBar

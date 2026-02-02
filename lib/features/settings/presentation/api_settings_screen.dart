@@ -19,6 +19,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isFetchingModels = false;
+  String _selectedGeminiModel = 'gemini-1.5-flash';
 
   @override
   void initState() {
@@ -31,12 +32,14 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     final pexels = await service.getPexelsKey();
     final unsplash = await service.getUnsplashKey();
     final gemini = await service.getGeminiKey();
+    final model = await service.getGeminiModel();
 
     if (mounted) {
       setState(() {
         _pexelsController.text = pexels ?? '';
         _unsplashController.text = unsplash ?? '';
         _geminiController.text = gemini ?? '';
+        _selectedGeminiModel = model;
         _isLoading = false;
       });
     }
@@ -110,11 +113,40 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
            child: ListView.builder(
              shrinkWrap: true,
              itemCount: models.length,
-             itemBuilder: (context, index) => ListTile(
-               leading: const Icon(Icons.model_training, size: 20),
-               title: Text(models[index], style: const TextStyle(fontSize: 14)),
-               dense: true,
-             ),
+             itemBuilder: (context, index) {
+               final model = models[index];
+               final isSelected = model == _selectedGeminiModel;
+               return ListTile(
+                 leading: Icon(
+                   Icons.model_training, 
+                   size: 20, 
+                   color: isSelected ? Theme.of(context).colorScheme.primary : null
+                 ),
+                 title: Text(
+                   model, 
+                   style: TextStyle(
+                     fontSize: 14,
+                     fontWeight: isSelected ? FontWeight.bold : null,
+                     color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                   )
+                 ),
+                 trailing: isSelected ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary, size: 18) : null,
+                 onTap: () async {
+                   setState(() {
+                     _selectedGeminiModel = model;
+                   });
+                   await ref.read(settingsServiceProvider).setGeminiModel(model);
+                   ref.invalidate(geminiModelProvider);
+                   if (context.mounted) {
+                     Navigator.pop(context);
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       SnackBar(content: Text('Model set to $model')),
+                     );
+                   }
+                 },
+                 dense: true,
+               );
+             },
            ),
          ),
          actions: [
@@ -165,7 +197,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                        icon: _isFetchingModels 
                           ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.list_alt, size: 18),
-                       label: const Text('Check Available Models', style: TextStyle(fontSize: 12)),
+                       label: Text('Model: $_selectedGeminiModel', style: const TextStyle(fontSize: 12)),
                      ),
                    ),
                    const SizedBox(height: 16),

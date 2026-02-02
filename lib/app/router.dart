@@ -117,8 +117,8 @@ class _NavigationShellState extends State<NavigationShell> {
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Icons.fitness_center_outlined),
-              selectedIcon: Icon(Icons.fitness_center),
+              icon: Icon(Icons.directions_run_outlined), // Runner icon
+              selectedIcon: Icon(Icons.directions_run),
               label: 'Workout',
             ),
             NavigationDestination(

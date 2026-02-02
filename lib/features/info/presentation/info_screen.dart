@@ -25,10 +25,8 @@ class _InfoScreenState extends ConsumerState<InfoScreen> {
     final userAsync = ref.watch(currentUserProvider);
     final activityAsync = ref.watch(activityGridProvider(365));
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     
     return Scaffold(
-      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),

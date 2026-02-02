@@ -17,6 +17,11 @@ class MuscleData {
 
   /// Helper to convert "Front Delts" -> "Front Shoulders" if needed for backward compatibility
   static String normalize(String input) {
+    // Strip (Left) suffix for normalization if present (from 3D model tap)
+    if (input.endsWith(' (Left)')) {
+      input = input.replaceAll(' (Left)', '');
+    }
+
     switch (input.toLowerCase()) {
       case 'front delts': return 'Front Shoulders';
       case 'side delts': return 'Side Shoulders';

@@ -48,8 +48,9 @@ final dailyInsightProvider = FutureProvider.autoDispose<AIInsightResponse>((ref)
   // 4. Diet Gap (Hours since last meal)
   final dietGap = await db.getHoursSinceLastFoodLog();
 
-  // Get API Key
+  // Get API Key and Model
   final apiKey = ref.watch(geminiApiKeyProvider).valueOrNull;
+  final preferredModel = ref.watch(geminiModelProvider).valueOrNull;
 
   // Generate insight
   return ref.watch(aiInsightsServiceProvider).getDailyInsight(
@@ -59,5 +60,6 @@ final dailyInsightProvider = FutureProvider.autoDispose<AIInsightResponse>((ref)
     volumeTrend: trend,
     hoursSinceLastMeal: dietGap,
     apiKey: apiKey,
+    preferredModel: preferredModel,
   );
 });
