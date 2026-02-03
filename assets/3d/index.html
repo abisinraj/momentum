@@ -1534,49 +1534,24 @@
             aiController.isGuarding = false;
             aiController.lungeState = null;
             aiController.comboQueue = [];
-            stanceController.targetPose = 'IDLE';
-            if (window.setCombatMode) window.setCombatMode(false);
 
-            // Exit Fullscreen
-            if (document.exitFullscreen) {
-                document.exitFullscreen().catch(e => console.log("Exit fullscreen failed", e));
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            }
+            // Disable procedural stance temporarily so animation can play
+            stanceController.targetPose = null;
 
-            // FORCE RESTORE MODEL
-            if (model) {
-                model.position.set(0, 0, 0);
-                model.scale.set(1, 1, 1);
-
-                model.traverse(c => {
-                    if (c.isMesh) {
-                        // SKIP HIDDEN (Respect Original Visibility)
-                        if (!c.visible) return;
-
-                        c.frustumCulled = false;
-
-                        // RESTORE SHADERS (Fix White Model)
-                        if (c.material) {
-                            c.material.opacity = 1.0;
-                            c.material.transparent = false;
-
-                            // Re-apply Heatmap Shader Logic
-                            if (window.applyHeatmapShader) applyHeatmapShader(c);
+            // Knockdown animation if won
+            if (won && window.mixer) {
+                const fallAnim = model.animations.find(a => a.name.toLowerCase().includes('fall') || a.name.toLowerCase().includes('death') || a.name.toLowerCase().includes('hit'));
+                if (fallAnim) {
+                    const action = window.mixer.clipAction(fallAnim);
+                    action.setLoop(THREE.LoopOnce);
+                    action.clampWhenFinished = true;
+                    action.reset().fadeIn(0.2).play();
+                    // Fade out others
+                    model.animations.forEach(a => {
+                        if (a !== fallAnim && window.mixer.clipAction(a).isRunning()) {
+                            window.mixer.clipAction(a).fadeOut(0.2);
                         }
-                    }
-                });
-
-                // RESTORE HEATMAP DATA
-                if (window._cachedHeatmapState) {
-                    console.log("Restoring Heatmap Data...");
-                    for (let key in window._cachedHeatmapState) {
-                        activeHeatmap[key] = window._cachedHeatmapState[key];
-                    }
-                    window._cachedHeatmapState = null;
-                    updateUniforms(); // Force update
+                    });
                 }
             }
 
@@ -1588,37 +1563,73 @@
                 `;
             }
 
-            // Knockdown animation if won
-            if (won && window.mixer) {
-                const fallAnim = model.animations.find(a => a.name.toLowerCase().includes('fall') || a.name.toLowerCase().includes('death') || a.name.toLowerCase().includes('hit'));
-                if (fallAnim) {
-                    const action = window.mixer.clipAction(fallAnim);
-                    action.setLoop(THREE.LoopOnce);
-                    action.clampWhenFinished = true;
-                    action.reset().fadeIn(0.2).play();
-                    model.animations.forEach(a => {
-                        if (a !== fallAnim) window.mixer.clipAction(a).fadeOut(0.2);
-                    });
-                }
-            }
-
+            // DELAYED RESTORATION (3 Seconds)
             setTimeout(() => {
+                // 1. Exit Fullscreen (End of Experience)
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(e => console.log("Exit fullscreen failed", e));
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+
                 const ui = document.getElementById('game-ui');
                 if (ui) ui.style.display = 'none';
-                // Return to idle stance
-                if (window.setCombatMode) window.setCombatMode(false);
 
-                // Return camera zoom to normal
+                // 2. FORCE RESTORE MODEL (Position & Shaders)
+                if (model) {
+                    // Reset Animation Mixer
+                    if (window.mixer) window.mixer.stopAllAction();
+
+                    // Reset Position
+                    model.position.set(0, 0, 0);
+                    model.scale.set(1, 1, 1);
+
+                    // Restore Shaders & Visibility
+                    model.traverse(c => {
+                        if (c.isMesh) {
+                            // SKIP HIDDEN (Respect Original Visibility)
+                            if (!c.visible) return;
+
+                            c.frustumCulled = false;
+
+                            // RESTORE SHADERS (Fix White Model)
+                            if (c.material) {
+                                c.material.opacity = 1.0;
+                                c.material.transparent = false;
+
+                                // Re-apply Heatmap Shader Logic
+                                if (window.applyHeatmapShader) applyHeatmapShader(c);
+                            }
+                        }
+                    });
+
+                    // RESTORE HEATMAP DATA
+                    if (window._cachedHeatmapState) {
+                        console.log("Restoring Heatmap Data...");
+                        for (let key in window._cachedHeatmapState) {
+                            activeHeatmap[key] = window._cachedHeatmapState[key];
+                        }
+                        window._cachedHeatmapState = null;
+                        updateUniforms(); // Force update
+                    }
+                }
+
+                // 3. Return to Idle Stance
+                if (window.setCombatMode) window.setCombatMode(false); // Sets targetPose to 'IDLE'
+
+                // 4. Return Camera
                 if (window.camera && window.controls) {
                     camera.position.set(0, 1.2, 4.0); // Full View Reset
+                    controls.target.set(0, 1.0, 0); // Reset target (was 1.35/1.45 during game)
 
                     // UNLOCK CONTROLS
-                    controls.enabled = true; // Re-enable
+                    controls.enabled = true;
                     controls.enableZoom = true;
                     controls.enablePan = true;
                     controls.enableRotate = true;
                     controls.enableDamping = true;
-
                     controls.update();
                 }
             }, 3000);
