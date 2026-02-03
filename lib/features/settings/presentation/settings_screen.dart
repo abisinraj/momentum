@@ -610,7 +610,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     try {
       final currentModelAsync = ref.read(geminiModelProvider);
-      final currentModel = currentModelAsync.valueOrNull ?? 'gemini-1.5-flash';
+      // Ensure we get the actual string value
+      final currentModel = currentModelAsync.asData?.value ?? 'gemini-1.5-flash';
       final models = await ref.read(aiInsightsServiceProvider).listAvailableModels(apiKey);
       
       if (context.mounted) {

@@ -17,6 +17,7 @@ class ThreeDManWidget extends ConsumerStatefulWidget {
   final String? focusMuscle;
   final String? heroTag;
   final bool interactive;
+  final bool enableBoxing;
 
   const ThreeDManWidget({
     super.key,
@@ -26,6 +27,7 @@ class ThreeDManWidget extends ConsumerStatefulWidget {
     this.focusMuscle,
     this.heroTag,
     this.interactive = true,
+    this.enableBoxing = true,
   });
 
   @override
@@ -216,6 +218,7 @@ class _ThreeDManWidgetState extends ConsumerState<ThreeDManWidget> {
           rotationModeAsync.whenData((mode) {
              _controller.runJavaScript("if (window.setRotationMode) window.setRotationMode('$mode');");
           });
+          _controller.runJavaScript("if (window.setBoxingEnabled) window.setBoxingEnabled(${widget.enableBoxing});");
         }
       });
     }

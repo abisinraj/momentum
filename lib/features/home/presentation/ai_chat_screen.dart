@@ -209,7 +209,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          0.0, // Scroll to bottom (start of reversed list)
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -280,7 +280,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 
-                final messages = snapshot.data ?? [];
+                final messages = (snapshot.data ?? []).reversed.toList();
                 
                 if (messages.isEmpty) {
                   return Center(
@@ -300,6 +300,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                 }
 
                 return ListView.builder(
+                  reverse: true,
                   controller: _scrollController,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   itemCount: messages.length,
@@ -368,15 +369,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                    ),
                 ],
               ),
-              if (isUser)
-                Positioned(
-                  right: -8,
-                  top: -8,
-                  child: IconButton(
-                    icon: Icon(Icons.edit, size: 14, color: colorScheme.onPrimaryContainer.withValues(alpha: 0.5)),
-                    onPressed: () => _editMessage(msg),
-                  ),
-                ),
+
             ],
           ),
         ),

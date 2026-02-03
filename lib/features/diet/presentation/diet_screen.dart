@@ -392,7 +392,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_chatScrollController.hasClients) {
         _chatScrollController.animateTo(
-          _chatScrollController.position.maxScrollExtent,
+          0.0, // Scroll to bottom (start of reversed list)
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -570,7 +570,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                   return const Center(child: CircularProgressIndicator());
                 }
                 
-                final messages = snapshot.data ?? [];
+                final messages = (snapshot.data ?? []).reversed.toList();
                 
                 if (messages.isEmpty) {
                   return Center(
@@ -590,6 +590,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                 }
 
                 return ListView.builder(
+                  reverse: true,
                   controller: _chatScrollController,
                   padding: const EdgeInsets.all(16),
                   itemCount: messages.length,

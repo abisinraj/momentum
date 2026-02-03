@@ -363,16 +363,27 @@ Instructions:
         final data = json.decode(response.body);
         final List models = data['models'] ?? [];
         
-        // Filter models that support generateContent and are clean
-        return models
+        final fetched = models
             .where((m) => (m['supportedGenerationMethods'] as List).contains('generateContent'))
             .map((m) => (m['name'] as String).replaceFirst('models/', ''))
             .toList();
+            
+        if (fetched.isEmpty) throw Exception('No models found');
+        return fetched;
       } else {
         throw Exception('Failed to fetch models: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Error listing models: $e');
+      debugPrint('Error listing models: $e. Using fallback list.');
+      // Fallback list of known working models
+      return [
+        'gemini-1.5-flash',
+        'gemini-1.5-pro',
+        'gemini-2.0-flash-exp', // Experimental
+        'gemini-pro',
+        'gemini-1.5-flash-8b',
+        'gemini-1.0-pro'
+      ];
     }
   }
 }

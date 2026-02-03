@@ -178,6 +178,7 @@ class _InfoScreenState extends ConsumerState<InfoScreen> {
               return workloadAsync.when(
                 data: (_) => ThreeDManWidget(
                   heroTag: 'profile-model',
+                  enableBoxing: false, // Disable boxing in profile
                   focusMuscle: _focusedMuscle,
                   onMuscleTap: (muscle) {
                     setState(() {
