@@ -230,12 +230,66 @@ window.stanceController = {
         const breathing = Math.sin(time * 0.002) * (this.targetPose === 'IDLE' ? 0.012 : 0.005);
         const fatigue = (typeof modelHealth !== 'undefined') ? Math.max(0, (100 - modelHealth) / 100) : 0;
 
-        // Fatigue Effects (Chin Lift)
+        // === DAMAGE STATES: Visual Degradation ===
+        // State thresholds: 75%, 50%, 25%
+        let damageState = 'healthy';
+        if (fatigue > 0.25) damageState = 'hurt'; // < 75% HP
+        if (fatigue > 0.5) damageState = 'wounded'; // < 50% HP  
+        if (fatigue > 0.75) damageState = 'critical'; // < 25% HP
+
+        // Fatigue Effects (Enhanced based on state)
         if (this.bones['Head']) {
-            this.bones['Head'].ref.rotation.x -= (fatigue * 0.45);
+            let chinLift = fatigue * 0.45;
+            // Critical: Add wobble
+            if (damageState === 'critical') {
+                chinLift += Math.sin(time * 0.004) * 0.15;
+            }
+            this.bones['Head'].ref.rotation.x -= chinLift;
         }
         if (this.bones['Spine']) {
-            this.bones['Spine'].ref.rotation.x += (fatigue * 0.2);
+            let slump = fatigue * 0.2;
+            // Wounded+: Add sway
+            if (damageState === 'wounded' || damageState === 'critical') {
+                slump += Math.sin(time * 0.003) * 0.08;
+            }
+            this.bones['Spine'].ref.rotation.x += slump;
+            // Critical: Side lean
+            if (damageState === 'critical') {
+                this.bones['Spine'].ref.rotation.z += Math.sin(time * 0.002) * 0.1;
+            }
+        }
+
+        // Visual: Red overlay based on damage (apply to model material)
+        if (model && fatigue > 0.5 && typeof gameMode !== 'undefined' && gameMode) {
+            // Simple body tint via CSS for now (non-invasive)
+            const canvas = document.querySelector('canvas');
+            if (canvas) {
+                const tintIntensity = Math.min(0.3, (fatigue - 0.5) * 0.6);
+                canvas.style.filter = `saturate(${1 - tintIntensity}) sepia(${tintIntensity * 0.5})`;
+            }
+        } else {
+            const canvas = document.querySelector('canvas');
+            if (canvas) canvas.style.filter = '';
+        }
+
+        // === AI HEAD MOVEMENT (Bob & Weave) ===
+        // Only apply during FIGHT stance when not actively attacking
+        if (this.targetPose === 'FIGHT' && typeof gameMode !== 'undefined' && gameMode) {
+            const t = time * 0.001; // Slow time scale
+
+            // Head bob (side-to-side weave)
+            if (this.bones['Head']) {
+                const headWeave = Math.sin(t * 1.5) * 0.08; // Slow weave
+                const headBob = Math.sin(t * 2.2) * 0.04; // Subtle vertical
+                this.bones['Head'].ref.rotation.y += headWeave;
+                this.bones['Head'].ref.rotation.x += headBob;
+            }
+
+            // Slight spine rotation for "peek-a-boo" style
+            if (this.bones['Spine']) {
+                const spineWeave = Math.sin(t * 1.2) * 0.05;
+                this.bones['Spine'].ref.rotation.y += spineWeave;
+            }
         }
 
         // PHYSICS TUNING: "Heavy Bag" Feel

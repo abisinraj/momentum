@@ -15,9 +15,9 @@ window.aiController = {
     lungeState: null, // New object for smooth animation { startTime, duration, startZ, depth, damage }
 
     patterns: {
-        easy: { cooldown: 4000, damage: 5, comboChance: 0.1, moveSpeed: 0.02 },
-        medium: { cooldown: 2500, damage: 8, comboChance: 0.6, moveSpeed: 0.04 },
-        hard: { cooldown: 1500, damage: 12, comboChance: 1.0, moveSpeed: 0.06 }
+        easy: { cooldown: 4000, damage: 3, comboChance: 0.1, moveSpeed: 0.02 },
+        medium: { cooldown: 2500, damage: 5, comboChance: 0.6, moveSpeed: 0.04 },
+        hard: { cooldown: 1500, damage: 8, comboChance: 1.0, moveSpeed: 0.06 }
     },
 
     init: function () {
@@ -30,6 +30,7 @@ window.aiController = {
         this.isStunned = false;
         this.stunEndTime = 0;
         this.comboQueue = []; // Init Queue
+        this.playerHitLog = []; // Anti-Spam Log
         if (typeof model !== 'undefined' && model) {
             model.position.x = 0;
             model.position.z = 0;
@@ -39,6 +40,12 @@ window.aiController = {
 
     update: function (time) {
         if (!this.enabled || (typeof gameMode !== 'undefined' && !gameMode) || (typeof model === 'undefined' || !model)) return;
+
+        // Prune Hit Log
+        const now = Date.now();
+        if (this.playerHitLog && this.playerHitLog.length > 0) {
+            this.playerHitLog = this.playerHitLog.filter(t => now - t < 2000);
+        }
 
         // SAFETY: Prevent Vanishing & Drift
         if (isNaN(model.position.x) || isNaN(model.position.z)) {
@@ -54,7 +61,25 @@ window.aiController = {
             }
         }
 
-        const pattern = this.patterns[this.difficulty];
+        // === DYNAMIC DIFFICULTY ===
+        // Adjust based on health differential
+        const playerHP = (typeof playerHealth !== 'undefined') ? playerHealth : 100;
+        const aiHP = (typeof modelHealth !== 'undefined') ? modelHealth : 100;
+        const healthDiff = aiHP - playerHP; // Positive = AI winning, Negative = Player winning
+
+        // Base pattern
+        let pattern = { ...this.patterns[this.difficulty] };
+
+        if (healthDiff < -20) {
+            // Player dominating - AI gets faster and more aggressive
+            pattern.cooldown = Math.max(800, pattern.cooldown * 0.7);
+            pattern.comboChance = Math.min(1.0, pattern.comboChance + 0.2);
+            console.log("🔥 AI ADAPTING: Getting aggressive!");
+        } else if (healthDiff > 20) {
+            // AI dominating - relax slightly
+            pattern.cooldown = pattern.cooldown * 1.2;
+            pattern.comboChance = Math.max(0.3, pattern.comboChance - 0.1);
+        }
 
         // 1. Organic Movement (Layered Sine Waves for "Life" - Increased for Footwork)
         if (!this.isAttacking) {
@@ -84,21 +109,24 @@ window.aiController = {
             const offset = Math.sin(progress * Math.PI) * state.depth;
             model.position.z = (state.startZ || 0) + offset;
 
-            // KINETIC CHAIN LOGIC (For JAB - Type 1)
-            if (state.type === 1) {
-                // Phase 1: Windup/Hip Drive (0-20%)
-                if (progress < 0.25) {
-                    if (window.stanceController) window.stanceController.targetPose = 'ATTACK_1_START';
-                }
-                // Phase 2: Snap/Impact (25-100%)
-                else {
-                    // Dynamic Aim based on zone
-                    if (window.stanceController) {
-                        if (state.dynamicPose) {
-                            window.stanceController.targetPose = state.dynamicPose;
-                        } else {
-                            window.stanceController.targetPose = 'ATTACK_1';
-                        }
+            // KINETIC CHAIN LOGIC
+            // Note: Pose updates for Type 1-6 are handled entirely by setTimeout in executeSingleStrike
+            if (state.type >= 1 && state.type <= 6) {
+                // Do nothing here for pose. Let Timeouts drive it.
+                // Apply Vertical physics for uppercuts if needed
+                if (state.verticalDrive) {
+                    // Sync with Impact Time (approx 150ms)
+                    const riseTime = 150;
+                    if (elapsed < riseTime) {
+                        // RISING (0 -> 150ms)
+                        const riseProgress = elapsed / riseTime;
+                        model.position.y = (state.startY || 0) + (riseProgress * 0.2);
+                    } else if (elapsed < riseTime * 2) {
+                        // SETTLING (150ms -> 300ms)
+                        const settleProgress = (elapsed - riseTime) / riseTime;
+                        model.position.y = (state.startY || 0) + (0.2 - (settleProgress * 0.2));
+                    } else {
+                        model.position.y = 0;
                     }
                 }
             }
@@ -154,13 +182,34 @@ window.aiController = {
         const isCombo = Math.random() < pattern.comboChance;
 
         if (isCombo) {
+            // ADVANCED COMBO DEFINITIONS (Type + Zone)
             const combos = [
-                [1, 2], [1, 1, 2], [2, 3], [1, 2, 3], [3, 4], [5, 2], [6, 3]
+                // 1. The Classic (1-2 Head)
+                [{ type: 1, zone: 'HEAD' }, { type: 2, zone: 'HEAD' }],
+                // 2. Double Jab Cross
+                [{ type: 1, zone: 'HEAD' }, { type: 1, zone: 'HEAD' }, { type: 2, zone: 'HEAD' }],
+                // 3. The Finisher (1-2-3 Hard)
+                [{ type: 1, zone: 'HEAD' }, { type: 2, zone: 'HEAD' }, { type: 3, zone: 'HEAD' }],
+                // 4. Body Snatcher (Jab Head -> Cross Body -> Left Hook Head)
+                [{ type: 1, zone: 'HEAD' }, { type: 2, zone: 'BODY' }, { type: 3, zone: 'HEAD' }],
+                // 5. Inside Fighting (Body Hook -> Head Hook)
+                [{ type: 3, zone: 'BODY' }, { type: 4, zone: 'HEAD' }],
+                // 6. Right Hand Lead (Surprise)
+                [{ type: 2, zone: 'HEAD' }, { type: 3, zone: 'HEAD' }],
+                // 7. The Uplift (Jab -> Rear Uppercut)
+                [{ type: 1, zone: 'HEAD' }, { type: 6, zone: 'HEAD' }],
+                // 8. Inside Demolition (Left Uppercut Body -> Right Hook Head)
+                [{ type: 5, zone: 'BODY' }, { type: 4, zone: 'HEAD' }],
+                // 9. Shoeshine (Uppercuts Flurry -> Hook)
+                [{ type: 5, zone: 'BODY' }, { type: 6, zone: 'BODY' }, { type: 3, zone: 'HEAD' }]
             ];
             this.comboQueue = combos[Math.floor(Math.random() * combos.length)];
-            console.log(`🤖 Combo: ${this.comboQueue}`);
+            console.log(`🤖 Combo Queue:`, this.comboQueue);
         } else {
-            this.comboQueue = [Math.floor(Math.random() * 6) + 1];
+            // Single pot-shot
+            const type = Math.floor(Math.random() * 6) + 1;
+            this.comboQueue = [{ type: type, zone: 'HEAD' }];
+            if (Math.random() < 0.3) this.comboQueue[0].zone = 'BODY';
         }
 
         this.processComboStep(pattern.damage);
@@ -173,16 +222,29 @@ window.aiController = {
         }
 
         this.isAttacking = true;
-        const type = this.comboQueue.shift();
+        this.isAttacking = true;
+        const step = this.comboQueue.shift();
 
-        // TARGET ZONE VARIETY
-        const zones = ['HEAD', 'HEAD', 'BODY', 'HEAD_LEFT', 'HEAD_RIGHT', 'BODY_LEFT', 'BODY_RIGHT'];
-        const zone = zones[Math.floor(Math.random() * zones.length)];
+        let type, zone;
+        if (typeof step === 'object') {
+            type = step.type;
+            zone = step.zone;
+        } else {
+            type = step; // Legacy fallback
+            zone = 'HEAD';
+        }
 
         this.executeSingleStrike(type, damage, zone);
 
-        let delay = 600;
-        if (type === 1) delay = 400; // Fast Jab
+        // DYNAMIC FLOW DELAY
+        let delay = 350; // Default fast follow-up
+        if (type === 1) delay = 250; // Jabs are super fast
+        else if (type === 2) delay = 400; // Cross needs recover
+        else delay = 500; // Hooks/Uppercuts need reload
+
+        // Increase delay if switching hands awkwardness? 
+        // Actually, opposite hands flow faster. Same hand = slower.
+        // We'll keep it simple for now.
 
         setTimeout(() => {
             if (this.enabled && (typeof gameMode !== 'undefined' ? gameMode : window.gameMode)) this.processComboStep(damage);
@@ -197,7 +259,13 @@ window.aiController = {
         if (type === 1) {
             const fullPose = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_1']));
             // Incorporate dynamic aiming
-            if (zone.includes('BODY')) fullPose['Spine'].rx += 0.45;
+            if (zone.includes('BODY')) {
+                fullPose['Spine'].rx += 0.45; // Down
+            } else if (zone.includes('LEFT')) {
+                fullPose['Spine'].ry -= 0.2; // Aim Left
+            } else if (zone.includes('RIGHT')) {
+                fullPose['Spine'].ry += 0.2; // Aim Right
+            }
 
             // Phase 1: GROUND FORCE (Leaves feet, Hips start)
             // We start with the FIGHT pose but inject the lower body triggers
@@ -209,31 +277,353 @@ window.aiController = {
 
             window.stanceController.targetPose = p1;
 
-            // Phase 2: KINETIC TRANSFER (Torso & Shoulder) ~60ms
+            // Phase 2: KINETIC TRANSFER (Shoulder Drive + Uncoil) ~40ms
             setTimeout(() => {
                 if (this.isStunned || !this.lungeState) return;
                 const p2 = JSON.parse(JSON.stringify(p1));
                 p2['Spine'] = fullPose['Spine']; // Snap Torso
                 p2['LeftArm'] = fullPose['LeftArm']; // Drive Shoulder
+                // START EXTENSION: Partial uncoil
+                p2['LeftForeArm'] = { rx: 0, ry: 0, rz: 0.8 };
                 if (window.stanceController) window.stanceController.targetPose = p2;
-            }, 60);
+            }, 40);
 
-            // Phase 3: IMPACT (The Snap) ~100ms
+            // Phase 3: MAX EXTENSION (Snap) ~80ms
             setTimeout(() => {
                 if (this.isStunned || !this.lungeState) return;
-                if (window.stanceController) window.stanceController.targetPose = fullPose; // Full Extension + Corkscrew
-            }, 100);
+                const p3 = JSON.parse(JSON.stringify(fullPose));
+                // OVERDRIVE: Target slightly past 0 (-0.2)
+                p3['LeftForeArm'] = { rx: 0, ry: 0, rz: -0.2 };
+                if (window.stanceController) window.stanceController.targetPose = p3;
+            }, 80);
+
+            // Phase 4: IMPACT HOLD (Lockout) ~120ms
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                if (window.stanceController) window.stanceController.targetPose = fullPose; // Settle at 0.0
+            }, 120);
 
             this.lungeState = {
                 startTime: Date.now(),
-                duration: 350, // Faster snap
+                duration: 350, // Fast Snap
                 startZ: (model && model.position) ? (model.position.z || 0) : 0,
-                depth: zone.includes('BODY') ? 1.4 : 2.0,
+                // REDUCED DEPTH: 1.6 for Head (prevents camera clip), 1.4 for Body
+                depth: zone.includes('BODY') ? 1.4 : 1.6,
                 damage: damage,
                 hitTriggered: false,
                 isCombo: true,
                 zone: zone,
                 type: type,
+                dynamicPose: fullPose
+            };
+            return;
+        }
+
+        // --- KINETIC CHAIN FOR CROSS (Type 2) ---
+        if (type === 2) {
+            const fullPose = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_2']));
+
+            // VARIATIONS
+            if (zone.includes('BODY')) {
+                fullPose['Spine'].rx += 0.45; // Lean Down
+                fullPose['RightArm'].rx += 0.2; // Angle Down
+                // Deep Knee Bend for Power
+                fullPose['RightUpLeg'].rx -= 0.3;
+                fullPose['LeftUpLeg'].rx -= 0.2;
+            } else if (zone.includes('LEFT')) {
+                fullPose['Spine'].ry -= 0.25;
+            } else if (zone.includes('RIGHT')) {
+                fullPose['Spine'].ry += 0.25;
+            }
+
+            // Phase 1: REAR FOOT DRIVE (Windup/Load)
+            const p1 = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_2_START']));
+            window.stanceController.targetPose = p1;
+
+            // Phase 2: TORQUE (Hips & Spine Snap) ~50ms
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p2 = JSON.parse(JSON.stringify(p1));
+                p2['Hips'] = fullPose['Hips']; // Fire Hips
+                p2['Spine'] = fullPose['Spine']; // Fire Spine
+                p2['RightArm'] = fullPose['RightArm']; // Shoulder Drive
+                p2['RightForeArm'] = { rx: 0, ry: 0, rz: 0.8 }; // Uncoil
+                if (window.stanceController) window.stanceController.targetPose = p2;
+            }, 50);
+
+            // Phase 3: EXTENSION (Snap) ~80ms
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p3 = JSON.parse(JSON.stringify(fullPose));
+                // OVERDRIVE
+                p3['RightForeArm'] = { rx: 0, ry: 0, rz: -0.2 };
+                if (window.stanceController) window.stanceController.targetPose = p3;
+            }, 80);
+
+            // Phase 4: IMPACT (Lockout) ~120ms
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                if (window.stanceController) window.stanceController.targetPose = fullPose;
+            }, 120);
+
+            this.lungeState = {
+                startTime: Date.now(),
+                duration: 450, // Power Commit
+                startZ: (model && model.position) ? (model.position.z || 0) : 0,
+                depth: zone.includes('BODY') ? 1.4 : 1.6,
+                damage: damage,
+                hitTriggered: false,
+                isCombo: true,
+                zone: zone,
+                type: type,
+                dynamicPose: fullPose
+            };
+            return;
+        }
+
+        // --- KINETIC CHAIN FOR LEFT HOOK (Type 3) ---
+        if (type === 3) {
+            const fullPose = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_3']));
+
+            // VARIATIONS
+            if (zone.includes('BODY')) { // LIVER SHOT
+                // Mechanics change: Shovel Hook (45 deg up)
+                fullPose['Spine'].rx += 0.3; // Lean Down
+                fullPose['Spine'].ry += 0.2; // Lean into it
+                // Drop levels
+                fullPose['RightUpLeg'].rx -= 0.4;
+                fullPose['LeftUpLeg'].rx -= 0.4;
+                // Arm Angle: Lower elbow, punch up
+                fullPose['LeftArm'].rz -= 0.5; // Elbow down
+                fullPose['LeftArm'].rx -= 0.2; // Punch up
+            } else {
+                // Aiming adjustments
+                if (zone.includes('LEFT')) fullPose['Spine'].ry -= 0.2;
+                if (zone.includes('RIGHT')) fullPose['Spine'].ry += 0.2;
+            }
+
+            // Phase 1: THE LOAD (Cock back ~0ms)
+            const p1 = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_3_START']));
+            window.stanceController.targetPose = p1;
+
+            // Phase 2: THE PIVOT (Hips & Feet First) ~100ms (Slower telegraph)
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p2 = JSON.parse(JSON.stringify(p1));
+                p2['Hips'] = fullPose['Hips']; // Fire hips Right
+                p2['LeftUpLeg'] = fullPose['LeftUpLeg']; // Pivot Lead Leg
+                p2['Spine'] = fullPose['Spine']; // Start Spine turn
+                if (window.stanceController) window.stanceController.targetPose = p2;
+            }, 100);
+
+            // Phase 3: THE WHIP (Arm Snap) ~240ms (Delayed Impact)
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p3 = JSON.parse(JSON.stringify(fullPose));
+                // OVERDRIVE: Whip slightly past center for snap
+                p3['Spine'].ry += 0.2;
+                if (window.stanceController) window.stanceController.targetPose = p3;
+            }, 240);
+
+            // Phase 4: SETTLE ~350ms
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                window.stanceController.targetPose = fullPose;
+            }, 350);
+
+            this.lungeState = {
+                startTime: Date.now(),
+                duration: 700, // Slower for Counter Opportunity
+                startZ: (model && model.position) ? (model.position.z || 0) : 0,
+                depth: zone.includes('BODY') ? 1.4 : 1.4, // Hooks are short range
+                damage: damage,
+                hitTriggered: false,
+                isCombo: true,
+                zone: zone,
+                type: type,
+                dynamicPose: fullPose
+            };
+            return;
+        }
+
+        // --- KINETIC CHAIN FOR RIGHT HOOK (Type 4) ---
+        if (type === 4) {
+            const fullPose = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_4']));
+
+            // VARIATIONS
+            if (zone.includes('BODY')) { // SPLEEN SHOT
+                // Mechanics change: Shovel Hook (45 deg up)
+                fullPose['Spine'].rx += 0.3; // Lean Down
+                fullPose['Spine'].ry -= 0.2; // Lean into it
+                // Drop levels
+                fullPose['RightUpLeg'].rx -= 0.4;
+                fullPose['LeftUpLeg'].rx -= 0.4;
+                // Arm Angle: Lower elbow, punch up
+                fullPose['RightArm'].rz += 0.5; // Elbow down (Inverse for Right Arm rz-ish)
+                fullPose['RightArm'].rx -= 0.2; // Punch up
+            } else {
+                // Aiming adjustments
+                if (zone.includes('LEFT')) fullPose['Spine'].ry -= 0.2;
+                if (zone.includes('RIGHT')) fullPose['Spine'].ry += 0.2;
+            }
+
+            // Phase 1: THE LOAD (Cock back ~0ms)
+            const p1 = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_4_START']));
+            window.stanceController.targetPose = p1;
+
+            // Phase 2: THE PIVOT (Hips & Feet First) ~100ms (Slower telegraph)
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p2 = JSON.parse(JSON.stringify(p1));
+                p2['Hips'] = fullPose['Hips']; // Fire hips Left
+                p2['RightUpLeg'] = fullPose['RightUpLeg']; // Pivot Rear Leg
+                p2['Spine'] = fullPose['Spine']; // Start Spine turn
+                if (window.stanceController) window.stanceController.targetPose = p2;
+            }, 100);
+
+            // Phase 3: THE WHIP (Arm Snap) ~240ms (Delayed Impact)
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p3 = JSON.parse(JSON.stringify(fullPose));
+                // OVERDRIVE: Whip slightly past center for snap
+                p3['Spine'].ry -= 0.2;
+                if (window.stanceController) window.stanceController.targetPose = p3;
+            }, 240);
+
+            // Phase 4: SETTLE ~350ms
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                window.stanceController.targetPose = fullPose;
+            }, 350);
+
+            this.lungeState = {
+                startTime: Date.now(),
+                duration: 700, // Slower for Counter Opportunity
+                startZ: (model && model.position) ? (model.position.z || 0) : 0,
+                depth: zone.includes('BODY') ? 1.4 : 1.4, // Hooks are short range
+                damage: damage,
+                hitTriggered: false,
+                isCombo: true,
+                zone: zone,
+                type: type,
+                dynamicPose: fullPose
+            };
+            return;
+        }
+
+        // --- KINETIC CHAIN FOR LEFT UPPERCUT (Type 5) ---
+        if (type === 5) {
+            const fullPose = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_5']));
+            let verticalDrive = true;
+
+            // VARIATIONS
+            if (zone.includes('BODY')) { // SOLAR PLEXUS
+                fullPose['Spine'].rx += 0.4; // Crunch Forward
+                fullPose['LeftArm'].rx -= 0.3; // Punch more forward (shovel)
+                verticalDrive = false; // Less rise on body shots
+            }
+
+            // Phase 1: THE DIP (Load ~0ms)
+            const p1 = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_5_START']));
+            window.stanceController.targetPose = p1;
+            if (verticalDrive && model) model.position.y -= 0.15; // Visibly Drop
+
+            // Phase 2: THE DRIVE (Legs Extend ~150ms)
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p2 = JSON.parse(JSON.stringify(p1));
+                p2['Hips'] = fullPose['Hips']; // Fire hips
+                p2['LeftUpLeg'] = fullPose['LeftUpLeg']; // Extend Lead Leg
+                p2['RightUpLeg'] = fullPose['RightUpLeg'];
+                p2['Spine'] = fullPose['Spine']; // Start upward extension
+                if (window.stanceController) window.stanceController.targetPose = p2;
+            }, 150);
+
+            // Phase 3: THE ARC (Impact ~300ms) - Huge Counter Window
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p3 = JSON.parse(JSON.stringify(fullPose));
+                if (window.stanceController) window.stanceController.targetPose = p3;
+            }, 300);
+
+            // Phase 4: SETTLE
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                window.stanceController.targetPose = fullPose;
+                if (model) model.position.y = 0; // Reset height
+            }, 550);
+
+            this.lungeState = {
+                startTime: Date.now(),
+                duration: 800, // BIG TELEGRAPH
+                startZ: (model && model.position) ? (model.position.z || 0) : 0,
+                startY: 0,
+                depth: 1.2, // Very close range
+                damage: damage,
+                hitTriggered: false,
+                isCombo: true,
+                zone: zone,
+                type: type,
+                verticalDrive: verticalDrive,
+                dynamicPose: fullPose
+            };
+            return;
+        }
+
+        // --- KINETIC CHAIN FOR RIGHT UPPERCUT (Type 6) ---
+        if (type === 6) {
+            const fullPose = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_6']));
+            let verticalDrive = true;
+
+            // VARIATIONS
+            if (zone.includes('BODY')) {
+                fullPose['Spine'].rx += 0.4;
+                fullPose['RightArm'].rx -= 0.3;
+                verticalDrive = false;
+            }
+
+            // Phase 1: THE DIP
+            const p1 = JSON.parse(JSON.stringify(window.stanceController.poses['ATTACK_6_START']));
+            window.stanceController.targetPose = p1;
+            if (verticalDrive && model) model.position.y -= 0.15;
+
+            // Phase 2: THE DRIVE
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p2 = JSON.parse(JSON.stringify(p1));
+                p2['Hips'] = fullPose['Hips'];
+                p2['RightUpLeg'] = fullPose['RightUpLeg']; // Extend Rear Leg
+                p2['LeftUpLeg'] = fullPose['LeftUpLeg'];
+                p2['Spine'] = fullPose['Spine'];
+                if (window.stanceController) window.stanceController.targetPose = p2;
+            }, 150);
+
+            // Phase 3: THE ARC - HUGE WINDOW
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                const p3 = JSON.parse(JSON.stringify(fullPose));
+                if (window.stanceController) window.stanceController.targetPose = p3;
+            }, 300);
+
+            // Phase 4: SETTLE
+            setTimeout(() => {
+                if (this.isStunned || !this.lungeState) return;
+                window.stanceController.targetPose = fullPose;
+                if (model) model.position.y = 0;
+            }, 550);
+
+            this.lungeState = {
+                startTime: Date.now(),
+                duration: 800, // BIG TELEGRAPH
+                startZ: (model && model.position) ? (model.position.z || 0) : 0,
+                startY: 0,
+                depth: 1.2,
+                damage: damage,
+                hitTriggered: false,
+                isCombo: true,
+                zone: zone,
+                type: type,
+                verticalDrive: verticalDrive,
                 dynamicPose: fullPose
             };
             return;
@@ -273,6 +663,30 @@ window.aiController = {
             dynamicPose: dynamicPose // SAVE ADJUSTED POSE
         };
     },
+
+    registerPlayerHit: function () {
+        if (!this.playerHitLog) this.playerHitLog = [];
+        const now = Date.now();
+        this.playerHitLog.push(now);
+
+        // Check for SPAM (3+ hits in < 800ms)
+        const recentHits = this.playerHitLog.filter(t => now - t < 800);
+        if (recentHits.length >= 3) {
+            console.log("🛡️ AI: SPAM DETECTED! Forcing Guard!");
+
+            // 1. Force Guard (Override Stun if needed for gameplay flow)
+            this.isStunned = false;
+            this.activateGuard();
+
+            // 2. COUNTER WINDOW: Player can now deal bonus damage for 500ms
+            this.counterWindowEnd = Date.now() + 500;
+            console.log("⚡ COUNTER WINDOW OPEN!");
+
+            // Clear log to prevent infinite trigger
+            this.playerHitLog = [];
+        }
+    },
+
     cancelAttack: function () {
         if (this.isAttacking || this.lungeState) {
             console.log("🤖 AI INTERRUPTED! Entering Hit Stun...");
@@ -304,13 +718,13 @@ window.aiController = {
     },
 
     shakeCamera: function (intensity) {
-        if (window.controls) {
-            // Shake target
+        // Use Global Shake System (Unified Physics)
+        if (window.shakeCamera) {
+            window.shakeCamera(intensity);
+        } else if (window.controls) {
+            // Fallback Legacy Shake
             controls.target.x += (Math.random() - 0.5) * intensity;
             controls.target.y += (Math.random() - 0.5) * intensity;
-
-            // Shake position (creates "head being hit" feel)
-            camera.position.x += (Math.random() - 0.5) * intensity * 0.5;
         }
 
         // Flash red with varying intensity
@@ -320,6 +734,25 @@ window.aiController = {
     hitPlayer: function (damage, isCombo = true) {
         // Execute Hit Effect
         if (window.parent) window.parent.postMessage({ type: 'player_hit', damage: damage }, '*');
+
+        // SLIP/DUCK EVASION CHECK
+        if (window.isPlayerSlipping && window.isPlayerSlipping()) {
+            const slip = window.getSlipDirection();
+            const attackType = this.lungeState ? this.lungeState.type : 0;
+
+            // Hooks (3,4) can be dodged by slipping left/right
+            // Straights (1,2) and Uppercuts (5,6) can be dodged by ducking
+            const hooksEvaded = (attackType === 3 || attackType === 4) && (slip === 'left' || slip === 'right');
+            const straightsEvaded = (attackType === 1 || attackType === 2 || attackType === 5 || attackType === 6) && slip === 'duck';
+
+            if (hooksEvaded || straightsEvaded) {
+                console.log("🏃 EVADED! Attack missed!");
+                // Visual feedback - green flash
+                document.body.style.backgroundColor = 'rgba(0,255,100,0.15)';
+                setTimeout(() => document.body.style.backgroundColor = 'transparent', 100);
+                return; // MISS - no damage
+            }
+        }
 
         // DEFENSE: Reduction if player is guarding
         if (typeof isPlayerGuarding !== 'undefined' && isPlayerGuarding) {
@@ -334,6 +767,9 @@ window.aiController = {
 
         if (typeof playerHealth !== 'undefined') {
             playerHealth -= damage;
+            if (typeof window.roundDamageTaken !== 'undefined') {
+                window.roundDamageTaken += damage;
+            }
             if (typeof updateGameUI === 'function') updateGameUI();
 
             if (playerHealth <= 0) {

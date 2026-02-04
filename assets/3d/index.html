@@ -285,6 +285,29 @@
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
 
+            // Add Ground: World Martial Arts Tournament (Stone Platform)
+            const groundGroup = new THREE.Group();
+
+            // 1. Stone Foundation (Tenkaichi Budokai - Warm Tile Color)
+            const planeGeom = new THREE.PlaneGeometry(20, 20);
+            const planeMat = new THREE.MeshStandardMaterial({
+                color: 0xe6c288, // Warm Sandy/Beige Tile Color
+                roughness: 0.9,
+                metalness: 0.0
+            });
+            const groundPlane = new THREE.Mesh(planeGeom, planeMat);
+            groundPlane.rotation.x = -Math.PI / 2;
+            groundPlane.receiveShadow = true;
+            groundGroup.add(groundPlane);
+
+            // 2. Tile Lines (Grout - Darker Earth Tone)
+            const tournamentGrid = new THREE.GridHelper(20, 20, 0x8b7355, 0xafa188);
+            tournamentGrid.position.y = 0.01; // Slightly above plane to prevent z-fighting
+            groundGroup.add(tournamentGrid);
+
+            groundGroup.position.y = 0;
+            scene.add(groundGroup);
+
             const loader = new GLTFLoader();
 
             // Function to handle the GLTF content once loaded
@@ -297,6 +320,7 @@
                 const center = box.getCenter(new THREE.Vector3());
                 model.position.x = -center.x;
                 model.position.z = -center.z;
+                model.rotation.set(0, 0, 0); // Force face forward (+Z or towards camera)
 
                 scene.add(model);
 
@@ -394,7 +418,7 @@
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.maxPolarAngle = Math.PI * 0.6; // Prevent looking under model too much
+            controls.maxPolarAngle = Math.PI / 2 - 0.1; // Restrict camera to stay above ground
             controls.minDistance = 1.5;
             controls.maxDistance = 6;
             controls.target.set(0, 1.0, 0);
@@ -417,6 +441,141 @@
             window.boxingEnabled = enabled;
             console.log("Boxing Enabled set to:", enabled);
         };
+
+        // === SOUND EFFECTS SYSTEM (Web Audio API Synthesized) ===
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+
+        window.playPunchSound = function () {
+            const ctx = getAudioContext();
+            // Whoosh sound - white noise fading out
+            const bufferSize = ctx.sampleRate * 0.1;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize) * 0.3;
+            }
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 800;
+            source.connect(filter).connect(ctx.destination);
+            source.start();
+        };
+
+        window.playHitSound = function (isCritical = false) {
+            const ctx = getAudioContext();
+            // Impact thud - low frequency sine + noise
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.frequency.value = isCritical ? 80 : 120;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(isCritical ? 0.5 : 0.3, ctx.currentTime);
+            gain.gain.exponentialDecayTo = 0.01;
+            gain.gain.setTargetAtTime(0.01, ctx.currentTime, 0.08);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.15);
+
+            // Add noise crunch
+            const bufferSize = ctx.sampleRate * 0.08;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize) * 0.4;
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            const noiseFilter = ctx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.value = 1000;
+            noise.connect(noiseFilter).connect(ctx.destination);
+            noise.start();
+        };
+
+        window.playBlockSound = function () {
+            const ctx = getAudioContext();
+            // Metallic clang - high frequency with quick decay
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.frequency.value = 600;
+            osc.type = 'triangle';
+            gain.gain.setValueAtTime(0.25, ctx.currentTime);
+            gain.gain.setTargetAtTime(0.01, ctx.currentTime, 0.05);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+        };
+
+        window.playBellSound = function () {
+            const ctx = getAudioContext();
+            // Classic boxing bell - high ping with reverb
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.frequency.value = 1200;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.4, ctx.currentTime);
+            gain.gain.setTargetAtTime(0.01, ctx.currentTime, 0.5);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 1.0);
+        };
+
+        // === SLIP & DUCK SYSTEM ===
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let slipDirection = null; // 'left', 'right', 'duck'
+        let slipEndTime = 0;
+        const SLIP_THRESHOLD = 50; // Pixels
+        const SLIP_DURATION = 400; // ms
+
+        window.addEventListener('touchstart', (e) => {
+            if (!gameMode) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!gameMode || slipEndTime > Date.now()) return; // Already slipping
+
+            const dx = e.touches[0].clientX - touchStartX;
+            const dy = e.touches[0].clientY - touchStartY;
+
+            // Detect Slip Left
+            if (dx < -SLIP_THRESHOLD && Math.abs(dy) < SLIP_THRESHOLD) {
+                slipDirection = 'left';
+                slipEndTime = Date.now() + SLIP_DURATION;
+                console.log("🏃 SLIP LEFT!");
+                // Camera tilt effect
+                if (camera) camera.rotation.z = 0.15;
+                setTimeout(() => { if (camera) camera.rotation.z = 0; }, SLIP_DURATION);
+            }
+            // Detect Slip Right
+            else if (dx > SLIP_THRESHOLD && Math.abs(dy) < SLIP_THRESHOLD) {
+                slipDirection = 'right';
+                slipEndTime = Date.now() + SLIP_DURATION;
+                console.log("🏃 SLIP RIGHT!");
+                if (camera) camera.rotation.z = -0.15;
+                setTimeout(() => { if (camera) camera.rotation.z = 0; }, SLIP_DURATION);
+            }
+            // Detect Duck
+            else if (dy > SLIP_THRESHOLD && Math.abs(dx) < SLIP_THRESHOLD) {
+                slipDirection = 'duck';
+                slipEndTime = Date.now() + SLIP_DURATION;
+                console.log("🦆 DUCK!");
+                // Camera dip effect
+                if (camera) camera.position.y -= 0.3;
+                setTimeout(() => { if (camera) camera.position.y += 0.3; }, SLIP_DURATION);
+            }
+        }, { passive: true });
+
+        // Expose for AI hit check
+        window.isPlayerSlipping = () => Date.now() < slipEndTime;
+        window.getSlipDirection = () => slipDirection;
 
         function onPointerUp() {
             if (boxingHoldTimer) {
@@ -451,10 +610,37 @@
 
             // Start Long-Press timer for Guarding (In-Game Only)
             if (gameMode) {
+                window.chargeStartTime = Date.now(); // Track for Charged Punch
+
                 if (stanceController.guardTimer) clearTimeout(stanceController.guardTimer);
                 stanceController.guardTimer = setTimeout(() => {
                     window.setGuarding(true);
-                }, 200);
+                    window.playerIsCharging = true; // Enter Charge Mode
+                    console.log("⚡ CHARGING PUNCH...");
+
+                    // Visual Feedback: Add pulsing indicator
+                    let indicator = document.getElementById('charge-indicator');
+                    if (!indicator) {
+                        indicator = document.createElement('div');
+                        indicator.id = 'charge-indicator';
+                        indicator.style.cssText = `
+                            position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+                            background: radial-gradient(circle, rgba(255,200,0,0.8), transparent);
+                            width: 60px; height: 60px; border-radius: 50%;
+                            animation: pulse 0.3s ease-in-out infinite alternate;
+                            pointer-events: none; z-index: 1001;
+                        `;
+                        document.body.appendChild(indicator);
+                        // Add keyframes if not exist
+                        if (!document.getElementById('charge-keyframes')) {
+                            const style = document.createElement('style');
+                            style.id = 'charge-keyframes';
+                            style.textContent = `@keyframes pulse { from { transform: translateX(-50%) scale(1); opacity: 0.6; } to { transform: translateX(-50%) scale(1.3); opacity: 1; } }`;
+                            document.head.appendChild(style);
+                        }
+                    }
+                    indicator.style.display = 'block';
+                }, 500); // 500ms to start charging
             }
 
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -477,6 +663,36 @@
                 const muscle = getMuscleAtPoint(hit.point);
 
                 if (gameMode) {
+                    // PARRY SYSTEM: Check if AI is mid-attack
+                    if (window.aiController && window.aiController.lungeState && !window.aiController.lungeState.hitTriggered) {
+                        const now = Date.now();
+                        const state = window.aiController.lungeState;
+                        const elapsed = now - state.startTime;
+                        const progress = elapsed / state.duration;
+
+                        // PARRY WINDOW: 40-60% of attack swing
+                        if (progress >= 0.40 && progress <= 0.60) {
+                            console.log("🛡️ PERFECT PARRY!");
+
+                            // 1. Cancel AI attack
+                            window.aiController.cancelAttack();
+
+                            // 2. Stagger AI (longer stun)
+                            window.aiController.isStunned = true;
+                            window.aiController.stunEndTime = Date.now() + 1200; // 1.2s stun
+
+                            // 3. Give player counter window
+                            window.aiController.counterWindowEnd = Date.now() + 800;
+
+                            // Visual feedback
+                            document.body.style.backgroundColor = 'rgba(0,255,100,0.2)';
+                            setTimeout(() => document.body.style.backgroundColor = 'transparent', 150);
+
+                            // Don't process as normal hit - parry consumed the input
+                            return;
+                        }
+                    }
+
                     handleGameHit(muscle, hit.point);
                 } else if (muscle) {
                     // console.log("Hit muscle:", muscle, "at", hit.point);
@@ -493,6 +709,9 @@
         function startBoxingGame() {
             if (gameMode) return;
             console.log("🥊 BOXING GAME STARTING...");
+
+            // SOUND: Boxing bell
+            if (window.playBellSound) window.playBellSound();
 
             // 1. Hide Muscle Status (Heatmap) Gracefully
             // Cache current logic status to restore later
@@ -514,7 +733,10 @@
                 console.log("Fullscreen request failed", e);
             }
 
-            if (model) model.position.set(0, 0, 0);
+            if (model) {
+                model.position.set(0, 0, 0);
+                model.rotation.set(0, 0, 0); // Ensure facing forward
+            }
             isZooming = false;
 
             gameMode = true;
@@ -540,7 +762,10 @@
                 // Y=1.45 centers slightly higher (Upper Chest), pushing hips down.
                 camera.position.set(0, 1.45, 2.5);
                 controls.target.set(0, 1.45, 0); // Important: Update controls target too
+                controls.update(); // FORCE UPDATE to sync state before disabling
                 camera.lookAt(0, 1.45, 0);
+
+                controls.enabled = false;
 
                 showGameUI();
             }
@@ -590,6 +815,122 @@
             if (window.FlutterChannel) {
                 window.FlutterChannel.postMessage(JSON.stringify({ type: 'game_start', mode: 'boxing' }));
             }
+
+            // === ROUNDS SYSTEM ===
+            window.currentRound = 1;
+            window.maxRounds = 3;
+            window.roundDuration = 30; // 30 seconds per round (1.30m total)
+            window.roundTimeRemaining = window.roundDuration;
+            window.isResting = false;
+            window.roundDamageDealt = 0; // Track for scoring
+            window.roundDamageTaken = 0;
+
+            startRoundTimer();
+        }
+
+        // === ROUNDS SYSTEM FUNCTIONS ===
+        let roundTimerInterval = null;
+
+        function startRoundTimer() {
+            if (roundTimerInterval) clearInterval(roundTimerInterval);
+
+            window.roundTimeRemaining = window.roundDuration;
+            updateRoundUI();
+
+            roundTimerInterval = setInterval(() => {
+                if (!gameMode || window.isResting) return;
+
+                window.roundTimeRemaining--;
+                updateRoundUI();
+
+                if (window.roundTimeRemaining <= 0) {
+                    endRound();
+                }
+            }, 1000);
+        }
+
+        function updateRoundUI() {
+            let timerEl = document.getElementById('round-timer');
+            if (!timerEl) {
+                timerEl = document.createElement('div');
+                timerEl.id = 'round-timer';
+                timerEl.style.cssText = `
+                    position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
+                    font-size: 24px; font-weight: bold; color: #fff;
+                    text-shadow: 2px 2px 0 #000;
+                    font-family: monospace; z-index: 1001;
+                `;
+                document.body.appendChild(timerEl);
+            }
+
+            const mins = Math.floor(window.roundTimeRemaining / 60);
+            const secs = window.roundTimeRemaining % 60;
+            timerEl.textContent = `Round ${window.currentRound}/${window.maxRounds} - ${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function endRound() {
+            if (window.playBellSound) window.playBellSound();
+
+            if (window.currentRound >= window.maxRounds) {
+                // Game over - determine winner by damage differential
+                const playerWins = window.roundDamageDealt > window.roundDamageTaken;
+                endBoxingGame(playerWins);
+                return;
+            }
+
+            // Instruction overlay (brief transition)
+            window.isResting = true;
+            window.aiController.enabled = false;
+
+            const instructions = [
+                "KEEP MOVING! DON'T BE A SITTING DUCK.",
+                "WATCH FOR THE HOOKS! SLIP LEFT OR RIGHT.",
+                "USE YOUR CHARGED PUNCH FOR BIG DAMAGE.",
+                "DON'T SPAM! WATCH YOUR STAMINA.",
+                "PARRY THE AI ATTACKS TO STUN THEM!",
+                "DUCK UNDER THE STRAIGHTS!"
+            ];
+            const randomInstruction = instructions[Math.floor(Math.random() * instructions.length)];
+
+            // Show instruction overlay
+            const restOverlay = document.createElement('div');
+            restOverlay.id = 'rest-overlay';
+            restOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.85); z-index: 10000;
+                display: flex; align-items: center; justify-content: center;
+                flex-direction: column; color: #fff; font-family: 'Outfit', sans-serif;
+                text-align: center; padding: 20px;
+            `;
+            restOverlay.innerHTML = `
+                <div style="font-size: 32px; color: #aaa; margin-bottom: 10px;">Round ${window.currentRound} Complete!</div>
+                <div style="font-size: 48px; font-weight: bold; color: #ffcc00; margin-bottom: 30px;">GET READY!</div>
+                <div style="font-size: 24px; color: #fff; max-width: 80%; line-height: 1.4;">${randomInstruction}</div>
+                <div id="rest-countdown" style="font-size: 64px; margin-top: 40px; font-family: monospace;">3</div>
+            `;
+            document.body.appendChild(restOverlay);
+
+            // Health recovery (20%)
+            modelHealth = Math.min(100, modelHealth + 20);
+            playerHealth = Math.min(100, playerHealth + 20);
+            updateGameUI();
+
+            let restTime = 3; // Shortened to 3 seconds
+            const restInterval = setInterval(() => {
+                restTime--;
+                const countdown = document.getElementById('rest-countdown');
+                if (countdown) countdown.textContent = restTime;
+
+                if (restTime <= 0) {
+                    clearInterval(restInterval);
+                    restOverlay.remove();
+                    window.isResting = false;
+                    window.currentRound++;
+                    window.aiController.enabled = true;
+                    if (window.playBellSound) window.playBellSound();
+                    startRoundTimer();
+                }
+            }, 1000);
         }
 
         function handleGameHit(muscle, point) {
@@ -607,24 +948,42 @@
             let hitText = "HIT!";
             let isCritical = false;
 
+            // CHARGED PUNCH: Apply 2x damage if charged
+            if (window.playerChargedPunch) {
+                damage *= 2;
+                hitText = "POWER!";
+                isCritical = true;
+                console.log("💥 CHARGED PUNCH LANDED! 2x Damage!");
+                window.playerChargedPunch = false; // Consume charge
+            }
+
             // CHECK GUARD (Damage Mitigation)
             if (stanceController.targetPose === 'GUARD') {
                 damage *= 0.3; // Blocked damage
                 hitText = "BLOCKED";
-                // Play metallic/thud sound?
+                if (window.playBlockSound) window.playBlockSound();
+            }
+
+            // CHECK COUNTER WINDOW (Bonus Damage)
+            if (window.aiController && window.aiController.counterWindowEnd && Date.now() < window.aiController.counterWindowEnd) {
+                damage *= 2; // Double damage during counter window
+                hitText = "COUNTER!";
+                isCritical = true;
+                console.log("⚡ COUNTER HIT! 2x Damage!");
+                window.aiController.counterWindowEnd = 0; // Consume the window
             }
 
             // 1. Weak Point (Anatomical)
             const weakPoints = ['Neck', 'Chest', 'Upper Abs', 'Lower Abs'];
             if (muscle && weakPoints.includes(muscle)) {
-                damage = 10;
+                damage = 4;
                 isWeakPoint = true;
                 hitText = "SOLID!";
             }
 
             // 2. Tired Spot (Heatmap Logic)
             if (muscle && activeHeatmap[muscle] > 0.6) {
-                damage += 15; // Massive Bonus
+                damage += 6; // Moderate Bonus
                 isCritical = true;
                 isWeakPoint = true;
                 hitText = "TIRED SPOT!";
@@ -632,11 +991,12 @@
             }
 
             if (!muscle) {
-                damage = 2; // Generic hit
+                damage = 1; // Glancing hit
             }
 
             modelHealth -= damage;
             gameScore += damage * (comboCount + 1);
+            window.roundDamageDealt += damage;
 
             const now = Date.now();
             if (now - gameLastHitTime < 1000) {
@@ -651,9 +1011,20 @@
                 window.stanceController.triggerHit(muscle, point, isCritical);
             }
 
+            // === HIT VFX: Impact Particles ===
+            spawnHitVFX(point, isCritical);
+
+            // === SOUND: Play hit impact ===
+            if (window.playHitSound) window.playHitSound(isCritical);
+
             // CANCEL ATTACK & TRIGGER GUARD
             if (window.aiController) {
                 window.aiController.cancelAttack();
+
+                // NOTIFY AI OF HIT (For Spam Detection)
+                if (window.aiController.registerPlayerHit) {
+                    window.aiController.registerPlayerHit();
+                }
 
                 // Reactive Guard (try to block next hit)
                 if (Math.random() < 0.4 && !window.aiController.isGuarding) {
@@ -680,6 +1051,85 @@
         function flashModelColor(color) {
             // DISABLED FOR DEBUGGING (Prevent Invisible Material)
             return;
+        }
+
+        // === HIT VFX SYSTEM ===
+        function spawnHitVFX(point, isCritical) {
+            if (!point || !camera) return;
+
+            // Project 3D point to 2D screen
+            const screenPos = point.clone().project(camera);
+            const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+
+            // Particle count based on critical
+            const count = isCritical ? 10 : 6;
+            const color = isCritical ? '#ffcc00' : '#ffffff';
+            const size = isCritical ? 12 : 8;
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+
+                // Random direction
+                const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.5;
+                const distance = 30 + Math.random() * 40;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+
+                particle.style.cssText = `
+                    position: fixed;
+                    left: ${x}px;
+                    top: ${y}px;
+                    width: ${size}px;
+                    height: ${size}px;
+                    background: ${color};
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 10000;
+                    box-shadow: 0 0 ${size}px ${color};
+                    transform: translate(-50%, -50%);
+                    transition: all 0.25s ease-out;
+                `;
+                document.body.appendChild(particle);
+
+                // Animate outward + fade
+                requestAnimationFrame(() => {
+                    particle.style.left = `${x + dx}px`;
+                    particle.style.top = `${y + dy}px`;
+                    particle.style.opacity = '0';
+                    particle.style.transform = 'translate(-50%, -50%) scale(0.3)';
+                });
+
+                // Cleanup
+                setTimeout(() => particle.remove(), 300);
+            }
+
+            // Impact flash at center
+            const flash = document.createElement('div');
+            flash.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: ${isCritical ? 40 : 25}px;
+                height: ${isCritical ? 40 : 25}px;
+                background: radial-gradient(circle, ${color} 0%, transparent 70%);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+                animation: hitFlash 0.15s ease-out forwards;
+            `;
+            document.body.appendChild(flash);
+
+            // Add animation keyframes if not exist
+            if (!document.getElementById('hit-flash-keyframes')) {
+                const style = document.createElement('style');
+                style.id = 'hit-flash-keyframes';
+                style.textContent = `@keyframes hitFlash { from { opacity: 1; transform: translate(-50%, -50%) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) scale(2); } }`;
+                document.head.appendChild(style);
+            }
+
+            setTimeout(() => flash.remove(), 200);
         }
 
         function showGameUI() {
@@ -773,7 +1223,20 @@
             // Disable procedural stance temporarily so animation can play
             stanceController.targetPose = null;
 
-            // Knockdown animation if won
+            // === KNOCKDOWN: Yamcha Death Pose ===
+            if (won) {
+                // Use procedural KNOCKDOWN pose (Yamcha style)
+                stanceController.targetPose = 'KNOCKDOWN';
+
+                // Lower model to ground
+                if (model) {
+                    model.position.y = 0; // Drop to floor (aligned with new ground at y=0)
+                }
+
+                // Text overlay removed as per request
+            }
+
+            // Fallback: Try built-in animation if available
             if (won && window.mixer) {
                 const fallAnim = model.animations.find(a => a.name.toLowerCase().includes('fall') || a.name.toLowerCase().includes('death') || a.name.toLowerCase().includes('hit'));
                 if (fallAnim) {
@@ -794,11 +1257,11 @@
             if (ui) {
                 ui.innerHTML = `
                     <div style="font-weight: bold; color: #ff4444; font-size: 20px; margin-bottom: 10px;">${won ? 'KNOCKOUT!' : 'FINISHED'}</div>
-                    <div style="font-size: 14px; color: #888; margin-top: 10px;">Body reset in 3s...</div>
+                    <div style="font-size: 14px; color: #888; margin-top: 10px;">Body reset in 5s...</div>
                 `;
             }
 
-            // DELAYED RESTORATION (3 Seconds)
+            // DELAYED RESTORATION (5 Seconds)
             setTimeout(() => {
                 // 1. Exit Fullscreen (End of Experience)
                 if (document.exitFullscreen) {
@@ -940,51 +1403,63 @@
 
                 shader.vertexShader = `
                     varying vec3 vWorldPosition;
+                    varying vec3 vLocalNormal;
                     ${shader.vertexShader}
                 `.replace(
                     '#include <worldpos_vertex>',
                     `
-                #include <worldpos_vertex>
+                    #include <worldpos_vertex>
                     vWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
-                `
+                    vLocalNormal = normal; // Pass local normal
+                    `
                 );
 
                 shader.fragmentShader = `
+                    varying vec3 vWorldPosition;
+                    varying vec3 vLocalNormal;
                     uniform vec3 u_zone_starts[${MAX_ZONES}];
                     uniform vec3 u_zone_ends[${MAX_ZONES}];
                     uniform float u_zone_radii[${MAX_ZONES}];
                     uniform float u_zone_intensities[${MAX_ZONES}];
                     uniform int u_zone_count;
-                    varying vec3 vWorldPosition;
 
                     float distToSegment(vec3 p, vec3 a, vec3 b) {
                         vec3 pa = p - a, ba = b - a;
                         float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-                    return length(pa - ba * h);
-                }
+                        return length(pa - ba * h);
+                    }
 
                     ${shader.fragmentShader}
                 `.replace(
                     '#include <dithering_fragment>',
                     `
-                #include <dithering_fragment>
+                    #include <dithering_fragment>
+                    
+                    // --- LOCAL FRONT/BACK DIAGNOSTIC (STAYS FOR DEBUGGING) ---
+                    vec3 diagnosticColor = vec3(0.8, 0.8, 0.8);
+                    if (vLocalNormal.z > 0.4) {
+                        diagnosticColor = vec3(0.0, 1.0, 1.0); // LOCAL FRONT = CYAN
+                    } else if (vLocalNormal.z < -0.4) {
+                        diagnosticColor = vec3(1.0, 0.0, 1.0); // LOCAL BACK = MAGENTA
+                    }
+                    gl_FragColor.rgb *= diagnosticColor;
+
                     float totalHeat = 0.0;
-                for (int i = 0; i < ${MAX_ZONES}; i++) {
-                    if (i >= u_zone_count) break;
+                    for (int i = 0; i < ${MAX_ZONES}; i++) {
+                        if (i >= u_zone_count) break;
                         float dist = distToSegment(vWorldPosition, u_zone_starts[i], u_zone_ends[i]);
                         float radius = u_zone_radii[i];
-                    if (dist < radius) {
+                        if (dist < radius) {
                             float factor = 1.0 - (dist / radius);
-                        totalHeat += factor * u_zone_intensities[i] * 1.5;
+                            totalHeat += factor * u_zone_intensities[i] * 1.5;
+                        }
                     }
-                }
-                totalHeat = clamp(totalHeat, 0.0, 1.0);
-                if (totalHeat > 0.05) {
+                    totalHeat = clamp(totalHeat, 0.0, 1.0);
+                    if (totalHeat > 0.05) {
                         vec3 heatColor = vec3(1.0, 0.25, 0.0); // Vibrant Orange/Red
-                    gl_FragColor.rgb = mix(gl_FragColor.rgb, heatColor, totalHeat * 0.7);
-                    // Add glow
-                    gl_FragColor.rgb += heatColor * totalHeat * 0.3;
-                }
+                        gl_FragColor.rgb = mix(gl_FragColor.rgb, heatColor, totalHeat * 0.7);
+                        gl_FragColor.rgb += heatColor * totalHeat * 0.3;
+                    }
                 `
                 );
             };
@@ -1036,6 +1511,83 @@
                 }
             }
 
+            // --- DYNAMIC ATMOSPHERE ---
+
+            // 1. Camera Shake System
+            window.shakeIntensity = 0;
+            window.shakeCamera = function (intensity) {
+                window.shakeIntensity = Math.min(window.shakeIntensity + intensity, 1.0);
+            };
+
+            // 2. Dust Particles
+            const particleCount = 200;
+            const particlesGeom = new THREE.BufferGeometry();
+            const particlePositions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i++) {
+                particlePositions[i] = (Math.random() - 0.5) * 15; // Spread
+            }
+            particlesGeom.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+            const particlesMat = new THREE.PointsMaterial({
+                color: 0xffaa00, // Golden dust
+                size: 0.05,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            const particleSystem = new THREE.Points(particlesGeom, particlesMat);
+            scene.add(particleSystem);
+
+            // 3. Dynamic Spotlights (Tournament Feel)
+            const spot1 = new THREE.SpotLight(0xffaa00, 50.0);
+            spot1.angle = 0.3;
+            spot1.penumbra = 0.5;
+            spot1.position.set(5, 10, 5);
+            spot1.castShadow = true;
+            spot1.target.position.set(0, 0, 0);
+            scene.add(spot1);
+            scene.add(spot1.target);
+
+            const spot2 = new THREE.SpotLight(0x00aaff, 50.0); // Contrast blue
+            spot2.angle = 0.3;
+            spot2.penumbra = 0.5;
+            spot2.position.set(-5, 10, -5);
+            spot2.castShadow = true;
+            spot2.target.position.set(0, 0, 0);
+            scene.add(spot2);
+            scene.add(spot2.target);
+
+            function updateAtmosphere(time) {
+                // Animate Particles
+                const positions = particleSystem.geometry.attributes.position.array;
+                for (let i = 0; i < particleCount; i++) {
+                    const idx = i * 3;
+                    positions[idx + 1] += Math.sin(time * 0.001 + positions[idx]) * 0.002; // Float Y
+                    positions[idx] += Math.cos(time * 0.0005 + positions[idx + 1]) * 0.001; // Drift X
+                }
+                particleSystem.geometry.attributes.position.needsUpdate = true;
+
+                // Animate Spotlights
+                spot1.target.position.x = Math.sin(time * 0.0005) * 3;
+                spot1.target.position.z = Math.cos(time * 0.0005) * 3;
+
+                spot2.target.position.x = Math.sin(time * 0.0007 + Math.PI) * 3;
+                spot2.target.position.z = Math.cos(time * 0.0007 + Math.PI) * 3;
+
+                // Camera Shake
+                if (window.shakeIntensity > 0) {
+                    const noiseX = (Math.random() - 0.5) * window.shakeIntensity * 0.2;
+                    const noiseY = (Math.random() - 0.5) * window.shakeIntensity * 0.2;
+                    const noiseZ = (Math.random() - 0.5) * window.shakeIntensity * 0.2;
+
+                    if (camera) {
+                        camera.position.add(new THREE.Vector3(noiseX, noiseY, noiseZ));
+                        // Dampen
+                        window.shakeIntensity *= 0.9;
+                        if (window.shakeIntensity < 0.01) window.shakeIntensity = 0;
+                    }
+                }
+            }
+
             // SAFETY NET: Check for NaN Camera
             if (camera && (isNaN(camera.position.x) || isNaN(camera.position.y) || isNaN(camera.position.z))) {
                 console.error("CAMERA BECAME NAN! RESETTING!");
@@ -1050,6 +1602,7 @@
             }
 
             if (window.controls) controls.update();
+            updateAtmosphere(Date.now()); // Call Atmosphere Update
             updateUniforms();
             renderer.render(scene, camera);
         }
@@ -1159,6 +1712,18 @@
                 clearTimeout(window.stanceController.guardTimer);
                 window.stanceController.guardTimer = null;
             }
+
+            // CHARGED PUNCH: If was charging, enable power hit
+            if (window.playerIsCharging) {
+                window.playerChargedPunch = true;
+                console.log("⚡ CHARGED PUNCH READY!");
+                window.playerIsCharging = false;
+            }
+
+            // Hide charge indicator
+            const indicator = document.getElementById('charge-indicator');
+            if (indicator) indicator.style.display = 'none';
+
             window.setGuarding(false);
         });
 
