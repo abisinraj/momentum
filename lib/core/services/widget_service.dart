@@ -135,21 +135,24 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
       cycleProgress = '$current/$total';
     }
 
-    debugPrint('[WidgetSync] Updating Widget -> Streak: $streak, Title: $title, Progress: $cycleProgress');
+    // 4. Get Tomorrow's Workout for "Next" preview
+    final tomorrowWorkout = await db.getTomorrowWorkout();
+    
+    debugPrint('[WidgetSync] Updating Widget -> Streak: $streak, Title: $title, Progress: $cycleProgress, Tomorrow: ${tomorrowWorkout?.name}');
 
     debugPrint('[WidgetSync] Calling widgetService.updateWidget with: Streak=$streak, Title=$title');
     
-    // 4. Get Theme
+    // 5. Get Theme
     final currentTheme = ref.read(widgetThemeProvider).valueOrNull ?? 'classic';
 
-    // 5. Update Widget
+    // 6. Update Widget
     await widgetService.updateWidget(
       streak: streak,
       title: title,
       desc: desc,
       cycleProgress: cycleProgress,
       widgetTheme: currentTheme,
-      nextWorkoutName: nextWorkout?.name ?? 'Momentum', 
+      nextWorkoutName: tomorrowWorkout?.name, 
     );
   } catch (e) {
     debugPrint('[WidgetSync] Error: $e');

@@ -902,6 +902,29 @@ class AppDatabase extends _$AppDatabase {
     return allWorkouts.first;
   }
   
+  /// Get the workout for tomorrow's split day (for widget preview)
+  Future<Workout?> getTomorrowWorkout() async {
+    final allWorkouts = await getAllWorkouts();
+    if (allWorkouts.isEmpty) return null;
+    
+    final user = await getUser();
+    final currentIndex = user?.currentSplitIndex ?? 0;
+    final splitDays = user?.splitDays ?? allWorkouts.length;
+    
+    // Calculate tomorrow's index (wrap around if at end of cycle)
+    final tomorrowIndex = (currentIndex + 1) % splitDays;
+    
+    // Find workout matching tomorrow's split index
+    for (final workout in allWorkouts) {
+      if (workout.orderIndex == tomorrowIndex) {
+        return workout;
+      }
+    }
+    
+    // Fallback to first workout if index is out of range
+    return allWorkouts.first;
+  }
+  
   /// Count completed sessions for a specific workout orderIndex (current split day)
   Future<int> getCompletedCountForSplitDay(int splitIndex) async {
     final allWorkouts = await getAllWorkouts();
