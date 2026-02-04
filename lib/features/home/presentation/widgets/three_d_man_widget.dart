@@ -14,6 +14,7 @@ class ThreeDManWidget extends ConsumerStatefulWidget {
   final double height;
   final bool transparent;
   final ValueChanged<String>? onMuscleTap;
+  final ValueChanged<bool>? onGameStateChange; // Called when game starts/ends
   final String? focusMuscle;
   final String? heroTag;
   final bool interactive;
@@ -24,6 +25,7 @@ class ThreeDManWidget extends ConsumerStatefulWidget {
     this.height = 400,
     this.transparent = true,
     this.onMuscleTap,
+    this.onGameStateChange,
     this.focusMuscle,
     this.heroTag,
     this.interactive = true,
@@ -71,6 +73,17 @@ class _ThreeDManWidgetState extends ConsumerState<ThreeDManWidget> {
                   if (widget.heroTag != null) {
                     _isModelLoaded[widget.heroTag!] = true;
                   }
+                }
+              } else if (data['type'] == 'game_start') {
+                // Notify parent that game is starting
+                widget.onGameStateChange?.call(true);
+              } else if (data['type'] == 'game_end') {
+                // Notify parent that game is ending
+                widget.onGameStateChange?.call(false);
+              } else if (data['type'] == 'close_page') {
+                // Close the page/pop navigation when game ends
+                if (mounted && Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
                 }
               }
             } catch (e) {

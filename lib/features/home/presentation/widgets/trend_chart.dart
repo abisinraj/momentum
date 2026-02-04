@@ -93,15 +93,36 @@ class _TrendChartState extends ConsumerState<TrendChart> {
                 }
 
                 // Prepare Data: Sort by date
-                final sorted = List.of(sessions);
+                var sorted = List.of(sessions);
                 sorted.sort((a, b) {
                   final dtA = a['completedAt'] as DateTime;
                   final dtB = b['completedAt'] as DateTime;
                   return dtA.compareTo(dtB);
                 });
                 
+                // When showing reps, filter to only show same workout type
+                if (_showReps && sorted.isNotEmpty) {
+                  // Find the most recent workout ID
+                  final mostRecentWorkout = sorted.last['workout'];
+                  if (mostRecentWorkout != null) {
+                    final targetWorkoutId = mostRecentWorkout.id;
+                    sorted = sorted.where((s) => 
+                      s['workout'] != null && s['workout'].id == targetWorkoutId
+                    ).toList();
+                  }
+                }
+                
                 // Take last 20 for readability
                 final recent = sorted.length > 20 ? sorted.sublist(sorted.length - 20) : sorted;
+                
+                if (recent.isEmpty) {
+                  return Center(
+                    child: Text(
+                      _showReps ? 'No rep data for this workout' : 'No data yet',
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    ),
+                  );
+                }
                 
                 List<FlSpot> spots = [];
                 for (int i = 0; i < recent.length; i++) {

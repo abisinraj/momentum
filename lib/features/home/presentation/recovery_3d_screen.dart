@@ -17,6 +17,7 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
   String? _selectedMuscle;
   Map<String, dynamic>? _currentMuscleStats;
   bool _isLoadingStats = false;
+  bool _isGameActive = false; // Tracks when boxing match is running
 
   void _handleMuscleTap(String muscle) {
     if (!mounted) return;
@@ -70,6 +71,11 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
                 height: MediaQuery.of(context).size.height,
                 focusMuscle: _selectedMuscle,
                 onMuscleTap: _handleMuscleTap,
+                onGameStateChange: (isActive) {
+                  if (mounted) {
+                    setState(() => _isGameActive = isActive);
+                  }
+                },
                 heroTag: 'muscle-model',
               ),
           ),
@@ -78,24 +84,31 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
           Positioned(
             top: 16, // Reduced since we use SafeArea inside Stack or just let it float
             left: 16,
-            child: SafeArea(
-              child: GestureDetector(
-                onTap: () => context.pop(),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface.withValues(alpha: 0.8),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+            child: AnimatedOpacity(
+              opacity: _isGameActive ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: IgnorePointer(
+                ignoring: _isGameActive,
+                child: SafeArea(
+                  child: GestureDetector(
+                    onTap: () => context.pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface.withValues(alpha: 0.8),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                    ],
+                      child: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 24),
+                    ),
                   ),
-                  child: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 24),
                 ),
               ),
             ),
@@ -106,7 +119,7 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
             top: 24,
             right: 24,
             child: AnimatedOpacity(
-              opacity: _selectedMuscle == null ? 1.0 : 0.0,
+              opacity: (_selectedMuscle == null && !_isGameActive) ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 300),
               child: SafeArea(
                 child: Column(

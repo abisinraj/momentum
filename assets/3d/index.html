@@ -306,6 +306,8 @@
             groundGroup.add(tournamentGrid);
 
             groundGroup.position.y = 0;
+            groundGroup.visible = false; // Hidden by default (Profile Mode)
+            window.groundGroup = groundGroup; // Expose for game mode toggle
             scene.add(groundGroup);
 
             const loader = new GLTFLoader();
@@ -314,6 +316,29 @@
             function onModelLoaded(gltf) {
                 model = gltf.scene;
                 window.model = model;
+
+                // CRITICAL: Define findBone IMMEDIATELY so stanceController can use it
+                window.findBone = function (name) {
+                    if (!model) return null;
+                    let firstMatch = null;
+                    let exactMatch = null;
+
+                    model.traverse(child => {
+                        const cName = child.name;
+                        if (!cName) return;
+
+                        if (cName === name || cName === 'Mixamo_' + name || cName.split(':').pop() === name) {
+                            exactMatch = child;
+                        }
+                        if (!firstMatch && cName.toLowerCase().includes(name.toLowerCase())) {
+                            firstMatch = child;
+                        }
+                    });
+
+                    return exactMatch || firstMatch;
+                };
+                // Also make it available without window prefix
+                findBone = window.findBone;
 
                 // Auto-center model on X and Z axes for better rotation (profile views)
                 const box = new THREE.Box3().setFromObject(model);
@@ -745,6 +770,12 @@
             gameScore = 0;
             comboCount = 0;
 
+            // Show Arena Elements (Tournament Mode)
+            if (window.groundGroup) window.groundGroup.visible = true;
+            if (window.particleSystem) window.particleSystem.visible = true;
+            if (window.gameSpot1) window.gameSpot1.visible = true;
+            if (window.gameSpot2) window.gameSpot2.visible = true;
+
             // Enable AI
             if (window.aiController) {
                 window.aiController.enabled = true;
@@ -1168,18 +1199,18 @@
                         box-shadow: 0 2px 5px rgba(0,0,0,0.3);
                     ">X</button>
 
-                    <!-- AI / MODEL HEALTH (Top Left - RED) -->
-                    <div style="position: absolute; top: 20px; left: 20px; text-align: left;">
-                        <div style="font-weight: 900; color: #ff4444; font-size: 16px; margin-bottom: 4px; text-shadow: 1px 1px 2px black; font-family: sans-serif; letter-spacing: 1px;">YOU (AI)</div>
-                        <div style="width: 150px; height: 10px; background: rgba(0,0,0,0.5); border: 1px solid #555; border-radius: 5px; overflow: hidden;">
+                    <!-- AI / MODEL HEALTH (Bottom Left - RED) -->
+                    <div style="position: absolute; bottom: 80px; left: 20px; text-align: left;">
+                        <div style="font-weight: 900; color: #ff4444; font-size: 14px; margin-bottom: 4px; text-shadow: 1px 1px 2px black; font-family: sans-serif; letter-spacing: 1px;">OPPONENT</div>
+                        <div style="width: 120px; height: 8px; background: rgba(0,0,0,0.5); border: 1px solid #555; border-radius: 5px; overflow: hidden;">
                             <div id="health-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ff4444, #b71c1c); transition: width 0.3s ease;"></div>
                         </div>
                     </div>
 
                     <!-- PLAYER HEALTH (Bottom Right - GREEN) -->
                     <div style="position: absolute; bottom: 80px; right: 20px; text-align: right;">
-                        <div style="font-weight: 900; color: #4CAF50; font-size: 16px; margin-bottom: 4px; text-shadow: 1px 1px 2px black; font-family: sans-serif; letter-spacing: 1px;">YOU</div>
-                        <div style="width: 150px; height: 10px; background: rgba(0,0,0,0.5); border: 1px solid #555; border-radius: 5px; overflow: hidden; margin-left: auto;">
+                        <div style="font-weight: 900; color: #4CAF50; font-size: 14px; margin-bottom: 4px; text-shadow: 1px 1px 2px black; font-family: sans-serif; letter-spacing: 1px;">YOU</div>
+                        <div style="width: 120px; height: 8px; background: rgba(0,0,0,0.5); border: 1px solid #555; border-radius: 5px; overflow: hidden; margin-left: auto;">
                             <div id="player-health-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #43a047, #4CAF50); transition: width 0.3s ease;"></div>
                         </div>
                     </div>
@@ -1317,20 +1348,17 @@
                 // 3. Return to Idle Stance
                 if (window.setCombatMode) window.setCombatMode(false); // Sets targetPose to 'IDLE'
 
-                // 4. Return Camera
-                if (window.camera && window.controls) {
-                    camera.position.set(0, 1.2, 4.0); // Full View Reset
-                    controls.target.set(0, 1.0, 0); // Reset target (was 1.35/1.45 during game)
+                // 4. Hide Arena Elements (Return to Profile Mode)
+                if (window.groundGroup) window.groundGroup.visible = false;
+                if (window.particleSystem) window.particleSystem.visible = false;
+                if (window.gameSpot1) window.gameSpot1.visible = false;
+                if (window.gameSpot2) window.gameSpot2.visible = false;
 
-                    // UNLOCK CONTROLS
-                    controls.enabled = true;
-                    controls.enableZoom = true;
-                    controls.enablePan = true;
-                    controls.enableRotate = true;
-                    controls.enableDamping = true;
-                    controls.update();
+                // 5. Close the page completely (exit 3D mode)
+                if (window.FlutterChannel) {
+                    window.FlutterChannel.postMessage(JSON.stringify({ type: 'close_page' }));
                 }
-            }, 3000);
+            }, 5000); // 5 second delay as requested
 
             if (window.FlutterChannel) {
                 window.FlutterChannel.postMessage(JSON.stringify({ type: 'game_end', score: gameScore }));
@@ -1403,20 +1431,17 @@
 
                 shader.vertexShader = `
                     varying vec3 vWorldPosition;
-                    varying vec3 vLocalNormal;
                     ${shader.vertexShader}
                 `.replace(
                     '#include <worldpos_vertex>',
                     `
                     #include <worldpos_vertex>
                     vWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;
-                    vLocalNormal = normal; // Pass local normal
                     `
                 );
 
                 shader.fragmentShader = `
                     varying vec3 vWorldPosition;
-                    varying vec3 vLocalNormal;
                     uniform vec3 u_zone_starts[${MAX_ZONES}];
                     uniform vec3 u_zone_ends[${MAX_ZONES}];
                     uniform float u_zone_radii[${MAX_ZONES}];
@@ -1435,15 +1460,6 @@
                     `
                     #include <dithering_fragment>
                     
-                    // --- LOCAL FRONT/BACK DIAGNOSTIC (STAYS FOR DEBUGGING) ---
-                    vec3 diagnosticColor = vec3(0.8, 0.8, 0.8);
-                    if (vLocalNormal.z > 0.4) {
-                        diagnosticColor = vec3(0.0, 1.0, 1.0); // LOCAL FRONT = CYAN
-                    } else if (vLocalNormal.z < -0.4) {
-                        diagnosticColor = vec3(1.0, 0.0, 1.0); // LOCAL BACK = MAGENTA
-                    }
-                    gl_FragColor.rgb *= diagnosticColor;
-
                     float totalHeat = 0.0;
                     for (int i = 0; i < ${MAX_ZONES}; i++) {
                         if (i >= u_zone_count) break;
@@ -1535,6 +1551,8 @@
                 blending: THREE.AdditiveBlending
             });
             const particleSystem = new THREE.Points(particlesGeom, particlesMat);
+            particleSystem.visible = false; // Hidden by default (Profile Mode)
+            window.particleSystem = particleSystem; // Expose for game mode toggle
             scene.add(particleSystem);
 
             // 3. Dynamic Spotlights (Tournament Feel)
@@ -1555,6 +1573,12 @@
             spot2.target.position.set(0, 0, 0);
             scene.add(spot2);
             scene.add(spot2.target);
+
+            // Hide spotlights by default (Profile Mode)
+            spot1.visible = false;
+            spot2.visible = false;
+            window.gameSpot1 = spot1;
+            window.gameSpot2 = spot2;
 
             function updateAtmosphere(time) {
                 // Animate Particles
@@ -1602,7 +1626,7 @@
             }
 
             if (window.controls) controls.update();
-            updateAtmosphere(Date.now()); // Call Atmosphere Update
+            if (gameMode) updateAtmosphere(Date.now()); // Only animate atmosphere in game mode
             updateUniforms();
             renderer.render(scene, camera);
         }
@@ -1706,6 +1730,8 @@
             const result = exactMatch || firstMatch;
             return result;
         }
+        // Expose globally for stanceController
+        window.findBone = findBone;
 
         window.addEventListener('pointerup', () => {
             if (window.stanceController && window.stanceController.guardTimer) {

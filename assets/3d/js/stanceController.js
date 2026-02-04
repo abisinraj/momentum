@@ -83,25 +83,7 @@ window.stanceController = {
         this.targetPose = 'IDLE'; // Default to relaxed
         console.log("🥊 Stance Controller Ready (v6.3 - RELAXED IDLE)");
 
-        // Add Debug Visuals
-        this.addBoneDebugVisuals();
-
-        // Create Debug UI Overlay
-        if (!document.getElementById('debug-overlay')) {
-            const d = document.createElement('div');
-            d.id = 'debug-overlay';
-            d.style.position = 'absolute';
-            d.style.top = '10px';
-            d.style.right = '10px';
-            d.style.background = 'rgba(0,0,0,0.7)';
-            d.style.color = '#0f0';
-            d.style.padding = '10px';
-            d.style.fontFamily = 'monospace';
-            d.style.fontSize = '12px';
-            d.style.zIndex = '99999';
-            d.style.pointerEvents = 'none';
-            document.body.appendChild(d);
-        }
+        // Debug visuals removed for production
     },
     addBoneDebugVisuals: function () {
         const geom = new THREE.SphereGeometry(0.05, 8, 8);
@@ -304,11 +286,6 @@ window.stanceController = {
             const target = poseData ? poseData[name] : null;
 
             if (target) {
-                // LOGGING: Check interpolation issues
-                if (name === 'RightUpLeg' && Math.random() < 0.01) {
-                    console.log(`LegDebug [${name}]: Current=${boneData.currentRot.z.toFixed(2)} Target=${target.rz.toFixed(2)}`);
-                }
-
                 boneData.currentRot.x += (target.rx - boneData.currentRot.x) * stiffness;
                 boneData.currentRot.y += (target.ry - boneData.currentRot.y) * stiffness;
 
@@ -317,20 +294,6 @@ window.stanceController = {
                 if (diffZ > Math.PI) diffZ -= Math.PI * 2;
                 if (diffZ < -Math.PI) diffZ += Math.PI * 2;
                 boneData.currentRot.z += diffZ * stiffness;
-            }
-
-            // Update Debug UI
-            if (name === 'RightUpLeg' || name === 'LeftUpLeg') {
-                const ui = document.getElementById('debug-overlay');
-                if (ui) {
-                    if (!ui.innerText.includes(name)) ui.innerText += `\n${name}: Z=${boneData.currentRot.z.toFixed(2)}`;
-                    else {
-                        // Simple replace for demo (inefficient but works)
-                        const lines = ui.innerText.split('\n');
-                        const newLines = lines.map(l => l.includes(name) ? `${name}: Z=${boneData.currentRot.z.toFixed(2)} (T:${target ? target.rz : 'N/A'})` : l);
-                        ui.innerText = newLines.join('\n');
-                    }
-                }
             }
 
             // Physics damping and clamping
