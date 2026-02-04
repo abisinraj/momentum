@@ -637,35 +637,37 @@
             if (gameMode) {
                 window.chargeStartTime = Date.now(); // Track for Charged Punch
 
-                if (window.stanceController.guardTimer) clearTimeout(window.stanceController.guardTimer);
-                window.stanceController.guardTimer = setTimeout(() => {
-                    window.setGuarding(true);
-                    window.playerIsCharging = true; // Enter Charge Mode
-                    console.log("⚡ CHARGING PUNCH...");
+                if (window.stanceController) {
+                    if (window.stanceController.guardTimer) clearTimeout(window.stanceController.guardTimer);
+                    window.stanceController.guardTimer = setTimeout(() => {
+                        window.setGuarding(true);
+                        window.playerIsCharging = true; // Enter Charge Mode
+                        console.log("⚡ CHARGING PUNCH...");
 
-                    // Visual Feedback: Add pulsing indicator
-                    let indicator = document.getElementById('charge-indicator');
-                    if (!indicator) {
-                        indicator = document.createElement('div');
-                        indicator.id = 'charge-indicator';
-                        indicator.style.cssText = `
-                            position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
-                            background: radial-gradient(circle, rgba(255,200,0,0.8), transparent);
-                            width: 60px; height: 60px; border-radius: 50%;
-                            animation: pulse 0.3s ease-in-out infinite alternate;
-                            pointer-events: none; z-index: 1001;
-                        `;
-                        document.body.appendChild(indicator);
-                        // Add keyframes if not exist
-                        if (!document.getElementById('charge-keyframes')) {
-                            const style = document.createElement('style');
-                            style.id = 'charge-keyframes';
-                            style.textContent = `@keyframes pulse { from { transform: translateX(-50%) scale(1); opacity: 0.6; } to { transform: translateX(-50%) scale(1.3); opacity: 1; } }`;
-                            document.head.appendChild(style);
+                        // Visual Feedback: Add pulsing indicator
+                        let indicator = document.getElementById('charge-indicator');
+                        if (!indicator) {
+                            indicator = document.createElement('div');
+                            indicator.id = 'charge-indicator';
+                            indicator.style.cssText = `
+                                position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+                                background: radial-gradient(circle, rgba(255,200,0,0.8), transparent);
+                                width: 60px; height: 60px; border-radius: 50%;
+                                animation: pulse 0.3s ease-in-out infinite alternate;
+                                pointer-events: none; z-index: 1001;
+                            `;
+                            document.body.appendChild(indicator);
+                            // Add keyframes if not exist
+                            if (!document.getElementById('charge-keyframes')) {
+                                const style = document.createElement('style');
+                                style.id = 'charge-keyframes';
+                                style.textContent = `@keyframes pulse { from { transform: translateX(-50%) scale(1); opacity: 0.6; } to { transform: translateX(-50%) scale(1.3); opacity: 1; } }`;
+                                document.head.appendChild(style);
+                            }
                         }
-                    }
-                    indicator.style.display = 'block';
-                }, 500); // 500ms to start charging
+                        indicator.style.display = 'block';
+                    }, 500); // 500ms to start charging
+                }
             }
 
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -989,7 +991,7 @@
             }
 
             // CHECK GUARD (Damage Mitigation)
-            if (window.stanceController.targetPose === 'GUARD') {
+            if (window.stanceController && window.stanceController.targetPose === 'GUARD') {
                 damage *= 0.3; // Blocked damage
                 hitText = "BLOCKED";
                 if (window.playBlockSound) window.playBlockSound();
@@ -1514,10 +1516,20 @@
 
             const now = Date.now();
             if (window.stanceController) {
-                // IMPORTANT: Run stance controller AFTER mixer to overwrite bone rotations
-                window.stanceController.update(now);
+                try {
+                    // IMPORTANT: Run stance controller AFTER mixer to overwrite bone rotations
+                    window.stanceController.update(now);
+                } catch (e) {
+                    console.warn("StanceController error:", e);
+                }
             }
-            if (window.aiController) window.aiController.update(now);
+            if (window.aiController) {
+                try {
+                    window.aiController.update(now);
+                } catch (e) {
+                    console.warn("AIController error:", e);
+                }
+            }
 
             // CAMERA CONTROL LOGIC
             if (isZooming) {

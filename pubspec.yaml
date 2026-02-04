@@ -83,6 +83,7 @@ flutter:
   assets:
     - assets/images/
     - assets/3d/
+    - assets/3d/js/
 
 
 flutter_launcher_icons:
