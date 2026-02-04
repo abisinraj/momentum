@@ -246,16 +246,28 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('Momentum AI'),
-        centerTitle: true,
+        centerTitle: false,
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               if (value == 'clear_history') {
                 _clearChat();
+              } else if (value == 'change_model') {
+                _showModelSelectionDialog();
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'change_model',
+                child: Row(
+                  children: [
+                    Icon(Icons.psychology_outlined, size: 20),
+                    SizedBox(width: 8),
+                    Text('Change AI Model'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'clear_history',
                 child: Row(
@@ -365,6 +377,17 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                                  : colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                           ),
                         ),
+                        if (isUser) ...[
+                           const SizedBox(width: 8),
+                           GestureDetector(
+                             onTap: () => _editMessage(msg),
+                             child: Icon(
+                               Icons.edit, 
+                               size: 14, 
+                               color: colorScheme.onPrimaryContainer.withValues(alpha: 0.6)
+                             ),
+                           ),
+                        ],
                      ],
                    ),
                 ],
@@ -443,14 +466,19 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                      ),
                      maxLines: null,
                      textCapitalization: TextCapitalization.sentences,
-                     onSubmitted: (_) => _editingMessageId != null ? _saveEditedMessage() : _sendMessage(),
-                   ),
+                      onChanged: (val) => setState(() {}),
+                      onSubmitted: (_) => (_textController.text.trim().isNotEmpty || _selectedImageBytes != null) 
+                          ? (_editingMessageId != null ? _saveEditedMessage() : _sendMessage()) 
+                          : null,
+                    ),
                  ),
                  const SizedBox(width: 8),
-                 IconButton.filled(
-                   onPressed: (_isLoading && _editingMessageId == null) ? null : (_editingMessageId != null ? _saveEditedMessage : _sendMessage),
-                   icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
-                 ),
+                  IconButton.filled(
+                    onPressed: (_isLoading || (_textController.text.trim().isEmpty && _selectedImageBytes == null && _editingMessageId == null)) 
+                        ? null 
+                        : (_editingMessageId != null ? _saveEditedMessage : _sendMessage),
+                    icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
+                  ),
               ],
             ),
           ],
@@ -458,6 +486,73 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       ),
     );
   }
+
+  void _showModelSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+          final modelAsync = ref.watch(geminiModelProvider);
+          final currentModel = modelAsync.valueOrNull;
+          
+          return AlertDialog(
+            title: const Text('Select Gemini Model'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildModelDialogItem(ref, 'Gemini 3.0 Flash', 'gemini-3.0-flash', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 3.0 Pro Preview', 'gemini-3.0-pro-preview', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 2.0 Flash', 'gemini-2.0-flash', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 2.0 Flash-Lite Preview', 'gemini-2.0-flash-lite-preview-02-05', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 2.0 Pro Exp', 'gemini-2.0-pro-experimental-02-05', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 1.5 Pro', 'gemini-1.5-pro', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 1.5 Flash', 'gemini-1.5-flash', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 1.5 Flash-8B', 'gemini-1.5-flash-8b', currentModel),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildModelDialogItem(WidgetRef ref, String label, String value, String? current) {
+    final isSelected = value == current;
+    return ListTile(
+      leading: Icon(
+        Icons.auto_awesome, 
+        color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey,
+        size: 20,
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : null,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
+        ),
+      ),
+      trailing: isSelected ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary, size: 18) : null,
+      onTap: () {
+        ref.read(geminiModelProvider.notifier).setModel(value);
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Model set to $label')),
+        );
+      },
+    );
+  }
+
 }
 
 class ChatMessage {

@@ -32,6 +32,9 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
     _initConnectivity();
   }
 
@@ -204,9 +207,11 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     }
   }
 
-  Future<void> _editMessage(DietChatMessage message) async {
-    _editingMessageId = message.id;
-    _textInputController.text = message.content;
+  void _editMessage(DietChatMessage message) {
+    setState(() {
+      _editingMessageId = message.id;
+      _textInputController.text = message.content;
+    });
     _tabController.animateTo(1); // Switch to AI Assistant tab
   }
 
@@ -421,9 +426,22 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
             onSelected: (value) {
               if (value == 'clear_history') {
                 _showClearConfirmation();
+              } else if (value == 'change_model') {
+                _showModelSelectionDialog();
               }
             },
             itemBuilder: (context) => [
+              if (_tabController.index == 1)
+                const PopupMenuItem(
+                  value: 'change_model',
+                  child: Row(
+                    children: [
+                      Icon(Icons.psychology_outlined, size: 20),
+                      SizedBox(width: 8),
+                      Text('Change AI Model'),
+                    ],
+                  ),
+                ),
               const PopupMenuItem(
                 value: 'clear_history',
                 child: Row(
@@ -447,7 +465,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                       },
                       child: Row(
                         children: [
-                          Icon(is24h ? Icons.access_time_filled : Icons.access_time, size: 20, color: theme.colorScheme.onSurface),
+                          Icon(is24h ? Icons.access_time_filled : Icons.access_time, size: 20, color: Theme.of(context).colorScheme.onSurface),
                           const SizedBox(width: 8),
                           Text(is24h ? 'Use 12h Format' : 'Use 24h Format'),
                         ],
@@ -644,6 +662,17 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                                           : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                                     ),
                                   ),
+                                  if (isUser) ...[
+                                    const SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: () => _editMessage(msg),
+                                      child: Icon(
+                                        Icons.edit, 
+                                        size: 14, 
+                                        color: theme.colorScheme.onPrimary.withValues(alpha: 0.6)
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ],
@@ -694,23 +723,24 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                           : null,
                     ),
                     textInputAction: TextInputAction.send,
-                    onSubmitted: (val) => _editingMessageId != null ? _saveEditedMessage() : _analyzeText(val),
+                    onChanged: (val) => setState(() {}),
+                    onSubmitted: (val) => val.trim().isNotEmpty 
+                        ? (_editingMessageId != null ? _saveEditedMessage() : _analyzeText(val)) 
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: const Color(0xFF1F1F1F), // Dark background always
-                    foregroundColor: Colors.white, // White icon always
-                  ),
+                IconButton.filled(
                   icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
-                  onPressed: () {
-                    if (_editingMessageId != null) {
-                      _saveEditedMessage();
-                    } else {
-                      _analyzeText(_textInputController.text);
-                    }
-                  },
+                  onPressed: (_isAnalyzing || (_textInputController.text.trim().isEmpty && _editingMessageId == null)) 
+                      ? null 
+                      : () {
+                        if (_editingMessageId != null) {
+                          _saveEditedMessage();
+                        } else {
+                          _analyzeText(_textInputController.text);
+                        }
+                      },
                 ),
               ],
             ),
@@ -766,4 +796,71 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
       ),
     );
   }
+
+  void _showModelSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+          final modelAsync = ref.watch(geminiModelProvider);
+          final currentModel = modelAsync.valueOrNull;
+          
+          return AlertDialog(
+            title: const Text('Select Gemini Model'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildModelDialogItem(ref, 'Gemini 3.0 Flash', 'gemini-3.0-flash', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 3.0 Pro Preview', 'gemini-3.0-pro-preview', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 2.0 Flash', 'gemini-2.0-flash', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 2.0 Flash-Lite Preview', 'gemini-2.0-flash-lite-preview-02-05', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 2.0 Pro Exp', 'gemini-2.0-pro-experimental-02-05', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 1.5 Pro', 'gemini-1.5-pro', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 1.5 Flash', 'gemini-1.5-flash', currentModel),
+                    _buildModelDialogItem(ref, 'Gemini 1.5 Flash-8B', 'gemini-1.5-flash-8b', currentModel),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildModelDialogItem(WidgetRef ref, String label, String value, String? current) {
+    final isSelected = value == current;
+    return ListTile(
+      leading: Icon(
+        Icons.auto_awesome, 
+        color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey,
+        size: 20,
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : null,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
+        ),
+      ),
+      trailing: isSelected ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary, size: 18) : null,
+      onTap: () {
+        ref.read(geminiModelProvider.notifier).setModel(value);
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Model set to $label')),
+        );
+      },
+    );
+  }
+
 }

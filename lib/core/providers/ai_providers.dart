@@ -1,4 +1,5 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/services/ai_insights_service.dart';
 import 'package:momentum/core/providers/database_providers.dart';
@@ -27,39 +28,57 @@ final dailyInsightProvider = FutureProvider.autoDispose<AIInsightResponse>((ref)
      );
   }
   
+  // Get API Key and Model first (await them properly)
+  final apiKey = await ref.watch(geminiApiKeyProvider.future);
+  final preferredModel = await ref.watch(geminiModelProvider.future);
+  
+  // Early return if no API key
+  if (apiKey == null || apiKey.isEmpty) {
+    return AIInsightResponse(
+      text: "Configure your Gemini API Key in Settings to unlock AI insights.",
+      mood: "warning",
+      type: "general",
+    );
+  }
+  
   // Watch database to get history
   final db = ref.watch(appDatabaseProvider);
   
-  // 1. History (Recent 5 sessions)
-  final history = await db.getRecentSessionsWithDetails(limit: 5);
-  if (history.isNotEmpty) {
-    final latestSession = history.first;
-    final sessionId = (latestSession['session'] as dynamic).id;
-    final exerciseDetails = await db.getSessionExerciseDetails(sessionId);
-    latestSession['exercises'] = exerciseDetails;
+  try {
+    // 1. History (Recent 5 sessions)
+    final history = await db.getRecentSessionsWithDetails(limit: 5);
+    if (history.isNotEmpty) {
+      final latestSession = history.first;
+      final sessionId = (latestSession['session'] as dynamic).id;
+      final exerciseDetails = await db.getSessionExerciseDetails(sessionId);
+      latestSession['exercises'] = exerciseDetails;
+    }
+    
+    // 2. Trends (Last 30 days)
+    final trend = await db.getVolumeTrend(30);
+    
+    // 3. Milestones (All-time stats)
+    final stats = await db.getAllTimeStats();
+    
+    // 4. Diet Gap (Hours since last meal)
+    final dietGap = await db.getHoursSinceLastFoodLog();
+
+    // Generate insight
+    return ref.watch(aiInsightsServiceProvider).getDailyInsight(
+      user: user,
+      recentSessions: history,
+      allTimeStats: stats,
+      volumeTrend: trend,
+      hoursSinceLastMeal: dietGap,
+      apiKey: apiKey,
+      preferredModel: preferredModel,
+    );
+  } catch (e) {
+    debugPrint('AI Insight Error: $e');
+    return AIInsightResponse(
+      text: "Unable to generate insight. Please try again.",
+      mood: "warning",
+      type: "general",
+    );
   }
-  
-  // 2. Trends (Last 30 days)
-  final trend = await db.getVolumeTrend(30);
-  
-  // 3. Milestones (All-time stats)
-  final stats = await db.getAllTimeStats();
-  
-  // 4. Diet Gap (Hours since last meal)
-  final dietGap = await db.getHoursSinceLastFoodLog();
-
-  // Get API Key and Model
-  final apiKey = ref.watch(geminiApiKeyProvider).valueOrNull;
-  final preferredModel = ref.watch(geminiModelProvider).valueOrNull;
-
-  // Generate insight
-  return ref.watch(aiInsightsServiceProvider).getDailyInsight(
-    user: user,
-    recentSessions: history,
-    allTimeStats: stats,
-    volumeTrend: trend,
-    hoursSinceLastMeal: dietGap,
-    apiKey: apiKey,
-    preferredModel: preferredModel,
-  );
 });

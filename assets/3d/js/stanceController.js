@@ -38,7 +38,7 @@ window.stanceController = {
         for (let logicalName in searchGroups) {
             let found = null;
             for (let term of searchGroups[logicalName]) {
-                found = findBone(term);
+                found = window.findBone ? window.findBone(term) : null;
                 if (found) break;
             }
 
@@ -206,11 +206,11 @@ window.stanceController = {
         if (this.bones['Spine']) this.bones['Spine'].cameraShake = isCritical ? 0.35 : 0.15;
     },
     update: function (time) {
-        if (!model || Object.keys(this.bones).length === 0) return;
+        if (!window.model || Object.keys(this.bones).length === 0) return;
 
         // RESTORED: Breathing & Fatigue (Safe)
         const breathing = Math.sin(time * 0.002) * (this.targetPose === 'IDLE' ? 0.012 : 0.005);
-        const fatigue = (typeof modelHealth !== 'undefined') ? Math.max(0, (100 - modelHealth) / 100) : 0;
+        const fatigue = (typeof window.modelHealth !== 'undefined') ? Math.max(0, (100 - window.modelHealth) / 100) : 0;
 
         // === DAMAGE STATES: Visual Degradation ===
         // State thresholds: 75%, 50%, 25%
@@ -242,7 +242,7 @@ window.stanceController = {
         }
 
         // Visual: Red overlay based on damage (apply to model material)
-        if (model && fatigue > 0.5 && typeof gameMode !== 'undefined' && gameMode) {
+        if (window.model && fatigue > 0.5 && typeof window.gameMode !== 'undefined' && window.gameMode) {
             // Simple body tint via CSS for now (non-invasive)
             const canvas = document.querySelector('canvas');
             if (canvas) {
@@ -256,7 +256,7 @@ window.stanceController = {
 
         // === AI HEAD MOVEMENT (Bob & Weave) ===
         // Only apply during FIGHT stance when not actively attacking
-        if (this.targetPose === 'FIGHT' && typeof gameMode !== 'undefined' && gameMode) {
+        if (this.targetPose === 'FIGHT' && typeof window.gameMode !== 'undefined' && window.gameMode) {
             const t = time * 0.001; // Slow time scale
 
             // Head bob (side-to-side weave)
@@ -459,12 +459,12 @@ window.stanceController = {
         }
 
         // Camera Tracking
-        if (window.controls && model) {
-            const targetY = gameMode ? 1.45 : 1.0;
+        if (window.controls && window.model) {
+            const targetY = (typeof window.gameMode !== 'undefined' && window.gameMode) ? 1.45 : 1.0;
             const lerpSpeed = 0.05;
 
-            controls.target.x += (model.position.x - controls.target.x) * lerpSpeed;
-            controls.target.z += (model.position.z - controls.target.z) * lerpSpeed;
+            controls.target.x += (window.model.position.x - controls.target.x) * lerpSpeed;
+            controls.target.z += (window.model.position.z - controls.target.z) * lerpSpeed;
             controls.target.y += (targetY - controls.target.y) * lerpSpeed;
         }
     }

@@ -4,40 +4,59 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:padding="12dp">
+    android:padding="16dp">
 
     <!-- Header Row -->
-    <TextView
-        android:id="@+id/widget_app_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="MOMENTUM"
-        android:textSize="10sp"
-        android:letterSpacing="0.2"
-        android:textStyle="bold"
-        android:textColor="@color/widget_text_secondary" 
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
-        
-    <TextView
-        android:id="@+id/widget_streak"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="🔥 12"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_accent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
-
-    <!-- Content Center -->
     <LinearLayout
+        android:id="@+id/widget_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
+        android:gravity="center_vertical">
+        
+        <TextView
+            android:id="@+id/widget_app_name"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="MOMENTUM"
+            android:textSize="11sp"
+            android:letterSpacing="0.15"
+            android:textStyle="bold"
+            android:textColor="@color/widget_text_primary" />
+            
+        <!-- Streak Badge -->
+        <LinearLayout
+            android:id="@+id/widget_streak_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/widget_streak_badge"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:gravity="center">
+            
+            <TextView
+                android:id="@+id/widget_streak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔥 3"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_streak_text" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Content Section -->
+    <LinearLayout
+        android:id="@+id/widget_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_centerVertical="true"
-        android:layout_toStartOf="@id/widget_streak"
-        android:layout_toEndOf="@id/widget_app_name"
+        android:layout_below="@id/widget_header"
+        android:layout_above="@id/widget_footer"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:gravity="center_vertical">
         
         <TextView
@@ -45,18 +64,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="TODAY'S PLAN"
-            android:textSize="9sp"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:textColor="@color/widget_text_secondary"
-            android:letterSpacing="0.1"
-            android:layout_marginBottom="2dp"/>
+            android:textColor="@color/widget_text_tertiary"
+            android:letterSpacing="0.08"
+            android:layout_marginBottom="4dp"/>
             
         <TextView
             android:id="@+id/widget_workout_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Push Day A"
-            android:textSize="18sp"
+            android:text="Boxing Basics..."
+            android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@color/widget_text_primary"
             android:maxLines="1"
@@ -66,9 +85,9 @@
             android:id="@+id/widget_workout_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="5 Exercises • ~45m"
+            android:text="5 Exercises • Tap to view"
             android:textSize="12sp"
-            android:textColor="@color/widget_text_secondary"
+            android:textColor="@color/widget_text_tertiary"
             android:maxLines="1"
             android:ellipsize="end"
             android:layout_marginTop="2dp"/>
@@ -76,27 +95,68 @@
     </LinearLayout>
 
     <!-- Footer Row -->
-    <TextView
-        android:id="@+id/widget_weekly_progress"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/widget_footer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:text="Day 1/3"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_accent"
-        android:paddingVertical="2dp" />
+        android:gravity="center_vertical">
+        
+        <!-- Progress Section -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            
+            <TextView
+                android:id="@+id/widget_progress_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PROGRESS"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_text_tertiary"
+                android:letterSpacing="0.1" />
+                
+            <TextView
+                android:id="@+id/widget_weekly_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Day 5/8"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
 
-    <TextView
-        android:id="@+id/widget_next_workout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:text="Next: Leg Day"
-        android:textSize="10sp"
-        android:textColor="@color/widget_text_secondary"
-        android:visibility="visible" />
+        <!-- Next Up Section -->
+        <LinearLayout
+            android:id="@+id/widget_next_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end"
+            android:visibility="visible">
+            
+            <TextView
+                android:id="@+id/widget_next_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NEXT UP"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_text_tertiary"
+                android:letterSpacing="0.1" />
+                
+            <TextView
+                android:id="@+id/widget_next_workout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Boxing Basics 2"
+                android:textSize="13sp"
+                android:textColor="@color/widget_text_secondary" />
+        </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>

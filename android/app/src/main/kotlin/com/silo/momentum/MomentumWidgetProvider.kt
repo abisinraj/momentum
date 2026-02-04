@@ -165,19 +165,19 @@ class MomentumWidgetProvider : AppWidgetProvider() {
             }
 
             // Update views
-            views.setTextViewText(R.id.widget_streak, "\uD83D\uDD25 $streak") // Fire emoji
+            views.setTextViewText(R.id.widget_streak, "🔥 $streak")
             views.setTextViewText(R.id.widget_workout_name, title)
             views.setTextViewText(R.id.widget_workout_desc, desc)
             
             // Cycle Progress
             views.setTextViewText(R.id.widget_weekly_progress, "Day $weeklyProgress")
-            views.setViewVisibility(R.id.widget_weekly_progress, android.view.View.VISIBLE)
 
+            // Next Workout Section
             if (nextWorkout.isNotEmpty()) {
-                views.setViewVisibility(R.id.widget_next_workout, android.view.View.VISIBLE)
-                views.setTextViewText(R.id.widget_next_workout, "Next: $nextWorkout")
+                views.setViewVisibility(R.id.widget_next_container, android.view.View.VISIBLE)
+                views.setTextViewText(R.id.widget_next_workout, nextWorkout)
             } else {
-                views.setViewVisibility(R.id.widget_next_workout, android.view.View.GONE)
+                views.setViewVisibility(R.id.widget_next_container, android.view.View.GONE)
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)

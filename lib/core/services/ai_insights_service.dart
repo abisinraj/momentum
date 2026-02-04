@@ -186,15 +186,46 @@ class AIInsightsService {
   }) async {
     try {
       if (apiKey == null || apiKey == _defaultApiKey || apiKey.isEmpty) {
-        // Fallback to MET formula if no API key
-        // MET 7.0 for resistance training
+        // --- BUILT-IN MET CALCULATION (FALLBACK) ---
         final weight = user.weightKg ?? 70.0;
         final hours = durationSeconds / 3600.0;
-        final intensityFactor = (intensity ?? 5) / 5.0;
-        return (7.0 * weight * hours * intensityFactor).round();
+        final rpe = (intensity ?? 5).toDouble();
+        
+        // Determine base MET based on workout content
+        double baseMET = 6.0; // Default: Moderate weight lifting
+        
+        bool hasHeavyLifts = false;
+        bool hasCardio = false;
+        
+        for (var se in exercises) {
+          final def = exerciseDefinitions.firstWhere((e) => e.id == se.exerciseId);
+          final name = def.name.toLowerCase();
+          final muscle = def.primaryMuscleGroup?.toLowerCase() ?? '';
+          
+          if (name.contains('run') || name.contains('cycle') || name.contains('jump') || name.contains('cardio')) {
+             hasCardio = true;
+          }
+          if (muscle.contains('legs') || name.contains('deadlift') || name.contains('squat')) {
+             hasHeavyLifts = true;
+          }
+        }
+
+        if (hasCardio) {
+          baseMET = 8.5; // High intensity cardio MET
+        } else if (hasHeavyLifts) {
+          baseMET = 7.5; // Heavy compound lifting MET
+        } else {
+          baseMET = 5.5; // Isolated/Light resistance MET
+        }
+
+        // Adjust MET by Intensity (RPE)
+        // RPE 5 is base. RPE 10 adds 40% boost. RPE 1 subtracts 40%.
+        final intensityMultiplier = 0.6 + (rpe / 10.0) * 0.8; 
+        
+        return (baseMET * weight * hours * intensityMultiplier).round();
       }
 
-      // Use robust fallback logic
+      // --- AI ESTIMATION ---
       final prompt = _constructCaloriePrompt(user, workout, exercises, durationSeconds, intensity, exerciseDefinitions);
       final content = [Content.text(prompt)];
       
@@ -229,33 +260,41 @@ class AIInsightsService {
   ) {
     final weight = user.weightKg != null ? '${user.weightKg}kg' : '70kg';
     final age = user.age ?? 30;
+    final goal = user.goal ?? 'Fitness';
     
     StringBuffer exerciseList = StringBuffer();
     for (var se in sessions) {
       final def = exerciseDefinitions.firstWhere((e) => e.id == se.exerciseId);
-      exerciseList.writeln("- ${def.name}: ${se.completedSets} sets, ${se.completedReps} total reps, weight: ${se.weightKg ?? 'Bodyweight'}");
+      final muscle = def.primaryMuscleGroup ?? 'General';
+      exerciseList.writeln("- ${def.name} ($muscle): ${se.completedSets} sets, ${se.completedReps} total reps, weight: ${se.weightKg ?? 'Bodyweight'}kg");
     }
 
     return '''
-    Task: Estimate calorie burn for a weightlifting session.
+    Task: Estimate calorie burn for a fitness session.
     
     User Stats:
     - Weight: $weight
     - Age: $age
+    - Primary Goal: $goal
     
     Workout Details:
     - Name: ${workout.name}
     - Duration: ${durationSeconds ~/ 60} minutes
     - Intensity (RPE 1-10): ${intensity ?? 'Moderate (5)'}
     
-    Exercises Performed:
+    Exercises Performed (Name, Muscle Group, Sets, Total Reps, Avg Weight):
     ${exerciseList.toString()}
+    
+    Context:
+    Consider the metabolic cost difference between compound movements (heavy lifting) and isolation movements. 
+    If cardio exercises are present, prioritize higher energy expenditure metrics.
+    Account for "Afterburn" (EPOC) based on the intensity rating provided.
     
     Instructions:
     Return ONLY the estimated number of calories burned as a single integer. No words, no explanation.
     
     Example:
-    350
+    425
     ''';
   }
 
@@ -327,9 +366,14 @@ Instructions:
     // Updated 2026 Model Priority List
     final modelsToTry = [
       if (preferredModel != null) preferredModel,
+      'gemini-3.0-flash',
+      'gemini-3.0-pro-preview',
       'gemini-2.0-flash',
+      'gemini-2.0-flash-lite-preview-02-05',
+      'gemini-2.0-pro-experimental-02-05',
       'gemini-1.5-flash',
       'gemini-1.5-pro',
+      'gemini-1.5-flash-8b',
     ];
 
     // Remove duplicates while preserving order
@@ -377,9 +421,11 @@ Instructions:
       debugPrint('Error listing models: $e. Using fallback list.');
       // Fallback list of known working models
       return [
+        'gemini-3.0-flash',
+        'gemini-3.0-pro-preview',
+        'gemini-2.0-flash',
         'gemini-1.5-flash',
         'gemini-1.5-pro',
-        'gemini-2.0-flash-exp', // Experimental
         'gemini-pro',
         'gemini-1.5-flash-8b',
         'gemini-1.0-pro'

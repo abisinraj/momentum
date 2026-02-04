@@ -39,7 +39,7 @@ window.aiController = {
     },
 
     update: function (time) {
-        if (!this.enabled || (typeof gameMode !== 'undefined' && !gameMode) || (typeof model === 'undefined' || !model)) return;
+        if (!this.enabled || (typeof window.gameMode !== 'undefined' && !window.gameMode) || (typeof window.model === 'undefined' || !window.model)) return;
 
         // Prune Hit Log
         const now = Date.now();
@@ -48,8 +48,8 @@ window.aiController = {
         }
 
         // SAFETY: Prevent Vanishing & Drift
-        if (isNaN(model.position.x) || isNaN(model.position.z)) {
-            model.position.set(0, 0, 0);
+        if (isNaN(window.model.position.x) || isNaN(window.model.position.z)) {
+            window.model.position.set(0, 0, 0);
         }
 
         // 0. HIT STUN CHECK
@@ -63,8 +63,8 @@ window.aiController = {
 
         // === DYNAMIC DIFFICULTY ===
         // Adjust based on health differential
-        const playerHP = (typeof playerHealth !== 'undefined') ? playerHealth : 100;
-        const aiHP = (typeof modelHealth !== 'undefined') ? modelHealth : 100;
+        const playerHP = (typeof window.playerHealth !== 'undefined') ? window.playerHealth : 100;
+        const aiHP = (typeof window.modelHealth !== 'undefined') ? window.modelHealth : 100;
         const healthDiff = aiHP - playerHP; // Positive = AI winning, Negative = Player winning
 
         // Base pattern
@@ -93,9 +93,9 @@ window.aiController = {
 
             const bobY = (Math.sin(t * 2.5) * 0.015);
             const smooth = 0.03;
-            model.position.x += (offsetX - model.position.x) * smooth;
-            model.position.z += (offsetZ - model.position.z) * smooth;
-            model.position.y += (bobY - model.position.y) * 0.1;
+            window.model.position.x += (offsetX - window.model.position.x) * smooth;
+            window.model.position.z += (offsetZ - window.model.position.z) * smooth;
+            window.model.position.y += (bobY - window.model.position.y) * 0.1;
         }
 
         // 2. Lunge & Attack Animation Loop (Frame Perfect)

@@ -143,10 +143,27 @@ class AIInsightsCard extends ConsumerWidget {
                             );
                           }
 
+                          // Show loading state
+                          if (insightAsync.isLoading) {
+                            return _buildLoadingShimmer(context);
+                          }
+                          
+                          // Handle error state
+                          if (insightAsync.hasError) {
+                            return Text(
+                              "Unable to generate insight. Tap to retry.",
+                              style: TextStyle(color: colorScheme.error, fontSize: 14),
+                            );
+                          }
+
+                          // Show insight if available
                           if (insight != null) {
-                            // Also filter out the specific service message just in case
+                            // Filter out the configure API key message
                             if (insight.text.contains("Configure your Gemini API Key")) {
-                               return const SizedBox.shrink(); // Should remain hidden or use above logic
+                              return Text(
+                                "Ready to analyze your training data. Tap to refresh.",
+                                style: TextStyle(color: colorScheme.onSurfaceVariant),
+                              );
                             }
                             
                             return Text(
@@ -159,7 +176,8 @@ class AIInsightsCard extends ConsumerWidget {
                               ),
                             );
                           }
-                          if (insightAsync.isLoading) return _buildLoadingShimmer(context);
+                          
+                          // Default fallback
                           return Text(
                             "Ready to analyze your training data. Tap to generate insights.",
                             style: TextStyle(color: colorScheme.onSurfaceVariant),

@@ -57,25 +57,25 @@
         var camera, scene, renderer, model, controls;
 
         // --- Camera Zoom Logic State (Hoisted to avoid TDZ) ---
-        let isZooming = false;
-        const targetCameraPos = new THREE.Vector3();
-        const targetControlsTarget = new THREE.Vector3();
-        const zoomDuration = 800; // ms (Faster, smoother)
-        let zoomStartTime = 0;
-        const startCameraPos = new THREE.Vector3();
-        const startControlsTarget = new THREE.Vector3();
-        let lastTapTime = 0;
-        let tapsOutsideCount = 0;
-        let gameMode = false;
-        let modelHealth = 100;
-        let playerHealth = 100;
-        let gameScore = 0;
-        let comboCount = 0;
-        let gameLastHitTime = 0;
+        var isZooming = false;
+        var targetCameraPos = new THREE.Vector3();
+        var targetControlsTarget = new THREE.Vector3();
+        var zoomDuration = 800; // ms (Faster, smoother)
+        var zoomStartTime = 0;
+        var startCameraPos = new THREE.Vector3();
+        var startControlsTarget = new THREE.Vector3();
+        var lastTapTime = 0;
+        var tapsOutsideCount = 0;
+        var gameMode = false;
+        var modelHealth = 100;
+        var playerHealth = 100;
+        var gameScore = 0;
+        var comboCount = 0;
+        var gameLastHitTime = 0;
 
         // --- MUSCLE DEFINITIONS (For Shader) ---
         // --- MUSCLE DEFINITIONS (Initially Empty - Populated by Flutter) ---
-        let muscleDefs = [];
+        var muscleDefs = [];
 
         // Function called by Flutter to set definitions
         window.updateMuscleDefs = function (defs, mirroredNames) {
@@ -119,7 +119,7 @@
             u_zone_count: { value: 0 }
         };
 
-        const activeHeatmap = {};
+        var activeHeatmap = {};
 
         // Efficient dependency gatekeeper
         window.isReady = false;
@@ -637,8 +637,8 @@
             if (gameMode) {
                 window.chargeStartTime = Date.now(); // Track for Charged Punch
 
-                if (stanceController.guardTimer) clearTimeout(stanceController.guardTimer);
-                stanceController.guardTimer = setTimeout(() => {
+                if (window.stanceController.guardTimer) clearTimeout(window.stanceController.guardTimer);
+                window.stanceController.guardTimer = setTimeout(() => {
                     window.setGuarding(true);
                     window.playerIsCharging = true; // Enter Charge Mode
                     console.log("⚡ CHARGING PUNCH...");
@@ -989,7 +989,7 @@
             }
 
             // CHECK GUARD (Damage Mitigation)
-            if (stanceController.targetPose === 'GUARD') {
+            if (window.stanceController.targetPose === 'GUARD') {
                 damage *= 0.3; // Blocked damage
                 hitText = "BLOCKED";
                 if (window.playBlockSound) window.playBlockSound();
@@ -1182,7 +1182,7 @@
                     <button id="exit-game-btn" style="
                         pointer-events: auto;
                         position: absolute;
-                        top: 20px;
+                        top: 60px;
                         right: 20px;
                         background: #d32f2f;
                         color: white;
@@ -1245,19 +1245,23 @@
 
         function endBoxingGame(won) {
             gameMode = false;
-            aiController.enabled = false;
-            aiController.isAttacking = false;
-            aiController.isGuarding = false;
-            aiController.lungeState = null;
-            aiController.comboQueue = [];
+            window.aiController.enabled = false;
+            window.aiController.isAttacking = false;
+            window.aiController.isGuarding = false;
+            window.aiController.lungeState = null;
+            window.aiController.comboQueue = [];
 
             // Disable procedural stance temporarily so animation can play
-            stanceController.targetPose = null;
-
+            window.stanceController.targetPose = null;
+            if (modelHealth <= 0) {
+                window.stanceController.targetPose = 'KNOCKDOWN';
+            } else {
+                window.stanceController.targetPose = 'IDLE';
+            }
             // === KNOCKDOWN: Yamcha Death Pose ===
             if (won) {
                 // Use procedural KNOCKDOWN pose (Yamcha style)
-                stanceController.targetPose = 'KNOCKDOWN';
+                window.stanceController.targetPose = 'KNOCKDOWN';
 
                 // Lower model to ground
                 if (model) {

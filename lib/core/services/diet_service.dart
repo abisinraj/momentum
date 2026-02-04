@@ -74,9 +74,14 @@ class DietService {
     // Updated 2026 Model Priority List
     final modelsToTry = [
       preferredModel,
+      'gemini-3.0-flash',
+      'gemini-3.0-pro-preview',
       'gemini-2.0-flash',
+      'gemini-2.0-flash-lite-preview-02-05',
+      'gemini-2.0-pro-experimental-02-05',
       'gemini-1.5-flash',
       'gemini-1.5-pro',
+      'gemini-1.5-flash-8b',
     ];
 
     // Remove duplicates while preserving order
