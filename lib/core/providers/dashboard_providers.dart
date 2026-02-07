@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/core/providers/database_providers.dart';
 import 'package:momentum/core/constants/muscle_data.dart';
+import 'package:momentum/core/utils/calorie_calculator.dart';
 
 // Note: activityGridProvider is in database_providers.dart
 
@@ -99,26 +100,34 @@ final dailyBurnProvider = FutureProvider<int>((ref) async {
   final todaySessions = await db.getSessionsForDate(DateTime.now());
   final completed = todaySessions.where((s) => s.completedAt != null);
   
+  // Get user weight once for all calculations
+  final user = await db.getUser();
+  final userWeight = user?.weightKg ?? 70.0;
+  
   int totalCalories = 0;
   for (final s in completed) {
-    if (s.caloriesBurned != null) {
-      totalCalories += s.caloriesBurned!;
-    } else {
-      final mins = (s.durationSeconds ?? 0) ~/ 60;
-      final weight = (await db.getUser())?.weightKg ?? 70.0;
-      final intensityFactor = (s.intensity ?? 5) / 5.0;
-      totalCalories += (6.0 * intensityFactor * weight * (mins / 60.0)).round();
-    }
+    totalCalories += CalorieCalculator.estimateSessionCalories(
+      caloriesBurned: s.caloriesBurned,
+      durationSeconds: s.durationSeconds,
+      weightKg: userWeight,
+      intensity: s.intensity,
+    );
   }
   
   return totalCalories;
 });
 
 final netCaloriesProvider = FutureProvider<Map<String, int>>((ref) async {
-  final foodAsync = await ref.watch(dailyNutritionProvider.future);
-  final burnAsync = await ref.watch(dailyBurnProvider.future);
+  // Fetch nutrition and burn data in parallel for better performance
+  final results = await Future.wait([
+    ref.watch(dailyNutritionProvider.future),
+    ref.watch(dailyBurnProvider.future),
+  ]);
   
-  final eaten = foodAsync['calories']?.toInt() ?? 0;
+  final foodAsync = results[0] as Map<String, dynamic>;
+  final burnAsync = results[1] as int;
+  
+  final eaten = (foodAsync['calories'] as num?)?.toInt() ?? 0;
   final burned = burnAsync;
   
   return {

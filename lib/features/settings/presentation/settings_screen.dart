@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/router.dart';
 import '../../../core/services/settings_service.dart';
-import '../../../core/services/widget_service.dart';
+
 import '../../../core/providers/health_connect_provider.dart';
 import '../../../core/providers/database_providers.dart';
 import '../../../core/providers/ai_providers.dart';
@@ -385,18 +385,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                    const SizedBox(height: 32),
                    _buildSectionHeader(context, 'Advanced'),
                    const SizedBox(height: 16),
-                   _buildSettingsTile(
-                     context: context,
-                     icon: Icons.sync_problem,
-                     iconColor: Colors.orange,
-                     title: 'Force Widget Sync',
-                     subtitle: 'Update home screen widget now',
-                     onTap: () async {
-                       ScaffoldMessenger.of(context).showSnackBar(
-                         const SnackBar(content: Text('Syncing widget...')),
-                       );
-                        ref.invalidate(widgetSyncProvider);
-                     },
+                   const SizedBox(height: 16),
+                   ref.watch(boxingGameEnabledProvider).when(
+                     data: (enabled) => _buildSwitchTile(
+                       context: context,
+                       icon: Icons.sports_mma,
+                       iconColor: Colors.redAccent,
+                       title: 'Allow Boxing Game',
+                       value: enabled,
+                       onChanged: (val) {
+                         ref.read(boxingGameEnabledProvider.notifier).setEnabled(val);
+                       },
+                     ),
+                     loading: () => const SizedBox(height: 56, child: Center(child: CircularProgressIndicator())),
+                     error: (_, __) => const SizedBox.shrink(),
                    ),
                 ],
               ),
@@ -445,6 +447,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ) : null,
         trailing: Icon(Icons.arrow_forward_ios, size: 16, color: colorScheme.onSurfaceVariant),
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildSwitchTile({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        trailing: Switch(
+          value: value,
+          onChanged: onChanged,
+          activeTrackColor: colorScheme.primary,
+        ),
       ),
     );
   }

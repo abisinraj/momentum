@@ -314,25 +314,8 @@ class AnalyticsCard extends ConsumerWidget {
     final totalMinutes = data['totalMinutes'] as int;
     final activeMinutes = (data['activeMinutes'] as int?) ?? 0; // New metric
     
-    // Progression Data
-    final isBodyweight = user?.splitDays == 8;
-    Widget progressionWidget;
-    
-    if (isBodyweight) {
-      final repsAsync = ref.watch(repsProgressionProvider);
-      progressionWidget = repsAsync.when(
-        data: (reps) => _buildProgressionMetric(context, 'PROGRESSION', reps[0], reps[1], 'reps', Icons.trending_up),
-        loading: () => const SizedBox.shrink(),
-        error: (_, __) => const SizedBox.shrink(),
-      );
-    } else {
-      final volumeAsync = ref.watch(volumeLoadProvider);
-      progressionWidget = volumeAsync.when(
-        data: (vol) => _buildProgressionMetric(context, 'VOLUME LOAD', vol[0].toInt(), vol[1].toInt(), 'kg', Icons.fitness_center),
-        loading: () => const SizedBox.shrink(),
-        error: (_, __) => const SizedBox.shrink(),
-      );
-    }
+    // Progression Data - REMOVED
+
 
     return Column(
       children: [
@@ -375,90 +358,12 @@ class AnalyticsCard extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 24),
-        progressionWidget,
+
       ],
     );
   }
 
-  Widget _buildProgressionMetric(BuildContext context, String label, int current, int last, String unit, IconData icon) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final diff = current - last;
-    final isPositive = diff >= 0;
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: isPositive ? colorScheme.primary.withValues(alpha: 0.1) : Colors.orangeAccent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 20, color: isPositive ? colorScheme.primary : Colors.orangeAccent),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Text(
-                      _formatValue(current),
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(unit, style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    isPositive ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    size: 16,
-                    color: isPositive ? colorScheme.primary : Colors.orangeAccent,
-                  ),
-                  Text(
-                    '${_formatValue(diff.abs())} $unit',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: isPositive ? colorScheme.primary : Colors.orangeAccent,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'vs last week',
-                style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildMetric(BuildContext context, String label, String value, String unit, IconData icon, Color color) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -502,10 +407,7 @@ class AnalyticsCard extends ConsumerWidget {
 
 
 
-  String _formatValue(num val) {
-    if (val >= 1000) return '${(val / 1000).toStringAsFixed(1)}k';
-    return val.toString();
-  }
+
 
   String _formatSteps(int steps) {
     if (steps >= 1000) {

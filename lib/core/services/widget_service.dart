@@ -89,13 +89,26 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     int streak = 0;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
     
-    // Check from today backwards
-    DateTime checkDate = today;
-    if (!activityGrid.containsKey(checkDate)) {
-      checkDate = today.subtract(const Duration(days: 1));
+    // Streak logic with 1-day grace period:
+    // - If today has activity, start counting from today
+    // - If today has no activity but yesterday does, start from yesterday (grace period)
+    // - If both today and yesterday have no activity, streak is 0
+    DateTime checkDate;
+    final todayHasActivity = activityGrid.containsKey(today);
+    final yesterdayHasActivity = activityGrid.containsKey(yesterday);
+    
+    if (todayHasActivity) {
+      checkDate = today;
+    } else if (yesterdayHasActivity) {
+      checkDate = yesterday;
+    } else {
+      // Streak is broken - no activity today or yesterday
+      checkDate = yesterday; // Will exit loop immediately
     }
     
+    // Count consecutive days backwards
     while (activityGrid.containsKey(checkDate)) {
       streak++;
       checkDate = checkDate.subtract(const Duration(days: 1));

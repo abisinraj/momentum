@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/providers/database_providers.dart';
+import '../../../core/services/settings_service.dart';
 import 'widgets/three_d_man_widget.dart';
 import '../../../core/constants/muscle_data.dart';
 
@@ -60,6 +61,8 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final boxingEnabledAsync = ref.watch(boxingGameEnabledProvider);
+    final boxingEnabled = boxingEnabledAsync.valueOrNull ?? true;
     
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -77,6 +80,7 @@ class _Recovery3DScreenState extends ConsumerState<Recovery3DScreen> {
                   }
                 },
                 heroTag: 'muscle-model',
+                enableBoxing: boxingEnabled,
               ),
           ),
           

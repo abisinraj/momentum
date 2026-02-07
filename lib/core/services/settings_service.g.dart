@@ -188,5 +188,21 @@ final timeFormatProvider =
     );
 
 typedef _$TimeFormat = AutoDisposeAsyncNotifier<String>;
+String _$boxingGameEnabledHash() => r'62d80eab0fd732a383a92fec0fbee4416ea0a547';
+
+/// See also [BoxingGameEnabled].
+@ProviderFor(BoxingGameEnabled)
+final boxingGameEnabledProvider =
+    AutoDisposeAsyncNotifierProvider<BoxingGameEnabled, bool>.internal(
+      BoxingGameEnabled.new,
+      name: r'boxingGameEnabledProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$boxingGameEnabledHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$BoxingGameEnabled = AutoDisposeAsyncNotifier<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

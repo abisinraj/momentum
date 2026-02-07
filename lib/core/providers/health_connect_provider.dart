@@ -96,6 +96,11 @@ class HealthNotifier extends _$HealthNotifier {
         hasPermissions: hasPerms,
         latestWeight: weight,
       );
+      
+      // AUTO-SYNC: If permissions are granted, sync immediately
+      if (hasPerms) {
+        syncData();
+      }
     } else {
       state = state.copyWith(isAvailable: false);
     }

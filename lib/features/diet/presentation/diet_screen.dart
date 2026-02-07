@@ -178,16 +178,48 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
   }
 
   Future<void> _handleAnalysisResult(Map<String, dynamic> result) async {
-    // Format the result nicely
-    final desc = result['description'] ?? 'Food';
-    final cal = result['calories'] ?? 0;
-    final p = result['protein'] ?? 0;
-    final c = result['carbs'] ?? 0;
-    final f = result['fats'] ?? 0;
+    // Handle new items array format
+    final items = result['items'] as List<dynamic>?;
+    
+    if (items == null || items.isEmpty) {
+      // Fallback to old single-item format for backward compatibility
+      final desc = result['description'] ?? 'Food';
+      final cal = result['calories'] ?? 0;
+      final p = result['protein'] ?? 0;
+      final c = result['carbs'] ?? 0;
+      final f = result['fats'] ?? 0;
 
-    final responseText = "I found: **$desc**\n"
-        "Calories: $cal kcal\n"
-        "P: ${p}g | C: ${c}g | F: ${f}g";
+      final responseText = "I found: **$desc**\n"
+          "Calories: $cal kcal\n"
+          "P: ${p}g | C: ${c}g | F: ${f}g";
+
+      if (!mounted) return;
+      final db = ref.read(appDatabaseProvider);
+      await db.addDietChatMessage(DietChatMessagesCompanion.insert(
+        role: 'ai',
+        content: responseText,
+      ));
+
+      setState(() {
+        _isAnalyzing = false;
+      });
+      
+      _showLogConfirmationDialog(result);
+      _scrollToBottom();
+      return;
+    }
+    
+    // Handle multiple items
+    final itemCount = items.length;
+    final itemDescriptions = items.map((item) => item['description'] ?? 'Unknown').join(', ');
+    
+    // Create summary message
+    final responseText = itemCount == 1
+        ? "I found: **${items[0]['description']}**\n"
+          "Calories: ${items[0]['calories']} kcal\n"
+          "P: ${items[0]['protein']}g | C: ${items[0]['carbs']}g | F: ${items[0]['fats']}g"
+        : "I found $itemCount items: **$itemDescriptions**\n"
+          "Total Calories: ${items.fold<int>(0, (sum, item) => sum + (item['calories'] as int? ?? 0))} kcal";
 
     if (!mounted) return;
     final db = ref.read(appDatabaseProvider);
@@ -200,11 +232,14 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
       _isAnalyzing = false;
     });
     
-    // Auto-prompt to log
-    if (mounted) {
-      _showLogConfirmationDialog(result);
-      _scrollToBottom();
+    // Show confirmation dialog for each item
+    for (final item in items) {
+      if (mounted) {
+        await _showLogConfirmationDialog(item as Map<String, dynamic>);
+      }
     }
+    
+    _scrollToBottom();
   }
 
   void _editMessage(DietChatMessage message) {
@@ -246,7 +281,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     }
   }
   
-  void _showLogConfirmationDialog(Map<String, dynamic> data) {
+  Future<void> _showLogConfirmationDialog(Map<String, dynamic> data) async {
     // Controllers for editing
     final descCtrl = TextEditingController(text: data['description']);
     final calCtrl = TextEditingController(text: data['calories'].toString());
@@ -709,38 +744,47 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                   tooltip: _editingMessageId != null ? 'Cancel Edit' : 'Take Photo',
                 ),
                 Expanded(
-                  child: TextField(
-                    controller: _textInputController,
-                    decoration: InputDecoration(
-                      hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
-                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                      suffixIcon: _textInputController.text.isNotEmpty && _editingMessageId == null
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, size: 18),
-                              onPressed: () => _textInputController.clear(),
-                            )
-                          : null,
-                    ),
-                    textInputAction: TextInputAction.send,
-                    onChanged: (val) => setState(() {}),
-                    onSubmitted: (val) => val.trim().isNotEmpty 
-                        ? (_editingMessageId != null ? _saveEditedMessage() : _analyzeText(val)) 
-                        : null,
+                  child: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _textInputController,
+                    builder: (context, value, child) {
+                      return TextField(
+                        controller: _textInputController,
+                        decoration: InputDecoration(
+                          hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
+                          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                          suffixIcon: value.text.isNotEmpty && _editingMessageId == null
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  onPressed: () => _textInputController.clear(),
+                                )
+                              : null,
+                        ),
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (val) => val.trim().isNotEmpty 
+                            ? (_editingMessageId != null ? _saveEditedMessage() : _analyzeText(val)) 
+                            : null,
+                      );
+                    }
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton.filled(
-                  icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
-                  onPressed: (_isAnalyzing || (_textInputController.text.trim().isEmpty && _editingMessageId == null)) 
-                      ? null 
-                      : () {
-                        if (_editingMessageId != null) {
-                          _saveEditedMessage();
-                        } else {
-                          _analyzeText(_textInputController.text);
-                        }
-                      },
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _textInputController,
+                  builder: (context, value, child) {
+                    return IconButton.filled(
+                      icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
+                      onPressed: (_isAnalyzing || (value.text.trim().isEmpty && _editingMessageId == null)) 
+                          ? null 
+                          : () {
+                            if (_editingMessageId != null) {
+                              _saveEditedMessage();
+                            } else {
+                              _analyzeText(_textInputController.text);
+                            }
+                          },
+                    );
+                  }
                 ),
               ],
             ),

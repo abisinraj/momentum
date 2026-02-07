@@ -18,6 +18,7 @@ class SettingsService {
   static const String _keyModelRotationMode = 'model_rotation_mode'; // 'horizontal', 'full'
   static const String _keyGeminiModel = 'gemini_model';
   static const String _keyPermissionsHandled = 'permissions_handled';
+  static const String _keyBoxingGameEnabled = 'boxing_game_enabled';
 
   final _storage = const FlutterSecureStorage();
 
@@ -59,6 +60,16 @@ class SettingsService {
   Future<int> getRestTimer() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_keyRestTimer) ?? 60; // Default 60s
+  }
+
+  Future<void> setBoxingGameEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyBoxingGameEnabled, enabled);
+  }
+
+  Future<bool> getBoxingGameEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyBoxingGameEnabled) ?? true; // Default true
   }
 
   Future<void> setPexelsKey(String key) async {
@@ -265,6 +276,21 @@ class TimeFormat extends _$TimeFormat {
     state = await AsyncValue.guard(() async {
       await ref.read(settingsServiceProvider).setTimeFormat(format);
       return format;
+    });
+  }
+}
+
+@riverpod
+class BoxingGameEnabled extends _$BoxingGameEnabled {
+  @override
+  Future<bool> build() async {
+    return ref.read(settingsServiceProvider).getBoxingGameEnabled();
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    state = await AsyncValue.guard(() async {
+      await ref.read(settingsServiceProvider).setBoxingGameEnabled(enabled);
+      return enabled;
     });
   }
 }

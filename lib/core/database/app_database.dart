@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import 'connection/connection.dart' as impl;
+import '../utils/calorie_calculator.dart';
 
 part 'app_database.g.dart';
 
@@ -367,15 +368,11 @@ class AppDatabase extends _$AppDatabase {
           ));
   }
 
-  /// Mark all active sessions as completed (cancelled)
+  /// Delete all active (incomplete) sessions
+  /// These are abandoned sessions that were never completed
   Future<void> cleanupActiveSessions() async {
-    final now = DateTime.now();
-    await (update(sessions)..where((s) => s.completedAt.isNull()))
-        .write(SessionsCompanion(
-          completedAt: Value(now),
-          durationSeconds: const Value(1), // Minimal duration for cancelled
-          intensity: const Value(0),
-        ));
+    // Delete instead of marking with fake duration to avoid corrupting analytics
+    await (delete(sessions)..where((s) => s.completedAt.isNull())).go();
   }
 
   
@@ -643,7 +640,7 @@ class AppDatabase extends _$AppDatabase {
 
     for (final r in results) {
       final sExec = r.readTable(sessionExercises);
-      final weight = sExec.weightKg ?? (userWeight * 0.8);
+      final weight = sExec.weightKg ?? userWeight; // Use full bodyweight
       totalVolume += weight * sExec.completedReps;
       totalSets += sExec.completedSets;
     }
@@ -685,16 +682,12 @@ class AppDatabase extends _$AppDatabase {
     for (final row in result) {
       final se = row.readTable(sessionExercises);
       
-      final weight = se.weightKg ?? (userWeight * 0.8); // Default to bodyweight*0.8 if no weight specified? 
-      // Or should we strict check? 
-      // For now, if weightKg is null, we assume bodyweight exercise.
+      // Use full bodyweight for bodyweight exercises (when weightKg is null)
+      // This is more accurate than the previous 0.8x multiplier
+      final weight = se.weightKg ?? userWeight;
       
       totalVolume += weight * se.completedReps; 
-      // Note: completedReps usually is Total reps (Sets * Reps per set) if tracked that way
-      // But looking at SessionExercises logic: `completedSets` and `completedReps`.
-      // If `completedReps` is TOTAL reps, then `weight * reps` is correct.
-      // If `completedReps` is average reps per set (unlikely), need to multiply by sets.
-      // Based on schema comments: "Total reps done". So just weight * reps.
+      // Note: completedReps is total reps done across all sets (per schema)
     }
     
     return totalVolume;
@@ -812,16 +805,18 @@ class AppDatabase extends _$AppDatabase {
     final totalMinutes = totalSeconds ~/ 60;
     
     // Calorie Calculation Logic
+    // Get user weight for MET calculation
+    final user = await getUser();
+    final userWeightKg = user?.weightKg ?? 70.0;
+    
     int calories = 0;
     for (final s in sessionRows) {
-      if (s.caloriesBurned != null) {
-        calories += s.caloriesBurned!;
-      } else {
-        // Fallback to MET formula for legacy/failed AI sessions
-        final mins = (s.durationSeconds ?? 0) ~/ 60;
-        final intentFactor = (s.intensity ?? 5) / 5.0;
-        calories += (mins * 7.0 * intentFactor).round();
-      }
+      calories += CalorieCalculator.estimateSessionCalories(
+        caloriesBurned: s.caloriesBurned,
+        durationSeconds: s.durationSeconds,
+        weightKg: userWeightKg,
+        intensity: s.intensity,
+      );
     }
     
     // We can return the granular active time here if needed for future use
@@ -1203,8 +1198,20 @@ class AppDatabase extends _$AppDatabase {
   // ===== Sleep Log Operations =====
 
   /// Add or update a sleep log entry
-  Future<int> addSleepLog(SleepLogsCompanion entry) =>
-      into(sleepLogs).insertOnConflictUpdate(entry);
+  Future<int> addSleepLog(SleepLogsCompanion entry) async {
+    // Check if entry exists for this date
+    final existing = await (select(sleepLogs)
+      ..where((t) => t.date.equals(entry.date.value))
+    ).getSingleOrNull();
+
+    if (existing != null) {
+      // Update existing
+      return (update(sleepLogs)..where((t) => t.id.equals(existing.id))).write(entry);
+    } else {
+      // Insert new
+      return into(sleepLogs).insert(entry);
+    }
+  }
 
   /// Get sleep logs for the last N days
   Future<List<SleepLog>> getSleepLogs(int days) {
