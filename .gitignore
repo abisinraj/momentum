@@ -44,3 +44,5 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 build_log_jdk17.txt
+.gemini/final_improvements.md
+.gemini/widget_preview_fix.md

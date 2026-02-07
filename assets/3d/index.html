@@ -1294,11 +1294,10 @@
             if (ui) {
                 ui.innerHTML = `
                     <div style="font-weight: bold; color: #ff4444; font-size: 20px; margin-bottom: 10px;">${won ? 'KNOCKOUT!' : 'FINISHED'}</div>
-                    <div style="font-size: 14px; color: #888; margin-top: 10px;">Body reset in 5s...</div>
                 `;
             }
 
-            // DELAYED RESTORATION (5 Seconds)
+            // INSTANT RESTORATION (No Delay)
             setTimeout(() => {
                 // 1. Exit Fullscreen (End of Experience)
                 if (document.exitFullscreen) {
@@ -1364,7 +1363,7 @@
                 if (window.FlutterChannel) {
                     window.FlutterChannel.postMessage(JSON.stringify({ type: 'close_page' }));
                 }
-            }, 5000); // 5 second delay as requested
+            }, 0); // Instant restoration
 
             if (window.FlutterChannel) {
                 window.FlutterChannel.postMessage(JSON.stringify({ type: 'game_end', score: gameScore }));

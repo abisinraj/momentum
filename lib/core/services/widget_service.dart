@@ -105,19 +105,32 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
     final nextWorkout = await db.getNextWorkout();
     String title = 'No Active Plan';
     String desc = 'Create an active split to start';
+    String? nextWorkoutName;
     
     if (nextWorkout != null) {
-      title = nextWorkout.name;
-      
       // Check if done today - this also needs to be reactive
       final completedIds = await db.getTodayCompletedWorkoutIds();
-      if (completedIds.contains(nextWorkout.id)) {
+      final isDoneToday = completedIds.contains(nextWorkout.id);
+      
+      // ALWAYS show today's workout in main section
+      title = nextWorkout.name;
+      
+      if (isDoneToday) {
+        // Today's workout is done - mark it as complete
         title = 'Done: ${nextWorkout.name}';
         desc = 'All done for today!';
+        
+        // Show tomorrow's workout in NEXT UP section
+        final tomorrowWorkout = await db.getTomorrowWorkout();
+        nextWorkoutName = tomorrowWorkout?.name;
       } else {
-        // Not done
+        // Today's workout is not done yet
         final exercises = await db.getExercisesForWorkout(nextWorkout.id);
         desc = '${exercises.length} Exercises • Tap to Start';
+        
+        // Show tomorrow's workout in NEXT UP section
+        final tomorrowWorkout = await db.getTomorrowWorkout();
+        nextWorkoutName = tomorrowWorkout?.name;
       }
     } else {
        // Check if setup is needed
@@ -134,25 +147,22 @@ final widgetSyncProvider = FutureProvider<void>((ref) async {
       final total = user.splitDays!;
       cycleProgress = '$current/$total';
     }
-
-    // 4. Get Tomorrow's Workout for "Next" preview
-    final tomorrowWorkout = await db.getTomorrowWorkout();
     
-    debugPrint('[WidgetSync] Updating Widget -> Streak: $streak, Title: $title, Progress: $cycleProgress, Tomorrow: ${tomorrowWorkout?.name}');
+    debugPrint('[WidgetSync] Updating Widget -> Streak: $streak, Title: $title, Progress: $cycleProgress, Next: $nextWorkoutName');
 
     debugPrint('[WidgetSync] Calling widgetService.updateWidget with: Streak=$streak, Title=$title');
     
-    // 5. Get Theme
+    // 4. Get Theme
     final currentTheme = ref.read(widgetThemeProvider).valueOrNull ?? 'classic';
 
-    // 6. Update Widget
+    // 5. Update Widget
     await widgetService.updateWidget(
       streak: streak,
       title: title,
       desc: desc,
       cycleProgress: cycleProgress,
       widgetTheme: currentTheme,
-      nextWorkoutName: tomorrowWorkout?.name, 
+      nextWorkoutName: nextWorkoutName, 
     );
   } catch (e) {
     debugPrint('[WidgetSync] Error: $e');
