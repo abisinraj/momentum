@@ -92,6 +92,10 @@ The app is built around **cycle-based progression** instead of daily scheduling.
 </table>
 
 <div align="center">
+<img src="assets/images/sakura_bloom.svg" width="200" alt="Blooming Sakura">
+</div>
+
+<div align="center">
 <img src="assets/images/sakura_divider.svg" width="100%" alt="Sakura Divider">
 </div>
 
@@ -173,6 +177,10 @@ The app is built around **cycle-based progression** instead of daily scheduling.
 | Storage | Secure Storage | 9.2.2 |
 | Notifications | Local Notifications | 17.2.2 |
 
+</div>
+
+<div align="right">
+<img src="assets/images/sakura_tree.svg" width="300" alt="Sakura Tree">
 </div>
 
 <div align="center">
@@ -389,6 +397,10 @@ flutter build appbundle --release
    • flutter analyze
 - Open a pull request with clear description
 ```
+
+<div align="center">
+<img src="assets/images/sakura_wind.svg" width="400" alt="Wind-blown Sakura Petals">
+</div>
 
 <div align="center">
 <img src="assets/images/sakura_divider.svg" width="100%" alt="Sakura Divider">

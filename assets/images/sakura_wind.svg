@@ -1,0 +1,58 @@
+<svg width="400" height="100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Petal gradient -->
+    <radialGradient id="petalGradient">
+      <stop offset="0%" style="stop-color:#FFC0CB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB7D5;stop-opacity:0.8" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Wind-blown petals moving horizontally -->
+  <g id="windPetal1">
+    <ellipse cx="0" cy="50" rx="6" ry="9" fill="url(#petalGradient)" opacity="0.8" transform="rotate(30 0 50)">
+      <animate attributeName="cx" from="-20" to="420" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="cy" from="50" to="60" dur="2s" repeatCount="indefinite" values="50;60;50"/>
+      <animateTransform attributeName="transform" type="rotate" from="30 0 50" to="390 420 60" dur="8s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  
+  <g id="windPetal2">
+    <ellipse cx="0" cy="30" rx="5" ry="8" fill="#FFB7D5" opacity="0.7" transform="rotate(-20 0 30)">
+      <animate attributeName="cx" from="-50" to="450" dur="10s" repeatCount="indefinite"/>
+      <animate attributeName="cy" from="30" to="40" dur="2.5s" repeatCount="indefinite" values="30;40;30"/>
+      <animateTransform attributeName="transform" type="rotate" from="-20 0 30" to="340 450 40" dur="10s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  
+  <g id="windPetal3">
+    <ellipse cx="0" cy="70" rx="5" ry="8" fill="#FFC0CB" opacity="0.75" transform="rotate(45 0 70)">
+      <animate attributeName="cx" from="-80" to="480" dur="9s" repeatCount="indefinite"/>
+      <animate attributeName="cy" from="70" to="75" dur="1.8s" repeatCount="indefinite" values="70;75;70"/>
+      <animateTransform attributeName="transform" type="rotate" from="45 0 70" to="405 480 75" dur="9s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  
+  <g id="windPetal4">
+    <ellipse cx="0" cy="45" rx="6" ry="9" fill="#FFB7D5" opacity="0.7" transform="rotate(-35 0 45)">
+      <animate attributeName="cx" from="-100" to="500" dur="11s" repeatCount="indefinite"/>
+      <animate attributeName="cy" from="45" to="52" dur="2.2s" repeatCount="indefinite" values="45;52;45"/>
+      <animateTransform attributeName="transform" type="rotate" from="-35 0 45" to="325 500 52" dur="11s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  
+  <g id="windPetal5">
+    <ellipse cx="0" cy="55" rx="5" ry="7" fill="#FFC0CB" opacity="0.65" transform="rotate(25 0 55)">
+      <animate attributeName="cx" from="-60" to="460" dur="7.5s" repeatCount="indefinite"/>
+      <animate attributeName="cy" from="55" to="62" dur="2.3s" repeatCount="indefinite" values="55;62;55"/>
+      <animateTransform attributeName="transform" type="rotate" from="25 0 55" to="385 460 62" dur="7.5s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  
+  <g id="windPetal6">
+    <ellipse cx="0" cy="35" rx="4" ry="7" fill="#FFB7D5" opacity="0.6" transform="rotate(-45 0 35)">
+      <animate attributeName="cx" from="-40" to="440" dur="9.5s" repeatCount="indefinite"/>
+      <animate attributeName="cy" from="35" to="42" dur="2.1s" repeatCount="indefinite" values="35;42;35"/>
+      <animateTransform attributeName="transform" type="rotate" from="-45 0 35" to="315 440 42" dur="9.5s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+</svg>
