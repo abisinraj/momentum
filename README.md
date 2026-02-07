@@ -4,11 +4,7 @@
 
 <sub>*A cycle-based, offline-first fitness tracker that blooms with your progress*</sub>
 
-```
-    ⚘     ⚘     ⚘
-  ⚘   ⚘ ⚘   ⚘   ⚘
-    ⚘     ⚘     ⚘
-```
+
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.10.7-FFB7D5?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.10.7-FFC0CB?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
@@ -339,13 +335,13 @@ flutter build appbundle --release
 ## Contribution Guidelines
 
 ```
-⚘ Fork the repository
-⚘ Create a feature branch
-⚘ Run code generation before committing
-⚘ Ensure tests and analysis pass:
+- Fork the repository
+- Create a feature branch
+- Run code generation before committing
+- Ensure tests and analysis pass:
    • flutter test
    • flutter analyze
-⚘ Open a pull request with clear description
+- Open a pull request with clear description
 ```
 
 ---
@@ -360,11 +356,7 @@ This project is licensed under the **MIT License**.
 
 ### Built with care for those who train at their own pace
 
-```
-    ⚘     ⚘     ⚘
-  ⚘   ⚘ ⚘   ⚘   ⚘
-    ⚘     ⚘     ⚘
-```
+
 
 *May your fitness journey bloom beautifully*
 
