@@ -1,20 +1,14 @@
 <div align="center">
 
-<!-- Sakura Header -->
-<img src="assets/images/sakura_header.svg" width="100%" alt="Sakura Header">
-
 # Momentum
 
 <sub>*A cycle-based, offline-first fitness tracker that blooms with your progress*</sub>
 
-<br>
+
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.10.7-FFB7D5?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.10.7-FFC0CB?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 [![License](https://img.shields.io/badge/License-MIT-FFD4E5?style=for-the-badge)](LICENSE)
-
-<!-- Sakura Divider -->
-<img src="assets/images/sakura_divider.svg" width="100%" alt="Sakura Divider">
 
 </div>
 
@@ -23,10 +17,6 @@
 ## Purpose
 
 Momentum is a **cycle-based, offline-first fitness tracker** that advances your workout split only when a workout is completed—like cherry blossoms that bloom in their own time, not on a calendar's schedule.
-
-<div align="right">
-<img src="assets/images/sakura_branch.svg" width="150" alt="Sakura Branch">
-</div>
 
 ---
 
@@ -38,17 +28,9 @@ Calendar-driven fitness apps tie progression to days on a schedule. Momentum rep
 
 ## Core Idea and Motivation
 
-<div align="center">
-
 > *"The flower that blooms in adversity is the most rare and beautiful of all."*
 
-</div>
-
 The app is built around **cycle-based progression** instead of daily scheduling. It removes calendar pressure and lets the training cycle move forward only when a workout is completed—honoring your rhythm, not the clock's.
-
-<div align="left">
-<img src="assets/images/sakura_petals.svg" width="120" alt="Sakura Petals">
-</div>
 
 ---
 
@@ -90,10 +72,6 @@ The app is built around **cycle-based progression** instead of daily scheduling.
 
 </td></tr>
 </table>
-
-<div align="center">
-<img src="assets/images/sakura_divider.svg" width="100%" alt="Sakura Divider">
-</div>
 
 ---
 
@@ -146,10 +124,6 @@ The app is built around **cycle-based progression** instead of daily scheduling.
 5. Widgets refresh using a dedicated widget service
 6. UI is driven by GoRouter with declarative route configuration
 
-<div align="right">
-<img src="assets/images/sakura_branch.svg" width="150" alt="Sakura Branch">
-</div>
-
 ---
 
 ## Tech Stack
@@ -173,10 +147,6 @@ The app is built around **cycle-based progression** instead of daily scheduling.
 | Storage | Secure Storage | 9.2.2 |
 | Notifications | Local Notifications | 17.2.2 |
 
-</div>
-
-<div align="center">
-<img src="assets/images/sakura_divider.svg" width="100%" alt="Sakura Divider">
 </div>
 
 ---
@@ -217,10 +187,6 @@ momentum/
 │
 └── test/                         # Test suite
 ```
-
-<div align="left">
-<img src="assets/images/sakura_petals.svg" width="120" alt="Sakura Petals">
-</div>
 
 ---
 
@@ -277,10 +243,6 @@ The app includes a **3D recovery model** rendered via WebView and Three.js, back
 - Boxing game mode with AI opponent (v3.0-FIGHTER)
 - Procedural animations with physics-based reactions
 
-<div align="right">
-<img src="assets/images/sakura_branch.svg" width="150" alt="Sakura Branch">
-</div>
-
 ---
 
 ## Performance Considerations
@@ -297,10 +259,6 @@ The app includes a **3D recovery model** rendered via WebView and Three.js, back
 - Android-only build configuration (iOS not supported)
 - Health data sync is opt-in and depends on Health Connect
 - No cloud sync configured (by design—offline-first)
-
-<div align="center">
-<img src="assets/images/sakura_divider.svg" width="100%" alt="Sakura Divider">
-</div>
 
 ---
 
@@ -356,16 +314,12 @@ flutter build appbundle --release
 - Android (min SDK 21 / Android 5.0 Lollipop)
 - iOS (not configured in current build)
 
-<div align="left">
-<img src="assets/images/sakura_petals.svg" width="120" alt="Sakura Petals">
-</div>
-
 ---
 
 ## Screens and Modules Overview
 
 | Screen | Purpose | Key Features |
-|:------:|:-------:|:-------------:|
+|:------:|:-------:|:-------------|
 | Splash | Entry point | Permission handling, initialization |
 | Setup | Onboarding | Profile creation, split configuration |
 | Home | Dashboard | Heatmap, 3D model, quick stats |
@@ -390,10 +344,6 @@ flutter build appbundle --release
 - Open a pull request with clear description
 ```
 
-<div align="center">
-<img src="assets/images/sakura_divider.svg" width="100%" alt="Sakura Divider">
-</div>
-
 ---
 
 ## License
@@ -406,16 +356,11 @@ This project is licensed under the **MIT License**.
 
 ### Built with care for those who train at their own pace
 
-<br>
+
 
 *May your fitness journey bloom beautifully*
 
-<br>
-
-<!-- Sakura Footer -->
-<img src="assets/images/sakura_footer.svg" width="100%" alt="Sakura Footer">
-
-<br>
+---
 
 **Momentum** • *Cycle-based progression, naturally* • v1.0.0
 

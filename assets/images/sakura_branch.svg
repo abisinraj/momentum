@@ -1,0 +1,49 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Branch -->
+  <path d="M 180 20 Q 150 60, 140 100 T 120 180" 
+        stroke="#8B4513" stroke-width="4" fill="none" opacity="0.7"/>
+  
+  <!-- Sakura Flowers on Branch -->
+  <g transform="translate(155, 50)">
+    <circle cx="0" cy="0" r="12" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-8" cy="-6" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="8" cy="-6" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-6" cy="8" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="6" cy="8" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="4" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <g transform="translate(145, 90)">
+    <circle cx="0" cy="0" r="12" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-8" cy="-6" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="8" cy="-6" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-6" cy="8" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="6" cy="8" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="4" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <g transform="translate(132, 140)">
+    <circle cx="0" cy="0" r="12" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-8" cy="-6" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="8" cy="-6" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-6" cy="8" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="6" cy="8" r="10" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="4" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <!-- Falling Petals -->
+  <ellipse cx="100" cy="30" rx="5" ry="8" fill="#FFB7D5" opacity="0.7" transform="rotate(30 100 30)">
+    <animate attributeName="cy" from="30" to="200" dur="4s" repeatCount="indefinite"/>
+    <animateTransform attributeName="transform" type="rotate" from="30 100 30" to="390 100 200" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <ellipse cx="70" cy="60" rx="5" ry="8" fill="#FFC0CB" opacity="0.7" transform="rotate(-20 70 60)">
+    <animate attributeName="cy" from="60" to="200" dur="5s" repeatCount="indefinite"/>
+    <animateTransform attributeName="transform" type="rotate" from="-20 70 60" to="340 70 200" dur="5s" repeatCount="indefinite"/>
+  </ellipse>
+  
+  <ellipse cx="50" cy="100" rx="5" ry="8" fill="#FFB7D5" opacity="0.6" transform="rotate(45 50 100)">
+    <animate attributeName="cy" from="100" to="200" dur="4.5s" repeatCount="indefinite"/>
+    <animateTransform attributeName="transform" type="rotate" from="45 50 100" to="405 50 200" dur="4.5s" repeatCount="indefinite"/>
+  </ellipse>
+</svg>

@@ -1,0 +1,105 @@
+<svg width="1200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Background -->
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE5EC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF0F5;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Sakura Petal Pattern -->
+    <g id="sakuraPetal">
+      <ellipse cx="0" cy="0" rx="8" ry="12" fill="#FFB7D5" opacity="0.8">
+        <animateTransform
+          attributeName="transform"
+          type="rotate"
+          from="0 0 0"
+          to="360 0 0"
+          dur="4s"
+          repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="200" fill="url(#skyGradient)"/>
+  
+  <!-- Sakura Branch -->
+  <path d="M 50 150 Q 200 120, 400 140 T 800 130 T 1150 145" 
+        stroke="#8B4513" stroke-width="6" fill="none" opacity="0.6"/>
+  
+  <!-- Sakura Flowers -->
+  <g transform="translate(150, 130)">
+    <circle cx="0" cy="0" r="15" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="5" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <g transform="translate(350, 145)">
+    <circle cx="0" cy="0" r="15" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="5" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <g transform="translate(550, 135)">
+    <circle cx="0" cy="0" r="15" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="5" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <g transform="translate(750, 132)">
+    <circle cx="0" cy="0" r="15" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="5" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <g transform="translate(950, 140)">
+    <circle cx="0" cy="0" r="15" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="10" cy="-8" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="8" cy="10" r="12" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="5" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <!-- Falling Petals -->
+  <use href="#sakuraPetal" x="100" y="20">
+    <animate attributeName="y" from="20" to="200" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="x" from="100" to="120" dur="5s" repeatCount="indefinite"/>
+  </use>
+  <use href="#sakuraPetal" x="300" y="10">
+    <animate attributeName="y" from="10" to="200" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="x" from="300" to="280" dur="6s" repeatCount="indefinite"/>
+  </use>
+  <use href="#sakuraPetal" x="500" y="30">
+    <animate attributeName="y" from="30" to="200" dur="5.5s" repeatCount="indefinite"/>
+    <animate attributeName="x" from="500" to="520" dur="5.5s" repeatCount="indefinite"/>
+  </use>
+  <use href="#sakuraPetal" x="700" y="15">
+    <animate attributeName="y" from="15" to="200" dur="6.5s" repeatCount="indefinite"/>
+    <animate attributeName="x" from="700" to="680" dur="6.5s" repeatCount="indefinite"/>
+  </use>
+  <use href="#sakuraPetal" x="900" y="25">
+    <animate attributeName="y" from="25" to="200" dur="5.8s" repeatCount="indefinite"/>
+    <animate attributeName="x" from="900" to="920" dur="5.8s" repeatCount="indefinite"/>
+  </use>
+  <use href="#sakuraPetal" x="1100" y="18">
+    <animate attributeName="y" from="18" to="200" dur="6.2s" repeatCount="indefinite"/>
+    <animate attributeName="x" from="1100" to="1080" dur="6.2s" repeatCount="indefinite"/>
+  </use>
+  
+  <!-- Title Text -->
+  <text x="600" y="100" font-family="Arial, sans-serif" font-size="48" font-weight="bold" 
+        text-anchor="middle" fill="#C06C84" opacity="0.9">MOMENTUM</text>
+</svg>

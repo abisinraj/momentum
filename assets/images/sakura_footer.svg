@@ -1,0 +1,70 @@
+<svg width="1200" height="120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="footerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF0F5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFE5EC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="120" fill="url(#footerGradient)"/>
+  
+  <!-- Ground/Grass Line -->
+  <path d="M 0 90 Q 200 85, 400 90 T 800 88 T 1200 90" 
+        stroke="#90EE90" stroke-width="3" fill="none" opacity="0.4"/>
+  
+  <!-- Sakura Branches -->
+  <path d="M 0 70 Q 150 60, 300 65" 
+        stroke="#8B4513" stroke-width="5" fill="none" opacity="0.6"/>
+  <path d="M 1200 75 Q 1050 65, 900 70" 
+        stroke="#8B4513" stroke-width="5" fill="none" opacity="0.6"/>
+  
+  <!-- Left Side Flowers -->
+  <g transform="translate(120, 62)">
+    <circle cx="0" cy="0" r="10" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-7" cy="-5" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="7" cy="-5" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-5" cy="7" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="5" cy="7" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="3" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <g transform="translate(220, 67)">
+    <circle cx="0" cy="0" r="10" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-7" cy="-5" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="7" cy="-5" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-5" cy="7" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="5" cy="7" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="3" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <!-- Right Side Flowers -->
+  <g transform="translate(1080, 67)">
+    <circle cx="0" cy="0" r="10" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-7" cy="-5" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="7" cy="-5" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-5" cy="7" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="5" cy="7" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="3" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <g transform="translate(980, 72)">
+    <circle cx="0" cy="0" r="10" fill="#FFB7D5" opacity="0.9"/>
+    <circle cx="-7" cy="-5" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="7" cy="-5" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="-5" cy="7" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="5" cy="7" r="8" fill="#FFC0CB" opacity="0.8"/>
+    <circle cx="0" cy="0" r="3" fill="#FFD700" opacity="1"/>
+  </g>
+  
+  <!-- Scattered Petals on Ground -->
+  <ellipse cx="400" cy="95" rx="4" ry="6" fill="#FFB7D5" opacity="0.5" transform="rotate(30 400 95)"/>
+  <ellipse cx="450" cy="92" rx="4" ry="6" fill="#FFC0CB" opacity="0.5" transform="rotate(-45 450 92)"/>
+  <ellipse cx="500" cy="96" rx="4" ry="6" fill="#FFB7D5" opacity="0.5" transform="rotate(60 500 96)"/>
+  <ellipse cx="550" cy="93" rx="4" ry="6" fill="#FFC0CB" opacity="0.5" transform="rotate(-20 550 93)"/>
+  <ellipse cx="600" cy="97" rx="4" ry="6" fill="#FFB7D5" opacity="0.5" transform="rotate(15 600 97)"/>
+  <ellipse cx="650" cy="94" rx="4" ry="6" fill="#FFC0CB" opacity="0.5" transform="rotate(-55 650 94)"/>
+  <ellipse cx="700" cy="95" rx="4" ry="6" fill="#FFB7D5" opacity="0.5" transform="rotate(40 700 95)"/>
+  <ellipse cx="750" cy="96" rx="4" ry="6" fill="#FFC0CB" opacity="0.5" transform="rotate(-30 750 96)"/>
+  <ellipse cx="800" cy="93" rx="4" ry="6" fill="#FFB7D5" opacity="0.5" transform="rotate(50 800 93)"/>
+</svg>
