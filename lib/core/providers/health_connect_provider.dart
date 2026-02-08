@@ -174,16 +174,28 @@ class HealthNotifier extends _$HealthNotifier {
         int? deepSleep;
         int? remSleep;
         
+        int sessionDuration = 0;
+        int stagesDuration = 0;
+        
         for (final point in sleepData) {
           final duration = point.dateTo.difference(point.dateFrom).inMinutes;
-          if (point.type == HealthDataType.SLEEP_ASLEEP) {
-            totalMinutes += duration;
+          
+          if (point.type == HealthDataType.SLEEP_SESSION) {
+            sessionDuration += duration;
+          } else if (point.type == HealthDataType.SLEEP_ASLEEP || 
+                     point.type == HealthDataType.SLEEP_LIGHT) { // Treat light as asleep
+            stagesDuration += duration;
           } else if (point.type == HealthDataType.SLEEP_DEEP) {
             deepSleep = (deepSleep ?? 0) + duration;
+            stagesDuration += duration;
           } else if (point.type == HealthDataType.SLEEP_REM) {
             remSleep = (remSleep ?? 0) + duration;
+            stagesDuration += duration;
           }
         }
+        
+        // Use session duration if available (most accurate total), otherwise sum of stages
+        totalMinutes = sessionDuration > 0 ? sessionDuration : stagesDuration;
         totalSleep = Duration(minutes: totalMinutes);
         
         // PERSIST: Save to database

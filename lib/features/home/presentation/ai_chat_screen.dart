@@ -466,18 +466,22 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
                      ),
                      maxLines: null,
                      textCapitalization: TextCapitalization.sentences,
-                      onChanged: (val) => setState(() {}),
                       onSubmitted: (_) => (_textController.text.trim().isNotEmpty || _selectedImageBytes != null) 
                           ? (_editingMessageId != null ? _saveEditedMessage() : _sendMessage()) 
                           : null,
                     ),
                  ),
                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    onPressed: (_isLoading || (_textController.text.trim().isEmpty && _selectedImageBytes == null && _editingMessageId == null)) 
-                        ? null 
-                        : (_editingMessageId != null ? _saveEditedMessage : _sendMessage),
-                    icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _textController,
+                    builder: (context, value, child) {
+                      return IconButton.filled(
+                        onPressed: (_isLoading || (value.text.trim().isEmpty && _selectedImageBytes == null && _editingMessageId == null)) 
+                            ? null 
+                            : (_editingMessageId != null ? _saveEditedMessage : _sendMessage),
+                        icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
+                      );
+                    },
                   ),
               ],
             ),

@@ -328,14 +328,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                            ],
                          ),
                          const SizedBox(height: 12),
-                         Text(
-                           'Last backup: Today, 08:00 AM',
-                           style: TextStyle(
-                             fontSize: 12,
-                             color: colorScheme.onSurfaceVariant,
-                           ),
-                         ),
-                         const SizedBox(height: 12),
+                         // Removed hardcoded 'Last backup' text to avoid confusion
+
                          SizedBox(
                            width: double.infinity,
                            child: OutlinedButton.icon(

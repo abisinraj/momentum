@@ -757,18 +757,21 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                       hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
                       border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                      suffixIcon: _textInputController.text.isNotEmpty && _editingMessageId == null
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, size: 18),
-                              onPressed: () => _textInputController.clear(),
-                            )
-                          : null,
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _textInputController,
+                        builder: (context, value, child) {
+                          return (value.text.isNotEmpty && _editingMessageId == null)
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  onPressed: () => _textInputController.clear(),
+                                )
+                              : const SizedBox.shrink();
+                        },
+                      ),
                     ),
                     textInputAction: TextInputAction.send,
                     onChanged: (val) {
-                      // Only rebuild if empty state changes (optimization)
-                      // or if we are in editing mode (to update button/hint potentially)
-                      setState(() {});
+                      // Removed setState to prevent rebuilding entire UI on every keystroke
                     },
                     onSubmitted: (val) => val.trim().isNotEmpty 
                         ? (_editingMessageId != null ? _saveEditedMessage() : _analyzeText(val)) 
@@ -776,17 +779,22 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton.filled(
-                  icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
-                  onPressed: (_isAnalyzing || (_textInputController.text.trim().isEmpty && _editingMessageId == null)) 
-                      ? null 
-                      : () {
-                        if (_editingMessageId != null) {
-                          _saveEditedMessage();
-                        } else {
-                          _analyzeText(_textInputController.text);
-                        }
-                      },
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _textInputController,
+                  builder: (context, value, child) {
+                    return IconButton.filled(
+                      icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
+                      onPressed: (_isAnalyzing || (value.text.trim().isEmpty && _editingMessageId == null)) 
+                          ? null 
+                          : () {
+                            if (_editingMessageId != null) {
+                              _saveEditedMessage();
+                            } else {
+                              _analyzeText(value.text);
+                            }
+                          },
+                    );
+                  },
                 ),
               ],
             ),
