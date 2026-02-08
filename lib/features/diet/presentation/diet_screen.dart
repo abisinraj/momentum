@@ -261,14 +261,17 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
       content: drift.Value(text),
     ));
 
+    // Capture ID before resetting state
+    final messageIdToUpdate = _editingMessageId;
+
     setState(() {
       _editingMessageId = null;
       _textInputController.clear();
       _isAnalyzing = true;
     });
 
-    // Re-analyze after edit
-    await _analyzeText(text);
+    // Re-analyze after edit (isRetry=true prevents new user message creation)
+    await _analyzeText(text, isRetry: true, messageId: messageIdToUpdate);
   }
 
   Future<void> _clearChat() async {
@@ -543,7 +546,7 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
          final totalF = logs.fold<double>(0, (sum, item) => sum + item.fats);
          
          return ListView(
-           padding: const EdgeInsets.all(16),
+           padding: const EdgeInsets.fromLTRB(16, 16, 16, 120), // 120px to clear Nav Bar
            children: [
              // Summary Card
              Card(
@@ -611,6 +614,9 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
     final timeFormatAsync = ref.watch(timeFormatProvider);
     final is24h = timeFormatAsync.valueOrNull == '24h';
     
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardOpen = bottomInset > 0;
+
     return SafeArea(
       bottom: true,
       child: Column(
@@ -725,8 +731,9 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
               padding: EdgeInsets.all(8.0),
               child: LinearProgressIndicator(),
             ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
+          // Input Area
+          Container(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, isKeyboardOpen ? 16 : 80), // 80px when closed (Nav Bar), 16px when open (Keyboard)
             child: Row(
               children: [
                 IconButton(
@@ -744,47 +751,42 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
                   tooltip: _editingMessageId != null ? 'Cancel Edit' : 'Take Photo',
                 ),
                 Expanded(
-                  child: ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: _textInputController,
-                    builder: (context, value, child) {
-                      return TextField(
-                        controller: _textInputController,
-                        decoration: InputDecoration(
-                          hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
-                          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                          suffixIcon: value.text.isNotEmpty && _editingMessageId == null
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear, size: 18),
-                                  onPressed: () => _textInputController.clear(),
-                                )
-                              : null,
-                        ),
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: (val) => val.trim().isNotEmpty 
-                            ? (_editingMessageId != null ? _saveEditedMessage() : _analyzeText(val)) 
-                            : null,
-                      );
-                    }
+                  child: TextField(
+                    controller: _textInputController,
+                    decoration: InputDecoration(
+                      hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
+                      border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      suffixIcon: _textInputController.text.isNotEmpty && _editingMessageId == null
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () => _textInputController.clear(),
+                            )
+                          : null,
+                    ),
+                    textInputAction: TextInputAction.send,
+                    onChanged: (val) {
+                      // Only rebuild if empty state changes (optimization)
+                      // or if we are in editing mode (to update button/hint potentially)
+                      setState(() {});
+                    },
+                    onSubmitted: (val) => val.trim().isNotEmpty 
+                        ? (_editingMessageId != null ? _saveEditedMessage() : _analyzeText(val)) 
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 8),
-                ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _textInputController,
-                  builder: (context, value, child) {
-                    return IconButton.filled(
-                      icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
-                      onPressed: (_isAnalyzing || (value.text.trim().isEmpty && _editingMessageId == null)) 
-                          ? null 
-                          : () {
-                            if (_editingMessageId != null) {
-                              _saveEditedMessage();
-                            } else {
-                              _analyzeText(_textInputController.text);
-                            }
-                          },
-                    );
-                  }
+                IconButton.filled(
+                  icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
+                  onPressed: (_isAnalyzing || (_textInputController.text.trim().isEmpty && _editingMessageId == null)) 
+                      ? null 
+                      : () {
+                        if (_editingMessageId != null) {
+                          _saveEditedMessage();
+                        } else {
+                          _analyzeText(_textInputController.text);
+                        }
+                      },
                 ),
               ],
             ),

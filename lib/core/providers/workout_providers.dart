@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../database/app_database.dart';
 import '../services/widget_service.dart';
 import '../services/settings_service.dart';
+import '../services/thumbnail_service.dart';
 // import '../services/background_service.dart';
 import 'database_providers.dart';
 
@@ -294,6 +295,35 @@ class WorkoutManager extends _$WorkoutManager {
     
     ref.invalidate(workoutsStreamProvider);
     ref.invalidate(nextWorkoutProvider);
+    ref.invalidate(nextWorkoutProvider);
+  }
+
+  /// Regenerate thumbnail for a workout
+  Future<void> regenerateThumbnail(Workout workout) async {
+    final db = ref.read(appDatabaseProvider);
+    final thumbnailService = ref.read(thumbnailServiceProvider);
+    
+    // Fetch new images based on workout name
+    final images = await thumbnailService.searchImages(workout.name);
+    
+    if (images.isNotEmpty) {
+      // Pick a random one from the results to ensure it changes
+      final newUrl = (images..shuffle()).first;
+      
+      debugPrint('Regenerating thumbnail for ${workout.name}: Old=${workout.thumbnailUrl} New=$newUrl');
+
+      await db.updateWorkout(workout.toCompanion(true).copyWith(
+        thumbnailUrl: Value(newUrl),
+      ));
+      
+      ref.invalidate(workoutsStreamProvider);
+      ref.invalidate(nextWorkoutProvider);
+      ref.invalidate(workoutProgressionProvider); // Force Home Screen update
+      // ignore: unused_result
+      ref.refresh(widgetSyncProvider);
+    } else {
+      debugPrint('No images found for ${workout.name}');
+    }
   }
 
   /// Log a rest day completion immediately

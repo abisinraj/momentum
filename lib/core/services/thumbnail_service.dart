@@ -93,15 +93,52 @@ class ThumbnailService {
     }
     
     // 2. Try Pexels API if key exists
+    // 2. Check Preferred Source
     final settings = ref.read(settingsServiceProvider);
-    final pexelsKey = await settings.getPexelsKey();
+    final source = await settings.getImageSource();
     
-    if (pexelsKey != null && pexelsKey.isNotEmpty) {
-      try {
-        final results = await _searchPexels(query, pexelsKey);
-        if (results.isNotEmpty) return results;
-      } catch (e) {
-        debugPrint('Pexels search failed: $e. Falling back to local.');
+    // Try Preferred First
+    if (source == 'unsplash') {
+      final unsplashKey = await settings.getUnsplashKey();
+      if (unsplashKey != null && unsplashKey.isNotEmpty) {
+        try {
+          final results = await _searchUnsplash(query, unsplashKey);
+          if (results.isNotEmpty) return results;
+        } catch (e) {
+          debugPrint('Unsplash search failed: $e. Falling back.');
+        }
+      }
+    } else {
+      // Default Pexels
+      final pexelsKey = await settings.getPexelsKey();
+      if (pexelsKey != null && pexelsKey.isNotEmpty) {
+        try {
+          final results = await _searchPexels(query, pexelsKey);
+          if (results.isNotEmpty) return results;
+        } catch (e) {
+          debugPrint('Pexels search failed: $e. Falling back.');
+        }
+      }
+    }
+    
+    // 3. Try Secondary Source (if primary failed or key missing)
+    if (source == 'unsplash') {
+      // Unsplash failed/missing -> Try Pexels
+      final pexelsKey = await settings.getPexelsKey();
+      if (pexelsKey != null && pexelsKey.isNotEmpty) {
+        try {
+          final results = await _searchPexels(query, pexelsKey);
+          if (results.isNotEmpty) return results;
+        } catch (e) { /* ignore */ }
+      }
+    } else {
+      // Pexels failed/missing -> Try Unsplash
+      final unsplashKey = await settings.getUnsplashKey();
+      if (unsplashKey != null && unsplashKey.isNotEmpty) {
+        try {
+          final results = await _searchUnsplash(query, unsplashKey);
+          if (results.isNotEmpty) return results;
+        } catch (e) { /* ignore */ }
       }
     }
     
@@ -149,6 +186,20 @@ class ThumbnailService {
       return photos.map<String>((p) => p['src']['medium'] as String).toList();
     }
     throw Exception('Pexels API error: ${response.statusCode}');
+  }
+
+  Future<List<String>> _searchUnsplash(String query, String accessKey) async {
+    final uri = Uri.parse('https://api.unsplash.com/search/photos?query=$query&per_page=30&orientation=landscape');
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Client-ID $accessKey',
+    });
+    
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = data['results'] as List;
+      return results.map<String>((p) => p['urls']['regular'] as String).toList();
+    }
+    throw Exception('Unsplash API error: ${response.statusCode}');
   }
   
   List<String> getFeaturedImages() {

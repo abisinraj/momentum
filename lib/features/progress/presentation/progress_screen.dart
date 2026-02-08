@@ -42,7 +42,7 @@ class ProgressScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 140), // Extra bottom padding for Nav Bar (increased)
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

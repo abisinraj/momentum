@@ -124,7 +124,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       final workoutContext = await _getWorkoutContext();
       final combinedContext = "$dietContext\n\n$workoutContext";
       
-      final preferredModel = ref.read(geminiModelProvider).valueOrNull;
+      final preferredModel = await ref.read(geminiModelProvider.future);
       
       final responseFragment = await ref.read(aiInsightsServiceProvider).analyzeMessage(
         text: text.isEmpty && image != null ? "Analyze this image" : text,
@@ -181,7 +181,7 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
        final workoutContext = await _getWorkoutContext();
        final combinedContext = "$dietContext\n\n$workoutContext";
        
-       final preferredModel = ref.read(geminiModelProvider).valueOrNull;
+       final preferredModel = await ref.read(geminiModelProvider.future);
        final response = await ref.read(aiInsightsServiceProvider).analyzeMessage(
           text: text,
           apiKey: apiKey,

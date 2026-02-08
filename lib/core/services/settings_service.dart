@@ -19,6 +19,7 @@ class SettingsService {
   static const String _keyGeminiModel = 'gemini_model';
   static const String _keyPermissionsHandled = 'permissions_handled';
   static const String _keyBoxingGameEnabled = 'boxing_game_enabled';
+  static const String _keyImageSource = 'image_source'; // 'pexels' or 'unsplash'
 
   final _storage = const FlutterSecureStorage();
 
@@ -70,6 +71,16 @@ class SettingsService {
   Future<bool> getBoxingGameEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keyBoxingGameEnabled) ?? true; // Default true
+  }
+
+  Future<void> setImageSource(String source) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyImageSource, source);
+  }
+
+  Future<String> getImageSource() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyImageSource) ?? 'pexels';
   }
 
   Future<void> setPexelsKey(String key) async {

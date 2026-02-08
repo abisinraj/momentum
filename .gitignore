@@ -46,3 +46,7 @@ app.*.map.json
 build_log_jdk17.txt
 .gemini/
 analysis_results.txt
+analysis_final_v2.txt
+analysis.txt
+analysis_final.txt
+analysis_final_v3.txt

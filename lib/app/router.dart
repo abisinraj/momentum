@@ -108,6 +108,8 @@ class _NavigationShellState extends State<NavigationShell> {
         extendBody: true, // Allow body to flow behind NavigationBar
         body: widget.navigationShell,
         bottomNavigationBar: NavigationBar(
+          backgroundColor: Theme.of(context).colorScheme.surface, // Ensure opaque background
+          surfaceTintColor: Colors.transparent, // Disable tint
           selectedIndex: widget.navigationShell.currentIndex,
           onDestinationSelected: _onTabSelected,
           destinations: const [

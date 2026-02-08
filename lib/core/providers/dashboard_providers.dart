@@ -124,10 +124,10 @@ final netCaloriesProvider = FutureProvider<Map<String, int>>((ref) async {
     ref.watch(dailyBurnProvider.future),
   ]);
   
-  final foodAsync = results[0] as Map<String, dynamic>;
+  final foodAsync = results[0] as Map<String, double>;
   final burnAsync = results[1] as int;
   
-  final eaten = (foodAsync['calories'] as num?)?.toInt() ?? 0;
+  final eaten = foodAsync['calories']?.toInt() ?? 0;
   final burned = burnAsync;
   
   return {

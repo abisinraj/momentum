@@ -75,7 +75,7 @@ Input: "$input"
     final apiKey = await _getApiKey();
     if (apiKey == null) throw Exception('API Key not found');
 
-    const prompt = 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with keys: "description", "calories", "protein", "carbs", "fats".';
+    const prompt = 'Identify the food in this image and estimate nutrition. Return ONLY a JSON object with a key "items" which is an array of objects. Each object must have keys: "description", "calories", "protein", "carbs", "fats".';
     final content = [
       Content.multi([
         TextPart(prompt),
@@ -84,7 +84,14 @@ Input: "$input"
     ];
 
     final response = await _generateWithFallback(content, apiKey, useJson: true);
-    return jsonDecode(response.text!);
+    final decoded = jsonDecode(response.text!);
+    
+    // Ensure structure is correct (sometimes AI returns just the object if only one item)
+    if (decoded is Map<String, dynamic> && !decoded.containsKey('items')) {
+      return {'items': [decoded]};
+    }
+    
+    return decoded;
   }
 
   Future<GenerateContentResponse> _generateWithFallback(

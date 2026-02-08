@@ -426,7 +426,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       } else if (url.startsWith('assets/')) {
         imageProvider = AssetImage(url);
       } else {
-        imageProvider = FileImage(File(url));
+        final file = File(url);
+        if (file.existsSync()) {
+          imageProvider = FileImage(file);
+        } else {
+          debugPrint('Thumbnail file not found: $url');
+        }
       }
     }
     
@@ -478,9 +483,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      colorScheme.primary.withValues(alpha: 0.8),
-                      colorScheme.secondary.withValues(alpha: 0.9),
-                      colorScheme.tertiary.withValues(alpha: 0.95),
+                      colorScheme.primary.withValues(alpha: 0.1),
+                      colorScheme.secondary.withValues(alpha: 0.1),
+                      colorScheme.tertiary.withValues(alpha: 0.15),
                     ],
                   ),
                 ),

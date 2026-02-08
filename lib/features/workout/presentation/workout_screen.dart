@@ -270,6 +270,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                  total: workouts.length,
                  onTap: () => _startWorkout(context, ref, workout, progression),
                  onDelete: () => _confirmDelete(context, ref, workout),
+                 onRefresh: () => _refreshThumbnail(context, ref, workout),
                )),
                
                if (tomorrowsWorkouts.isNotEmpty) ...[
@@ -293,6 +294,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                    total: workouts.length,
                    onTap: null, // Disable start for tomorrow's workouts
                    onDelete: () => _confirmDelete(context, ref, workout),
+                   onRefresh: () => _refreshThumbnail(context, ref, workout),
                  )),
                ],
 
@@ -354,6 +356,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           total: totalCount,
           onTap: isToday ? () => _startWorkout(context, ref, workout, progression) : null,
           onDelete: () => _confirmDelete(context, ref, workout),
+          onRefresh: () => _refreshThumbnail(context, ref, workout),
         );
       },
     );
@@ -481,6 +484,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       ),
     );
   }
+  void _refreshThumbnail(BuildContext context, WidgetRef ref, Workout workout) {
+    ref.read(workoutManagerProvider.notifier).regenerateThumbnail(workout);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Refreshing thumbnail...')),
+    );
+  }
 }
 
 class _WorkoutCard extends StatelessWidget {
@@ -492,6 +501,7 @@ class _WorkoutCard extends StatelessWidget {
   final int total;
   final VoidCallback? onTap;
   final VoidCallback onDelete;
+  final VoidCallback onRefresh;
   
   const _WorkoutCard({
     super.key,
@@ -503,6 +513,7 @@ class _WorkoutCard extends StatelessWidget {
     required this.total,
     this.onTap,
     required this.onDelete,
+    required this.onRefresh,
   });
   
   @override
@@ -597,6 +608,8 @@ class _WorkoutCard extends StatelessWidget {
                                     ),
                                   ),
                                 );
+                            } else if (value == 'refresh_thumb') {
+                                onRefresh();
                             } else if (value == 'delete') {
                               onDelete();
                             }
@@ -609,6 +622,16 @@ class _WorkoutCard extends StatelessWidget {
                                   Icon(Icons.edit_outlined, size: 20, color: Colors.white),
                                   SizedBox(width: 12),
                                   Text('Edit', style: TextStyle(color: Colors.white)),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'refresh_thumb',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.refresh, size: 20, color: colorScheme.primary),
+                                  const SizedBox(width: 12),
+                                  Text('Refresh Image', style: TextStyle(color: colorScheme.onSurface)),
                                 ],
                               ),
                             ),

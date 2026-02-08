@@ -20,6 +20,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
   bool _isSaving = false;
   bool _isFetchingModels = false;
   String _selectedGeminiModel = 'gemini-1.5-flash';
+  String _selectedImageSource = 'pexels';
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     final unsplash = await service.getUnsplashKey();
     final gemini = await service.getGeminiKey();
     final model = await service.getGeminiModel();
+    final source = await service.getImageSource();
 
     if (mounted) {
       setState(() {
@@ -40,6 +42,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
         _unsplashController.text = unsplash ?? '';
         _geminiController.text = gemini ?? '';
         _selectedGeminiModel = model;
+        _selectedImageSource = source;
         _isLoading = false;
       });
     }
@@ -59,6 +62,7 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     await service.setPexelsKey(_pexelsController.text.trim());
     await service.setUnsplashKey(_unsplashController.text.trim());
     await service.setGeminiKey(_geminiController.text.trim());
+    await service.setImageSource(_selectedImageSource);
     
     // Invalidate providers
     ref.invalidate(pexelsApiKeyProvider);
@@ -202,6 +206,41 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                    ),
                    const SizedBox(height: 16),
                    
+                   Text(
+                     'Default Image Source',
+                     style: TextStyle(
+                       color: colorScheme.onSurface,
+                       fontSize: 14,
+                       fontWeight: FontWeight.w500,
+                     ),
+                   ),
+                   const SizedBox(height: 8),
+                   SegmentedButton<String>(
+                     segments: const [
+                       ButtonSegment(
+                         value: 'pexels', 
+                         label: Text('Pexels'),
+                         icon: Icon(Icons.photo_library_outlined),
+                       ),
+                       ButtonSegment(
+                         value: 'unsplash', 
+                         label: Text('Unsplash'),
+                         icon: Icon(Icons.camera_alt_outlined),
+                       ),
+                     ],
+                     selected: {_selectedImageSource},
+                     onSelectionChanged: (Set<String> newSelection) {
+                       setState(() {
+                         _selectedImageSource = newSelection.first;
+                       });
+                     },
+                     style: const ButtonStyle(
+                       visualDensity: VisualDensity.compact,
+                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                     ),
+                   ),
+                   const SizedBox(height: 24),
+
                    _buildTextField(
                      context,
                      controller: _pexelsController,

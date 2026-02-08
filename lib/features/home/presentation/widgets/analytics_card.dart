@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:momentum/core/services/settings_service.dart';
 import '../../../../app/router.dart';
 import 'themed_card.dart';
-import 'trend_chart.dart';
 
 
 class AnalyticsCard extends ConsumerWidget {
@@ -71,12 +70,7 @@ class AnalyticsCard extends ConsumerWidget {
             error: (err, _) => Text('Error loading metrics', style: TextStyle(color: colorScheme.error)),
           ),
           
-          const SizedBox(height: 24),
-          const Divider(height: 1),
-          const SizedBox(height: 20),
-          
-          // 3. Trend Chart (New)
-          const TrendChart(),
+
           
            const SizedBox(height: 24),
           const Divider(height: 1),
