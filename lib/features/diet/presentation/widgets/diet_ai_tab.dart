@@ -24,6 +24,7 @@ class DietAiTab extends ConsumerStatefulWidget {
 class _DietAiTabState extends ConsumerState<DietAiTab> with AutomaticKeepAliveClientMixin {
   final TextEditingController _textInputController = TextEditingController();
   final ScrollController _chatScrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
   
   // Chat State
   bool _isAnalyzing = false;
@@ -45,6 +46,7 @@ class _DietAiTabState extends ConsumerState<DietAiTab> with AutomaticKeepAliveCl
     _connectivitySubscription.cancel();
     _textInputController.dispose();
     _chatScrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -102,6 +104,9 @@ class _DietAiTabState extends ConsumerState<DietAiTab> with AutomaticKeepAliveCl
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Offline. Meal will be processed when you reconnect.')),
       );
+      setState(() {
+        _isAnalyzing = false;
+      });
       return;
     }
 
@@ -238,29 +243,39 @@ class _DietAiTabState extends ConsumerState<DietAiTab> with AutomaticKeepAliveCl
       _editingMessageId = message.id;
       _textInputController.text = message.content;
     });
-    // Already in tab, just focus?
+    _focusNode.requestFocus();
   }
 
-  Future<void> _saveEditedMessage() async {
+  Future<void> _saveEditedMessage(String text) async {
     if (_editingMessageId == null) return;
-    final text = _textInputController.text.trim();
-    if (text.isEmpty) return;
+    if (text.trim().isEmpty) return;
 
-    final db = ref.read(appDatabaseProvider);
-    await db.updateDietChatMessage(DietChatMessagesCompanion(
-      id: drift.Value(_editingMessageId!),
-      content: drift.Value(text),
-    ));
+    try {
+      final db = ref.read(appDatabaseProvider);
+      await db.updateDietChatMessage(DietChatMessagesCompanion(
+        id: drift.Value(_editingMessageId!),
+        content: drift.Value(text),
+      ));
 
-    final messageIdToUpdate = _editingMessageId;
+      final messageIdToUpdate = _editingMessageId;
 
-    setState(() {
-      _editingMessageId = null;
-      _textInputController.clear();
-      _isAnalyzing = true;
-    });
+      setState(() {
+        _editingMessageId = null;
+        _textInputController.clear();
+        _isAnalyzing = true;
+      });
 
-    await _analyzeText(text, isRetry: true, messageId: messageIdToUpdate);
+      // Analyze the updated text
+      await _analyzeText(text, isRetry: true, messageId: messageIdToUpdate);
+
+    } catch (e) {
+      debugPrint('Error saving edited message: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update message: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _clearChat() async {
@@ -660,6 +675,7 @@ class _DietAiTabState extends ConsumerState<DietAiTab> with AutomaticKeepAliveCl
                 Expanded(
                   child: TextField(
                     controller: _textInputController,
+                    focusNode: _focusNode,
                     decoration: InputDecoration(
                       hintText: _editingMessageId != null ? 'Edit your message...' : 'e.g. "Ate a chicken burger"',
                       border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
@@ -679,7 +695,7 @@ class _DietAiTabState extends ConsumerState<DietAiTab> with AutomaticKeepAliveCl
                     textInputAction: TextInputAction.send,
                     onChanged: (val) {},
                     onSubmitted: (val) => val.trim().isNotEmpty 
-                        ? (_editingMessageId != null ? _saveEditedMessage() : _analyzeText(val)) 
+                        ? (_editingMessageId != null ? _saveEditedMessage(val) : _analyzeText(val)) 
                         : null,
                   ),
                 ),
@@ -689,11 +705,11 @@ class _DietAiTabState extends ConsumerState<DietAiTab> with AutomaticKeepAliveCl
                   builder: (context, value, child) {
                     return IconButton.filled(
                       icon: Icon(_editingMessageId != null ? Icons.check : Icons.send),
-                      onPressed: (_isAnalyzing || (value.text.trim().isEmpty && _editingMessageId == null)) 
+                      onPressed: (_isAnalyzing || value.text.trim().isEmpty) 
                           ? null 
                           : () {
                             if (_editingMessageId != null) {
-                              _saveEditedMessage();
+                              _saveEditedMessage(value.text);
                             } else {
                               _analyzeText(value.text);
                             }

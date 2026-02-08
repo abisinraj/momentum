@@ -1252,8 +1252,11 @@ class AppDatabase extends _$AppDatabase {
       into(dietChatMessages).insert(entry);
 
   /// Update a message in the diet chat history (e.g. for editing)
-  Future<bool> updateDietChatMessage(DietChatMessagesCompanion entry) =>
-      update(dietChatMessages).replace(entry);
+  Future<bool> updateDietChatMessage(DietChatMessagesCompanion entry) {
+    return (update(dietChatMessages)..where((t) => t.id.equals(entry.id.value)))
+        .write(entry)
+        .then((rows) => rows > 0);
+  }
 
   /// Clear the diet chat history
   Future<int> clearDietChatHistory() => delete(dietChatMessages).go();
