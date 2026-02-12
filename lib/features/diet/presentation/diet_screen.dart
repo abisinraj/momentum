@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:momentum/features/diet/presentation/widgets/diet_ai_tab.dart';
 import 'package:momentum/features/diet/presentation/widgets/diet_journal_tab.dart';
 import '../../../core/providers/database_providers.dart';
-import '../../../core/providers/ai_providers.dart';
 import '../../../core/services/settings_service.dart';
 
 // DietScreen now becomes a lightweight shell
@@ -170,9 +169,13 @@ class _DietScreenState extends ConsumerState<DietScreen> with SingleTickerProvid
       title: Text(label, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : null, color: isSelected ? Theme.of(context).colorScheme.primary : null)),
       trailing: isSelected ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary, size: 18) : null,
       onTap: () {
+        if (value == current) {
+          Navigator.pop(context);
+          return;
+        }
         ref.read(geminiModelProvider.notifier).setModel(value);
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Model set to \$label')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Model set to \$label')));
       },
     );
   }

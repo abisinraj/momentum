@@ -679,6 +679,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       )
                     ),
                     onTap: () async {
+                      if (modelName == currentModel) {
+                        Navigator.pop(context);
+                        return;
+                      }
                       await ref.read(geminiModelProvider.notifier).setModel(modelName);
                       if (context.mounted) {
                         Navigator.pop(context);

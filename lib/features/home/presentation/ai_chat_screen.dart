@@ -548,6 +548,10 @@ class _AIChatScreenState extends ConsumerState<AIChatScreen> {
       ),
       trailing: isSelected ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary, size: 18) : null,
       onTap: () {
+        if (value == current) {
+          Navigator.pop(context);
+          return;
+        }
         ref.read(geminiModelProvider.notifier).setModel(value);
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(

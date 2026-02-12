@@ -37,14 +37,27 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
     final source = await service.getImageSource();
 
     if (mounted) {
-      setState(() {
-        _pexelsController.text = pexels ?? '';
-        _unsplashController.text = unsplash ?? '';
-        _geminiController.text = gemini ?? '';
-        _selectedGeminiModel = model;
-        _selectedImageSource = source;
-        _isLoading = false;
-      });
+      final newPexels = pexels ?? '';
+      final newUnsplash = unsplash ?? '';
+      final newGemini = gemini ?? '';
+
+      final changed = _pexelsController.text != newPexels ||
+          _unsplashController.text != newUnsplash ||
+          _geminiController.text != newGemini ||
+          _selectedGeminiModel != model ||
+          _selectedImageSource != source ||
+          _isLoading;
+
+      if (changed) {
+        setState(() {
+          _pexelsController.text = newPexels;
+          _unsplashController.text = newUnsplash;
+          _geminiController.text = newGemini;
+          _selectedGeminiModel = model;
+          _selectedImageSource = source;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -135,19 +148,23 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                    )
                  ),
                  trailing: isSelected ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary, size: 18) : null,
-                 onTap: () async {
-                   setState(() {
-                     _selectedGeminiModel = model;
-                   });
-                   await ref.read(settingsServiceProvider).setGeminiModel(model);
-                   ref.invalidate(geminiModelProvider);
-                   if (context.mounted) {
-                     Navigator.pop(context);
-                     ScaffoldMessenger.of(context).showSnackBar(
-                       SnackBar(content: Text('Model set to $model')),
-                     );
-                   }
-                 },
+                  onTap: () async {
+                    if (model == _selectedGeminiModel) {
+                      Navigator.pop(context);
+                      return;
+                    }
+                    setState(() {
+                      _selectedGeminiModel = model;
+                    });
+                    await ref.read(settingsServiceProvider).setGeminiModel(model);
+                    ref.invalidate(geminiModelProvider);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Model set to $model')),
+                      );
+                    }
+                  },
                  dense: true,
                );
              },
@@ -229,11 +246,13 @@ class _APISettingsScreenState extends ConsumerState<APISettingsScreen> {
                        ),
                      ],
                      selected: {_selectedImageSource},
-                     onSelectionChanged: (Set<String> newSelection) {
-                       setState(() {
-                         _selectedImageSource = newSelection.first;
-                       });
-                     },
+                      onSelectionChanged: (Set<String> newSelection) {
+                        final selected = newSelection.first;
+                        if (selected == _selectedImageSource) return;
+                        setState(() {
+                          _selectedImageSource = selected;
+                        });
+                      },
                      style: const ButtonStyle(
                        visualDensity: VisualDensity.compact,
                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
