@@ -573,7 +573,12 @@ class _DietAiTabState extends ConsumerState<DietAiTab> with AutomaticKeepAliveCl
             ),
           // Input Area
           Container(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, isKeyboardOpen ? 16 : 24),
+            padding: EdgeInsets.fromLTRB(
+              16, 
+              16, 
+              16, 
+              isKeyboardOpen ? 16 : 72,
+            ),
             child: Row(
               children: [
                 IconButton(
